@@ -1,4 +1,4 @@
-import { db } from "@/lib/db"
+﻿mport { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { formatCurrency } from "@/lib/utils"
 import { TrendingUp, ShoppingCart, Package, Users, CheckSquare, Sprout, AlertTriangle, Store, Clock } from "lucide-react"

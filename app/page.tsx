@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation"
+﻿mport { redirect } from "next/navigation"
 import { auth } from "@/auth"
 
 export default async function RootPage() {

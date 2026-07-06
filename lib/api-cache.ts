@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿mport { NextResponse } from "next/server"
 
 /**
  * Returns a cached JSON response.
