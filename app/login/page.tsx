@@ -85,13 +85,36 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-amber-50 to-yellow-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-300 rounded-2xl mb-4 shadow-lg">
-            <Store className="w-9 h-9 text-amber-900" />
-          </div>
-          <h1 className="text-3xl font-bold text-amber-900">ArgoFirm</h1>
-          <p className="text-amber-700 mt-1">Farm Management System</p>
+        {/* Banner with Rice Illustration */}
+        <div className="bg-gradient-to-r from-amber-200 to-yellow-200 rounded-3xl p-8 mb-6 text-center shadow-xl border-2 border-amber-300">
+          {/* Rice Plant SVG Logo */}
+          <svg className="w-24 h-24 mx-auto mb-4" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Rice stems */}
+            <line x1="30" y1="120" x2="25" y2="40" stroke="#92400e" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="50" y1="120" x2="50" y2="20" stroke="#92400e" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="70" y1="120" x2="75" y2="45" stroke="#92400e" strokeWidth="2.5" strokeLinecap="round" />
+
+            {/* Rice grains - left stem */}
+            <ellipse cx="20" cy="35" rx="4" ry="7" fill="#d4af37" transform="rotate(-20 20 35)" />
+            <ellipse cx="18" cy="48" rx="4" ry="7" fill="#d4af37" transform="rotate(-15 18 48)" />
+            <ellipse cx="22" cy="60" rx="4" ry="7" fill="#d4af37" transform="rotate(-25 22 60)" />
+
+            {/* Rice grains - center stem (main) */}
+            <ellipse cx="45" cy="15" rx="4.5" ry="8" fill="#f59e0b" />
+            <ellipse cx="40" cy="28" rx="4.5" ry="8" fill="#f59e0b" />
+            <ellipse cx="55" cy="25" rx="4.5" ry="8" fill="#f59e0b" />
+            <ellipse cx="50" cy="38" rx="4.5" ry="8" fill="#d4af37" />
+            <ellipse cx="43" cy="50" rx="4.5" ry="8" fill="#d4af37" />
+            <ellipse cx="57" cy="48" rx="4.5" ry="8" fill="#d4af37" />
+
+            {/* Rice grains - right stem */}
+            <ellipse cx="80" cy="40" rx="4" ry="7" fill="#d4af37" transform="rotate(20 80 40)" />
+            <ellipse cx="82" cy="53" rx="4" ry="7" fill="#d4af37" transform="rotate(15 82 53)" />
+            <ellipse cx="78" cy="65" rx="4" ry="7" fill="#d4af37" transform="rotate(25 78 65)" />
+          </svg>
+
+          <h2 className="text-2xl font-bold text-amber-900 mb-1">ArgoFirm</h2>
+          <p className="text-amber-800 text-sm font-medium">Modern Farm Management</p>
         </div>
 
         {/* Card */}
