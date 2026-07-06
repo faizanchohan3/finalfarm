@@ -83,15 +83,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-800 via-green-700 to-green-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-white via-amber-50 to-yellow-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-2xl mb-4 shadow-lg">
-            <Store className="w-9 h-9 text-purple-900" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-300 rounded-2xl mb-4 shadow-lg">
+            <Store className="w-9 h-9 text-amber-900" />
           </div>
-          <h1 className="text-3xl font-bold text-amber-950">ArgoFirm</h1>
-          <p className="text-purple-200 mt-1">Farm Management System</p>
+          <h1 className="text-3xl font-bold text-amber-900">ArgoFirm</h1>
+          <p className="text-amber-700 mt-1">Farm Management System</p>
         </div>
 
         {/* Card */}
@@ -102,7 +102,7 @@ export default function LoginPage() {
               onClick={() => setTab("login")}
               className={`flex-1 py-4 text-sm font-medium transition-colors ${
                 tab === "login"
-                  ? "bg-purple-700 text-amber-950"
+                  ? "bg-amber-100 text-amber-950"
                   : "text-gray-600 hover:text-gray-800 hover:bg-amber-50"
               }`}
             >
@@ -112,7 +112,7 @@ export default function LoginPage() {
               onClick={() => setTab("register")}
               className={`flex-1 py-4 text-sm font-medium transition-colors ${
                 tab === "register"
-                  ? "bg-purple-700 text-amber-950"
+                  ? "bg-amber-100 text-amber-950"
                   : "text-gray-600 hover:text-gray-800 hover:bg-amber-50"
               }`}
             >
@@ -166,14 +166,14 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full bg-purple-700 hover:bg-purple-800" disabled={loginLoading}>
+                  <Button type="submit" className="w-full bg-amber-100 hover:bg-white" disabled={loginLoading}>
                     {loginLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</> : "Sign In"}
                   </Button>
                 </form>
 
                 <p className="mt-6 text-center text-sm text-gray-500">
                   Want to register your shop?{" "}
-                  <button onClick={() => setTab("register")} className="text-purple-700 font-medium hover:underline">
+                  <button onClick={() => setTab("register")} className="text-amber-700 font-medium hover:underline">
                     Register here
                   </button>
                 </p>
@@ -186,7 +186,7 @@ export default function LoginPage() {
                 {regSuccess ? (
                   <div className="text-center py-6">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                      <CheckCircle className="w-9 h-9 text-purple-600" />
+                      <CheckCircle className="w-9 h-9 text-amber-600" />
                     </div>
                     <h2 className="text-xl font-bold text-gray-800 mb-2">Registration Submitted!</h2>
                     <p className="text-gray-500 text-sm mb-6">
@@ -195,7 +195,7 @@ export default function LoginPage() {
                     </p>
                     <Button
                       onClick={() => { setTab("login"); setRegSuccess(false) }}
-                      className="bg-purple-700 hover:bg-purple-800"
+                      className="bg-amber-100 hover:bg-white"
                     >
                       Back to Sign In
                     </Button>
@@ -203,7 +203,7 @@ export default function LoginPage() {
                 ) : (
                   <>
                     <div className="flex items-center gap-2 mb-6">
-                      <ShoppingBag className="w-5 h-5 text-purple-700" />
+                      <ShoppingBag className="w-5 h-5 text-amber-700" />
                       <h2 className="text-xl font-semibold text-gray-800">Register Your Shop</h2>
                     </div>
                     <form onSubmit={handleRegister} className="space-y-4">
@@ -287,14 +287,14 @@ export default function LoginPage() {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full bg-purple-700 hover:bg-purple-800 mt-2" disabled={regLoading}>
+                      <Button type="submit" className="w-full bg-amber-100 hover:bg-white mt-2" disabled={regLoading}>
                         {regLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</> : "Submit Registration"}
                       </Button>
                     </form>
 
                     <p className="mt-4 text-center text-xs text-gray-400">
                       Already have an account?{" "}
-                      <button onClick={() => setTab("login")} className="text-purple-700 font-medium hover:underline">
+                      <button onClick={() => setTab("login")} className="text-amber-700 font-medium hover:underline">
                         Sign In
                       </button>
                     </p>
