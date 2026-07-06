@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import {
-  LayoutDashboard, Package, ShoppingCart, ShoppingBag, Sprout,
+  LayoutDashboard, Package, ShoppingCart, ShoppingBag,
   Wallet, BarChart3, ClipboardList, Users, Settings,
   ChevronLeft, ChevronRight, Store, CheckSquare, UserCheck,
   Truck, ChevronDown, Receipt, Warehouse,
@@ -51,7 +51,6 @@ const shopNavItems: NavItem[] = [
   { href: "/suppliers", label: "Suppliers", icon: Truck },
   { href: "/purchases", label: "Purchases", icon: ShoppingBag },
   { href: "/sales", label: "Sales", icon: ShoppingCart },
-  { href: "/pesticides", label: "Pesticides", icon: Sprout },
   { href: "/finance", label: "Roznamcha", icon: Wallet },
   { href: "/banks", label: "Banks", icon: Building2 },
   { href: "/expenses", label: "Expenses", icon: Receipt },
@@ -79,7 +78,6 @@ export function Sidebar() {
   const [liveShopName, setLiveShopName] = useState<string | null>(null)
   const [shopModules, setShopModules] = useState({
     moduleGodown: false, moduleGate: false, moduleTransport: false,
-    modulePesticides: false,
   })
 
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN"
@@ -99,7 +97,6 @@ export function Sidebar() {
     if (item.href === "/warehouse")  return shopModules.moduleGodown
     if (item.href === "/gate")       return shopModules.moduleGate
     if (item.href === "/transport")  return shopModules.moduleTransport
-    if (item.href === "/pesticides") return shopModules.modulePesticides
     return true
   })
 
@@ -122,7 +119,6 @@ export function Sidebar() {
               moduleGodown:     !!d.shop.moduleGodown,
               moduleGate:       !!d.shop.moduleGate,
               moduleTransport:  !!d.shop.moduleTransport,
-              modulePesticides: !!d.shop.modulePesticides,
             })
           }
         })
