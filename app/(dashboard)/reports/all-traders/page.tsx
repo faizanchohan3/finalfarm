@@ -72,8 +72,17 @@ export default function AllTradersReportPage() {
 </style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
   <div><div class="doc-title">All Traders Report — Profile Summary</div><div class="doc-sub">Total: ${filtered.length} traders</div></div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
   <div class="doc-meta"><div>Printed: ${date}</div></div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
 </div>
 <div class="body-pad">
   <table>
@@ -85,7 +94,13 @@ ${buildPrintHeader(shop)}
       <td colspan="4"><strong>Total: ${filtered.length} traders</strong></td>
     </tr></tfoot>
   </table>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
   <div class="sig-row"><span>Generated on ${date}</span><span>${shop?.name || ""}</span></div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
 </div>
 <script>window.onload=()=>{window.print()}<\/script>
 </body></html>`)
@@ -123,23 +138,62 @@ ${buildPrintHeader(shop)}
 </style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
   <div><div class="doc-title">All Traders Report</div><div class="doc-sub">Total: ${filtered.length} traders</div></div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
   <div class="doc-meta"><div>Printed: ${date}</div></div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
 </div>
 <div class="body-pad">
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
     <div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:12px 16px">
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       <div style="font-size:9px;color:#9ca3af;text-transform:uppercase;font-weight:700">Receivable from Traders</div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       <div style="font-size:16px;font-weight:900;color:#15803d;margin-top:3px">PKR ${totalPayable.toLocaleString()}</div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
     </div>
     <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px">
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       <div style="font-size:9px;color:#9ca3af;text-transform:uppercase;font-weight:700">Payable to Traders</div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       <div style="font-size:16px;font-weight:900;color:#b91c1c;margin-top:3px">PKR ${totalAdvance.toLocaleString()}</div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
     </div>
     <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 16px">
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       <div style="font-size:9px;color:#9ca3af;text-transform:uppercase;font-weight:700">Settled / Clear</div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       <div style="font-size:16px;font-weight:900;color:#374151;margin-top:3px">${settled} traders</div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
     </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
   </div>
   <table>
     <thead><tr>
@@ -158,7 +212,13 @@ ${buildPrintHeader(shop)}
       <td></td>
     </tr></tfoot>
   </table>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
   <div class="sig-row"><span>Generated on ${date}</span><span>${shop?.name || ""}</span></div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
 </div>
 <script>window.onload=()=>{window.print()}<\/script>
 </body></html>`)
@@ -171,10 +231,16 @@ ${buildPrintHeader(shop)}
         <div>
           <h2 className="text-2xl font-bold text-gray-900">All Traders Report</h2>
           <p className="text-gray-500 text-sm">{isRestrictedRole ? "Profile details for all traders" : "Balance summary for all traders (buyers/sellers)"}</p>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
         <Button variant="outline" onClick={printReport} className="gap-2">
           <Printer className="w-4 h-4" /> Print Report
         </Button>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* Summary Cards */}
@@ -206,6 +272,9 @@ ${buildPrintHeader(shop)}
             <p className="text-xs text-gray-400 mt-0.5">no balance</p>
           </CardContent>
         </Card>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* Total Dr/Cr Cards */}
@@ -228,6 +297,9 @@ ${buildPrintHeader(shop)}
             <p className="text-xs text-green-500 mt-0.5">received & paid</p>
           </CardContent>
         </Card>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* Table */}
@@ -238,13 +310,25 @@ ${buildPrintHeader(shop)}
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input placeholder="Search by name, phone, address..." value={search}
                 onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             </div>
             {isRestrictedRole && (
               <div className="text-xs text-gray-500 bg-amber-50 px-3 py-1.5 rounded">
                 Summary view only
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
               </div>
             )}
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -335,9 +419,15 @@ ${buildPrintHeader(shop)}
                 </tfoot>
               )}
             </table>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
         </CardContent>
       </Card>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
     </div>
   )
 }

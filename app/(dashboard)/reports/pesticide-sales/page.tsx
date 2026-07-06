@@ -50,19 +50,43 @@ export default function PesticideSalesReportPage() {
           <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
             {shop?.logo
               ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
             }
             <div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
               <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
           <div style={{textAlign:"right",fontSize:"11px",lineHeight:1.9,opacity:0.9}}>
             {shop?.phone && <div>&#9990;&nbsp;{shop.phone}</div>}
             {shop?.address && <div>&#9679;&nbsp;{shop.address}</div>}
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             <div style={{fontSize:"10px",opacity:0.75}}>Printed: {today}</div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb",marginBottom:"10px"}}>
           <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Pesticide Sales Report</h2>
@@ -72,8 +96,17 @@ export default function PesticideSalesReportPage() {
             <span>Total Amount: <strong>{formatCurrency(totals.totalAmount)}</strong></span>
             <span>Collected: <strong style={{color:"#166534"}}>{formatCurrency(totals.totalPaid)}</strong></span>
             <span>Outstanding: <strong style={{color:"#b91c1c"}}>{formatCurrency(totals.totalBalance)}</strong></span>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* Screen Header */}
@@ -81,10 +114,16 @@ export default function PesticideSalesReportPage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Pesticide Sales Report</h2>
           <p className="text-gray-500 text-sm">All pesticide sales with buyer and payment details</p>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
         <Button onClick={() => window.print()} variant="outline" className="gap-2">
           <Printer className="w-4 h-4" /> Print Report
         </Button>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* Filters */}
@@ -94,10 +133,16 @@ export default function PesticideSalesReportPage() {
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">From Date</label>
               <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-40" />
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">To Date</label>
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">Pesticide</label>
@@ -112,10 +157,16 @@ export default function PesticideSalesReportPage() {
                   ))}
                 </SelectContent>
               </Select>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             </div>
             <Button onClick={loadReport} disabled={loading} className="bg-green-700 hover:bg-green-800">
               {loading ? "Loading..." : "Apply Filter"}
             </Button>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
         </CardContent>
       </Card>
@@ -148,6 +199,9 @@ export default function PesticideSalesReportPage() {
             </p>
           </CardContent>
         </Card>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* Table */}
@@ -188,10 +242,19 @@ export default function PesticideSalesReportPage() {
                       <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                       <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(s.createdAt)}</td>
                       <td className="px-4 py-3">
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
                         <div className="font-medium text-gray-900">{s.pesticide?.name}</div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
                         <div className="text-xs text-gray-400">{s.pesticide?.unit}</div>
                       </td>
                       <td className="px-4 py-3">
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
                         <div className="font-medium text-gray-900">{buyer}</div>
                         {buyerType && (
                           <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${buyerType === "farmer" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
@@ -235,9 +298,15 @@ export default function PesticideSalesReportPage() {
                 </tfoot>
               )}
             </table>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
         </CardContent>
       </Card>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
     </div>
   )
 }

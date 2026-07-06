@@ -55,30 +55,66 @@ export default function ProductReportPage() {
           <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
             {shop?.logo
               ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
             }
             <div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
               <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
           <div style={{textAlign:"right",fontSize:"11px",lineHeight:1.9,opacity:0.9}}>
             {shop?.phone && <div>&#9990;&nbsp;{shop.phone}</div>}
             {shop?.address && <div>&#9679;&nbsp;{shop.address}</div>}
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             <div style={{fontSize:"10px",opacity:0.75}}>Printed: {today}</div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb",marginBottom:"8px"}}>
           <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Store Product Report</h2>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>All active products — stock levels, valuations and sales performance</div>
           <div style={{display:"flex",gap:"24px",marginTop:"8px",fontSize:"11px"}}>
             <span><strong>{totals.totalProducts}</strong> Products</span>
             <span>Stock Value: <strong>{formatCurrency(totals.totalStockValue)}</strong></span>
             <span>Total Sold: <strong>{formatCurrency(totals.totalSaleAmount)}</strong></span>
             <span style={{color:"#b91c1c"}}>Low Stock: <strong>{totals.lowStockCount}</strong></span>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* ── Screen Header ── */}
@@ -86,10 +122,16 @@ export default function ProductReportPage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Product Report</h2>
           <p className="text-gray-500 text-sm">Stock levels, valuations & sales performance</p>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
         <Button onClick={() => window.print()} variant="outline" className="gap-2">
           <Printer className="w-4 h-4" /> Print Report
         </Button>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* ── Summary Cards ── */}
@@ -131,6 +173,9 @@ export default function ProductReportPage() {
             </p>
           </CardContent>
         </Card>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* ── Date Range Filter ── */}
@@ -143,6 +188,9 @@ export default function ProductReportPage() {
             onChange={(e) => setFrom(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
           />
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
         <div>
           <label className="text-xs font-medium text-gray-600 block mb-1">To Date</label>
@@ -152,6 +200,9 @@ export default function ProductReportPage() {
             onChange={(e) => setTo(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
           />
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
         <Button size="sm" className="bg-green-700 hover:bg-green-800" onClick={() => loadReport()}>
           Apply
@@ -164,6 +215,9 @@ export default function ProductReportPage() {
             Sales filtered: {from || "start"} → {to || "today"}
           </span>
         )}
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* ── Stock / Search Filters ── */}
@@ -176,6 +230,9 @@ export default function ProductReportPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
           />
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
         <Button
           variant={filter === "all" ? "default" : "outline"}
@@ -194,6 +251,9 @@ export default function ProductReportPage() {
           <AlertTriangle className="w-3.5 h-3.5 mr-1" />
           Low Stock ({totals.lowStockCount ?? 0})
         </Button>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* ── Table ── */}
@@ -239,6 +299,9 @@ export default function ProductReportPage() {
                         {p.isLowStock && (
                           <AlertTriangle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
                         )}
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -284,9 +347,15 @@ export default function ProductReportPage() {
                 </tr>
               </tfoot>
             </table>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
         </CardContent>
       </Card>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
     </div>
   )
 }

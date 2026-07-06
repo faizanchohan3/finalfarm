@@ -49,24 +49,57 @@ export default function PurchasesReportPage() {
           <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
             {shop?.logo
               ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
             }
             <div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
               <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
           <div style={{textAlign:"right",fontSize:"11px",lineHeight:1.9,opacity:0.9}}>
             {shop?.phone && <div>&#9990;&nbsp;{shop.phone}</div>}
             {shop?.address && <div>&#9679;&nbsp;{shop.address}</div>}
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             <div style={{fontSize:"10px",opacity:0.75}}>Generated: {new Date().toLocaleDateString("en-PK")}</div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb"}}>
           <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Purchase Report</h2>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>Period: {dateLabel}</div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* Screen header */}
@@ -74,10 +107,16 @@ export default function PurchasesReportPage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Purchase Report</h2>
           <p className="text-gray-500 text-sm">Detailed purchase transactions</p>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
         </div>
         <Button onClick={() => window.print()} variant="outline" className="gap-2">
           <Printer className="w-4 h-4" /> Print Report
         </Button>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* Filters */}
@@ -87,10 +126,16 @@ export default function PurchasesReportPage() {
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">From Date</label>
               <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-40" />
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">To Date</label>
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">Supplier</label>
@@ -105,10 +150,16 @@ export default function PurchasesReportPage() {
                   ))}
                 </SelectContent>
               </Select>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
             </div>
             <Button onClick={loadReport} disabled={loading} className="bg-green-700 hover:bg-green-800">
               {loading ? "Loading..." : "Apply Filter"}
             </Button>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
         </CardContent>
       </Card>
@@ -133,6 +184,9 @@ export default function PurchasesReportPage() {
             <p className="text-xl font-bold text-red-600 mt-1">{formatCurrency(totals.totalBalance)}</p>
           </CardContent>
         </Card>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
       </div>
 
       {/* Table */}
@@ -162,8 +216,14 @@ export default function PurchasesReportPage() {
                   <tr key={purchase.id} className="hover:bg-amber-50">
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(purchase.createdAt)}</td>
                     <td className="px-4 py-3">
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
                       <div className="font-medium text-gray-900">{purchase.supplier?.name || "Unknown"}</div>
                       {purchase.supplier?.phone && (
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
                         <div className="text-xs text-gray-400 mt-0.5">{purchase.supplier.phone}</div>
                       )}
                     </td>
@@ -194,9 +254,15 @@ export default function PurchasesReportPage() {
                 </tr>
               </tfoot>
             </table>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
           </div>
         </CardContent>
       </Card>
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
     </div>
   )
 }
