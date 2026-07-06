@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
     userId: session.user.id,
     action: "CREATE",
     module: "EXPENSES",
-    details: `Expense: PKR ${amount} — ${description}`,
+    details: `Expense: PKR ${amount} â€” ${description}`,
   })
 
   return NextResponse.json({ expense }, { status: 201 })
@@ -110,3 +110,4 @@ export async function DELETE(req: Request) {
 
   return NextResponse.json({ success: true })
 }
+

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -51,7 +51,7 @@ export default function BankTransactionsPage() {
   const selectedBankName = bankId === "ALL" ? "All Banks" : (banks.find((b) => b.id === bankId)?.name || "")
   const dateLabel =
     dateFrom || dateTo
-      ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
+      ? `${dateFrom ? formatDate(dateFrom) : "Start"} â€” ${dateTo ? formatDate(dateTo) : "Today"}`
       : "All Time"
 
   return (
@@ -65,7 +65,7 @@ export default function BankTransactionsPage() {
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
             }
             <div>
-              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
+              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Argo-Firn"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function BankTransactionsPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Building2 className="w-4 h-4" />
-                {selectedBankName} — {dateLabel}
+                {selectedBankName} â€” {dateLabel}
                 <span className="text-gray-400 font-normal text-sm">({summary.count} entries)</span>
               </CardTitle>
             </CardHeader>
@@ -242,10 +242,10 @@ export default function BankTransactionsPage() {
                         <td className="px-4 py-3 text-gray-500 text-xs">{e.description}</td>
                         <td className="px-4 py-3 text-gray-500 text-xs capitalize">{e.method?.replace("_", " ") || "-"}</td>
                         <td className="px-4 py-3 text-right font-semibold text-purple-700">
-                          {isInflow(e.type) ? formatCurrency(e.amount) : "—"}
+                          {isInflow(e.type) ? formatCurrency(e.amount) : "â€”"}
                         </td>
                         <td className="px-4 py-3 text-right font-semibold text-red-600">
-                          {!isInflow(e.type) ? formatCurrency(e.amount) : "—"}
+                          {!isInflow(e.type) ? formatCurrency(e.amount) : "â€”"}
                         </td>
                       </tr>
                     ))}
@@ -280,3 +280,4 @@ export default function BankTransactionsPage() {
     </div>
   )
 }
+

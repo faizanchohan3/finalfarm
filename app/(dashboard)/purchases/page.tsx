@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -93,7 +93,7 @@ export default function PurchasesPage() {
 
   useEffect(() => { loadData() }, [])
 
-  // Auto-compute commission total from weight × rate
+  // Auto-compute commission total from weight Ã— rate
   useEffect(() => {
     const w = parseFloat(cWeight)
     const r = parseFloat(cRate)
@@ -226,19 +226,19 @@ export default function PurchasesPage() {
     const statusCls = p.status === "PAID" ? "PAID" : p.status === "PARTIAL" ? "PARTIAL" : "PENDING"
     const itemRows = (p.items || []).map((i: any) => `
       <tr>
-        <td>${i.product?.name || "—"}</td>
+        <td>${i.product?.name || "â€”"}</td>
         <td style="text-align:center">${i.quantity} ${i.product?.unit || ""}</td>
         <td style="text-align:right">PKR ${(i.price || 0).toLocaleString()}</td>
         <td style="text-align:right">PKR ${(i.total || 0).toLocaleString()}</td>
       </tr>`).join("")
     const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Purchase — ${ref}</title>
+    w.document.write(`<html><head><title>Purchase â€” ${ref}</title>
 <style>${receiptCSS}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
   <div>
     <div class="doc-title">Purchase Receipt</div>
-    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; By: ${p.createdBy?.name || "—"}</div>
+    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; By: ${p.createdBy?.name || "â€”"}</div>
   </div>
   <div class="doc-meta"><div>${date}</div><span class="badge badge-${statusCls}">${p.status}</span></div>
 </div>
@@ -279,13 +279,13 @@ ${buildPrintHeader(shop)}
       const statusCls = p.status === "PAID" ? "PAID" : p.status === "PARTIAL" ? "PARTIAL" : "PENDING"
       return `<tr>
         <td>${i + 1}</td><td>${from}</td><td>${type}</td>
-        <td style="font-size:9px;color:#555">${its || "—"}</td>
+        <td style="font-size:9px;color:#555">${its || "â€”"}</td>
         <td style="text-align:right">PKR ${(p.totalAmount || 0).toLocaleString()}</td>
         <td style="text-align:right;color:#15803d">PKR ${(p.paidAmount || 0).toLocaleString()}</td>
         <td style="text-align:right;color:${p.balance > 0 ? "#b91c1c" : "#15803d"}">PKR ${(p.balance || 0).toLocaleString()}</td>
         <td><span class="badge badge-${statusCls}">${p.status}</span></td>
         <td>${new Date(p.createdAt).toLocaleDateString("en-PK")}</td>
-        <td>${p.createdBy?.name || "—"}</td>
+        <td>${p.createdBy?.name || "â€”"}</td>
       </tr>`
     }).join("")
     const totalAmt = list.reduce((s, p) => s + (p.totalAmount || 0), 0)
@@ -474,7 +474,7 @@ ${buildPrintHeader(shop)}
         
           </div>
 
-          {/* ── ADD TO STOCK path ── */}
+          {/* â”€â”€ ADD TO STOCK path â”€â”€ */}
           {purchaseType === "stock" && (
             <div className="space-y-4">
               <div>
@@ -513,7 +513,7 @@ ${buildPrintHeader(shop)}
                           onValueChange={(v) => updateItem(i, "productId", v)}
                           placeholder="Select product"
                           options={[
-                            { value: "manual", label: "✏ Manual / Custom Entry" },
+                            { value: "manual", label: "âœ Manual / Custom Entry" },
                             ...products.map((p: any) => ({ value: p.id, label: p.name }))
                           ]}
                         />
@@ -566,7 +566,7 @@ ${buildPrintHeader(shop)}
             </div>
           )}
 
-          {/* ── COMMISSION path ── */}
+          {/* â”€â”€ COMMISSION path â”€â”€ */}
           {purchaseType === "commission" && (
             <div className="space-y-4">
               {/* Previous Record Toggle for Commission */}
@@ -597,7 +597,7 @@ ${buildPrintHeader(shop)}
               )}
 
               <div>
-                <Label>Seller (Farmer / Supplier) <span className="text-gray-400 font-normal">— optional</span></Label>
+                <Label>Seller (Farmer / Supplier) <span className="text-gray-400 font-normal">â€” optional</span></Label>
                 <SearchableSelect
                   value={cPartyId}
                   onValueChange={(v) => { setCPartyId(v); if (v !== "walkin") setCWalkInSeller("") }}
@@ -638,7 +638,7 @@ ${buildPrintHeader(shop)}
                 <div>
                   <Label>Total Value <span className="text-red-500">*</span></Label>
                   <Input type="number" placeholder="0" value={cTotalValue} onChange={(e) => setCTotalValue(e.target.value)} />
-                  <p className="text-xs text-gray-400 mt-1">Auto-filled from weight × rate</p>
+                  <p className="text-xs text-gray-400 mt-1">Auto-filled from weight Ã— rate</p>
                 </div>
                 <div><Label>Commission %</Label><Input type="number" placeholder="2.5" value={cCommissionRate} onChange={(e) => setCCommissionRate(e.target.value)} /></div>
               </div>
@@ -705,9 +705,9 @@ ${buildPrintHeader(shop)}
             </div>
             <div className="bg-blue-50 border border-blue-300 rounded-xl p-3 text-xs text-blue-800 space-y-1">
               <p className="font-semibold">What happens when deleted:</p>
-              <p>✓ Purchase removed from supplier/farmer ledger</p>
-              <p>✓ Stock quantities reversed</p>
-              <p>✗ This cannot be undone</p>
+              <p>âœ“ Purchase removed from supplier/farmer ledger</p>
+              <p>âœ“ Stock quantities reversed</p>
+              <p>âœ— This cannot be undone</p>
             </div>
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
@@ -721,3 +721,4 @@ ${buildPrintHeader(shop)}
     </div>
   )
 }
+

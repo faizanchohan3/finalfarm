@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { cachedJson } from "@/lib/api-cache"
@@ -44,3 +44,4 @@ export async function POST(req: Request) {
   const supplier = await db.supplier.create({ data: { shopId: session.user.shopId || null, name, phone, address } })
   return NextResponse.json({ supplier }, { status: 201 })
 }
+

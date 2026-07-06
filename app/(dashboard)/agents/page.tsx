@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -168,7 +168,7 @@ export default function AgentsPage() {
                       </td>
                       <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                       <td className="px-4 py-3 font-semibold text-gray-900">{a.name}</td>
-                      <td className="px-4 py-3 text-gray-600">{a.phone || "—"}</td>
+                      <td className="px-4 py-3 text-gray-600">{a.phone || "â€”"}</td>
                       <td className="px-4 py-3 text-center">
                         <span className="text-xs px-2 py-0.5 bg-orange-50 text-orange-700 rounded-full font-medium">{a.commissionRate}%</span>
                       </td>
@@ -209,8 +209,8 @@ export default function AgentsPage() {
                                     <tr key={li} className="border-b border-gray-50">
                                       <td className="px-3 py-2 text-gray-500">{formatDate(e.createdAt)}</td>
                                       <td className="px-3 py-2 text-gray-600">{e.notes || (e.type === "CREDIT" ? "Commission earned" : "Commission paid")}</td>
-                                      <td className="px-3 py-2 text-right text-purple-700">{e.type === "CREDIT" ? formatCurrency(e.amount) : "—"}</td>
-                                      <td className="px-3 py-2 text-right text-red-600">{e.type === "DEBIT" ? formatCurrency(e.amount) : "—"}</td>
+                                      <td className="px-3 py-2 text-right text-purple-700">{e.type === "CREDIT" ? formatCurrency(e.amount) : "â€”"}</td>
+                                      <td className="px-3 py-2 text-right text-red-600">{e.type === "DEBIT" ? formatCurrency(e.amount) : "â€”"}</td>
                                       <td className="px-3 py-2 text-right font-semibold">{formatCurrency(Math.abs(e.balance))} {e.balance > 0 ? "Dr" : "Cr"}</td>
                                     </tr>
                                   ))}
@@ -261,7 +261,7 @@ export default function AgentsPage() {
       {/* Commission Entry Modal */}
       <Dialog open={!!showPayModal} onOpenChange={() => setShowPayModal(null)}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Add Commission Entry — {showPayModal?.name}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Add Commission Entry â€” {showPayModal?.name}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div><Label>Type</Label>
               <Select value={payForm.type} onValueChange={(v) => setPayForm({ ...payForm, type: v })}>
@@ -292,3 +292,4 @@ export default function AgentsPage() {
     </div>
   )
 }
+

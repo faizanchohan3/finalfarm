@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
         shopId: session.user.shopId || null,
         type: "CREDIT",
         amount: incentiveAmt,
-        description: `Pesticide incentive — ${name}`,
+        description: `Pesticide incentive â€” ${name}`,
         reference: pesticide.id,
         category: "Pesticide Incentive",
         accountId: incomeAccount?.id || null,
@@ -65,3 +65,4 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ pesticide }, { status: 201 })
 }
+

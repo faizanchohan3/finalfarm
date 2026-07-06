@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 
@@ -57,3 +57,4 @@ export async function PUT(req: Request) {
   })
   return NextResponse.json({ warehouse })
 }
+

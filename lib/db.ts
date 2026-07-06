@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+﻿import { PrismaClient } from "@prisma/client"
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
@@ -10,5 +10,6 @@ export const db =
     log: ["error"],
   })
 
-// Always persist singleton — reuses connection on Vercel warm invocations
+// Always persist singleton â€” reuses connection on Vercel warm invocations
 globalForPrisma.prisma = db
+

@@ -1,4 +1,4 @@
-import { auth } from "@/auth"
+﻿import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 
 export const proxy = auth((req) => {
@@ -8,7 +8,7 @@ export const proxy = auth((req) => {
   const role = req.auth?.user?.role
   const isSuperAdmin = role === "SUPER_ADMIN"
 
-  // Only redirect page routes to login — never redirect API routes
+  // Only redirect page routes to login â€” never redirect API routes
   if (!isLoggedIn && !isLoginPage && !pathname.startsWith("/api/")) {
     return NextResponse.redirect(new URL("/login", req.nextUrl))
   }
@@ -19,7 +19,7 @@ export const proxy = auth((req) => {
     return NextResponse.redirect(new URL(dest, req.nextUrl))
   }
 
-  // Super admin can ONLY access /shops and /profile — but never redirect API routes
+  // Super admin can ONLY access /shops and /profile â€” but never redirect API routes
   const superAdminAllowed = pathname.startsWith("/shops") || pathname.startsWith("/profile")
   if (isLoggedIn && isSuperAdmin && !superAdminAllowed && !pathname.startsWith("/api/")) {
     return NextResponse.redirect(new URL("/shops", req.nextUrl))
@@ -31,3 +31,4 @@ export const proxy = auth((req) => {
 export const config = {
   matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
 }
+

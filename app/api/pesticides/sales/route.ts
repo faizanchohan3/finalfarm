@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
@@ -104,3 +104,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: err?.message || "Failed to create pesticide sale" }, { status: 500 })
   }
 }
+

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -160,7 +160,7 @@ export function Sidebar() {
         {!collapsed && (
           <div className="overflow-hidden">
             <p className="font-bold text-sm leading-tight truncate">
-              {isSuperAdmin ? "Gala Mandi" : (shopName || "Gala Mandi")}
+              {isSuperAdmin ? "Argo-Firn" : (shopName || "Argo-Firn")}
             </p>
             <p className="text-white text-xs">
               {isSuperAdmin ? "Platform Head" : "Shop Management"}
@@ -271,3 +271,4 @@ export function Sidebar() {
     </aside>
   )
 }
+

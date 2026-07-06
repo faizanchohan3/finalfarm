@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
@@ -206,7 +206,7 @@ export default function SalesPage() {
     const rows = (s.items || []).map((item: any, i: number) =>
       `<tr style="background:${i%2===0?"#f9fafb":"#fff"}">
         <td>${i+1}</td>
-        <td>${item.product?.name || "—"}</td>
+        <td>${item.product?.name || "â€”"}</td>
         <td style="text-align:center">${item.quantity}</td>
         <td style="text-align:center">${item.product?.unit || ""}</td>
         <td style="text-align:right">PKR ${(item.price || 0).toLocaleString()}</td>
@@ -214,13 +214,13 @@ export default function SalesPage() {
       </tr>`
     ).join("")
     const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Sale Invoice — ${ref}</title>
+    w.document.write(`<html><head><title>Sale Invoice â€” ${ref}</title>
 <style>${receiptCSS}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
   <div>
     <div class="doc-title">Sales Invoice</div>
-    <div class="doc-sub">Invoice #: ${ref} &nbsp;|&nbsp; By: ${s.createdBy?.name || "—"}</div>
+    <div class="doc-sub">Invoice #: ${ref} &nbsp;|&nbsp; By: ${s.createdBy?.name || "â€”"}</div>
   </div>
   <div class="doc-meta"><div>${date}</div><span class="badge badge-${statusCls}">${statusCls}</span></div>
 </div>
@@ -262,13 +262,13 @@ ${buildPrintHeader(shop)}
     const bal = s.balance ?? (s.totalAmount - s.paidAmount)
     const statusCls = bal <= 0 ? "PAID" : s.paidAmount > 0 ? "PARTIAL" : "PENDING"
     const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Pesticide Sale — ${ref}</title>
+    w.document.write(`<html><head><title>Pesticide Sale â€” ${ref}</title>
 <style>${receiptCSS}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
   <div>
     <div class="doc-title">Pesticide Sale Receipt</div>
-    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; By: ${s.soldBy?.name || "—"}</div>
+    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; By: ${s.soldBy?.name || "â€”"}</div>
   </div>
   <div class="doc-meta"><div>${date}</div><span class="badge badge-${statusCls}">${statusCls}</span></div>
 </div>
@@ -282,7 +282,7 @@ ${buildPrintHeader(shop)}
     <thead><tr><th>Pesticide</th><th style="text-align:center">Qty</th><th style="text-align:center">Unit</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Total</th></tr></thead>
     <tbody>
       <tr>
-        <td>${s.pesticide?.name || "—"}</td>
+        <td>${s.pesticide?.name || "â€”"}</td>
         <td style="text-align:center">${s.quantity}</td>
         <td style="text-align:center">${s.pesticide?.unit || ""}</td>
         <td style="text-align:right">PKR ${(s.unitPrice || 0).toLocaleString()}</td>
@@ -323,11 +323,11 @@ ${buildPrintHeader(shop)}
     .filter((s) => new Date(s.createdAt).toDateString() === new Date().toDateString() && s.status !== "CANCELLED")
     .reduce((sum, s) => sum + s.totalAmount, 0)
 
-  const shopName = (session?.user as any)?.shopName || "Gala Mandi"
+  const shopName = (session?.user as any)?.shopName || "Argo-Firn"
 
   return (
     <>
-      {/* ── Pesticide Sale Print Invoice (branded format) ── */}
+      {/* â”€â”€ Pesticide Sale Print Invoice (branded format) â”€â”€ */}
       {selectedPesticideSaleDetail && (
         <div className="hidden print:block fixed inset-0 bg-blue-50 z-50">
           <style>{`@media print { @page { size: A4 portrait; margin: 0; } }`}</style>
@@ -338,7 +338,7 @@ ${buildPrintHeader(shop)}
                 : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
               }
               <div>
-                <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
+                <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Argo-Firn"}</div>
                 {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
               </div>
             </div>
@@ -412,7 +412,7 @@ ${buildPrintHeader(shop)}
         </div>
       )}
 
-      {/* ── Product Sale Print Invoice (branded format) ── */}
+      {/* â”€â”€ Product Sale Print Invoice (branded format) â”€â”€ */}
       {selectedSale && (
         <div className="hidden print:block fixed inset-0 bg-blue-50 z-50">
           <style>{`@media print { @page { size: A4 portrait; margin: 0; } }`}</style>
@@ -424,7 +424,7 @@ ${buildPrintHeader(shop)}
                 : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
               }
               <div>
-                <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
+                <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Argo-Firn"}</div>
                 {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
               </div>
             </div>
@@ -510,7 +510,7 @@ ${buildPrintHeader(shop)}
         </div>
       )}
 
-      {/* ── Main Page (hidden on print) ── */}
+      {/* â”€â”€ Main Page (hidden on print) â”€â”€ */}
       <div className="space-y-6 print:hidden">
         <div className="flex items-center justify-between">
           <div>
@@ -841,7 +841,7 @@ ${buildPrintHeader(shop)}
                   <SelectTrigger><SelectValue placeholder="Select pesticide" /></SelectTrigger>
                   <SelectContent>
                     {pesticides.map((p: any) => (
-                      <SelectItem key={p.id} value={p.id}>{p.name} — {p.quantity} {p.unit} available</SelectItem>
+                      <SelectItem key={p.id} value={p.id}>{p.name} â€” {p.quantity} {p.unit} available</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1108,9 +1108,9 @@ ${buildPrintHeader(shop)}
             </div>
             <div className="bg-blue-50 border border-blue-300 rounded-xl p-3 text-xs text-blue-800 space-y-1">
               <p className="font-semibold">What happens when deleted:</p>
-              <p>✓ Sale removed from customer ledger</p>
-              <p>✓ Stock quantities restored</p>
-              <p>✗ This cannot be undone</p>
+              <p>âœ“ Sale removed from customer ledger</p>
+              <p>âœ“ Stock quantities restored</p>
+              <p>âœ— This cannot be undone</p>
             </div>
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
@@ -1126,3 +1126,4 @@ ${buildPrintHeader(shop)}
     </>
   )
 }
+

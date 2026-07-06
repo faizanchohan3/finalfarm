@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -209,15 +209,15 @@ export default function ExpensesPage() {
                     <td className="px-4 py-3 text-xs text-gray-500">
                       {e.account ? (
                         <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full font-medium">
-                          {e.account.code} — {e.account.name}
+                          {e.account.code} â€” {e.account.name}
                         </span>
-                      ) : "—"}
+                      ) : "â€”"}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{e.reference || "—"}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs">{e.reference || "â€”"}</td>
                     <td className="px-4 py-3 text-right font-semibold text-red-600">
                       {formatCurrency(e.amount)}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{e.createdBy?.name || "—"}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs">{e.createdBy?.name || "â€”"}</td>
                     <td className="px-4 py-3 text-center">
                       <button
                         onClick={() => handleDelete(e.id, e.description)}
@@ -236,7 +236,7 @@ export default function ExpensesPage() {
                 <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                   <tr>
                     <td colSpan={6} className="px-4 py-3 font-bold text-gray-700">
-                      Total — {filtered.length} entries
+                      Total â€” {filtered.length} entries
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-red-600">
                       {formatCurrency(filtered.reduce((s, e) => s + e.amount, 0))}
@@ -298,16 +298,16 @@ export default function ExpensesPage() {
                   <SelectValue placeholder="Select account (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— No account —</SelectItem>
+                  <SelectItem value="none">â€” No account â€”</SelectItem>
                   {accounts.map((a) => (
                     <SelectItem key={a.id} value={a.id}>
-                      {a.code} — {a.name}
+                      {a.code} â€” {a.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {accounts.length === 0 && (
-                <p className="text-xs text-gray-400 mt-1">No expense accounts found — load default accounts first.</p>
+                <p className="text-xs text-gray-400 mt-1">No expense accounts found â€” load default accounts first.</p>
               )}
             </div>
             <div>
@@ -334,3 +334,4 @@ export default function ExpensesPage() {
     </div>
   )
 }
+

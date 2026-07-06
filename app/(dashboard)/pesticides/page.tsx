@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -142,17 +142,17 @@ export default function PesticidesPage() {
     const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
     const rows = filtered.map((p, i) => {
       const isExpired = p.expiryDate && new Date(p.expiryDate) < new Date()
-      const expLabel = p.expiryDate ? formatDateDMY(p.expiryDate) : "—"
+      const expLabel = p.expiryDate ? formatDateDMY(p.expiryDate) : "â€”"
       return `<tr style="${isExpired ? "background:#fee2e2;" : i % 2 === 0 ? "background:#f9fdf9;" : ""}">
         <td>${i + 1}</td>
         <td><strong>${p.name}</strong></td>
-        <td>${p.category?.name || "—"}</td>
+        <td>${p.category?.name || "â€”"}</td>
         <td>${p.quantity}</td>
         <td>${p.unit}</td>
-        <td>${p.batchNumber || "—"}</td>
+        <td>${p.batchNumber || "â€”"}</td>
         <td>${expLabel}</td>
         <td style="text-align:right">PKR ${(p.purchasePrice || 0).toLocaleString()}</td>
-        <td style="text-align:right">${p.incentive > 0 ? `PKR ${(p.incentive || 0).toLocaleString()}` : "—"}</td>
+        <td style="text-align:right">${p.incentive > 0 ? `PKR ${(p.incentive || 0).toLocaleString()}` : "â€”"}</td>
         <td style="text-align:right">PKR ${(p.salePrice || 0).toLocaleString()}</td>
       </tr>`
     }).join("")
@@ -194,7 +194,7 @@ ${buildPrintHeader(shop)}
         <td>${i + 1}</td>
         <td><strong>${c.name}</strong></td>
         <td style="text-align:center">${count}</td>
-        <td>${pesticides.filter((p) => p.categoryId === c.id).map((p) => p.name).join(", ") || "—"}</td>
+        <td>${pesticides.filter((p) => p.categoryId === c.id).map((p) => p.name).join(", ") || "â€”"}</td>
       </tr>`
     }).join("")
     const w = window.open("", "_blank")!
@@ -244,11 +244,11 @@ ${buildPrintHeader(shop)}
 
   function printSinglePesticide(p: any) {
     const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
-    const expiry = p.expiryDate ? formatDateDMY(p.expiryDate) : "—"
+    const expiry = p.expiryDate ? formatDateDMY(p.expiryDate) : "â€”"
     const isExpired = p.expiryDate && new Date(p.expiryDate) < new Date()
     const netCost = p.purchasePrice * p.quantity - (p.incentive || 0)
     const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Stock Card — ${p.name}</title>
+    w.document.write(`<html><head><title>Stock Card â€” ${p.name}</title>
 <style>${receiptCSS}
   body { max-width: 480px; margin: 0 auto; }
   .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
@@ -261,23 +261,23 @@ ${buildPrintHeader(shop)}
 </style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
-  <div><div class="doc-title">${p.name}</div><div class="doc-sub">${p.category?.name || "No Category"} &nbsp;|&nbsp; Batch: ${p.batchNumber || "—"}</div></div>
+  <div><div class="doc-title">${p.name}</div><div class="doc-sub">${p.category?.name || "No Category"} &nbsp;|&nbsp; Batch: ${p.batchNumber || "â€”"}</div></div>
   <div class="doc-meta"><div>Printed: ${date}</div>${isExpired ? '<div style="color:#b91c1c;font-weight:700">EXPIRED</div>' : ""}</div>
 </div>
 <div class="body-pad">
   <div class="stock-banner">
     <div class="stock-qty">${p.quantity} ${p.unit}</div>
-    <div class="stock-unit">Current Stock${p.quantity <= p.minStock ? " — LOW STOCK" : ""}</div>
+    <div class="stock-unit">Current Stock${p.quantity <= p.minStock ? " â€” LOW STOCK" : ""}</div>
   </div>
   <div class="card-grid">
     <div class="card-item"><div class="card-lbl">Purchase Price</div><div class="card-val">PKR ${(p.purchasePrice || 0).toLocaleString()}</div></div>
     <div class="card-item"><div class="card-lbl">Sale Price</div><div class="card-val">PKR ${(p.salePrice || 0).toLocaleString()}</div></div>
-    <div class="card-item"><div class="card-lbl">Incentive / Discount</div><div class="card-val">${p.incentive > 0 ? "PKR " + (p.incentive || 0).toLocaleString() : "—"}</div></div>
+    <div class="card-item"><div class="card-lbl">Incentive / Discount</div><div class="card-val">${p.incentive > 0 ? "PKR " + (p.incentive || 0).toLocaleString() : "â€”"}</div></div>
     <div class="card-item"><div class="card-lbl">Min Stock Level</div><div class="card-val">${p.minStock || 0} ${p.unit}</div></div>
     <div class="card-item"><div class="card-lbl">Expiry Date</div><div class="card-val" style="${isExpired ? "color:#b91c1c" : ""}">${expiry}</div></div>
-    <div class="card-item"><div class="card-lbl">Manufacturer</div><div class="card-val" style="font-size:12px">${p.manufacturer || "—"}</div></div>
+    <div class="card-item"><div class="card-lbl">Manufacturer</div><div class="card-val" style="font-size:12px">${p.manufacturer || "â€”"}</div></div>
   </div>
-  <div class="sig-row"><span>${shop?.name || ""}</span><span>Stock Card — ${date}</span></div>
+  <div class="sig-row"><span>${shop?.name || ""}</span><span>Stock Card â€” ${date}</span></div>
 </div>
 <script>window.onload=()=>{window.print()}<\/script>
 </body></html>`)
@@ -406,7 +406,7 @@ ${buildPrintHeader(shop)}
                         <td className="py-3 px-3">
                           {p.incentive > 0 ? (
                             <span className="text-blue-600 font-medium">{formatCurrency(p.incentive)}</span>
-                          ) : <span className="text-gray-400">—</span>}
+                          ) : <span className="text-gray-400">â€”</span>}
                         </td>
                         <td className="py-3 px-3">{formatCurrency(p.salePrice)}</td>
                         <td className="py-3 px-3">
@@ -454,7 +454,7 @@ ${buildPrintHeader(shop)}
                     <td className="py-3 px-3 font-semibold">{formatCurrency(s.totalAmount)}</td>
                     <td className="py-3 px-3">{s.customerName || "-"}</td>
                     <td className="py-3 px-3 text-purple-600">{formatCurrency(s.paidAmount)}</td>
-                    <td className="py-3 px-3 text-blue-600">{s.incentive > 0 ? formatCurrency(s.incentive) : "—"}</td>
+                    <td className="py-3 px-3 text-blue-600">{s.incentive > 0 ? formatCurrency(s.incentive) : "â€”"}</td>
                     <td className="py-3 px-3 text-gray-500">{formatDateDMY(s.createdAt)}</td>
                     <td className="py-3 px-3 text-gray-500">{s.soldBy?.name}</td>
                   </tr>
@@ -481,7 +481,7 @@ ${buildPrintHeader(shop)}
               <Select value={form.categoryId || "none"} onValueChange={(v) => { setForm({ ...form, categoryId: v === "none" ? "" : v }); setNewCategoryName("") }}>
                 <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">— No category —</SelectItem>
+                  <SelectItem value="none">â€” No category â€”</SelectItem>
                   {categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                   <SelectItem value="new">+ Add New Category...</SelectItem>
                 </SelectContent>
@@ -540,7 +540,7 @@ ${buildPrintHeader(shop)}
               return (
                 <>
                   <div className="flex justify-between text-sm text-gray-500 px-1">
-                    <span>Subtotal ({qty} × {formatCurrency(purchasePrice)})</span>
+                    <span>Subtotal ({qty} Ã— {formatCurrency(purchasePrice)})</span>
                     <span className="font-medium text-gray-700">{formatCurrency(subtotal)}</span>
                   </div>
                   <div>
@@ -670,3 +670,4 @@ ${buildPrintHeader(shop)}
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { signOut } from "next-auth/react"
 import { useSession } from "next-auth/react"
@@ -109,3 +109,4 @@ export function Header({ title }: { title: string }) {
     </header>
   )
 }
+

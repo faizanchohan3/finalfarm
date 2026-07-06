@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -113,7 +113,7 @@ export default function InventoryPage() {
       return `<tr style="${isLow ? "background:#fef2f2;" : i % 2 === 0 ? "background:#f9fdf9;" : ""}">
         <td>${i + 1}</td>
         <td><strong>${p.name}</strong></td>
-        <td>${p.category?.name || "—"}</td>
+        <td>${p.category?.name || "â€”"}</td>
         <td style="text-align:right;${isLow ? "color:#b91c1c;font-weight:700;" : ""}">${p.currentStock}</td>
         <td>${p.unit}</td>
         <td style="text-align:right">${p.minStock}</td>
@@ -235,16 +235,16 @@ ${buildPrintHeader(shop)}
         </div>
       )}
 
-      {/* Critical Stock Alert (≤ 2 units) */}
+      {/* Critical Stock Alert (â‰¤ 2 units) */}
       {criticalStock.length > 0 && (
         <div className="bg-red-50 border border-red-300 rounded-lg p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-red-800 font-semibold text-sm">
-              Critical Stock Alert — {criticalStock.length} product{criticalStock.length > 1 ? "s" : ""} almost out of stock!
+              Critical Stock Alert â€” {criticalStock.length} product{criticalStock.length > 1 ? "s" : ""} almost out of stock!
             </p>
             <p className="text-red-600 text-xs mt-0.5">
-              {criticalStock.map((p) => `${p.name} (${p.currentStock} ${p.unit} left)`).join(" · ")}
+              {criticalStock.map((p) => `${p.name} (${p.currentStock} ${p.unit} left)`).join(" Â· ")}
             </p>
           </div>
         </div>
@@ -375,7 +375,7 @@ ${buildPrintHeader(shop)}
 
           <div className="p-5 space-y-5">
 
-            {/* ── Section 1: Basic Info ── */}
+            {/* â”€â”€ Section 1: Basic Info â”€â”€ */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Product Info</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -388,7 +388,7 @@ ${buildPrintHeader(shop)}
                 <Label className="text-xs font-semibold text-gray-600">Category *</Label>
                 {categories.length === 0 ? (
                   <div className="mt-1 text-xs text-blue-600 bg-blue-50 border border-blue-300 rounded-lg px-3 py-2.5">
-                    📂 No categories yet. Go to <strong>Categories</strong> tab above to add one.
+                    ðŸ“‚ No categories yet. Go to <strong>Categories</strong> tab above to add one.
                   </div>
                 ) : (
                   <Select value={form.categoryId} onValueChange={(v) => { setForm({ ...form, categoryId: v }); setCategorySearch("") }}>
@@ -417,7 +417,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* ── Section 2: Unit & Stock ── */}
+            {/* â”€â”€ Section 2: Unit & Stock â”€â”€ */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Unit & Stock</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -463,7 +463,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* ── Section 3: Pricing ── */}
+            {/* â”€â”€ Section 3: Pricing â”€â”€ */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Pricing</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -488,7 +488,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* ── Action Buttons ── */}
+            {/* â”€â”€ Action Buttons â”€â”€ */}
             <div className="flex gap-3 pt-1">
               <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
               <Button onClick={handleSave} className="flex-1 bg-blue-600 hover:bg-blue-700 gap-2">
@@ -503,3 +503,4 @@ ${buildPrintHeader(shop)}
     </div>
   )
 }
+

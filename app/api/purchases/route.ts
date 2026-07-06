@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       })
     }
 
-    // Update trader/customer ledger — we owe them the unpaid balance
+    // Update trader/customer ledger â€” we owe them the unpaid balance
     if (sellerCustomerId && balance > 0) {
       await tx.customer.update({
         where: { id: sellerCustomerId },
@@ -125,3 +125,4 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ purchase }, { status: 201 })
 }
+

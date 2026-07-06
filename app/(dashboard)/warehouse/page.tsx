@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -144,7 +144,7 @@ export default function WarehousePage() {
                   </div>
                 </div>
                 {w.capacity && (
-                  <p className="text-xs text-gray-500">Capacity: {w.capacity} units{w.manager ? ` · Manager: ${w.manager}` : ""}</p>
+                  <p className="text-xs text-gray-500">Capacity: {w.capacity} units{w.manager ? ` Â· Manager: ${w.manager}` : ""}</p>
                 )}
                 {/* Stock details */}
                 {w.stock?.length > 0 && (
@@ -258,7 +258,7 @@ export default function WarehousePage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right font-medium">{a.quantity} {a.product.unit}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{a.reason || "—"}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">{a.reason || "â€”"}</td>
                       <td className="px-4 py-3 text-gray-500 text-xs">{a.createdBy?.name}</td>
                       <td className="px-4 py-3 text-gray-400 text-xs">{new Date(a.createdAt).toLocaleDateString("en-PK")}</td>
                     </tr>
@@ -373,3 +373,4 @@ export default function WarehousePage() {
     </div>
   )
 }
+

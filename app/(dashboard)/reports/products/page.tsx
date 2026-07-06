@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -48,7 +48,7 @@ export default function ProductReportPage() {
 
   return (
     <div className="space-y-6">
-      {/* ── Print Header ── */}
+      {/* â”€â”€ Print Header â”€â”€ */}
       <div className="hidden print:block">
         <style>{`@media print { @page { size: A4 landscape; } }`}</style>
         <div style={{background:"linear-gradient(135deg,#14532d 0%,#166534 60%,#15803d 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -58,7 +58,7 @@ export default function ProductReportPage() {
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
             }
             <div>
-              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
+              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Argo-Firn"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
             </div>
           </div>
@@ -71,7 +71,7 @@ export default function ProductReportPage() {
         <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb",marginBottom:"8px"}}>
           <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Store Product Report</h2>
-          <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>All active products — stock levels, valuations and sales performance</div>
+          <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>All active products â€” stock levels, valuations and sales performance</div>
           <div style={{display:"flex",gap:"24px",marginTop:"8px",fontSize:"11px"}}>
             <span><strong>{totals.totalProducts}</strong> Products</span>
             <span>Stock Value: <strong>{formatCurrency(totals.totalStockValue)}</strong></span>
@@ -81,7 +81,7 @@ export default function ProductReportPage() {
         </div>
       </div>
 
-      {/* ── Screen Header ── */}
+      {/* â”€â”€ Screen Header â”€â”€ */}
       <div className="flex items-center justify-between print:hidden">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Product Report</h2>
@@ -92,12 +92,12 @@ export default function ProductReportPage() {
         </Button>
       </div>
 
-      {/* ── Summary Cards ── */}
+      {/* â”€â”€ Summary Cards â”€â”€ */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 print:hidden">
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-gray-500 uppercase font-medium tracking-wide">Total Products</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{totals.totalProducts ?? "—"}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{totals.totalProducts ?? "â€”"}</p>
           </CardContent>
         </Card>
         <Card>
@@ -127,13 +127,13 @@ export default function ProductReportPage() {
               Low Stock Items
             </p>
             <p className={`text-2xl font-bold mt-1 ${totals.lowStockCount > 0 ? "text-red-600" : "text-gray-900"}`}>
-              {totals.lowStockCount ?? "—"}
+              {totals.lowStockCount ?? "â€”"}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* ── Date Range Filter ── */}
+      {/* â”€â”€ Date Range Filter â”€â”€ */}
       <div className="flex flex-wrap gap-3 items-end print:hidden bg-blue-50 border border-blue-300 rounded-xl p-4">
         <div>
           <label className="text-xs font-medium text-gray-600 block mb-1">From Date</label>
@@ -161,12 +161,12 @@ export default function ProductReportPage() {
         </Button>
         {(from || to) && (
           <span className="text-xs text-purple-700 font-medium bg-green-50 border border-green-200 px-3 py-2 rounded-lg">
-            Sales filtered: {from || "start"} → {to || "today"}
+            Sales filtered: {from || "start"} â†’ {to || "today"}
           </span>
         )}
       </div>
 
-      {/* ── Stock / Search Filters ── */}
+      {/* â”€â”€ Stock / Search Filters â”€â”€ */}
       <div className="flex gap-3 items-center print:hidden">
         <div className="relative max-w-xs flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -196,7 +196,7 @@ export default function ProductReportPage() {
         </Button>
       </div>
 
-      {/* ── Table ── */}
+      {/* â”€â”€ Table â”€â”€ */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -270,7 +270,7 @@ export default function ProductReportPage() {
               <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                 <tr>
                   <td colSpan={9} className="px-4 py-3 font-bold text-gray-700">
-                    Total — {filtered.length} products
+                    Total â€” {filtered.length} products
                   </td>
                   <td className="px-4 py-3 text-right font-bold text-blue-700">
                     {formatCurrency(filtered.reduce((s, p) => s + p.stockValue, 0))}
@@ -295,3 +295,4 @@ export default function ProductReportPage() {
     </div>
   )
 }
+

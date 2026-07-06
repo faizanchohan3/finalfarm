@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
@@ -61,8 +61,8 @@ export default function AllTradersReportPage() {
       const rows = filtered.map((t, i) => `<tr style="${i % 2 === 0 ? "background:#f9fdf9" : ""}">
         <td>${i + 1}</td>
         <td><strong>${t.name}</strong></td>
-        <td>${t.phone || "—"}</td>
-        <td>${t.address || "—"}</td>
+        <td>${t.phone || "â€”"}</td>
+        <td>${t.address || "â€”"}</td>
       </tr>`).join("")
 
       const w = window.open("", "_blank")!
@@ -72,7 +72,7 @@ export default function AllTradersReportPage() {
 </style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
-  <div><div class="doc-title">All Traders Report — Profile Summary</div><div class="doc-sub">Total: ${filtered.length} traders</div></div>
+  <div><div class="doc-title">All Traders Report â€” Profile Summary</div><div class="doc-sub">Total: ${filtered.length} traders</div></div>
   <div class="doc-meta"><div>Printed: ${date}</div></div>
 </div>
 <div class="body-pad">
@@ -101,8 +101,8 @@ ${buildPrintHeader(shop)}
       return `<tr style="${i % 2 === 0 ? "background:#f9fdf9" : ""}">
         <td>${i + 1}</td>
         <td><strong>${t.name}</strong></td>
-        <td>${t.phone || "—"}</td>
-        <td>${t.address || "—"}</td>
+        <td>${t.phone || "â€”"}</td>
+        <td>${t.address || "â€”"}</td>
         <td style="text-align:right">PKR ${(t.totalDebit || 0).toLocaleString()}</td>
         <td style="text-align:right">PKR ${(t.totalCredit || 0).toLocaleString()}</td>
         <td style="text-align:right;font-weight:700;color:${statusColor}">
@@ -182,27 +182,27 @@ ${buildPrintHeader(shop)}
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-gray-500 font-medium uppercase">Total Traders</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{loading ? "—" : filtered.length}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{loading ? "â€”" : filtered.length}</p>
           </CardContent>
         </Card>
         <Card className="border-green-200 bg-green-50/40">
           <CardContent className="p-4">
             <p className="text-xs text-purple-600 font-medium uppercase">Receivable</p>
-            <p className="text-2xl font-bold text-purple-700 mt-1">{loading ? "—" : formatCurrency(totalPayable)}</p>
+            <p className="text-2xl font-bold text-purple-700 mt-1">{loading ? "â€”" : formatCurrency(totalPayable)}</p>
             <p className="text-xs text-green-500 mt-0.5">{filtered.filter((t) => ((t.totalDebit || 0) - (t.totalCredit || 0)) > 0).length} traders</p>
           </CardContent>
         </Card>
         <Card className="border-red-200 bg-red-50/40">
           <CardContent className="p-4">
             <p className="text-xs text-red-500 font-medium uppercase">Payable</p>
-            <p className="text-2xl font-bold text-red-600 mt-1">{loading ? "—" : formatCurrency(totalAdvance)}</p>
+            <p className="text-2xl font-bold text-red-600 mt-1">{loading ? "â€”" : formatCurrency(totalAdvance)}</p>
             <p className="text-xs text-red-400 mt-0.5">{filtered.filter((t) => ((t.totalDebit || 0) - (t.totalCredit || 0)) < 0).length} traders</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-gray-500 font-medium uppercase">Settled</p>
-            <p className="text-2xl font-bold text-gray-700 mt-1">{loading ? "—" : settled}</p>
+            <p className="text-2xl font-bold text-gray-700 mt-1">{loading ? "â€”" : settled}</p>
             <p className="text-xs text-gray-400 mt-0.5">no balance</p>
           </CardContent>
         </Card>
@@ -214,7 +214,7 @@ ${buildPrintHeader(shop)}
           <CardContent className="p-4">
             <p className="text-xs text-blue-600 font-medium uppercase">Total Sales (Dr)</p>
             <p className="text-2xl font-bold text-blue-700 mt-1">
-              {loading ? "—" : formatCurrency(filtered.reduce((s, t) => s + (t.totalDebit || 0), 0))}
+              {loading ? "â€”" : formatCurrency(filtered.reduce((s, t) => s + (t.totalDebit || 0), 0))}
             </p>
             <p className="text-xs text-blue-500 mt-0.5">all sales & commissions</p>
           </CardContent>
@@ -223,7 +223,7 @@ ${buildPrintHeader(shop)}
           <CardContent className="p-4">
             <p className="text-xs text-purple-600 font-medium uppercase">Total Payments (Cr)</p>
             <p className="text-2xl font-bold text-purple-700 mt-1">
-              {loading ? "—" : formatCurrency(filtered.reduce((s, t) => s + (t.totalCredit || 0), 0))}
+              {loading ? "â€”" : formatCurrency(filtered.reduce((s, t) => s + (t.totalCredit || 0), 0))}
             </p>
             <p className="text-xs text-green-500 mt-0.5">received & paid</p>
           </CardContent>
@@ -282,8 +282,8 @@ ${buildPrintHeader(shop)}
                     <tr key={t.id} className="hover:bg-blue-50">
                       <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                       <td className="px-4 py-3 font-medium text-gray-900">{t.name}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{t.phone || "—"}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{t.address || "—"}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">{t.phone || "â€”"}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">{t.address || "â€”"}</td>
                       {!isRestrictedRole && (
                         <>
                           <td className="px-4 py-3 text-right text-gray-700">{formatCurrency(t.totalDebit || 0)}</td>
@@ -346,3 +346,4 @@ ${buildPrintHeader(shop)}
     </div>
   )
 }
+

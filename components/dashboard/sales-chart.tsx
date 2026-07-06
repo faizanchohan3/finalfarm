@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
@@ -25,7 +25,7 @@ export function SalesChart() {
           <BarChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `₨${(v / 1000).toFixed(0)}k`} />
+            <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `â‚¨${(v / 1000).toFixed(0)}k`} />
             <Tooltip formatter={(value: any) => formatCurrency(Number(value))} />
             <Bar dataKey="sales" fill="#15803d" radius={[4, 4, 0, 0]} />
           </BarChart>
@@ -34,3 +34,4 @@ export function SalesChart() {
     </Card>
   )
 }
+

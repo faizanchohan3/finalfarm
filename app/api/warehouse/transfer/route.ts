@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const body = await req.json()
     const transferNo = `TRF-${Date.now()}`
 
-    // Create as PENDING — stock is NOT moved until approved
+    // Create as PENDING â€” stock is NOT moved until approved
     const transfer = await db.stockTransfer.create({
       data: {
         transferNo,
@@ -115,3 +115,4 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: err?.message || "Failed to approve transfer" }, { status: 500 })
   }
 }
+

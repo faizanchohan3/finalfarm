@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,7 +31,7 @@ export default function BalanceSheetPage() {
   }
 
   const dateLabel = dateFrom || dateTo
-    ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
+    ? `${dateFrom ? formatDate(dateFrom) : "Start"} â€” ${dateTo ? formatDate(dateTo) : "Today"}`
     : "All Time"
 
   return (
@@ -71,7 +71,7 @@ export default function BalanceSheetPage() {
           {/* P&L STATEMENT */}
           <Card className="border-2 border-blue-200 bg-blue-50">
             <CardHeader className="pb-2 border-b-2 border-blue-200">
-              <CardTitle className="text-lg text-blue-900">📊 INCOME STATEMENT (P&L)</CardTitle>
+              <CardTitle className="text-lg text-blue-900">ðŸ“Š INCOME STATEMENT (P&L)</CardTitle>
               <p className="text-xs text-blue-700 mt-1">Period: {dateLabel}</p>
             </CardHeader>
             <CardContent className="p-4">
@@ -123,17 +123,17 @@ export default function BalanceSheetPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-700">Cost of Purchases</span>
-                      <span className="font-semibold text-red-600">− {formatCurrency(data.purchasesTotal)}</span>
+                      <span className="font-semibold text-red-600">âˆ’ {formatCurrency(data.purchasesTotal)}</span>
                     </div>
                     {data.otherExpense > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-700">Other Expenses</span>
-                        <span className="text-red-600">− {formatCurrency(data.otherExpense)}</span>
+                        <span className="text-red-600">âˆ’ {formatCurrency(data.otherExpense)}</span>
                       </div>
                     )}
                     <div className="border-t pt-2 flex justify-between text-sm font-bold text-red-600">
                       <span>Total Expenses</span>
-                      <span>− {formatCurrency(data.purchasesTotal + data.otherExpense)}</span>
+                      <span>âˆ’ {formatCurrency(data.purchasesTotal + data.otherExpense)}</span>
                     </div>
                   </div>
 
@@ -159,7 +159,7 @@ export default function BalanceSheetPage() {
           {/* BALANCE SHEET */}
           <Card className="border-2 border-purple-200 bg-purple-50">
             <CardHeader className="pb-2 border-b-2 border-purple-200">
-              <CardTitle className="text-lg text-purple-900">💰 BALANCE SHEET (Assets = Liabilities + Equity)</CardTitle>
+              <CardTitle className="text-lg text-purple-900">ðŸ’° BALANCE SHEET (Assets = Liabilities + Equity)</CardTitle>
               <p className="text-xs text-purple-700 mt-1">As of {new Date().toLocaleDateString("en-PK")}</p>
             </CardHeader>
             <CardContent className="p-4">
@@ -239,7 +239,7 @@ export default function BalanceSheetPage() {
               <div className={`mt-6 p-4 rounded-lg border-2 ${data.accountingEquation ? "bg-green-50 border-green-300" : "bg-red-50 border-red-300"}`}>
                 <div className="flex items-center gap-2 mb-2">
                   {data.accountingEquation ? (
-                    <div className="text-purple-700 text-sm font-bold">✓ Accounting Equation Balanced</div>
+                    <div className="text-purple-700 text-sm font-bold">âœ“ Accounting Equation Balanced</div>
                   ) : (
                     <div className="text-red-700 text-sm font-bold flex items-center gap-1"><AlertCircle className="w-4 h-4" /> Equation Imbalanced</div>
                   )}
@@ -263,7 +263,7 @@ export default function BalanceSheetPage() {
             {/* Accounting Equation Diagram */}
             <Card className="border-2 border-indigo-200 bg-indigo-50">
               <CardHeader className="pb-2 border-b-2 border-indigo-200">
-                <CardTitle className="text-base text-indigo-900">📐 Accounting Equation</CardTitle>
+                <CardTitle className="text-base text-indigo-900">ðŸ“ Accounting Equation</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="flex items-center justify-center gap-4 mb-6">
@@ -289,7 +289,7 @@ export default function BalanceSheetPage() {
                   </div>
                 </div>
                 <div className={`p-3 rounded-lg text-center font-bold ${data.accountingEquation ? "bg-green-100 text-purple-800 border-2 border-green-500" : "bg-red-100 text-red-800 border-2 border-red-500"}`}>
-                  {data.accountingEquation ? "✓ EQUATION BALANCED" : "⚠ EQUATION IMBALANCED"}
+                  {data.accountingEquation ? "âœ“ EQUATION BALANCED" : "âš  EQUATION IMBALANCED"}
                 </div>
               </CardContent>
             </Card>
@@ -300,7 +300,7 @@ export default function BalanceSheetPage() {
             {/* Revenue vs Expenses Pie Chart */}
             <Card className="border-2 border-emerald-200 bg-emerald-50 print:hidden">
               <CardHeader className="pb-2 border-b-2 border-emerald-200">
-                <CardTitle className="text-base text-emerald-900">💰 Revenue vs Expenses</CardTitle>
+                <CardTitle className="text-base text-emerald-900">ðŸ’° Revenue vs Expenses</CardTitle>
               </CardHeader>
               <CardContent className="p-4">
                 <ResponsiveContainer width="100%" height={280}>
@@ -332,7 +332,7 @@ export default function BalanceSheetPage() {
             {data.totalAssets > 0 && (
               <Card className="border-2 border-blue-200 bg-blue-50">
                 <CardHeader className="pb-2 border-b-2 border-blue-200">
-                  <CardTitle className="text-base text-blue-900">🏦 Assets Breakdown</CardTitle>
+                  <CardTitle className="text-base text-blue-900">ðŸ¦ Assets Breakdown</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <ResponsiveContainer width="100%" height={280}>
@@ -364,7 +364,7 @@ export default function BalanceSheetPage() {
           {/* Financial Summary Bar Chart */}
           <Card className="border-2 border-violet-200 bg-violet-50 print:hidden">
             <CardHeader className="pb-2 border-b-2 border-violet-200">
-              <CardTitle className="text-base text-violet-900">📊 Financial Summary Comparison</CardTitle>
+              <CardTitle className="text-base text-violet-900">ðŸ“Š Financial Summary Comparison</CardTitle>
             </CardHeader>
             <CardContent className="p-4">
               <ResponsiveContainer width="100%" height={350}>
@@ -457,3 +457,4 @@ export default function BalanceSheetPage() {
     </div>
   )
 }
+

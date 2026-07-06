@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 
@@ -27,3 +27,4 @@ export async function GET(req: Request) {
 
   return NextResponse.json({ data: months })
 }
+

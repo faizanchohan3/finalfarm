@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { cachedJson } from "@/lib/api-cache"
@@ -20,3 +20,4 @@ export async function POST(req: Request) {
   const category = await db.category.create({ data: { shopId: session.user.shopId || null, name, description } })
   return NextResponse.json({ category }, { status: 201 })
 }
+

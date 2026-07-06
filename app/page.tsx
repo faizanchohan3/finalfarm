@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation"
+﻿import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 
 export default async function RootPage() {
@@ -7,3 +7,4 @@ export default async function RootPage() {
   if (session.user.role === "SUPER_ADMIN") redirect("/shops")
   redirect("/dashboard")
 }
+

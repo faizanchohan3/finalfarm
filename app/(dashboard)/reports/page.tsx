@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -81,21 +81,21 @@ const reportCards = [
   {
     href: "/reports/all-farmers",
     title: "All Farmers Report",
-    description: "Balance summary for all farmers — payable, advance, and settled",
+    description: "Balance summary for all farmers â€” payable, advance, and settled",
     icon: Tractor,
     color: "from-green-600 to-green-700",
   },
   {
     href: "/reports/all-suppliers",
     title: "All Suppliers Report",
-    description: "Balance summary for all suppliers — payable, advance, and settled",
+    description: "Balance summary for all suppliers â€” payable, advance, and settled",
     icon: Store,
     color: "from-cyan-600 to-cyan-700",
   },
   {
     href: "/reports/all-traders",
     title: "All Traders Report",
-    description: "Balance summary for all traders (buyers/sellers) — receivable, payable, and settled",
+    description: "Balance summary for all traders (buyers/sellers) â€” receivable, payable, and settled",
     icon: UserCheck,
     color: "from-indigo-600 to-indigo-700",
   },
@@ -168,10 +168,10 @@ export default function ReportsPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
-        <p className="text-gray-500 text-sm">Business performance overview — select a report below</p>
+        <p className="text-gray-500 text-sm">Business performance overview â€” select a report below</p>
       </div>
 
-      {/* ── Key Metrics — Colorful Gradient Cards ── */}
+      {/* â”€â”€ Key Metrics â€” Colorful Gradient Cards â”€â”€ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Link href="/reports/sales">
           <div
@@ -179,7 +179,7 @@ export default function ReportsPage() {
             style={{ background: "linear-gradient(135deg, #15803d 0%, #166534 100%)" }}
           >
             <ShoppingCart className="w-6 h-6 mb-3 opacity-80" />
-            <p className="text-2xl font-bold">{loading ? "—" : formatCurrency(financeData.income)}</p>
+            <p className="text-2xl font-bold">{loading ? "â€”" : formatCurrency(financeData.income)}</p>
             <p className="text-purple-200 text-sm mt-1">Total Revenue</p>
             <p className="text-purple-300 text-xs mt-2 flex items-center gap-1">View Sales Report <ArrowRight className="w-3 h-3" /></p>
           </div>
@@ -191,10 +191,10 @@ export default function ReportsPage() {
             style={{ background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)" }}
           >
             <Users className="w-6 h-6 mb-3 opacity-80" />
-            <p className="text-2xl font-bold">{loading ? "—" : customerData.count}</p>
+            <p className="text-2xl font-bold">{loading ? "â€”" : customerData.count}</p>
             <p className="text-blue-200 text-sm mt-1">Total Traders</p>
             <p className="text-blue-300 text-xs mt-2 flex items-center gap-1">
-              Udhar: {loading ? "—" : formatCurrency(customerData.outstanding)} <ArrowRight className="w-3 h-3" />
+              Udhar: {loading ? "â€”" : formatCurrency(customerData.outstanding)} <ArrowRight className="w-3 h-3" />
             </p>
           </div>
         </Link>
@@ -205,10 +205,10 @@ export default function ReportsPage() {
             style={{ background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)" }}
           >
             <Package className="w-6 h-6 mb-3 opacity-80" />
-            <p className="text-2xl font-bold">{loading ? "—" : formatCurrency(productData.stockValue)}</p>
+            <p className="text-2xl font-bold">{loading ? "â€”" : formatCurrency(productData.stockValue)}</p>
             <p className="text-violet-200 text-sm mt-1">Store Value</p>
             <p className="text-violet-300 text-xs mt-2 flex items-center gap-1">
-              {loading ? "—" : productData.totalProducts} products · {loading ? "—" : productData.lowStockCount} low stock <ArrowRight className="w-3 h-3" />
+              {loading ? "â€”" : productData.totalProducts} products Â· {loading ? "â€”" : productData.lowStockCount} low stock <ArrowRight className="w-3 h-3" />
             </p>
           </div>
         </Link>
@@ -219,14 +219,14 @@ export default function ReportsPage() {
             style={{ background: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)" }}
           >
             <TrendingDown className="w-6 h-6 mb-3 opacity-80" />
-            <p className="text-2xl font-bold">{loading ? "—" : formatCurrency(expenseData.total)}</p>
+            <p className="text-2xl font-bold">{loading ? "â€”" : formatCurrency(expenseData.total)}</p>
             <p className="text-red-200 text-sm mt-1">Total Expenses</p>
             <p className="text-red-300 text-xs mt-2 flex items-center gap-1">View Expenses <ArrowRight className="w-3 h-3" /></p>
           </div>
         </Link>
       </div>
 
-      {/* ── Secondary Metric Cards ── */}
+      {/* â”€â”€ Secondary Metric Cards â”€â”€ */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="border-green-100">
           <CardContent className="p-4">
@@ -235,7 +235,7 @@ export default function ReportsPage() {
               <Wallet className="w-4 h-4 text-purple-600" />
             </div>
             <p className={`text-xl font-bold ${financeData.balance >= 0 ? "text-purple-700" : "text-red-600"}`}>
-              {loading ? "—" : formatCurrency(financeData.balance)}
+              {loading ? "â€”" : formatCurrency(financeData.balance)}
             </p>
             <p className="text-xs text-gray-400 mt-1">Income minus expenses</p>
           </CardContent>
@@ -248,7 +248,7 @@ export default function ReportsPage() {
               <BookOpen className="w-4 h-4 text-orange-500" />
             </div>
             <p className={`text-xl font-bold ${customerData.outstanding > 0 ? "text-orange-600" : "text-gray-500"}`}>
-              {loading ? "—" : formatCurrency(customerData.outstanding)}
+              {loading ? "â€”" : formatCurrency(customerData.outstanding)}
             </p>
             <p className="text-xs text-gray-400 mt-1">Total outstanding balance</p>
           </CardContent>
@@ -261,7 +261,7 @@ export default function ReportsPage() {
               <TrendingUp className="w-4 h-4 text-violet-600" />
             </div>
             <p className="text-xl font-bold text-violet-700">
-              {loading ? "—" : formatCurrency(productData.totalSaleAmount)}
+              {loading ? "â€”" : formatCurrency(productData.totalSaleAmount)}
             </p>
             <p className="text-xs text-gray-400 mt-1">Total sale amount (all time)</p>
           </CardContent>
@@ -276,16 +276,16 @@ export default function ReportsPage() {
               <AlertTriangle className={`w-4 h-4 ${productData.lowStockCount > 0 ? "text-red-500" : "text-gray-400"}`} />
             </div>
             <p className={`text-xl font-bold ${productData.lowStockCount > 0 ? "text-red-600" : "text-gray-500"}`}>
-              {loading ? "—" : productData.lowStockCount} items
+              {loading ? "â€”" : productData.lowStockCount} items
             </p>
             <Link href="/reports/products" className="text-xs text-red-500 hover:underline mt-1 block">
-              View product report →
+              View product report â†’
             </Link>
           </CardContent>
         </Card>
       </div>
 
-      {/* ── Charts Row ── */}
+      {/* â”€â”€ Charts Row â”€â”€ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -298,7 +298,7 @@ export default function ReportsPage() {
               <BarChart data={monthlySales}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `₨${(v / 1000).toFixed(0)}k`} />
+                <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `â‚¨${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(v: any) => formatCurrency(Number(v))} />
                 <Bar dataKey="sales" fill="#15803d" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -362,7 +362,7 @@ export default function ReportsPage() {
         </Card>
       </div>
 
-      {/* ── Report Navigation Cards ── */}
+      {/* â”€â”€ Report Navigation Cards â”€â”€ */}
       <div>
         <h3 className="text-base font-semibold text-gray-700 mb-3">Detailed Reports</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -387,3 +387,4 @@ export default function ReportsPage() {
     </div>
   )
 }
+

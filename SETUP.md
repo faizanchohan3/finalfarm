@@ -1,11 +1,11 @@
-# Gala Mandi Shop Management — Setup Guide
+﻿# Argo-Firn Shop Management â€” Setup Guide
 
 ## 1. Prerequisites
 - Node.js 18+
 - PostgreSQL database (use [Neon](https://neon.tech) for free hosting)
 - Vercel account for deployment
 
-## 2. Database Setup (Neon — Free)
+## 2. Database Setup (Neon â€” Free)
 1. Sign up at https://neon.tech
 2. Create a new project: **gala-mandi**
 3. Copy the connection string (looks like: `postgresql://user:password@ep-xyz.neon.tech/neondb?sslmode=require`)
@@ -84,3 +84,4 @@ vercel
 | Audit Log | Full activity trail |
 | Users | Multi-user with role-based access |
 | Settings | Categories configuration |
+

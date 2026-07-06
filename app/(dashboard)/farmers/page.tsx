@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -283,9 +283,9 @@ export default function FarmersPage() {
                       </td>
                       <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                       <td className="px-4 py-3 font-semibold text-gray-900">{f.name}</td>
-                      <td className="px-4 py-3 text-gray-600">{f.village || "—"}</td>
-                      <td className="px-4 py-3 text-gray-600">{f.phone || "—"}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{f.cnic || "—"}</td>
+                      <td className="px-4 py-3 text-gray-600">{f.village || "â€”"}</td>
+                      <td className="px-4 py-3 text-gray-600">{f.phone || "â€”"}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">{f.cnic || "â€”"}</td>
                       <td className="px-4 py-3 text-right text-gray-600">{formatCurrency(f.creditLimit)}</td>
                       <td className={`px-4 py-3 text-right font-bold ${(f.balance || 0) > 0 ? "text-purple-600" : (f.balance || 0) < 0 ? "text-red-600" : "text-gray-600"}`}>
                         {formatCurrency(f.balance || 0)}
@@ -374,8 +374,8 @@ export default function FarmersPage() {
                                           </td>
                                           <td className="px-3 py-2 text-gray-500">{formatDate(e.date)}</td>
                                           <td className="px-3 py-2 text-gray-600">{e.description}</td>
-                                          <td className="px-3 py-2 text-right text-red-600">{e.debit > 0 ? formatCurrency(e.debit) : "—"}</td>
-                                          <td className="px-3 py-2 text-right text-purple-700">{e.credit > 0 ? formatCurrency(e.credit) : "—"}</td>
+                                          <td className="px-3 py-2 text-right text-red-600">{e.debit > 0 ? formatCurrency(e.debit) : "â€”"}</td>
+                                          <td className="px-3 py-2 text-right text-purple-700">{e.credit > 0 ? formatCurrency(e.credit) : "â€”"}</td>
                                           <td className={`px-3 py-2 text-right font-semibold ${e.balance > 0 ? "text-red-600" : "text-gray-500"}`}>
                                             {formatCurrency(Math.abs(e.balance))} {e.balance > 0 ? "Dr" : e.balance < 0 ? "Cr" : ""}
                                           </td>
@@ -421,7 +421,7 @@ export default function FarmersPage() {
               {photoPreview && (
                 <div className="mb-2 relative">
                   <img src={photoPreview} alt="Preview" className="w-20 h-20 rounded-lg object-cover" />
-                  <button onClick={() => { setPhotoPreview(""); setForm({ ...form, picture: "" }); }} className="absolute -top-2 -right-2 bg-red-500 text-blue-900 rounded-full w-6 h-6 flex items-center justify-center text-xs">✕</button>
+                  <button onClick={() => { setPhotoPreview(""); setForm({ ...form, picture: "" }); }} className="absolute -top-2 -right-2 bg-red-500 text-blue-900 rounded-full w-6 h-6 flex items-center justify-center text-xs">âœ•</button>
                 </div>
               )}
               <div className="flex gap-2">
@@ -469,7 +469,7 @@ export default function FarmersPage() {
         <div className="hidden print:block fixed inset-0 bg-blue-50 z-[9999] p-10">
           <div className="max-w-xs mx-auto">
             <div className="text-center border-b-2 border-gray-800 pb-4 mb-5">
-              <h1 className="text-2xl font-bold text-gray-900">Gala Mandi</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Argo-Firn</h1>
               <p className="text-sm text-gray-500">{lastPayment.paymentType === "RECEIVE" ? "Payment Receipt (Received)" : "Payment Receipt"}</p>
               <p className="text-xs text-gray-400 mt-1">{new Date().toLocaleString("en-PK")}</p>
             </div>
@@ -491,7 +491,7 @@ export default function FarmersPage() {
                 </span>
               </div>
             </div>
-            <p className="mt-8 text-center text-xs text-gray-400 border-t pt-4">Gala Mandi — Farmer Account</p>
+            <p className="mt-8 text-center text-xs text-gray-400 border-t pt-4">Argo-Firn â€” Farmer Account</p>
           </div>
         </div>
       )}
@@ -608,7 +608,7 @@ export default function FarmersPage() {
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-xs text-blue-900">
-                ⚠️ <strong>Warning:</strong> This action cannot be undone.
+                âš ï¸ <strong>Warning:</strong> This action cannot be undone.
               </p>
             </div>
           </div>
@@ -635,7 +635,7 @@ export default function FarmersPage() {
               <DialogTitle>Farmer Details</DialogTitle>
               <p className="text-xs text-gray-500 mt-1">View farmer account, purchases & sales</p>
             </div>
-            <button onClick={() => setShowDetailModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+            <button onClick={() => setShowDetailModal(false)} className="text-gray-400 hover:text-gray-600">âœ•</button>
           </DialogHeader>
 
           {farmerDetail && selectedFarmer && (
@@ -648,15 +648,15 @@ export default function FarmersPage() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Village</p>
-                  <p className="font-semibold text-gray-900">{selectedFarmer.village || "—"}</p>
+                  <p className="font-semibold text-gray-900">{selectedFarmer.village || "â€”"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Phone</p>
-                  <p className="font-semibold text-gray-900">{selectedFarmer.phone || "—"}</p>
+                  <p className="font-semibold text-gray-900">{selectedFarmer.phone || "â€”"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-1">CNIC</p>
-                  <p className="font-semibold text-gray-900">{selectedFarmer.cnic || "—"}</p>
+                  <p className="font-semibold text-gray-900">{selectedFarmer.cnic || "â€”"}</p>
                 </div>
               </div>
 
@@ -751,8 +751,8 @@ export default function FarmersPage() {
                           <tr key={i}>
                             <td className="py-2 px-3 text-gray-500 whitespace-nowrap text-xs">{formatDate(e.date)}</td>
                             <td className="py-2 px-3 text-gray-700 text-xs">{e.description}</td>
-                            <td className="py-2 px-3 text-right font-medium text-gray-900">{e.debit > 0 ? formatCurrency(e.debit) : "—"}</td>
-                            <td className="py-2 px-3 text-right text-purple-700">{e.credit > 0 ? formatCurrency(e.credit) : "—"}</td>
+                            <td className="py-2 px-3 text-right font-medium text-gray-900">{e.debit > 0 ? formatCurrency(e.debit) : "â€”"}</td>
+                            <td className="py-2 px-3 text-right text-purple-700">{e.credit > 0 ? formatCurrency(e.credit) : "â€”"}</td>
                             <td className={`py-2 px-3 text-right font-semibold ${e.balance > 0 ? "text-red-600" : "text-purple-700"}`}>
                               {formatCurrency(Math.abs(e.balance))} {e.balance > 0 ? "Dr" : e.balance < 0 ? "Cr" : ""}
                             </td>
@@ -770,3 +770,4 @@ export default function FarmersPage() {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 
 /**
  * Returns a cached JSON response.
@@ -12,3 +12,4 @@ export function cachedJson(data: unknown, max = 15, swr = 60) {
     },
   })
 }
+

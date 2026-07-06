@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useRef, useState } from "react"
 import { formatCurrency } from "@/lib/utils"
@@ -13,7 +13,7 @@ type SliderData = {
   expiredPesticides: number
 }
 
-// Inline styles — avoids Tailwind purging dynamic class strings
+// Inline styles â€” avoids Tailwind purging dynamic class strings
 const SLIDE_STYLES = [
   { background: "linear-gradient(135deg, #15803d 0%, #166534 60%, #14532d 100%)" },
   { background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 60%, #1e40af 100%)" },
@@ -50,7 +50,7 @@ export function StatsSlider(props: SliderData) {
       label: "Inventory",
       value: `${props.totalProducts} Products`,
       sub: props.expiredPesticides > 0
-        ? `⚠ ${props.expiredPesticides} pesticide(s) expiring soon`
+        ? `âš  ${props.expiredPesticides} pesticide(s) expiring soon`
         : "All stock within expiry",
       badge: props.expiredPesticides > 0 ? props.expiredPesticides : null,
     },
@@ -75,13 +75,13 @@ export function StatsSlider(props: SliderData) {
     }, 250)
   }
 
-  // Stable autoplay using refs — no stale closures
+  // Stable autoplay using refs â€” no stale closures
   useEffect(() => {
     const timer = setInterval(() => {
       goTo((currentRef.current + 1) % COUNT)
     }, 4000)
     return () => clearInterval(timer)
-  }, []) // intentionally empty — uses refs only
+  }, []) // intentionally empty â€” uses refs only
 
   const slide = slides[current]
   const Icon = slide.icon
@@ -183,3 +183,4 @@ export function StatsSlider(props: SliderData) {
     </div>
   )
 }
+

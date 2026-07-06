@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -101,13 +101,13 @@ export default function GatePage() {
     const pass = entry.gatePass
     const ref = pass?.passNo || entry.entryNo
     const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Gate Pass — ${ref}</title>
+    w.document.write(`<html><head><title>Gate Pass â€” ${ref}</title>
 <style>${receiptCSS}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
   <div>
     <div class="doc-title">Gate Pass</div>
-    <div class="doc-sub">Pass No: ${pass?.passNo || "—"} &nbsp;|&nbsp; Entry No: ${entry.entryNo}</div>
+    <div class="doc-sub">Pass No: ${pass?.passNo || "â€”"} &nbsp;|&nbsp; Entry No: ${entry.entryNo}</div>
   </div>
   <div class="doc-meta">
     <div>${new Date(entry.entryTime).toLocaleString("en-PK")}</div>
@@ -116,12 +116,12 @@ ${buildPrintHeader(shop)}
 </div>
 <div class="body-pad">
   <div class="info-grid">
-    <div><div class="lbl">Vehicle No</div><div class="val">${entry.vehicle?.vehicleNo || entry.vehicleNo || "—"}</div></div>
-    <div><div class="lbl">Driver</div><div class="val">${entry.driverName || entry.vehicle?.driverName || "—"}</div></div>
-    <div><div class="lbl">Farmer</div><div class="val">${entry.farmer?.name || "—"}</div></div>
-    <div><div class="lbl">Agent</div><div class="val">${entry.agent?.name || "—"}</div></div>
-    <div><div class="lbl">Commodity</div><div class="val">${entry.commodity || "—"}</div></div>
-    <div><div class="lbl">Bags</div><div class="val">${entry.bags || "—"}</div></div>
+    <div><div class="lbl">Vehicle No</div><div class="val">${entry.vehicle?.vehicleNo || entry.vehicleNo || "â€”"}</div></div>
+    <div><div class="lbl">Driver</div><div class="val">${entry.driverName || entry.vehicle?.driverName || "â€”"}</div></div>
+    <div><div class="lbl">Farmer</div><div class="val">${entry.farmer?.name || "â€”"}</div></div>
+    <div><div class="lbl">Agent</div><div class="val">${entry.agent?.name || "â€”"}</div></div>
+    <div><div class="lbl">Commodity</div><div class="val">${entry.commodity || "â€”"}</div></div>
+    <div><div class="lbl">Bags</div><div class="val">${entry.bags || "â€”"}</div></div>
     ${entry.weighbridgeEntries?.[0] ? `<div><div class="lbl">Net Weight</div><div class="val">${entry.weighbridgeEntries[0].netWeight} KG</div></div>` : ""}
     ${entry.purpose ? `<div><div class="lbl">Purpose</div><div class="val">${entry.purpose}</div></div>` : ""}
   </div>
@@ -222,15 +222,15 @@ ${buildPrintHeader(shop)}
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_COLORS[e.type]}`}>{e.type}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="font-medium text-gray-800">{e.vehicle?.vehicleNo || e.vehicleNo || "—"}</p>
+                        <p className="font-medium text-gray-800">{e.vehicle?.vehicleNo || e.vehicleNo || "â€”"}</p>
                         <p className="text-xs text-gray-500">{e.driverName || e.vehicle?.driverName}</p>
                       </td>
-                      <td className="px-4 py-3 text-gray-700">{e.farmer?.name || "—"}</td>
-                      <td className="px-4 py-3 text-gray-700">{e.agent?.name || "—"}</td>
-                      <td className="px-4 py-3 text-gray-700">{e.commodity || "—"}</td>
-                      <td className="px-4 py-3 text-center text-gray-700">{e.bags || "—"}</td>
+                      <td className="px-4 py-3 text-gray-700">{e.farmer?.name || "â€”"}</td>
+                      <td className="px-4 py-3 text-gray-700">{e.agent?.name || "â€”"}</td>
+                      <td className="px-4 py-3 text-gray-700">{e.commodity || "â€”"}</td>
+                      <td className="px-4 py-3 text-center text-gray-700">{e.bags || "â€”"}</td>
                       <td className="px-4 py-3 text-right font-medium text-blue-700">
-                        {latestWeigh ? `${latestWeigh.netWeight} KG` : "—"}
+                        {latestWeigh ? `${latestWeigh.netWeight} KG` : "â€”"}
                       </td>
                       <td className="px-4 py-3 text-xs text-gray-500">{new Date(e.entryTime).toLocaleTimeString("en-PK", { hour: "2-digit", minute: "2-digit" })}</td>
                       <td className="px-4 py-3 text-center">
@@ -283,8 +283,8 @@ ${buildPrintHeader(shop)}
               <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="IN">IN — Vehicle Entering</SelectItem>
-                  <SelectItem value="OUT">OUT — Vehicle Exiting</SelectItem>
+                  <SelectItem value="IN">IN â€” Vehicle Entering</SelectItem>
+                  <SelectItem value="OUT">OUT â€” Vehicle Exiting</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -332,7 +332,7 @@ ${buildPrintHeader(shop)}
       <Dialog open={!!showWeighModal} onOpenChange={() => setShowWeighModal(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Scale className="w-5 h-5" /> Weighbridge — {showWeighModal?.entryNo}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Scale className="w-5 h-5" /> Weighbridge â€” {showWeighModal?.entryNo}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
@@ -363,3 +363,4 @@ ${buildPrintHeader(shop)}
     </div>
   )
 }
+

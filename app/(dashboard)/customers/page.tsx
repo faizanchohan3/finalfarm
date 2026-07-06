@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -254,7 +254,7 @@ export default function CustomersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Traders</h2>
-          <p className="text-gray-500 text-sm">{activeCustomers.length} active · {inactiveCustomers.length} inactive</p>
+          <p className="text-gray-500 text-sm">{activeCustomers.length} active Â· {inactiveCustomers.length} inactive</p>
         </div>
         <Button onClick={openAdd} className="bg-purple-700 hover:bg-purple-800 gap-2">
           <Plus className="w-4 h-4" /> Add Traders
@@ -359,7 +359,7 @@ export default function CustomersPage() {
                         </div>
                       </td>
                       <td className="py-3 px-3 text-gray-600">
-                        {c.phone ? <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{c.phone}</span> : "—"}
+                        {c.phone ? <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{c.phone}</span> : "â€”"}
                       </td>
                       <td className="py-3 px-3">
                         {c.referenceName ? (
@@ -367,7 +367,7 @@ export default function CustomersPage() {
                             <p className="text-gray-700 text-xs font-medium">{c.referenceName}</p>
                             {c.referencePhone && <p className="text-gray-400 text-xs">{c.referencePhone}</p>}
                           </div>
-                        ) : <span className="text-gray-400">—</span>}
+                        ) : <span className="text-gray-400">â€”</span>}
                       </td>
                       <td className="py-3 px-3">
                         {(c.creditLimit || 0) > 0 ? (
@@ -382,7 +382,7 @@ export default function CustomersPage() {
                             {formatCurrency(Math.abs(c.ledgerBalance || 0))}
                             {(c.ledgerBalance || 0) !== 0 && <span className="text-xs ml-1 font-normal">{(c.ledgerBalance || 0) > 0 ? "Dr" : "Cr"}</span>}
                           </span>
-                        ) : <span className="text-gray-400">—</span>}
+                        ) : <span className="text-gray-400">â€”</span>}
                       </td>
                       <td className="py-3 px-3">
                         <span className={`text-xs px-2 py-0.5 rounded-full ${c.isActive ? "bg-green-100 text-purple-700" : "bg-blue-100 text-gray-500"}`}>
@@ -430,7 +430,7 @@ export default function CustomersPage() {
         </CardContent>
       </Card>
 
-      {/* ── Add/Edit Modal ─────────────────────────────────────── */}
+      {/* â”€â”€ Add/Edit Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -460,7 +460,7 @@ export default function CustomersPage() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-700">Customer Photo</p>
-                <p className="text-xs text-gray-400 mt-0.5">JPG, PNG — max 2 MB. Shown in table & detail view.</p>
+                <p className="text-xs text-gray-400 mt-0.5">JPG, PNG â€” max 2 MB. Shown in table & detail view.</p>
                 {form.image && (
                   <button type="button" onClick={() => setForm({ ...form, image: "" })}
                     className="text-xs text-red-500 hover:underline mt-1">Remove photo</button>
@@ -520,7 +520,7 @@ export default function CustomersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Customer Detail Modal ──────────────────────────────── */}
+      {/* â”€â”€ Customer Detail Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
         <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto">
           <DialogHeader>
@@ -721,8 +721,8 @@ export default function CustomersPage() {
                                 </span>
                               </td>
                               <td className="py-2 px-3 text-gray-700 text-xs max-w-xs truncate">{entry.description}</td>
-                              <td className="py-2 px-3 text-right font-medium text-gray-900">{entry.debit > 0 ? formatCurrency(entry.debit) : "—"}</td>
-                              <td className="py-2 px-3 text-right text-purple-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "—"}</td>
+                              <td className="py-2 px-3 text-right font-medium text-gray-900">{entry.debit > 0 ? formatCurrency(entry.debit) : "â€”"}</td>
+                              <td className="py-2 px-3 text-right text-purple-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "â€”"}</td>
                               <td className={`py-2 px-3 text-right font-semibold ${entry.balance > 0 ? "text-red-600" : "text-purple-700"}`}>
                                 {formatCurrency(Math.abs(entry.balance))}
                                 {entry.balance !== 0 && <span className="text-xs ml-1 font-normal">{entry.balance > 0 ? "Dr" : "Cr"}</span>}
@@ -800,7 +800,7 @@ export default function CustomersPage() {
         <div className="hidden print:block fixed inset-0 bg-blue-50 z-[9999] p-10">
           <div className="max-w-xs mx-auto">
             <div className="text-center border-b-2 border-gray-800 pb-4 mb-5">
-              <h1 className="text-2xl font-bold text-gray-900">Gala Mandi</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Argo-Firn</h1>
               <p className="text-sm text-gray-500">Payment Receipt</p>
               <p className="text-xs text-gray-400 mt-1">{new Date().toLocaleString("en-PK")}</p>
             </div>
@@ -822,7 +822,7 @@ export default function CustomersPage() {
         </div>
       )}
 
-      {/* ── Delete Confirmation Modal ─────────────────────────── */}
+      {/* â”€â”€ Delete Confirmation Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -856,15 +856,15 @@ export default function CustomersPage() {
               <p className="text-sm font-semibold text-blue-800">What happens when you delete?</p>
               <ul className="text-xs text-blue-600 space-y-1">
                 <li className="flex items-start gap-1.5">
-                  <span className="text-amber-500 mt-0.5">✓</span>
+                  <span className="text-amber-500 mt-0.5">âœ“</span>
                   <span>Trader profile (name, phone, address) will be <strong>removed</strong></span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-purple-600 mt-0.5">✓</span>
+                  <span className="text-purple-600 mt-0.5">âœ“</span>
                   <span>All sales, commissions & ledger records are <strong>kept safe</strong></span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-purple-600 mt-0.5">✓</span>
+                  <span className="text-purple-600 mt-0.5">âœ“</span>
                   <span>Your financial totals and reports <strong>remain accurate</strong></span>
                 </li>
               </ul>
@@ -894,7 +894,7 @@ export default function CustomersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Payment Modal ──────────────────────────────────────── */}
+      {/* â”€â”€ Payment Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Dialog open={showPaymentModal} onOpenChange={(open) => { setShowPaymentModal(open); if (!open) setLastPayment(null) }}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -1024,7 +1024,7 @@ export default function CustomersPage() {
                   <Select value={paymentForm.bankId || "none"} onValueChange={(v) => setPaymentForm({ ...paymentForm, bankId: v === "none" ? "" : v })}>
                     <SelectTrigger><SelectValue placeholder="Select bank..." /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">— Not specified —</SelectItem>
+                      <SelectItem value="none">â€” Not specified â€”</SelectItem>
                       {banks.map((b) => (
                         <SelectItem key={b.id} value={b.id}>{b.name}{b.accountNumber ? ` (${b.accountNumber})` : ""}</SelectItem>
                       ))}
@@ -1067,7 +1067,7 @@ export default function CustomersPage() {
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-xs text-blue-900">
-                ⚠️ <strong>Warning:</strong> This action cannot be undone.
+                âš ï¸ <strong>Warning:</strong> This action cannot be undone.
               </p>
             </div>
           </div>
@@ -1088,3 +1088,4 @@ export default function CustomersPage() {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
@@ -143,7 +143,7 @@ export default function ProfilePage() {
             <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
             <span className="text-gray-500 w-20">Joined</span>
             <span className="font-medium text-gray-800">
-              {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString("en-PK", { year: "numeric", month: "long", day: "numeric" }) : "—"}
+              {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString("en-PK", { year: "numeric", month: "long", day: "numeric" }) : "â€”"}
             </span>
           </div>
         </div>
@@ -264,3 +264,4 @@ export default function ProfilePage() {
     </div>
   )
 }
+

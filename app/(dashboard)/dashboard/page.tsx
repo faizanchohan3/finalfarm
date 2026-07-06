@@ -1,4 +1,4 @@
-import { db } from "@/lib/db"
+﻿import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { formatCurrency } from "@/lib/utils"
 import { TrendingUp, ShoppingCart, Package, Users, CheckSquare, Sprout, AlertTriangle, Store, Clock } from "lucide-react"
@@ -106,9 +106,9 @@ export default async function DashboardPage() {
         </h2>
         <p className="text-gray-500 text-sm mt-1">
           {isSuperAdmin
-            ? "Platform overview — all shops combined."
+            ? "Platform overview â€” all shops combined."
             : isCashier
-            ? "Sales & Transaction Dashboard — Process transactions and view quick reports."
+            ? "Sales & Transaction Dashboard â€” Process transactions and view quick reports."
             : `Here's what's happening at ${session?.user?.shopName || "your shop"} today.`}
         </p>
       </div>
@@ -143,7 +143,7 @@ export default async function DashboardPage() {
               <p className="text-blue-900 font-bold text-lg">Manage All Shops</p>
               <p className="text-purple-300 text-xs">Approve registrations, suspend or reactivate shops</p>
             </div>
-            <span className="text-purple-300 text-sm">View →</span>
+            <span className="text-purple-300 text-sm">View â†’</span>
           </div>
         </Link>
       )}
@@ -155,10 +155,10 @@ export default async function DashboardPage() {
             <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-red-800 font-semibold text-sm">
-                Critical Stock Alert — {data.criticalStockProducts.length} product{data.criticalStockProducts.length > 1 ? "s" : ""} almost out of stock!
+                Critical Stock Alert â€” {data.criticalStockProducts.length} product{data.criticalStockProducts.length > 1 ? "s" : ""} almost out of stock!
               </p>
               <p className="text-red-600 text-xs mt-0.5">
-                {data.criticalStockProducts.map((p) => `${p.name} (${p.currentStock} ${p.unit})`).join(" · ")}
+                {data.criticalStockProducts.map((p) => `${p.name} (${p.currentStock} ${p.unit})`).join(" Â· ")}
               </p>
             </div>
           </div>
@@ -209,3 +209,4 @@ export default async function DashboardPage() {
     </div>
   )
 }
+

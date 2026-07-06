@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -300,7 +300,7 @@ export default function FinancePage() {
         </CardContent>
       </Card>
 
-      {/* Add Transaction Modal — Redesigned */}
+      {/* Add Transaction Modal â€” Redesigned */}
       <Dialog open={showModal} onOpenChange={(o) => { setShowModal(o); if (!o) setShowMoreCats(false) }}>
         <DialogContent className="w-[95vw] max-w-lg sm:w-full max-h-[92vh] overflow-y-auto">
           <DialogHeader>
@@ -316,7 +316,7 @@ export default function FinancePage() {
 
           <div className="space-y-5">
 
-            {/* ── Step 1: Type Toggle ── */}
+            {/* â”€â”€ Step 1: Type Toggle â”€â”€ */}
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setForm({ ...form, type: "CREDIT", category: "", accountId: "" })}
@@ -342,7 +342,7 @@ export default function FinancePage() {
               </button>
             </div>
 
-            {/* ── Step 2: Amount ── */}
+            {/* â”€â”€ Step 2: Amount â”€â”€ */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Amount (PKR) *</Label>
               <div className="relative mt-1">
@@ -358,12 +358,12 @@ export default function FinancePage() {
               </div>
               {form.amount && parseFloat(form.amount) > 0 && (
                 <p className={`text-xs mt-1 font-medium ${form.type === "CREDIT" ? "text-purple-600" : "text-red-600"}`}>
-                  {form.type === "CREDIT" ? "+" : "−"} {formatCurrency(parseFloat(form.amount))}
+                  {form.type === "CREDIT" ? "+" : "âˆ’"} {formatCurrency(parseFloat(form.amount))}
                 </p>
               )}
             </div>
 
-            {/* ── Step 3: Description ── */}
+            {/* â”€â”€ Step 3: Description â”€â”€ */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Description *</Label>
               <Input
@@ -374,7 +374,7 @@ export default function FinancePage() {
               />
             </div>
 
-            {/* ── Step 3B: Transaction Date ── */}
+            {/* â”€â”€ Step 3B: Transaction Date â”€â”€ */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Transaction Date *</Label>
               <Input
@@ -385,7 +385,7 @@ export default function FinancePage() {
               />
             </div>
 
-            {/* ── Step 4: Category Chips ── */}
+            {/* â”€â”€ Step 4: Category Chips â”€â”€ */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Category</Label>
               <div className="flex flex-wrap gap-1.5 mt-2">
@@ -431,7 +431,7 @@ export default function FinancePage() {
               )}
             </div>
 
-            {/* ── Step 5: Payment Method ── */}
+            {/* â”€â”€ Step 5: Payment Method â”€â”€ */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Payment Method</Label>
               <div className="grid grid-cols-2 gap-2 mt-1">
@@ -461,26 +461,26 @@ export default function FinancePage() {
                   <SelectTrigger className="mt-2"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {banks.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>{b.name}{b.accountNumber ? ` — ${b.accountNumber}` : ""}</SelectItem>
+                      <SelectItem key={b.id} value={b.id}>{b.name}{b.accountNumber ? ` â€” ${b.accountNumber}` : ""}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
               {form.bankId && banks.length === 0 && (
-                <p className="text-xs text-blue-600 mt-1.5">No banks added yet — <Link href="/banks" className="underline">add a bank</Link></p>
+                <p className="text-xs text-blue-600 mt-1.5">No banks added yet â€” <Link href="/banks" className="underline">add a bank</Link></p>
               )}
             </div>
 
-            {/* ── Step 6: Account (collapsed by default) ── */}
+            {/* â”€â”€ Step 6: Account (collapsed by default) â”€â”€ */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Chart of Account <span className="font-normal normal-case text-gray-400">(optional)</span></Label>
               {accounts.length === 0 ? (
-                <p className="text-xs text-gray-400 mt-1">No accounts — <Link href="/accounts" className="underline text-blue-600">load default accounts</Link></p>
+                <p className="text-xs text-gray-400 mt-1">No accounts â€” <Link href="/accounts" className="underline text-blue-600">load default accounts</Link></p>
               ) : (
                 <Select value={form.accountId || "none"} onValueChange={(v) => setForm({ ...form, accountId: v === "none" ? "" : v })}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select account..." /></SelectTrigger>
                   <SelectContent position="popper" side="bottom" className="max-h-56 overflow-y-auto">
-                    <SelectItem value="none">— No account —</SelectItem>
+                    <SelectItem value="none">â€” No account â€”</SelectItem>
                     {(() => {
                       const relevantTypes = form.type === "CREDIT"
                         ? ["INCOME", "ASSET", "EQUITY"]
@@ -494,7 +494,7 @@ export default function FinancePage() {
                         <SelectGroup key={g.type}>
                           <SelectLabel>{g.type}</SelectLabel>
                           {g.items.map((a: any) => (
-                            <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
+                            <SelectItem key={a.id} value={a.id}>{a.code} â€” {a.name}</SelectItem>
                           ))}
                         </SelectGroup>
                       ))
@@ -504,7 +504,7 @@ export default function FinancePage() {
               )}
             </div>
 
-            {/* ── Step 6B: Debit/Credit (appears when account is selected) ── */}
+            {/* â”€â”€ Step 6B: Debit/Credit (appears when account is selected) â”€â”€ */}
             {form.accountId && (
               <div>
                 <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Entry Type</Label>
@@ -533,14 +533,14 @@ export default function FinancePage() {
               </div>
             )}
 
-            {/* ── Step 7: Reference ── */}
+            {/* â”€â”€ Step 7: Reference â”€â”€ */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Reference <span className="font-normal normal-case text-gray-400">(optional)</span></Label>
               <Input className="mt-1" placeholder="Invoice #, Cheque #, Note..." value={form.reference}
                 onChange={(e) => setForm({ ...form, reference: e.target.value })} />
             </div>
 
-            {/* ── Action Buttons ── */}
+            {/* â”€â”€ Action Buttons â”€â”€ */}
             <div className="flex gap-3 pt-1">
               <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1" disabled={saving}>
                 Cancel
@@ -612,7 +612,7 @@ export default function FinancePage() {
                       <tr key={i} className="hover:bg-blue-50">
                         <td className="py-3 px-4 text-gray-500 text-xs whitespace-nowrap">{formatDate(t.createdAt)}</td>
                         <td className="py-3 px-4 text-gray-700">{t.description}</td>
-                        <td className="py-3 px-4 text-gray-600 text-xs">{t.category || "—"}</td>
+                        <td className="py-3 px-4 text-gray-600 text-xs">{t.category || "â€”"}</td>
                         <td className="py-3 px-4">
                           <span className={`text-xs font-medium px-2 py-1 rounded-full ${t.type === "CREDIT" ? "bg-green-100 text-purple-700" : "bg-red-100 text-red-700"}`}>
                             {t.type === "CREDIT" ? "Income" : "Expense"}
@@ -737,3 +737,4 @@ export default function FinancePage() {
     </div>
   )
 }
+

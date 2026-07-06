@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 
@@ -68,3 +68,4 @@ export async function DELETE(req: Request) {
   await db.vehicle.update({ where: { id: body.id }, data: { isActive: false } })
   return NextResponse.json({ ok: true })
 }
+

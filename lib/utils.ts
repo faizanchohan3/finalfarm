@@ -1,4 +1,4 @@
-import { type ClassValue, clsx } from "clsx"
+﻿import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -74,3 +74,4 @@ export function getRoleColor(role: string): string {
   }
   return colors[role] || "bg-gray-100 text-gray-800"
 }
+

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -158,7 +158,7 @@ export default function TasksPage() {
                   <span>{task.assignedTo?.name || "Unassigned"}</span>
                   {task.dueDate && (
                     <>
-                      <span>•</span>
+                      <span>â€¢</span>
                       <Clock className="w-3 h-3" />
                       <span className={new Date(task.dueDate) < new Date() && task.status !== "COMPLETED" ? "text-red-500" : ""}>
                         Due {formatDate(task.dueDate)}
@@ -255,3 +255,4 @@ export default function TasksPage() {
     </div>
   )
 }
+

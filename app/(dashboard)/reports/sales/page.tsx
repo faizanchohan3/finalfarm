@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -39,7 +39,7 @@ export default function SalesReportPage() {
   }
 
   const dateLabel = dateFrom || dateTo
-    ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
+    ? `${dateFrom ? formatDate(dateFrom) : "Start"} â€” ${dateTo ? formatDate(dateTo) : "Today"}`
     : "All Time"
 
   return (
@@ -53,7 +53,7 @@ export default function SalesReportPage() {
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
             }
             <div>
-              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
+              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Argo-Firn"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
             </div>
           </div>
@@ -194,7 +194,7 @@ export default function SalesReportPage() {
               </tbody>
               <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                 <tr>
-                  <td colSpan={3} className="px-4 py-3 font-bold text-gray-700">Total — {sales.length} sales</td>
+                  <td colSpan={3} className="px-4 py-3 font-bold text-gray-700">Total â€” {sales.length} sales</td>
                   <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCurrency(totals.totalAmount)}</td>
                   <td className="px-4 py-3 text-right font-bold text-purple-700">{formatCurrency(totals.totalPaid)}</td>
                   <td className="px-4 py-3 text-right font-bold text-red-600">{formatCurrency(totals.totalBalance)}</td>
@@ -213,3 +213,4 @@ export default function SalesReportPage() {
     </div>
   )
 }
+

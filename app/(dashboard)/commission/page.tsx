@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -197,14 +197,14 @@ export default function CommissionPage() {
   const totalCommEarned = commissions.reduce((s, c) => s + c.commissionAmount, 0)
   const totalPending = commissions.filter((c) => c.status !== "PAID").reduce((s, c) => s + c.balance, 0)
 
-  // Seller copy: shows only what seller will receive — buyer total and commission hidden
+  // Seller copy: shows only what seller will receive â€” buyer total and commission hidden
   function printForSeller(c: any) {
-    const seller = c.farmer?.name || c.supplier?.name || c.walkInSeller || "—"
-    const buyer = c.customer?.name || c.walkInCustomer || "—"
+    const seller = c.farmer?.name || c.supplier?.name || c.walkInSeller || "â€”"
+    const buyer = c.customer?.name || c.walkInCustomer || "â€”"
     const ref = c.id.slice(-6).toUpperCase()
     const date = new Date(c.createdAt).toLocaleDateString("en-PK")
     const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Seller Copy — ${ref}</title>
+    w.document.write(`<html><head><title>Seller Copy â€” ${ref}</title>
 <style>${receiptCSS}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
@@ -243,15 +243,15 @@ ${buildPrintHeader(shop)}
     w.print()
   }
 
-  // Buyer copy: shows only what buyer owes — seller amount and commission hidden
+  // Buyer copy: shows only what buyer owes â€” seller amount and commission hidden
   function printForBuyer(c: any) {
-    const seller = c.farmer?.name || c.supplier?.name || c.walkInSeller || "—"
-    const buyer = c.customer?.name || c.walkInCustomer || "—"
+    const seller = c.farmer?.name || c.supplier?.name || c.walkInSeller || "â€”"
+    const buyer = c.customer?.name || c.walkInCustomer || "â€”"
     const ref = c.id.slice(-6).toUpperCase()
     const date = new Date(c.createdAt).toLocaleDateString("en-PK")
     const statusCls = c.status === "PAID" ? "PAID" : c.status === "PARTIAL" ? "PARTIAL" : "PENDING"
     const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Buyer Copy — ${ref}</title>
+    w.document.write(`<html><head><title>Buyer Copy â€” ${ref}</title>
 <style>${receiptCSS}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
@@ -294,15 +294,15 @@ ${buildPrintHeader(shop)}
 
   function printAllCommissions(list: any[]) {
     const rows = list.map((c, i) => {
-      const seller = c.farmer?.name || c.supplier?.name || c.walkInSeller || "—"
-      const buyer = c.customer?.name || c.walkInCustomer || "—"
+      const seller = c.farmer?.name || c.supplier?.name || c.walkInSeller || "â€”"
+      const buyer = c.customer?.name || c.walkInCustomer || "â€”"
       const commodity = [c.commodity, c.bags ? `${c.bags} bags` : null, c.weight ? `${c.weight} kg` : null].filter(Boolean).join(", ")
       const statusCls = c.status === "PAID" ? "PAID" : c.status === "PARTIAL" ? "PARTIAL" : "PENDING"
       return `<tr>
         <td>${i + 1}</td>
         <td>${seller}</td>
         <td>${buyer}</td>
-        <td>${commodity || "—"}</td>
+        <td>${commodity || "â€”"}</td>
         <td style="text-align:right">PKR ${(c.totalValue || 0).toLocaleString()}</td>
         <td style="text-align:right;color:#15803d">PKR ${(c.paidAmount || 0).toLocaleString()}</td>
         <td style="text-align:right;color:${c.balance > 0 ? "#b91c1c" : "#15803d"}">PKR ${(c.balance || 0).toLocaleString()}</td>
@@ -415,7 +415,7 @@ ${buildPrintHeader(shop)}
                     <tr key={c.id} className="border-b border-gray-50 hover:bg-blue-50">
                       <td className="py-3 px-2 text-gray-400 text-xs">{i + 1}</td>
                       <td className="py-3 px-2 font-medium text-gray-800">
-                        {c.farmer?.name || c.supplier?.name || c.walkInSeller || <span className="text-gray-400">—</span>}
+                        {c.farmer?.name || c.supplier?.name || c.walkInSeller || <span className="text-gray-400">â€”</span>}
                         {c.walkInSeller && <span className="ml-1 text-xs text-orange-500">(walk-in)</span>}
                       </td>
                       <td className="py-3 px-2 font-medium text-gray-800">
@@ -423,14 +423,14 @@ ${buildPrintHeader(shop)}
                         {c.walkInCustomer && <span className="ml-1 text-xs text-orange-500">(walk-in)</span>}
                       </td>
                       <td className="py-3 px-2 text-gray-600">
-                        {c.commodity || "—"}
+                        {c.commodity || "â€”"}
                         {c.bags ? <span className="ml-1 text-xs text-gray-400">{c.bags} bags</span> : null}
                         {c.weight ? <span className="ml-1 text-xs text-gray-400">{c.weight} kg</span> : null}
                       </td>
                       <td className="py-3 px-2 text-gray-700">{formatCurrency(c.totalValue)}</td>
                       <td className="py-3 px-2 text-gray-600">{c.commissionRate}%</td>
                       <td className="py-3 px-2 text-purple-700 font-medium">{formatCurrency(c.commissionAmount)}</td>
-                      <td className="py-3 px-2 text-orange-600">{c.labourAmount > 0 ? formatCurrency(c.labourAmount) : "—"}</td>
+                      <td className="py-3 px-2 text-orange-600">{c.labourAmount > 0 ? formatCurrency(c.labourAmount) : "â€”"}</td>
                       <td className="py-3 px-2 text-blue-700">{formatCurrency(c.sellerPayable)}</td>
                       <td className="py-3 px-2 text-purple-600">{formatCurrency(c.paidAmount)}</td>
                       <td className="py-3 px-2 text-red-600">{formatCurrency(c.balance)}</td>
@@ -472,7 +472,7 @@ ${buildPrintHeader(shop)}
         </CardContent>
       </Card>
 
-      {/* New Commission Modal — Redesigned */}
+      {/* New Commission Modal â€” Redesigned */}
       <Dialog open={showNew} onOpenChange={setShowNew}>
         <DialogContent className="w-[96vw] max-w-2xl max-h-[92vh] overflow-y-auto p-0">
           {/* Header */}
@@ -497,7 +497,7 @@ ${buildPrintHeader(shop)}
 
           <div className="p-5 space-y-5">
 
-            {/* ── Section 1: Parties ── */}
+            {/* â”€â”€ Section 1: Parties â”€â”€ */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Seller & Buyer</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -535,7 +535,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* ── Section 2: Commodity & Quantity ── */}
+            {/* â”€â”€ Section 2: Commodity & Quantity â”€â”€ */}
               </div>
             </div>
             <div>
@@ -570,7 +570,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* ── Section 3: Amounts ── */}
+            {/* â”€â”€ Section 3: Amounts â”€â”€ */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Amounts & Commission</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -582,7 +582,7 @@ ${buildPrintHeader(shop)}
                     <Input type="number" className="pl-9 font-bold" placeholder="0" value={totalValue}
                       onChange={(e) => setTotalValue(e.target.value)} />
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">Mound × Rate</p>
+                  <p className="text-xs text-gray-400 mt-1">Mound Ã— Rate</p>
                 </div>
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">Commission %</Label>
@@ -624,7 +624,7 @@ ${buildPrintHeader(shop)}
               )}
             </div>
 
-            {/* ── Section 4: Payment & Notes ── */}
+            {/* â”€â”€ Section 4: Payment & Notes â”€â”€ */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Payment & Notes</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -654,7 +654,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* ── Action Buttons ── */}
+            {/* â”€â”€ Action Buttons â”€â”€ */}
             <div className="flex gap-3 pt-1">
               <Button variant="outline" onClick={() => setShowNew(false)} className="flex-1" disabled={saving}>Cancel</Button>
               <Button onClick={handleSave} disabled={saving} className="flex-1 bg-orange-600 hover:bg-orange-700 gap-2">
@@ -733,15 +733,15 @@ ${buildPrintHeader(shop)}
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Commodity</span>
-                <span className="font-semibold">{deleteTarget?.commodity || "—"}</span>
+                <span className="font-semibold">{deleteTarget?.commodity || "â€”"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Buyer</span>
-                <span className="font-semibold">{deleteTarget?.customer?.name || deleteTarget?.walkInCustomer || "—"}</span>
+                <span className="font-semibold">{deleteTarget?.customer?.name || deleteTarget?.walkInCustomer || "â€”"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Seller</span>
-                <span className="font-semibold">{deleteTarget?.farmer?.name || deleteTarget?.supplier?.name || deleteTarget?.walkInSeller || "—"}</span>
+                <span className="font-semibold">{deleteTarget?.farmer?.name || deleteTarget?.supplier?.name || deleteTarget?.walkInSeller || "â€”"}</span>
               </div>
               <div className="flex justify-between border-t pt-1.5">
                 <span className="text-gray-500">Total Value</span>
@@ -754,11 +754,11 @@ ${buildPrintHeader(shop)}
             </div>
             <div className="bg-blue-50 border border-blue-300 rounded-xl p-3 text-xs text-blue-800 space-y-1">
               <p className="font-semibold">What happens when deleted:</p>
-              <p>✓ Removed from buyer (trader) ledger</p>
-              <p>✓ Removed from seller (farmer/supplier) ledger</p>
-              <p>✓ Commission income reversed from accounts</p>
-              <p>✓ Labour expense reversed from accounts</p>
-              <p>✗ This cannot be undone</p>
+              <p>âœ“ Removed from buyer (trader) ledger</p>
+              <p>âœ“ Removed from seller (farmer/supplier) ledger</p>
+              <p>âœ“ Commission income reversed from accounts</p>
+              <p>âœ“ Labour expense reversed from accounts</p>
+              <p>âœ— This cannot be undone</p>
             </div>
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
@@ -772,3 +772,4 @@ ${buildPrintHeader(shop)}
     </div>
   )
 }
+

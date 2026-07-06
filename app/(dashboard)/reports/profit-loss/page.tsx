@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -30,7 +30,7 @@ export default function ProfitLossPage() {
   }
 
   const dateLabel = dateFrom || dateTo
-    ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
+    ? `${dateFrom ? formatDate(dateFrom) : "Start"} â€” ${dateTo ? formatDate(dateTo) : "Today"}`
     : "All Time"
 
   return (
@@ -44,7 +44,7 @@ export default function ProfitLossPage() {
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
             }
             <div>
-              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
+              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Argo-Firn"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
             </div>
           </div>
@@ -218,12 +218,12 @@ export default function ProfitLossPage() {
                 </div>
                 <div className="flex justify-between py-2 border-b">
                   <p className="text-gray-600">Cost of Purchases</p>
-                  <p className="font-medium text-red-600">− {formatCurrency(data.purchasesTotal)}</p>
+                  <p className="font-medium text-red-600">âˆ’ {formatCurrency(data.purchasesTotal)}</p>
                 </div>
                 {data.pesticideIncentive > 0 && (
                   <div className="flex justify-between py-2 border-b">
                     <p className="text-gray-600 text-sm">Pesticide Incentive</p>
-                    <p className="font-medium text-blue-600">− {formatCurrency(data.pesticideIncentive)}</p>
+                    <p className="font-medium text-blue-600">âˆ’ {formatCurrency(data.pesticideIncentive)}</p>
                   </div>
                 )}
                 <div className="flex justify-between py-2 border-b font-semibold">
@@ -247,7 +247,7 @@ export default function ProfitLossPage() {
                 {data.otherExpense > 0 && (
                   <div className="flex justify-between py-2 border-b">
                     <p className="text-gray-600">Other Expenses</p>
-                    <p className="text-red-600">− {formatCurrency(data.otherExpense)}</p>
+                    <p className="text-red-600">âˆ’ {formatCurrency(data.otherExpense)}</p>
                   </div>
                 )}
                 <div className={`flex justify-between py-3 px-3 rounded-lg font-bold text-lg ${data.netIncome >= 0 ? "bg-green-50 text-purple-800" : "bg-red-50 text-red-800"}`}>
@@ -278,7 +278,7 @@ export default function ProfitLossPage() {
                     {data.transactions.map((t: any) => (
                       <tr key={t.id} className="hover:bg-blue-50">
                         <td className="px-4 py-2 text-gray-500 text-xs">{formatDate(t.createdAt)}</td>
-                        <td className="px-4 py-2 text-gray-700">{t.description || "—"}</td>
+                        <td className="px-4 py-2 text-gray-700">{t.description || "â€”"}</td>
                         <td className="px-4 py-2">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded ${t.type === "CREDIT" ? "bg-green-100 text-purple-700" : "bg-red-100 text-red-700"}`}>
                             {t.type}
@@ -308,3 +308,4 @@ export default function ProfitLossPage() {
     </div>
   )
 }
+

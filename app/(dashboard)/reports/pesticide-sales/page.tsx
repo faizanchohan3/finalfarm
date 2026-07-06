@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -37,7 +37,7 @@ export default function PesticideSalesReportPage() {
   }
 
   const dateLabel = dateFrom || dateTo
-    ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
+    ? `${dateFrom ? formatDate(dateFrom) : "Start"} â€” ${dateTo ? formatDate(dateTo) : "Today"}`
     : "All Time"
 
   const today = new Date().toLocaleDateString("en-PK")
@@ -53,7 +53,7 @@ export default function PesticideSalesReportPage() {
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
             }
             <div>
-              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
+              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Argo-Firn"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
             </div>
           </div>
@@ -203,7 +203,7 @@ export default function PesticideSalesReportPage() {
                       <td className="px-4 py-3 text-right text-gray-700">{formatCurrency(s.unitPrice)}</td>
                       <td className="px-4 py-3 text-right font-medium text-gray-900">{formatCurrency(s.totalAmount)}</td>
                       <td className="px-4 py-3 text-right text-purple-700">{formatCurrency(s.paidAmount)}</td>
-                      <td className="px-4 py-3 text-right text-red-600">{s.balance > 0 ? formatCurrency(s.balance) : "—"}</td>
+                      <td className="px-4 py-3 text-right text-red-600">{s.balance > 0 ? formatCurrency(s.balance) : "â€”"}</td>
                       <td className="px-4 py-3 text-center print:hidden">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                           status === "PAID" ? "bg-green-100 text-purple-700"
@@ -226,10 +226,10 @@ export default function PesticideSalesReportPage() {
               {!loading && sales.length > 0 && (
                 <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                   <tr>
-                    <td colSpan={6} className="px-4 py-3 font-bold text-gray-700">Total — {sales.length} sales</td>
+                    <td colSpan={6} className="px-4 py-3 font-bold text-gray-700">Total â€” {sales.length} sales</td>
                     <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCurrency(totals.totalAmount)}</td>
                     <td className="px-4 py-3 text-right font-bold text-purple-700">{formatCurrency(totals.totalPaid)}</td>
-                    <td className="px-4 py-3 text-right font-bold text-red-600">{totals.totalBalance > 0 ? formatCurrency(totals.totalBalance) : "—"}</td>
+                    <td className="px-4 py-3 text-right font-bold text-red-600">{totals.totalBalance > 0 ? formatCurrency(totals.totalBalance) : "â€”"}</td>
                     <td className="print:hidden" />
                   </tr>
                 </tfoot>
@@ -246,3 +246,4 @@ export default function PesticideSalesReportPage() {
     </div>
   )
 }
+

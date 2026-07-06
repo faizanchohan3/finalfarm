@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -85,7 +85,7 @@ export default function AuditPage() {
                       <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
                         <User className="w-3 h-3" />
                         <span>{log.user?.name}</span>
-                        <span>•</span>
+                        <span>â€¢</span>
                         <span>{formatDateTime(log.createdAt)}</span>
                       </div>
                     </div>
@@ -126,3 +126,4 @@ export default function AuditPage() {
     </div>
   )
 }
+

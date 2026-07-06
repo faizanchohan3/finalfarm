@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/sidebar"
+﻿import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
@@ -32,10 +32,11 @@ export default async function DashboardLayout({
       </div>
       <div className="flex flex-col flex-1 overflow-hidden">
         <div className="print:hidden">
-          <Header title="Gala Mandi" />
+          <Header title="Argo-Firn" />
         </div>
         <main className="flex-1 overflow-y-auto p-6 bg-blue-50 print:overflow-visible print:p-4 print:bg-blue-50">{children}</main>
       </div>
     </div>
   )
 }
+

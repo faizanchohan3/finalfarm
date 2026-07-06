@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { cachedJson } from "@/lib/api-cache"
@@ -49,3 +49,4 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: err?.message || "Failed to update settings" }, { status: 500 })
   }
 }
+

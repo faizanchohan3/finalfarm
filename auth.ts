@@ -1,4 +1,4 @@
-import NextAuth from "next-auth"
+﻿import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { db } from "@/lib/db"
 import bcrypt from "bcryptjs"
@@ -71,3 +71,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
 })
+

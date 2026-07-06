@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+﻿import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcryptjs"
 
 const db = new PrismaClient()
@@ -6,7 +6,7 @@ const db = new PrismaClient()
 async function main() {
   console.log("Seeding database - Super Admin Only...")
 
-  // ── Super Admin (Platform Head) — no shopId ──────────────────────────────
+  // â”€â”€ Super Admin (Platform Head) â€” no shopId â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const adminPassword = await bcrypt.hash("admin123", 12)
   const admin = await db.user.upsert({
     where: { email: "admin@agrofirm.com" },
@@ -20,13 +20,13 @@ async function main() {
     },
   })
 
-  console.log("✅ Database seeded successfully!")
-  console.log("\n📌 SUPER ADMIN CREDENTIALS:")
-  console.log("═════════════════════════════════════")
+  console.log("âœ… Database seeded successfully!")
+  console.log("\nðŸ“Œ SUPER ADMIN CREDENTIALS:")
+  console.log("â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•")
   console.log("  Email:    admin@agrofirm.com")
   console.log("  Password: admin123")
-  console.log("═════════════════════════════════════")
-  console.log("\n⚠️  IMPORTANT:")
+  console.log("â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•")
+  console.log("\nâš ï¸  IMPORTANT:")
   console.log("  - This is a FRESH database - completely separate from gala-mandi")
   console.log("  - Only Super Admin account exists")
   console.log("  - All test data has been removed")
@@ -36,3 +36,4 @@ async function main() {
 main()
   .catch(console.error)
   .finally(() => db.$disconnect())
+

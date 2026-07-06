@@ -1,5 +1,5 @@
-export function buildPrintHeader(shop: any): string {
-  const name = shop?.name || "Gala Mandi"
+﻿export function buildPrintHeader(shop: any): string {
+  const name = shop?.name || "Argo-Firn"
   const ownerName = shop?.ownerName || ""
   const phone = shop?.phone || ""
   const address = shop?.address || ""
@@ -81,3 +81,4 @@ export const reportCSS = `
   .badge-PENDING { background: #fee2e2; color: #b91c1c; }
   @media print { body { } @page { margin: 8mm; } }
 `
+

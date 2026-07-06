@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -54,7 +54,7 @@ export default function CustomersReportPage() {
   return (
     <div className="space-y-6">
 
-      {/* ── Print Header ── */}
+      {/* â”€â”€ Print Header â”€â”€ */}
       <div className="hidden print:block">
         <div style={{background:"linear-gradient(135deg,#14532d 0%,#166534 60%,#15803d 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
@@ -63,7 +63,7 @@ export default function CustomersReportPage() {
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
             }
             <div>
-              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
+              <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Argo-Firn"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
             </div>
           </div>
@@ -76,7 +76,7 @@ export default function CustomersReportPage() {
         <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb",marginBottom:"8px"}}>
           <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Trader Report</h2>
-          <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>All active traders — business summary with outstanding balances</div>
+          <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>All active traders â€” business summary with outstanding balances</div>
           <div style={{display:"flex",gap:"24px",marginTop:"8px",fontSize:"11px"}}>
             <span><strong>{customers.length}</strong> Traders</span>
             <span>Total Business: <strong>{formatCurrency(totals.totalBusiness)}</strong></span>
@@ -86,7 +86,7 @@ export default function CustomersReportPage() {
         </div>
       </div>
 
-      {/* ── Screen Header ── */}
+      {/* â”€â”€ Screen Header â”€â”€ */}
       <div className="flex items-center justify-between print:hidden">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Trader Report</h2>
@@ -97,7 +97,7 @@ export default function CustomersReportPage() {
         </Button>
       </div>
 
-      {/* ── Summary Cards ── */}
+      {/* â”€â”€ Summary Cards â”€â”€ */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 print:hidden">
         <Card>
           <CardContent className="p-4">
@@ -127,7 +127,7 @@ export default function CustomersReportPage() {
         </Card>
       </div>
 
-      {/* ── Search ── */}
+      {/* â”€â”€ Search â”€â”€ */}
       <div className="relative max-w-sm print:hidden">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <Input
@@ -138,7 +138,7 @@ export default function CustomersReportPage() {
         />
       </div>
 
-      {/* ── Main Table ── */}
+      {/* â”€â”€ Main Table â”€â”€ */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -186,13 +186,13 @@ export default function CustomersReportPage() {
                       </td>
                       <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                       <td className="px-4 py-3 font-semibold text-gray-900">{c.name}</td>
-                      <td className="px-4 py-3 text-gray-600">{c.phone || "—"}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{c.address || "—"}</td>
+                      <td className="px-4 py-3 text-gray-600">{c.phone || "â€”"}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">{c.address || "â€”"}</td>
                       <td className="px-4 py-3 text-center text-gray-700 font-medium">{c.saleCount}</td>
                       <td className="px-4 py-3 text-right font-medium text-gray-900">{formatCurrency(c.totalBusiness)}</td>
                       <td className="px-4 py-3 text-right text-purple-700 font-medium">{formatCurrency(c.totalPaid)}</td>
                       <td className={`px-4 py-3 text-right font-bold ${c.totalBalance > 0 ? "text-red-600" : "text-gray-400"}`}>
-                        {c.totalBalance > 0 ? formatCurrency(c.totalBalance) : "—"}
+                        {c.totalBalance > 0 ? formatCurrency(c.totalBalance) : "â€”"}
                       </td>
                       <td className="px-4 py-3 print:hidden" onClick={(e) => e.stopPropagation()}>
                         <Link
@@ -236,7 +236,7 @@ export default function CustomersReportPage() {
                                       <td className="px-3 py-2 text-right font-medium">{formatCurrency(s.totalAmount)}</td>
                                       <td className="px-3 py-2 text-right text-purple-700">{formatCurrency(s.paidAmount)}</td>
                                       <td className={`px-3 py-2 text-right font-medium ${s.balance > 0 ? "text-red-600" : "text-gray-400"}`}>
-                                        {s.balance > 0 ? formatCurrency(s.balance) : "—"}
+                                        {s.balance > 0 ? formatCurrency(s.balance) : "â€”"}
                                       </td>
                                       <td className="px-3 py-2 text-center">
                                         <span className={`px-2 py-0.5 rounded-full text-xs ${
@@ -266,7 +266,7 @@ export default function CustomersReportPage() {
               <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                 <tr>
                   <td colSpan={5} className="px-4 py-3 font-bold text-gray-700">
-                    Total — {filtered.length} customers, {totals.saleCount} sales
+                    Total â€” {filtered.length} customers, {totals.saleCount} sales
                   </td>
                   <td className="px-4 py-3 text-center font-bold text-gray-700">{totals.saleCount}</td>
                   <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCurrency(totals.totalBusiness)}</td>
@@ -287,3 +287,4 @@ export default function CustomersReportPage() {
     </div>
   )
 }
+

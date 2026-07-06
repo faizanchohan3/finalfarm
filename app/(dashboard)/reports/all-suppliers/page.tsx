@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
@@ -49,9 +49,9 @@ export default function AllSuppliersReportPage() {
       const rows = filtered.map((s, i) => `<tr style="${i % 2 === 0 ? "background:#f9fdf9" : ""}">
         <td>${i + 1}</td>
         <td><strong>${s.name}</strong></td>
-        <td>${s.phone || "—"}</td>
-        <td>${s.otherPhone || "—"}</td>
-        <td>${s.address || "—"}</td>
+        <td>${s.phone || "â€”"}</td>
+        <td>${s.otherPhone || "â€”"}</td>
+        <td>${s.address || "â€”"}</td>
       </tr>`).join("")
 
       const w = window.open("", "_blank")!
@@ -61,7 +61,7 @@ export default function AllSuppliersReportPage() {
 </style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
-  <div><div class="doc-title">All Suppliers Report — Profile Summary</div><div class="doc-sub">Total: ${filtered.length} suppliers</div></div>
+  <div><div class="doc-title">All Suppliers Report â€” Profile Summary</div><div class="doc-sub">Total: ${filtered.length} suppliers</div></div>
   <div class="doc-meta"><div>Printed: ${date}</div></div>
 </div>
 <div class="body-pad">
@@ -90,9 +90,9 @@ ${buildPrintHeader(shop)}
       return `<tr style="${i % 2 === 0 ? "background:#f9fdf9" : ""}">
         <td>${i + 1}</td>
         <td><strong>${s.name}</strong></td>
-        <td>${s.phone || "—"}</td>
-        <td>${s.otherPhone || "—"}</td>
-        <td>${s.address || "—"}</td>
+        <td>${s.phone || "â€”"}</td>
+        <td>${s.otherPhone || "â€”"}</td>
+        <td>${s.address || "â€”"}</td>
         <td style="text-align:right">PKR ${(s.totalDebit || 0).toLocaleString()}</td>
         <td style="text-align:right">PKR ${(s.totalCredit || 0).toLocaleString()}</td>
         <td style="text-align:right;font-weight:700;color:${statusColor}">
@@ -172,27 +172,27 @@ ${buildPrintHeader(shop)}
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-gray-500 font-medium uppercase">Total Suppliers</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{loading ? "—" : filtered.length}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{loading ? "â€”" : filtered.length}</p>
           </CardContent>
         </Card>
         <Card className="border-red-200 bg-red-50/40">
           <CardContent className="p-4">
             <p className="text-xs text-red-500 font-medium uppercase">Payable to Suppliers</p>
-            <p className="text-2xl font-bold text-red-600 mt-1">{loading ? "—" : formatCurrency(totalPayable)}</p>
+            <p className="text-2xl font-bold text-red-600 mt-1">{loading ? "â€”" : formatCurrency(totalPayable)}</p>
             <p className="text-xs text-red-400 mt-0.5">{filtered.filter((s) => s.balance > 0).length} suppliers</p>
           </CardContent>
         </Card>
         <Card className="border-green-200 bg-green-50/40">
           <CardContent className="p-4">
             <p className="text-xs text-purple-600 font-medium uppercase">Advance Paid</p>
-            <p className="text-2xl font-bold text-purple-700 mt-1">{loading ? "—" : formatCurrency(totalAdvance)}</p>
+            <p className="text-2xl font-bold text-purple-700 mt-1">{loading ? "â€”" : formatCurrency(totalAdvance)}</p>
             <p className="text-xs text-green-500 mt-0.5">{filtered.filter((s) => s.balance < 0).length} suppliers</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-gray-500 font-medium uppercase">Settled</p>
-            <p className="text-2xl font-bold text-gray-700 mt-1">{loading ? "—" : settled}</p>
+            <p className="text-2xl font-bold text-gray-700 mt-1">{loading ? "â€”" : settled}</p>
             <p className="text-xs text-gray-400 mt-0.5">no balance</p>
           </CardContent>
         </Card>
@@ -264,10 +264,10 @@ ${buildPrintHeader(shop)}
                         </td>
                       )}
                       <td className="px-4 py-3 font-medium text-gray-900">{s.name}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{s.phone || "—"}</td>
-                      {isRestrictedRole && <td className="px-4 py-3 text-gray-500 text-xs">{s.otherPhone || "—"}</td>}
-                      {!isRestrictedRole && <td className="px-4 py-3 text-gray-500 text-xs">{s.otherPhone || "—"}</td>}
-                      <td className="px-4 py-3 text-gray-500 text-xs">{s.address || "—"}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">{s.phone || "â€”"}</td>
+                      {isRestrictedRole && <td className="px-4 py-3 text-gray-500 text-xs">{s.otherPhone || "â€”"}</td>}
+                      {!isRestrictedRole && <td className="px-4 py-3 text-gray-500 text-xs">{s.otherPhone || "â€”"}</td>}
+                      <td className="px-4 py-3 text-gray-500 text-xs">{s.address || "â€”"}</td>
                       {!isRestrictedRole && (
                         <>
                           <td className="px-4 py-3 text-right text-gray-700">{formatCurrency(s.totalDebit || 0)}</td>
@@ -330,3 +330,4 @@ ${buildPrintHeader(shop)}
     </div>
   )
 }
+

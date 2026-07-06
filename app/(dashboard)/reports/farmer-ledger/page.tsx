@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Suspense, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
@@ -67,7 +67,7 @@ function FarmerLedgerContent() {
   }
 
   const dateLabel = dateFrom || dateTo
-    ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
+    ? `${dateFrom ? formatDate(dateFrom) : "Start"} â€” ${dateTo ? formatDate(dateTo) : "Today"}`
     : "All Time"
 
   const filtered = farmers.filter(
@@ -100,15 +100,15 @@ function FarmerLedgerContent() {
           <td style="white-space:nowrap">${new Date(e.date).toLocaleDateString("en-PK")}</td>
           <td><span style="font-size:8px;padding:1px 6px;border-radius:99px;background:${e.type==="PAYMENT"?"#dcfce7":"#fef3c7"};color:${e.type==="PAYMENT"?"#166534":"#92400e"};font-weight:700">${e.type}</span></td>
           <td style="font-size:9px">${e.description}</td>
-          <td style="text-align:right">${e.debit>0?"PKR "+e.debit.toLocaleString():"—"}</td>
-          <td style="text-align:right;color:#15803d">${e.credit>0?"PKR "+e.credit.toLocaleString():"—"}</td>
+          <td style="text-align:right">${e.debit>0?"PKR "+e.debit.toLocaleString():"â€”"}</td>
+          <td style="text-align:right;color:#15803d">${e.credit>0?"PKR "+e.credit.toLocaleString():"â€”"}</td>
           <td style="text-align:right;font-weight:600;color:${e.balance>0?"#b91c1c":"#15803d"}">PKR ${Math.abs(e.balance).toLocaleString()} ${e.balance>0?"Cr":e.balance<0?"Dr":""}</td>
         </tr>`).join("")
       return `<div style="margin-bottom:28px">
         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
           <div>
             <div style="font-size:13px;font-weight:800;color:#14532d">${f.name}</div>
-            <div style="font-size:10px;color:#6b7280;margin-top:2px">${[f.village,f.phone,f.cnic].filter(Boolean).join(" · ")||"No contact info"}</div>
+            <div style="font-size:10px;color:#6b7280;margin-top:2px">${[f.village,f.phone,f.cnic].filter(Boolean).join(" Â· ")||"No contact info"}</div>
           </div>
           <div style="text-align:right">
             <div style="font-size:15px;font-weight:900;color:${balColor}">PKR ${Math.abs(bal).toLocaleString()}</div>
@@ -118,7 +118,7 @@ function FarmerLedgerContent() {
         ${(data.entries||[]).length>0?`<table>
           <thead><tr><th>#</th><th>Date</th><th>Type</th><th>Description</th><th style="text-align:right">Debit</th><th style="text-align:right">Credit</th><th style="text-align:right">Balance</th></tr></thead>
           <tbody>${txRows}</tbody>
-          <tfoot><tr><td colspan="4"><strong>Closing — ${(data.entries||[]).length} entries</strong></td>
+          <tfoot><tr><td colspan="4"><strong>Closing â€” ${(data.entries||[]).length} entries</strong></td>
             <td style="text-align:right"><strong>PKR ${(data.totalDebit||0).toLocaleString()}</strong></td>
             <td style="text-align:right;color:#15803d"><strong>PKR ${(data.totalCredit||0).toLocaleString()}</strong></td>
             <td style="text-align:right;color:${balColor}"><strong>PKR ${Math.abs(bal).toLocaleString()} ${bal>0?"Cr":bal<0?"Dr":""}</strong></td>
@@ -127,11 +127,11 @@ function FarmerLedgerContent() {
       </div>`
     }).join('<div style="border-top:2px dashed #d1fae5;margin:20px 0"></div>')
     const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>All Farmers — Full Ledger</title>
+    w.document.write(`<html><head><title>All Farmers â€” Full Ledger</title>
 <style>${reportCSS} body{max-width:960px;margin:0 auto}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
-  <div><div class="doc-title">All Farmers — Full Ledger</div><div class="doc-sub">${filtered.length} farmers · ${date}</div></div>
+  <div><div class="doc-title">All Farmers â€” Full Ledger</div><div class="doc-sub">${filtered.length} farmers Â· ${date}</div></div>
   <div class="doc-meta"><div>Payable: PKR ${totalPayable.toLocaleString()}</div><div>Advance: PKR ${totalAdvance.toLocaleString()}</div></div>
 </div>
 <div class="body-pad">${sections}</div>
@@ -149,7 +149,7 @@ ${buildPrintHeader(shop)}
             {shop?.logo ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>}
             <div>
-              <div style={{fontSize:"20px",fontWeight:900}}>{shop?.name||"Gala Mandi"}</div>
+              <div style={{fontSize:"20px",fontWeight:900}}>{shop?.name||"Argo-Firn"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8}}>{shop.ownerName}</div>}
             </div>
           </div>
@@ -160,7 +160,7 @@ ${buildPrintHeader(shop)}
         </div>
         <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24,#d97706)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb"}}>
-          <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Farmer Ledger — {selectedFarmer?.name}</h2>
+          <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Farmer Ledger â€” {selectedFarmer?.name}</h2>
           <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>Period: {dateLabel}</div>
         </div>
       </div>
@@ -169,7 +169,7 @@ ${buildPrintHeader(shop)}
       <div className="flex items-center justify-between print:hidden">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Farmer Ledger</h2>
-          <p className="text-gray-500 text-sm">{farmers.length} farmers · Payable: {formatCurrency(totalPayable)}</p>
+          <p className="text-gray-500 text-sm">{farmers.length} farmers Â· Payable: {formatCurrency(totalPayable)}</p>
         </div>
         <div className="flex gap-2">
           {ledger && <Button onClick={() => window.print()} variant="outline" className="gap-2"><Printer className="w-4 h-4" /> Print Ledger</Button>}
@@ -200,7 +200,7 @@ ${buildPrintHeader(shop)}
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input placeholder="Search farmers..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
           </div>
-          <p className="text-xs text-gray-400">{filtered.length} farmers — click a row to view ledger</p>
+          <p className="text-xs text-gray-400">{filtered.length} farmers â€” click a row to view ledger</p>
         </div>
         <CardContent className="p-0">
           <div className="overflow-x-auto max-h-64 overflow-y-auto">
@@ -224,8 +224,8 @@ ${buildPrintHeader(shop)}
                       className={`cursor-pointer transition-colors ${isSelected ? "bg-green-50 border-l-4 border-purple-600" : "hover:bg-blue-50"}`}>
                       <td className="px-3 py-2 text-gray-400 text-xs">{i+1}</td>
                       <td className="px-3 py-2 font-medium text-gray-900">{f.name}</td>
-                      <td className="px-3 py-2 text-gray-500 text-xs">{f.village || "—"}</td>
-                      <td className="px-3 py-2 text-gray-500 text-xs">{f.phone || "—"}</td>
+                      <td className="px-3 py-2 text-gray-500 text-xs">{f.village || "â€”"}</td>
+                      <td className="px-3 py-2 text-gray-500 text-xs">{f.phone || "â€”"}</td>
                       <td className="px-3 py-2 text-right text-gray-700 text-xs">{formatCurrency(f.totalDebit||0)}</td>
                       <td className="px-3 py-2 text-right text-purple-700 text-xs">{formatCurrency(f.totalCredit||0)}</td>
                       <td className={`px-3 py-2 text-right font-bold text-xs ${bal>0?"text-red-600":bal<0?"text-purple-700":"text-gray-400"}`}>
@@ -261,7 +261,7 @@ ${buildPrintHeader(shop)}
                   <Select value={farmerId} onValueChange={(v) => { setFarmerId(v); setLedger(null) }}>
                     <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {farmers.map((f) => <SelectItem key={f.id} value={f.id}>{f.name}{f.village?` — ${f.village}`:""}</SelectItem>)}
+                      {farmers.map((f) => <SelectItem key={f.id} value={f.id}>{f.name}{f.village?` â€” ${f.village}`:""}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -308,7 +308,7 @@ ${buildPrintHeader(shop)}
               <div className={`rounded-lg px-5 py-4 flex items-center justify-between ${ledger.closingBalance > 0 ? "bg-red-50 border border-red-200" : "bg-green-50 border border-green-200"}`}>
                 <div>
                   <p className="text-sm font-medium text-gray-700">Closing Balance</p>
-                  <p className="text-xs text-gray-500">{ledger.entries?.length || 0} transactions · {dateLabel}</p>
+                  <p className="text-xs text-gray-500">{ledger.entries?.length || 0} transactions Â· {dateLabel}</p>
                 </div>
                 <div className="text-right">
                   <p className={`text-2xl font-bold ${ledger.closingBalance > 0 ? "text-red-700" : "text-purple-700"}`}>{formatCurrency(Math.abs(ledger.closingBalance))}</p>
@@ -321,7 +321,7 @@ ${buildPrintHeader(shop)}
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" /> {ledger.farmer?.name} — Account Statement
+                    <BookOpen className="w-4 h-4" /> {ledger.farmer?.name} â€” Account Statement
                     <span className="text-gray-400 font-normal text-sm">({ledger.entries?.length || 0} entries)</span>
                   </CardTitle>
                 </CardHeader>
@@ -346,8 +346,8 @@ ${buildPrintHeader(shop)}
                               </span>
                             </td>
                             <td className="px-4 py-3 text-gray-700 text-xs">{entry.description}</td>
-                            <td className="px-4 py-3 text-right text-gray-900">{entry.debit > 0 ? formatCurrency(entry.debit) : "—"}</td>
-                            <td className="px-4 py-3 text-right text-purple-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "—"}</td>
+                            <td className="px-4 py-3 text-right text-gray-900">{entry.debit > 0 ? formatCurrency(entry.debit) : "â€”"}</td>
+                            <td className="px-4 py-3 text-right text-purple-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "â€”"}</td>
                             <td className={`px-4 py-3 text-right font-medium ${entry.balance > 0 ? "text-red-600" : "text-purple-700"}`}>
                               {formatCurrency(Math.abs(entry.balance))}
                               {entry.balance !== 0 && <span className="text-xs ml-1 font-normal">{entry.balance > 0 ? "Cr" : "Dr"}</span>}
@@ -383,3 +383,4 @@ ${buildPrintHeader(shop)}
     </div>
   )
 }
+

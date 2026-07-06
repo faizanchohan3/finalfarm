@@ -1,4 +1,4 @@
-import { db } from "./db"
+﻿import { db } from "./db"
 
 export async function createAuditLog({
   userId,
@@ -23,3 +23,4 @@ export async function createAuditLog({
     // Audit failures should not break the main operation
   }
 }
+

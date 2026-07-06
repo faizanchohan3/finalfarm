@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 
@@ -63,3 +63,4 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ adjustment })
 }
+
