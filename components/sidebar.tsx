@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, ShoppingBag, Sprout,
   Wallet, BarChart3, ClipboardList, Users, Settings,
   ChevronLeft, ChevronRight, Store, CheckSquare, UserCheck,
-  Truck, ChevronDown, Receipt, Tractor, UserCog, Warehouse,
+  Truck, ChevronDown, Receipt, Warehouse,
   Scale, UserCircle, Building2, BookOpen,
 } from "lucide-react"
 import { useState, useEffect } from "react"
@@ -48,21 +48,14 @@ const shopNavItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/inventory", label: "Store", icon: Package },
   { href: "/customers", label: "Traders", icon: UserCheck },
-  { href: "/farmers", label: "Farmers", icon: Tractor },
-
-  { href: "/commission", label: "Commission", icon: UserCog },
-{ href: "/suppliers", label: "Suppliers", icon: Truck },
- { href: "/purchases", label: "Purchases", icon: ShoppingBag },
- 
+  { href: "/suppliers", label: "Suppliers", icon: Truck },
+  { href: "/purchases", label: "Purchases", icon: ShoppingBag },
   { href: "/sales", label: "Sales", icon: ShoppingCart },
-  
   { href: "/pesticides", label: "Pesticides", icon: Sprout },
   { href: "/finance", label: "Roznamcha", icon: Wallet },
   { href: "/banks", label: "Banks", icon: Building2 },
   { href: "/expenses", label: "Expenses", icon: Receipt },
-
   { href: "/warehouse", label: "Godowns", icon: Warehouse },
-
   { href: "/gate", label: "Gate / Weighbridge", icon: Scale },
   { href: "/tasks", label: "Notes", icon: CheckSquare },
   { href: "/reports", label: "Reports", icon: BarChart3, hasChildren: true },
@@ -86,7 +79,7 @@ export function Sidebar() {
   const [liveShopName, setLiveShopName] = useState<string | null>(null)
   const [shopModules, setShopModules] = useState({
     moduleGodown: false, moduleGate: false, moduleTransport: false,
-    moduleFarmers: true, moduleCommission: true, modulePesticides: false,
+    modulePesticides: false,
   })
 
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN"
@@ -98,7 +91,7 @@ export function Sidebar() {
   const navItems = isSuperAdmin ? superAdminNavItems : shopNavItems.filter((item) => {
     // CASHIER role restrictions
     if (isCashier) {
-      const allowedPaths = ["/dashboard", "/sales", "/purchases", "/commission", "/transport", "/reports"]
+      const allowedPaths = ["/dashboard", "/sales", "/purchases", "/transport", "/reports"]
       if (!allowedPaths.includes(item.href)) return false
     }
 
@@ -106,8 +99,6 @@ export function Sidebar() {
     if (item.href === "/warehouse")  return shopModules.moduleGodown
     if (item.href === "/gate")       return shopModules.moduleGate
     if (item.href === "/transport")  return shopModules.moduleTransport
-    if (item.href === "/farmers")    return shopModules.moduleFarmers
-    if (item.href === "/commission") return shopModules.moduleCommission
     if (item.href === "/pesticides") return shopModules.modulePesticides
     return true
   })
@@ -131,8 +122,6 @@ export function Sidebar() {
               moduleGodown:     !!d.shop.moduleGodown,
               moduleGate:       !!d.shop.moduleGate,
               moduleTransport:  !!d.shop.moduleTransport,
-              moduleFarmers:    d.shop.moduleFarmers !== false,
-              moduleCommission: d.shop.moduleCommission !== false,
               modulePesticides: !!d.shop.modulePesticides,
             })
           }
@@ -183,20 +172,20 @@ export function Sidebar() {
                 <div
                   className={cn(
                     "flex items-center rounded-lg transition-colors",
-                    active ? "bg-blue-100" : "hover:bg-blue-100"
+                    active ? "bg-yellow-400" : "hover:bg-white"
                   )}
                 >
                   <Link
                     href={href}
                     className="flex items-center gap-3 px-3 py-2.5 flex-1 text-sm font-medium"
                   >
-                    <Icon className="w-5 h-5 flex-shrink-0 text-blue-900" />
-                    {!collapsed && <span className="text-blue-900">{label}</span>}
+                    <Icon className={cn("w-5 h-5 flex-shrink-0", active ? "text-white" : "text-gray-900")} />
+                    {!collapsed && <span className={active ? "text-white" : "text-gray-900"}>{label}</span>}
                   </Link>
                   {!collapsed && (
                     <button
                       onClick={() => setReportsOpen((o) => !o)}
-                      className="pr-3 py-2.5 text-white hover:text-blue-900 transition-colors"
+                      className={cn("pr-3 py-2.5 transition-colors", active ? "text-white" : "text-gray-900")}
                       aria-label="Toggle reports menu"
                     >
                       <ChevronDown
@@ -247,7 +236,7 @@ export function Sidebar() {
               href={href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                active ? "bg-blue-100 text-blue-900" : "text-green-100 hover:bg-blue-100 hover:text-blue-900"
+                active ? "bg-yellow-400 text-white" : "text-green-100 hover:bg-white hover:text-gray-900"
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
