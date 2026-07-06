@@ -58,7 +58,7 @@ export function SearchableSelect({
 
   return (
     <Select value={value || undefined} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger className={cn("w-full border-2 border-gray-200 hover:border-green-500 transition-colors", className)}>
+      <SelectTrigger className={cn("w-full border-2 border-amber-200 hover:border-green-500 transition-colors", className)}>
         {value ? (
           <div className="flex items-center gap-2 w-full">
             <span className="text-sm font-medium">{selectedLabel}</span>
@@ -72,14 +72,14 @@ export function SearchableSelect({
       </SelectTrigger>
       <SelectContent side={side} className="w-[--radix-select-trigger-width] min-w-[200px]">
         {searchable && (
-          <div className="p-2 border-b sticky top-0 bg-white z-50">
+          <div className="p-2 border-b sticky top-0 bg-amber-50 z-50">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 w-4 h-4 text-gray-400" />
               <Input
                 placeholder="Search categories..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 h-8 text-sm border-gray-200"
+                className="pl-8 h-8 text-sm border-amber-200"
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e) => e.stopPropagation()}
                 onKeyUp={(e) => e.stopPropagation()}

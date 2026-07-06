@@ -370,7 +370,7 @@ ${buildPrintHeader(shop)}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200">
+                  <tr className="border-b border-amber-200">
                     {["#", "From", "Type", "Total", "Paid", "Balance", "Status", "Date", "By", ""].map((h) => (
                       <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
                     ))}
@@ -378,7 +378,7 @@ ${buildPrintHeader(shop)}
                 </thead>
                 <tbody>
                   {filtered.map((p, i) => (
-                    <tr key={p.id} className="border-b border-gray-50 hover:bg-gray-50">
+                    <tr key={p.id} className="border-b border-gray-50 hover:bg-amber-50">
                       <td className="py-3 px-3 text-gray-400 text-xs">{i + 1}</td>
                       <td className="py-3 px-3 font-medium text-gray-800">{p.farmer?.name || p.supplier?.name || p.sellerCustomer?.name || p.walkinSeller || "Direct"}</td>
                       <td className="py-3 px-3">
@@ -460,12 +460,12 @@ ${buildPrintHeader(shop)}
           )}
 
           {/* Type toggle */}
-          <div className="flex rounded-lg border border-gray-200 p-1 gap-1">
+          <div className="flex rounded-lg border border-amber-200 p-1 gap-1">
             <button
               onClick={() => setPurchaseType("stock")}
               className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-colors ${
                 purchaseType === "stock"
-                  ? "bg-green-700 text-white shadow-sm"
+                  ? "bg-green-700 text-amber-950 shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -542,7 +542,7 @@ ${buildPrintHeader(shop)}
                   ))}
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="bg-amber-50 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Total:</span><span className="font-bold">{formatCurrency(stockTotal)}</span>
                 </div>
@@ -685,7 +685,7 @@ ${buildPrintHeader(shop)}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 text-sm space-y-1">
+            <div className="bg-amber-50 rounded-xl p-4 border border-amber-100 text-sm space-y-1">
               <div className="flex justify-between">
                 <span className="text-gray-500">Reference</span>
                 <span className="font-semibold">#{deleteTarget?.id?.slice(-8).toUpperCase()}</span>

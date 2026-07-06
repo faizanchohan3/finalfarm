@@ -14,7 +14,7 @@ export function RecentSales({ sales }: { sales: any[] }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100">
+                <tr className="border-b border-amber-100">
                   <th className="text-left py-2 px-3 text-gray-500 font-medium">Customer</th>
                   <th className="text-left py-2 px-3 text-gray-500 font-medium">Amount</th>
                   <th className="text-left py-2 px-3 text-gray-500 font-medium">Status</th>
@@ -24,7 +24,7 @@ export function RecentSales({ sales }: { sales: any[] }) {
               </thead>
               <tbody>
                 {sales.map((sale) => (
-                  <tr key={sale.id} className="border-b border-gray-50 hover:bg-gray-50">
+                  <tr key={sale.id} className="border-b border-gray-50 hover:bg-amber-50">
                     <td className="py-2 px-3 font-medium text-gray-800">
                       {sale.customer?.name || "Walk-in"}
                     </td>

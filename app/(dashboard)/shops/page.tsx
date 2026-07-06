@@ -81,7 +81,7 @@ export default function ShopsPage() {
       )}
 
       {/* Filter tabs */}
-      <div className="flex gap-2 border-b border-gray-200 pb-0">
+      <div className="flex gap-2 border-b border-amber-200 pb-0">
         {["ALL", "PENDING", "APPROVED", "REJECTED"].map((f) => (
           <button
             key={f}
@@ -94,7 +94,7 @@ export default function ShopsPage() {
           >
             {f === "ALL" ? "All Shops" : f.charAt(0) + f.slice(1).toLowerCase()}
             {f === "PENDING" && pending > 0 && (
-              <span className="ml-2 bg-yellow-500 text-white text-xs rounded-full px-1.5 py-0.5">{pending}</span>
+              <span className="ml-2 bg-yellow-500 text-amber-950 text-xs rounded-full px-1.5 py-0.5">{pending}</span>
             )}
           </button>
         ))}
@@ -108,7 +108,7 @@ export default function ShopsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {shops.map((shop) => (
-            <div key={shop.id} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div key={shop.id} className="bg-amber-50 rounded-xl border border-amber-200 p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -143,7 +143,7 @@ export default function ShopsPage() {
                 )}
               </div>
 
-              <div className="flex gap-3 text-xs text-gray-600 mb-4 bg-gray-50 rounded-lg p-3">
+              <div className="flex gap-3 text-xs text-gray-600 mb-4 bg-amber-50 rounded-lg p-3">
                 <div className="flex items-center gap-1">
                   <Users className="w-3.5 h-3.5 text-blue-500" />
                   <span>{shop._count.users} users</span>

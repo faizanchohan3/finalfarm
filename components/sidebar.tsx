@@ -144,7 +144,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "relative flex flex-col bg-green-800 text-white transition-all duration-300 h-screen overflow-hidden",
+        "relative flex flex-col bg-green-800 text-amber-950 transition-all duration-300 h-screen overflow-hidden",
         collapsed ? "w-16" : "w-64"
       )}
     >
@@ -190,13 +190,13 @@ export function Sidebar() {
                     href={href}
                     className="flex items-center gap-3 px-3 py-2.5 flex-1 text-sm font-medium"
                   >
-                    <Icon className="w-5 h-5 flex-shrink-0 text-white" />
-                    {!collapsed && <span className="text-white">{label}</span>}
+                    <Icon className="w-5 h-5 flex-shrink-0 text-amber-950" />
+                    {!collapsed && <span className="text-amber-950">{label}</span>}
                   </Link>
                   {!collapsed && (
                     <button
                       onClick={() => setReportsOpen((o) => !o)}
-                      className="pr-3 py-2.5 text-green-200 hover:text-white transition-colors"
+                      className="pr-3 py-2.5 text-green-200 hover:text-amber-950 transition-colors"
                       aria-label="Toggle reports menu"
                     >
                       <ChevronDown
@@ -227,7 +227,7 @@ export function Sidebar() {
                               "flex items-center py-1.5 px-2 rounded text-xs font-medium transition-colors",
                               subActive
                                 ? "bg-green-700 text-yellow-300"
-                                : "text-green-300 hover:bg-green-700 hover:text-white"
+                                : "text-green-300 hover:bg-green-700 hover:text-amber-950"
                             )}
                           >
                             {sub.label}
@@ -247,7 +247,7 @@ export function Sidebar() {
               href={href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                active ? "bg-green-600 text-white" : "text-green-100 hover:bg-green-700 hover:text-white"
+                active ? "bg-green-600 text-amber-950" : "text-green-100 hover:bg-green-700 hover:text-amber-950"
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -263,9 +263,9 @@ export function Sidebar() {
         className="absolute -right-3 top-20 w-6 h-6 bg-green-700 border border-green-600 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
       >
         {collapsed ? (
-          <ChevronRight className="w-3 h-3 text-white" />
+          <ChevronRight className="w-3 h-3 text-amber-950" />
         ) : (
-          <ChevronLeft className="w-3 h-3 text-white" />
+          <ChevronLeft className="w-3 h-3 text-amber-950" />
         )}
       </button>
     </aside>

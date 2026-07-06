@@ -121,8 +121,8 @@ export default function TasksPage() {
             onClick={() => setFilter(status)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === status
-                ? "bg-green-700 text-white"
-                : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                ? "bg-green-700 text-amber-950"
+                : "bg-amber-50 text-gray-600 border border-amber-200 hover:bg-amber-50"
             }`}
           >
             {status.replace("_", " ")} ({counts[status as keyof typeof counts] ?? tasks.length})

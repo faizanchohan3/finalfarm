@@ -346,7 +346,7 @@ ${buildPrintHeader(shop)}
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-amber-200">
         {(["stock", "sales"] as const).map((tab) => (
           <button
             key={tab}
@@ -374,7 +374,7 @@ ${buildPrintHeader(shop)}
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200">
+                  <tr className="border-b border-amber-200">
                     {["Name", "Category", "Qty", "Unit", "Batch", "Expiry", "Purchase", "Incentive", "Sale", "Actions"].map((h) => (
                       <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
                     ))}
@@ -385,7 +385,7 @@ ${buildPrintHeader(shop)}
                     const isExpired = p.expiryDate && new Date(p.expiryDate) < now
                     const isExpiring = p.expiryDate && new Date(p.expiryDate) <= thirtyDays && !isExpired
                     return (
-                      <tr key={p.id} className={`border-b border-gray-50 hover:bg-gray-50 ${isExpired ? "bg-red-50" : ""}`}>
+                      <tr key={p.id} className={`border-b border-gray-50 hover:bg-amber-50 ${isExpired ? "bg-red-50" : ""}`}>
                         <td className="py-3 px-3 font-medium text-gray-800">{p.name}</td>
                         <td className="py-3 px-3 text-gray-600">{p.category?.name}</td>
                         <td className="py-3 px-3">
@@ -439,7 +439,7 @@ ${buildPrintHeader(shop)}
           <CardContent className="pt-6">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b border-amber-200">
                   {["Pesticide", "Qty", "Unit Price", "Total", "Customer", "Paid", "Incentive", "Date", "By"].map((h) => (
                     <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
                   ))}
@@ -447,7 +447,7 @@ ${buildPrintHeader(shop)}
               </thead>
               <tbody>
                 {sales.map((s) => (
-                  <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50">
+                  <tr key={s.id} className="border-b border-gray-50 hover:bg-amber-50">
                     <td className="py-3 px-3 font-medium text-gray-800">{s.pesticide?.name}</td>
                     <td className="py-3 px-3">{s.quantity}</td>
                     <td className="py-3 px-3">{formatCurrency(s.unitPrice)}</td>
@@ -587,7 +587,7 @@ ${buildPrintHeader(shop)}
               />
               <Button onClick={handleAddCategory} disabled={!newCatInput.trim()}><Plus className="w-4 h-4" /></Button>
             </div>
-            <div className="divide-y divide-gray-100 max-h-64 overflow-y-auto rounded-lg border border-gray-200">
+            <div className="divide-y divide-gray-100 max-h-64 overflow-y-auto rounded-lg border border-amber-200">
               {categories.length === 0 && (
                 <p className="text-center py-6 text-gray-400 text-sm">No categories yet</p>
               )}
@@ -647,7 +647,7 @@ ${buildPrintHeader(shop)}
                   </div>
                 )}
 
-                <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600 flex justify-between">
+                <div className="bg-amber-50 rounded-lg p-3 text-sm text-gray-600 flex justify-between">
                   <span>Available: <strong>{selectedPesticide?.quantity} {selectedPesticide?.unit}</strong></span>
                   <span>Unit Price: <strong>{formatCurrency(unitPrice)}</strong></span>
                 </div>

@@ -23,7 +23,7 @@ export default function DashboardNotFound() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+    <div className="flex items-center justify-center min-h-screen bg-amber-50 p-4">
       <Card className="max-w-md w-full">
         <CardContent className="p-8 text-center">
           <div className="flex justify-center mb-4">

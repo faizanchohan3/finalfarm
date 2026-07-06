@@ -134,7 +134,7 @@ export default function ProductReportPage() {
       </div>
 
       {/* ── Date Range Filter ── */}
-      <div className="flex flex-wrap gap-3 items-end print:hidden bg-gray-50 border border-gray-200 rounded-xl p-4">
+      <div className="flex flex-wrap gap-3 items-end print:hidden bg-amber-50 border border-amber-200 rounded-xl p-4">
         <div>
           <label className="text-xs font-medium text-gray-600 block mb-1">From Date</label>
           <input
@@ -208,7 +208,7 @@ export default function ProductReportPage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-t">
+              <thead className="bg-amber-50 border-b border-t">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">#</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Product</th>
@@ -230,7 +230,7 @@ export default function ProductReportPage() {
                 ) : filtered.map((p, i) => (
                   <tr
                     key={p.id}
-                    className={`hover:bg-gray-50 ${p.isLowStock ? "bg-red-50/40" : ""}`}
+                    className={`hover:bg-amber-50 ${p.isLowStock ? "bg-red-50/40" : ""}`}
                   >
                     <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                     <td className="px-4 py-3">
@@ -242,7 +242,7 @@ export default function ProductReportPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full">
+                      <span className="text-xs px-2 py-0.5 bg-amber-100 text-gray-700 rounded-full">
                         {p.category}
                       </span>
                     </td>
@@ -267,7 +267,7 @@ export default function ProductReportPage() {
                   <tr><td colSpan={12} className="px-4 py-10 text-center text-gray-400">No products found</td></tr>
                 )}
               </tbody>
-              <tfoot className="bg-gray-50 border-t-2 border-gray-200">
+              <tfoot className="bg-amber-50 border-t-2 border-amber-200">
                 <tr>
                   <td colSpan={9} className="px-4 py-3 font-bold text-gray-700">
                     Total — {filtered.length} products

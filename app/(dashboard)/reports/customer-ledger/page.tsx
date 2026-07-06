@@ -201,7 +201,7 @@ ${buildPrintHeader(shop)}
         <CardContent className="p-0">
           <div className="overflow-x-auto max-h-64 overflow-y-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b sticky top-0">
+              <thead className="bg-amber-50 border-b sticky top-0">
                 <tr>
                   {["#","Name","Phone","Address","Total Dr","Total Cr","Balance","Status",""].map((h) => (
                     <th key={h} className={`px-3 py-2.5 text-xs font-semibold text-gray-500 uppercase ${["Total Dr","Total Cr","Balance"].includes(h)?"text-right":"text-left"}`}>{h}</th>
@@ -216,7 +216,7 @@ ${buildPrintHeader(shop)}
                   const isSelected = c.id === customerId
                   return (
                     <tr key={c.id} onClick={() => setCustomerId(isSelected ? "" : c.id)}
-                      className={`cursor-pointer transition-colors ${isSelected ? "bg-orange-50 border-l-4 border-orange-500" : "hover:bg-gray-50"}`}>
+                      className={`cursor-pointer transition-colors ${isSelected ? "bg-orange-50 border-l-4 border-orange-500" : "hover:bg-amber-50"}`}>
                       <td className="px-3 py-2 text-gray-400 text-xs">{i+1}</td>
                       <td className="px-3 py-2 font-medium text-gray-900">{c.name}</td>
                       <td className="px-3 py-2 text-gray-500 text-xs">{c.phone||"—"}</td>
@@ -227,7 +227,7 @@ ${buildPrintHeader(shop)}
                         {formatCurrency(Math.abs(bal))}{bal!==0&&<span className="font-normal ml-0.5">{bal>0?"Dr":"Cr"}</span>}
                       </td>
                       <td className="px-3 py-2">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${bal>0?"bg-red-100 text-red-700":bal<0?"bg-green-100 text-green-700":"bg-gray-100 text-gray-500"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${bal>0?"bg-red-100 text-red-700":bal<0?"bg-green-100 text-green-700":"bg-amber-100 text-gray-500"}`}>
                           {bal>0?"Outstanding":bal<0?"Overpaid":"Settled"}
                         </span>
                       </td>
@@ -317,7 +317,7 @@ ${buildPrintHeader(shop)}
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50 border-b border-t">
+                      <thead className="bg-amber-50 border-b border-t">
                         <tr>
                           {["#","Date","Type","Description","Debit (Dr)","Credit (Cr)","Running Balance"].map((h) => (
                             <th key={h} className={`px-4 py-3 font-semibold text-gray-600 text-xs uppercase ${["Debit (Dr)","Credit (Cr)","Running Balance"].includes(h)?"text-right":"text-left"}`}>{h}</th>
@@ -345,7 +345,7 @@ ${buildPrintHeader(shop)}
                         ))}
                         {ledger.entries?.length === 0 && <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-400">No transactions found</td></tr>}
                       </tbody>
-                      <tfoot className="bg-gray-50 border-t-2 border-gray-200">
+                      <tfoot className="bg-amber-50 border-t-2 border-amber-200">
                         <tr>
                           <td colSpan={4} className="px-4 py-3 font-bold text-gray-700">Closing Balance</td>
                           <td className="px-4 py-3 text-right font-bold">{formatCurrency((ledger.entries || []).reduce((s: number, e: any) => s + e.debit, 0))}</td>

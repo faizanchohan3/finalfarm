@@ -147,7 +147,7 @@ export default function SalesReportPage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-t">
+              <thead className="bg-amber-50 border-b border-t">
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs uppercase">Date</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs uppercase">Trader</th>
@@ -160,7 +160,7 @@ export default function SalesReportPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {sales.map((sale) => (
-                  <tr key={sale.id} className="hover:bg-gray-50">
+                  <tr key={sale.id} className="hover:bg-amber-50">
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(sale.createdAt)}</td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-900">{sale.customer?.name || sale.farmer?.name || "Walk-in"}</div>
@@ -192,7 +192,7 @@ export default function SalesReportPage() {
                   </tr>
                 )}
               </tbody>
-              <tfoot className="bg-gray-50 border-t-2 border-gray-200">
+              <tfoot className="bg-amber-50 border-t-2 border-amber-200">
                 <tr>
                   <td colSpan={3} className="px-4 py-3 font-bold text-gray-700">Total — {sales.length} sales</td>
                   <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCurrency(totals.totalAmount)}</td>

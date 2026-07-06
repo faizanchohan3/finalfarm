@@ -194,7 +194,7 @@ export default function ProfitLossPage() {
           </div>
 
           {/* Net Summary */}
-          <Card className="border-2 border-gray-200">
+          <Card className="border-2 border-amber-200">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <DollarSign className="w-4 h-4" /> Summary
@@ -266,7 +266,7 @@ export default function ProfitLossPage() {
               </CardHeader>
               <CardContent className="p-0">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b border-t">
+                  <thead className="bg-amber-50 border-b border-t">
                     <tr>
                       <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
                       <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Description</th>
@@ -276,7 +276,7 @@ export default function ProfitLossPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {data.transactions.map((t: any) => (
-                      <tr key={t.id} className="hover:bg-gray-50">
+                      <tr key={t.id} className="hover:bg-amber-50">
                         <td className="px-4 py-2 text-gray-500 text-xs">{formatDate(t.createdAt)}</td>
                         <td className="px-4 py-2 text-gray-700">{t.description || "—"}</td>
                         <td className="px-4 py-2">

@@ -138,7 +138,7 @@ export default function AgentsPage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-t">
+              <thead className="bg-amber-50 border-b border-t">
                 <tr>
                   <th className="px-4 py-3 w-8" />
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">#</th>
@@ -157,7 +157,7 @@ export default function AgentsPage() {
                 ) : filtered.map((a, i) => (
                   <>
                     <tr key={a.id}
-                      className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${expanded[a.id] ? "bg-orange-50/30" : ""}`}
+                      className={`border-b border-amber-100 hover:bg-amber-50 cursor-pointer ${expanded[a.id] ? "bg-orange-50/30" : ""}`}
                       onClick={() => toggleExpand(a.id)}
                     >
                       <td className="px-4 py-3">
@@ -194,9 +194,9 @@ export default function AgentsPage() {
                             {!expanded[a.id].ledger?.length ? (
                               <p className="text-xs text-gray-400">No transactions yet</p>
                             ) : (
-                              <table className="w-full text-xs border border-gray-100 rounded">
-                                <thead className="bg-white">
-                                  <tr className="border-b border-gray-100">
+                              <table className="w-full text-xs border border-amber-100 rounded">
+                                <thead className="bg-amber-50">
+                                  <tr className="border-b border-amber-100">
                                     <th className="px-3 py-2 text-left text-gray-500">Date</th>
                                     <th className="px-3 py-2 text-left text-gray-500">Notes</th>
                                     <th className="px-3 py-2 text-right text-green-700">Earned (Cr)</th>

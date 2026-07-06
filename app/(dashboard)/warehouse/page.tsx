@@ -178,7 +178,7 @@ export default function WarehousePage() {
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b">
+                <thead className="bg-amber-50 border-b">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Transfer #</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">From</th>
@@ -193,7 +193,7 @@ export default function WarehousePage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {transfers.map((t) => (
-                    <tr key={t.id} className={`hover:bg-gray-50 ${t.status === "PENDING" ? "bg-yellow-50/40" : ""}`}>
+                    <tr key={t.id} className={`hover:bg-amber-50 ${t.status === "PENDING" ? "bg-yellow-50/40" : ""}`}>
                       <td className="px-4 py-3 font-mono text-xs text-gray-500">{t.transferNo}</td>
                       <td className="px-4 py-3 text-gray-700">{t.fromWarehouse.name}</td>
                       <td className="px-4 py-3 text-gray-700">{t.toWarehouse.name}</td>
@@ -203,7 +203,7 @@ export default function WarehousePage() {
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                           t.status === "PENDING" ? "bg-yellow-100 text-yellow-700" :
                           t.status === "APPROVED" ? "bg-green-100 text-green-700" :
-                          "bg-gray-100 text-gray-600"
+                          "bg-amber-100 text-gray-600"
                         }`}>{t.status}</span>
                       </td>
                       <td className="px-4 py-3 text-gray-500 text-xs">{t.createdBy?.name}</td>
@@ -212,7 +212,7 @@ export default function WarehousePage() {
                         {t.status === "PENDING" && (
                           <button
                             onClick={() => handleApproveTransfer(t.id)}
-                            className="text-xs bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded font-medium"
+                            className="text-xs bg-green-700 hover:bg-green-800 text-amber-950 px-3 py-1 rounded font-medium"
                           >
                             Approve
                           </button>
@@ -234,7 +234,7 @@ export default function WarehousePage() {
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b">
+                <thead className="bg-amber-50 border-b">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Adj #</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Product</th>
@@ -248,7 +248,7 @@ export default function WarehousePage() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {adjustments.map((a) => (
-                    <tr key={a.id} className="hover:bg-gray-50">
+                    <tr key={a.id} className="hover:bg-amber-50">
                       <td className="px-4 py-3 font-mono text-xs text-gray-500">{a.adjustNo}</td>
                       <td className="px-4 py-3 font-medium text-gray-800">{a.product.name}</td>
                       <td className="px-4 py-3 text-gray-600">{a.warehouse?.name || "Main"}</td>

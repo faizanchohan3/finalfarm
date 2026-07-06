@@ -150,7 +150,7 @@ export default function CustomersReportPage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-t">
+              <thead className="bg-amber-50 border-b border-t">
                 <tr>
                   <th className="px-4 py-3 w-8 print:hidden" />
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">#</th>
@@ -172,7 +172,7 @@ export default function CustomersReportPage() {
                     {/* Customer Row */}
                     <tr
                       key={c.id}
-                      className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${expanded[c.id] ? "bg-green-50/30" : ""}`}
+                      className={`border-b border-amber-100 hover:bg-amber-50 cursor-pointer transition-colors ${expanded[c.id] ? "bg-green-50/30" : ""}`}
                       onClick={() => toggleExpand(c.id)}
                     >
                       <td className="px-4 py-3 print:hidden">
@@ -215,9 +215,9 @@ export default function CustomersReportPage() {
                             {expanded[c.id].sales?.length === 0 ? (
                               <p className="text-xs text-gray-400">No sales yet</p>
                             ) : (
-                              <table className="w-full text-xs border border-gray-100 rounded">
-                                <thead className="bg-white">
-                                  <tr className="border-b border-gray-100">
+                              <table className="w-full text-xs border border-amber-100 rounded">
+                                <thead className="bg-amber-50">
+                                  <tr className="border-b border-amber-100">
                                     <th className="px-3 py-2 text-left text-gray-500 font-medium">Date</th>
                                     <th className="px-3 py-2 text-left text-gray-500 font-medium">Items</th>
                                     <th className="px-3 py-2 text-right text-gray-500 font-medium">Total</th>
@@ -228,7 +228,7 @@ export default function CustomersReportPage() {
                                 </thead>
                                 <tbody>
                                   {expanded[c.id].sales.map((s: any) => (
-                                    <tr key={s.id} className="border-b border-gray-50 hover:bg-white">
+                                    <tr key={s.id} className="border-b border-gray-50 hover:bg-amber-50">
                                       <td className="px-3 py-2 text-gray-500">{formatDate(s.createdAt)}</td>
                                       <td className="px-3 py-2 text-gray-600 max-w-xs truncate">
                                         {s.items.map((it: any) => `${it.quantity} ${it.product?.unit} ${it.product?.name}`).join(", ")}
@@ -243,7 +243,7 @@ export default function CustomersReportPage() {
                                           s.status === "PAID" ? "bg-green-100 text-green-700" :
                                           s.status === "PARTIAL" ? "bg-orange-100 text-orange-700" :
                                           s.status === "PENDING" ? "bg-yellow-100 text-yellow-700" :
-                                          "bg-gray-100 text-gray-500"
+                                          "bg-amber-100 text-gray-500"
                                         }`}>
                                           {s.status}
                                         </span>
@@ -263,7 +263,7 @@ export default function CustomersReportPage() {
                   <tr><td colSpan={10} className="px-4 py-10 text-center text-gray-400">No customers found</td></tr>
                 )}
               </tbody>
-              <tfoot className="bg-gray-50 border-t-2 border-gray-200">
+              <tfoot className="bg-amber-50 border-t-2 border-amber-200">
                 <tr>
                   <td colSpan={5} className="px-4 py-3 font-bold text-gray-700">
                     Total — {filtered.length} customers, {totals.saleCount} sales

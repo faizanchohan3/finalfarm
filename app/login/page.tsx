@@ -90,20 +90,20 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-2xl mb-4 shadow-lg">
             <Store className="w-9 h-9 text-green-900" />
           </div>
-          <h1 className="text-3xl font-bold text-white">Gala Mandi</h1>
+          <h1 className="text-3xl font-bold text-amber-950">Gala Mandi</h1>
           <p className="text-green-200 mt-1">Multi-Shop Management System</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-amber-50 rounded-2xl shadow-2xl overflow-hidden">
           {/* Tabs */}
-          <div className="flex border-b border-gray-200">
+          <div className="flex border-b border-amber-200">
             <button
               onClick={() => setTab("login")}
               className={`flex-1 py-4 text-sm font-medium transition-colors ${
                 tab === "login"
-                  ? "bg-green-700 text-white"
-                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                  ? "bg-green-700 text-amber-950"
+                  : "text-gray-600 hover:text-gray-800 hover:bg-amber-50"
               }`}
             >
               Sign In
@@ -112,8 +112,8 @@ export default function LoginPage() {
               onClick={() => setTab("register")}
               className={`flex-1 py-4 text-sm font-medium transition-colors ${
                 tab === "register"
-                  ? "bg-green-700 text-white"
-                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                  ? "bg-green-700 text-amber-950"
+                  : "text-gray-600 hover:text-gray-800 hover:bg-amber-50"
               }`}
             >
               Register Shop

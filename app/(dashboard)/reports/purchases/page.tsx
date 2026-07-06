@@ -146,7 +146,7 @@ export default function PurchasesReportPage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-t">
+              <thead className="bg-amber-50 border-b border-t">
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs uppercase">Date</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs uppercase">Supplier</th>
@@ -159,7 +159,7 @@ export default function PurchasesReportPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {purchases.map((purchase) => (
-                  <tr key={purchase.id} className="hover:bg-gray-50">
+                  <tr key={purchase.id} className="hover:bg-amber-50">
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(purchase.createdAt)}</td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-900">{purchase.supplier?.name || "Unknown"}</div>
@@ -184,7 +184,7 @@ export default function PurchasesReportPage() {
                   </tr>
                 )}
               </tbody>
-              <tfoot className="bg-gray-50 border-t-2 border-gray-200">
+              <tfoot className="bg-amber-50 border-t-2 border-amber-200">
                 <tr>
                   <td colSpan={3} className="px-4 py-3 font-bold text-gray-700">Total — {purchases.length} purchases</td>
                   <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCurrency(totals.totalAmount)}</td>

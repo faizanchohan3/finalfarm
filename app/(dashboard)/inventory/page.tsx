@@ -192,7 +192,7 @@ ${buildPrintHeader(shop)}
 
       {/* Category Management Panel */}
       {showCategories && (
-        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 shadow-sm">
           <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <Tag className="w-4 h-4 text-purple-600" />
             Manage Categories
@@ -303,7 +303,7 @@ ${buildPrintHeader(shop)}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200">
+                  <tr className="border-b border-amber-200">
                     {["Product", "Category", "Stock", "Unit", "Min Stock", "Purchase Price", "Sale Price", "Status", "Actions"].map((h) => (
                       <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
                     ))}
@@ -311,7 +311,7 @@ ${buildPrintHeader(shop)}
                 </thead>
                 <tbody>
                   {filtered.map((p) => (
-                    <tr key={p.id} className="border-b border-gray-50 hover:bg-gray-50">
+                    <tr key={p.id} className="border-b border-gray-50 hover:bg-amber-50">
                       <td className="py-3 px-3 font-medium text-gray-800">{p.name}</td>
                       <td className="py-3 px-3 text-gray-600">{p.category?.name}</td>
                       <td className="py-3 px-3">
@@ -354,10 +354,10 @@ ${buildPrintHeader(shop)}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="w-[96vw] max-w-2xl max-h-[92vh] overflow-y-auto p-0">
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-4 rounded-t-lg flex items-center justify-between">
+          <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-blue-500 text-amber-950 px-6 py-4 rounded-t-lg flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                <Package className="w-5 h-5 text-white" />
+              <div className="w-9 h-9 rounded-full bg-amber-50/20 flex items-center justify-center flex-shrink-0">
+                <Package className="w-5 h-5 text-amber-950" />
               </div>
               <div>
                 <h2 className="text-lg font-bold">{editing ? "Edit Product" : "Add Product"}</h2>
@@ -366,7 +366,7 @@ ${buildPrintHeader(shop)}
             </div>
             <button
               onClick={() => setShowModal(false)}
-              className="text-white hover:bg-white/20 rounded-lg p-1.5 transition-colors flex-shrink-0"
+              className="text-amber-950 hover:bg-amber-50/20 rounded-lg p-1.5 transition-colors flex-shrink-0"
               title="Close"
             >
               <X className="w-5 h-5" />
@@ -378,7 +378,7 @@ ${buildPrintHeader(shop)}
             {/* ── Section 1: Basic Info ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Product Info</h3>
-              <div className="bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-100">
+              <div className="bg-amber-50 rounded-xl p-4 space-y-3 border border-amber-100">
               <div>
                 <Label className="text-xs font-semibold text-gray-600">Product Name *</Label>
                 <Input className="mt-1" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -396,7 +396,7 @@ ${buildPrintHeader(shop)}
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent side="bottom" sideOffset={8} className="p-0">
-                      <div className="sticky top-0 bg-white border-b p-2">
+                      <div className="sticky top-0 bg-amber-50 border-b p-2">
                         <Input placeholder="Search categories..." value={categorySearch} onChange={(e) => setCategorySearch(e.target.value)} className="h-8 text-xs" autoFocus />
                       </div>
                       <div className="max-h-40 overflow-y-auto">
@@ -420,7 +420,7 @@ ${buildPrintHeader(shop)}
             {/* ── Section 2: Unit & Stock ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Unit & Stock</h3>
-              <div className="bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-100">
+              <div className="bg-amber-50 rounded-xl p-4 space-y-3 border border-amber-100">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">Unit *</Label>
@@ -466,7 +466,7 @@ ${buildPrintHeader(shop)}
             {/* ── Section 3: Pricing ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Pricing</h3>
-              <div className="bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-100">
+              <div className="bg-amber-50 rounded-xl p-4 space-y-3 border border-amber-100">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">Purchase Price (PKR)</Label>

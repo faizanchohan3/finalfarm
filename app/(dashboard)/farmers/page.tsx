@@ -252,7 +252,7 @@ export default function FarmersPage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-t">
+              <thead className="bg-amber-50 border-b border-t">
                 <tr>
                   <th className="px-4 py-3 w-8" />
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">#</th>
@@ -272,7 +272,7 @@ export default function FarmersPage() {
                 ) : filtered.map((f, i) => (
                   <>
                     <tr key={f.id}
-                      className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${expanded[f.id] ? "bg-green-50/30" : ""}`}
+                      className={`border-b border-amber-100 hover:bg-amber-50 cursor-pointer ${expanded[f.id] ? "bg-green-50/30" : ""}`}
                       onClick={() => toggleExpand(f.id)}
                     >
                       <td className="px-4 py-3">
@@ -340,14 +340,14 @@ export default function FarmersPage() {
                                 {selectedPayments.size > 0 && (
                                   <div className="flex items-center gap-2 bg-blue-50 p-2 rounded border border-blue-200">
                                     <span className="text-xs font-medium text-blue-900">{selectedPayments.size} payment(s) selected</span>
-                                    <button onClick={() => showDeleteConfirmModal(f.id)} className="ml-auto px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">
+                                    <button onClick={() => showDeleteConfirmModal(f.id)} className="ml-auto px-2 py-1 bg-red-600 text-amber-950 text-xs rounded hover:bg-red-700">
                                       Delete Selected
                                     </button>
                                   </div>
                                 )}
-                                <table className="w-full text-xs border border-gray-100 rounded">
-                                  <thead className="bg-white">
-                                    <tr className="border-b border-gray-100">
+                                <table className="w-full text-xs border border-amber-100 rounded">
+                                  <thead className="bg-amber-50">
+                                    <tr className="border-b border-amber-100">
                                       <th className="px-2 py-2 text-center w-6"></th>
                                       <th className="px-3 py-2 text-left text-gray-500">Date</th>
                                       <th className="px-3 py-2 text-left text-gray-500">Description</th>
@@ -382,7 +382,7 @@ export default function FarmersPage() {
                                         </tr>
                                       )
                                     })}
-                                    <tr className="bg-gray-50 border-t-2 border-gray-200">
+                                    <tr className="bg-amber-50 border-t-2 border-amber-200">
                                       <td colSpan={3} className="px-3 py-2 font-bold text-gray-700 text-xs">Closing Balance</td>
                                       <td className="px-3 py-2 text-right font-bold text-gray-900 text-xs">{formatCurrency((expanded[f.id].ledger || []).reduce((s: number, e: any) => s + e.debit, 0))}</td>
                                       <td className="px-3 py-2 text-right font-bold text-green-700 text-xs">{formatCurrency((expanded[f.id].ledger || []).reduce((s: number, e: any) => s + e.credit, 0))}</td>
@@ -421,7 +421,7 @@ export default function FarmersPage() {
               {photoPreview && (
                 <div className="mb-2 relative">
                   <img src={photoPreview} alt="Preview" className="w-20 h-20 rounded-lg object-cover" />
-                  <button onClick={() => { setPhotoPreview(""); setForm({ ...form, picture: "" }); }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">✕</button>
+                  <button onClick={() => { setPhotoPreview(""); setForm({ ...form, picture: "" }); }} className="absolute -top-2 -right-2 bg-red-500 text-amber-950 rounded-full w-6 h-6 flex items-center justify-center text-xs">✕</button>
                 </div>
               )}
               <div className="flex gap-2">
@@ -466,7 +466,7 @@ export default function FarmersPage() {
 
       {/* Payment Receipt Print Template */}
       {lastPayment && showPayModal && (
-        <div className="hidden print:block fixed inset-0 bg-white z-[9999] p-10">
+        <div className="hidden print:block fixed inset-0 bg-amber-50 z-[9999] p-10">
           <div className="max-w-xs mx-auto">
             <div className="text-center border-b-2 border-gray-800 pb-4 mb-5">
               <h1 className="text-2xl font-bold text-gray-900">Gala Mandi</h1>
@@ -515,7 +515,7 @@ export default function FarmersPage() {
                 <p className="font-semibold text-gray-900">{lastPayment.name}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{lastPayment.paymentType === "RECEIVE" ? "Received from Farmer" : "Paid to Farmer"}</p>
               </div>
-              <div className="border border-gray-100 rounded-lg p-4 space-y-2 text-sm">
+              <div className="border border-amber-100 rounded-lg p-4 space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-gray-500">Amount</span><span className="font-bold text-green-700">{formatCurrency(lastPayment.amount)}</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Method</span><span>{lastPayment.method.replace("_", " ")}</span></div>
                 {lastPayment.notes && <div className="flex justify-between"><span className="text-gray-500">Notes</span><span className="text-xs">{lastPayment.notes}</span></div>}
@@ -547,12 +547,12 @@ export default function FarmersPage() {
                 <Label className="mb-2 block">Payment Type</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <button type="button" onClick={() => setPayForm({ ...payForm, paymentType: "PAY" })}
-                    className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors ${payForm.paymentType === "PAY" ? "bg-green-700 text-white border-green-700" : "bg-white text-gray-600 border-gray-200 hover:border-green-300"}`}>
+                    className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors ${payForm.paymentType === "PAY" ? "bg-green-700 text-amber-950 border-green-700" : "bg-amber-50 text-gray-600 border-amber-200 hover:border-green-300"}`}>
                     Paid to Farmer
                     <p className="text-xs font-normal opacity-75 mt-0.5">Paying farmer (Cr)</p>
                   </button>
                   <button type="button" onClick={() => setPayForm({ ...payForm, paymentType: "RECEIVE" })}
-                    className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors ${payForm.paymentType === "RECEIVE" ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-600 border-gray-200 hover:border-blue-300"}`}>
+                    className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors ${payForm.paymentType === "RECEIVE" ? "bg-blue-600 text-amber-950 border-blue-600" : "bg-amber-50 text-gray-600 border-amber-200 hover:border-blue-300"}`}>
                     Received
                     <p className="text-xs font-normal opacity-75 mt-0.5">Income received (Dr)</p>
                   </button>
@@ -641,7 +641,7 @@ export default function FarmersPage() {
           {farmerDetail && selectedFarmer && (
             <div className="space-y-6">
               {/* Farmer Info */}
-              <div className="grid grid-cols-2 gap-4 pb-4 border-b border-gray-200">
+              <div className="grid grid-cols-2 gap-4 pb-4 border-b border-amber-200">
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Name</p>
                   <p className="font-semibold text-gray-900">{selectedFarmer.name}</p>
@@ -686,7 +686,7 @@ export default function FarmersPage() {
                   </h3>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {farmerDetail.purchases.map((p: any) => (
-                      <div key={p.id} className="bg-gray-50 rounded p-3 text-sm border border-gray-200">
+                      <div key={p.id} className="bg-amber-50 rounded p-3 text-sm border border-amber-200">
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="font-medium text-gray-900">{p.items.map((i: any) => i.product?.name || "Item").join(", ")}</p>
@@ -713,7 +713,7 @@ export default function FarmersPage() {
                   </h3>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {farmerDetail.sales.map((s: any) => (
-                      <div key={s.id} className="bg-gray-50 rounded p-3 text-sm border border-gray-200">
+                      <div key={s.id} className="bg-amber-50 rounded p-3 text-sm border border-amber-200">
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="font-medium text-gray-900">{s.items.map((i: any) => i.product?.name || "Item").join(", ")}</p>
@@ -737,7 +737,7 @@ export default function FarmersPage() {
                   </h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-amber-50">
                         <tr>
                           <th className="text-left py-2 px-3 text-gray-500 font-medium text-xs">Date</th>
                           <th className="text-left py-2 px-3 text-gray-500 font-medium text-xs">Description</th>

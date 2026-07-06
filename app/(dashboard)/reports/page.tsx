@@ -175,7 +175,7 @@ export default function ReportsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Link href="/reports/sales">
           <div
-            className="rounded-xl p-5 text-white cursor-pointer hover:opacity-90 transition-opacity"
+            className="rounded-xl p-5 text-amber-950 cursor-pointer hover:opacity-90 transition-opacity"
             style={{ background: "linear-gradient(135deg, #15803d 0%, #166534 100%)" }}
           >
             <ShoppingCart className="w-6 h-6 mb-3 opacity-80" />
@@ -187,7 +187,7 @@ export default function ReportsPage() {
 
         <Link href="/reports/customers">
           <div
-            className="rounded-xl p-5 text-white cursor-pointer hover:opacity-90 transition-opacity"
+            className="rounded-xl p-5 text-amber-950 cursor-pointer hover:opacity-90 transition-opacity"
             style={{ background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)" }}
           >
             <Users className="w-6 h-6 mb-3 opacity-80" />
@@ -201,7 +201,7 @@ export default function ReportsPage() {
 
         <Link href="/reports/products">
           <div
-            className="rounded-xl p-5 text-white cursor-pointer hover:opacity-90 transition-opacity"
+            className="rounded-xl p-5 text-amber-950 cursor-pointer hover:opacity-90 transition-opacity"
             style={{ background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)" }}
           >
             <Package className="w-6 h-6 mb-3 opacity-80" />
@@ -215,7 +215,7 @@ export default function ReportsPage() {
 
         <Link href="/expenses">
           <div
-            className="rounded-xl p-5 text-white cursor-pointer hover:opacity-90 transition-opacity"
+            className="rounded-xl p-5 text-amber-950 cursor-pointer hover:opacity-90 transition-opacity"
             style={{ background: "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)" }}
           >
             <TrendingDown className="w-6 h-6 mb-3 opacity-80" />
@@ -267,7 +267,7 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
 
-        <Card className={productData.lowStockCount > 0 ? "border-red-200 bg-red-50/30" : "border-gray-100"}>
+        <Card className={productData.lowStockCount > 0 ? "border-red-200 bg-red-50/30" : "border-amber-100"}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <p className={`text-xs font-medium uppercase tracking-wide ${productData.lowStockCount > 0 ? "text-red-500" : "text-gray-500"}`}>
@@ -349,7 +349,7 @@ export default function ReportsPage() {
                     <div key={cat.category} className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: CATEGORY_COLORS[i] }} />
                       <p className="text-xs text-gray-500 w-20 truncate">{cat.category}</p>
-                      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="flex-1 h-1.5 bg-amber-100 rounded-full overflow-hidden">
                         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: CATEGORY_COLORS[i] }} />
                       </div>
                       <p className="text-xs font-medium text-gray-700 w-20 text-right">{formatCurrency(cat._sum.amount)}</p>
@@ -368,10 +368,10 @@ export default function ReportsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {visibleReportCards.map(({ href, title, description, icon: Icon, color }) => (
             <Link key={href} href={href}>
-              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-gray-100 group">
+              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-amber-100 group">
                 <CardContent className="p-5 flex items-start gap-4">
                   <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center flex-shrink-0`}>
-                    <Icon className="w-5 h-5 text-white" />
+                    <Icon className="w-5 h-5 text-amber-950" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 text-sm group-hover:text-green-700 transition-colors">{title}</p>
