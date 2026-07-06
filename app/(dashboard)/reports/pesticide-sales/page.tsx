@@ -162,7 +162,7 @@ export default function PesticideSalesReportPage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 border-b border-t">
+              <thead className="bg-blue-50 border-b border-t">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">#</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
@@ -184,7 +184,7 @@ export default function PesticideSalesReportPage() {
                   const buyerType = s.farmer ? "farmer" : s.customer ? "customer" : null
                   const status = s.balance <= 0 ? "PAID" : s.paidAmount > 0 ? "PARTIAL" : "PENDING"
                   return (
-                    <tr key={s.id} className="hover:bg-slate-50">
+                    <tr key={s.id} className="hover:bg-blue-50">
                       <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                       <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(s.createdAt)}</td>
                       <td className="px-4 py-3">
@@ -207,7 +207,7 @@ export default function PesticideSalesReportPage() {
                       <td className="px-4 py-3 text-center print:hidden">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                           status === "PAID" ? "bg-green-100 text-purple-700"
-                          : status === "PARTIAL" ? "bg-yellow-100 text-yellow-700"
+                          : status === "PARTIAL" ? "bg-blue-100 text-blue-700"
                           : "bg-red-100 text-red-700"
                         }`}>{status}</span>
                       </td>
@@ -224,7 +224,7 @@ export default function PesticideSalesReportPage() {
                 )}
               </tbody>
               {!loading && sales.length > 0 && (
-                <tfoot className="bg-slate-50 border-t-2 border-yellow-300">
+                <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                   <tr>
                     <td colSpan={6} className="px-4 py-3 font-bold text-gray-700">Total — {sales.length} sales</td>
                     <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCurrency(totals.totalAmount)}</td>
@@ -240,7 +240,7 @@ export default function PesticideSalesReportPage() {
       </Card>
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t border-yellow-300 text-center text-xs text-yellow-600">
+      <div className="mt-8 pt-4 border-t border-blue-300 text-center text-xs text-blue-600">
         Powered by Softtech
       </div>
     </div>

@@ -144,17 +144,17 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "relative flex flex-col bg-slate-900 text-white transition-all duration-300 h-screen overflow-hidden border-r border-yellow-400",
+        "relative flex flex-col bg-blue-900 text-white transition-all duration-300 h-screen overflow-hidden border-r border-blue-400",
         collapsed ? "w-16" : "w-64"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-yellow-400 flex-shrink-0">
-        <div className="flex-shrink-0 w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-yellow-400">
+      <div className="flex items-center gap-3 px-4 py-5 border-b border-blue-400 flex-shrink-0">
+        <div className="flex-shrink-0 w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-blue-400">
           {shopLogo ? (
             <img src={shopLogo} alt="Shop Logo" className="w-full h-full object-cover" />
           ) : (
-            <Store className="w-5 h-5 text-slate-900" />
+            <Store className="w-5 h-5 text-blue-900" />
           )}
         </div>
         {!collapsed && (
@@ -183,20 +183,20 @@ export function Sidebar() {
                 <div
                   className={cn(
                     "flex items-center rounded-lg transition-colors",
-                    active ? "bg-yellow-100" : "hover:bg-yellow-100"
+                    active ? "bg-blue-100" : "hover:bg-blue-100"
                   )}
                 >
                   <Link
                     href={href}
                     className="flex items-center gap-3 px-3 py-2.5 flex-1 text-sm font-medium"
                   >
-                    <Icon className="w-5 h-5 flex-shrink-0 text-slate-900" />
-                    {!collapsed && <span className="text-slate-900">{label}</span>}
+                    <Icon className="w-5 h-5 flex-shrink-0 text-blue-900" />
+                    {!collapsed && <span className="text-blue-900">{label}</span>}
                   </Link>
                   {!collapsed && (
                     <button
                       onClick={() => setReportsOpen((o) => !o)}
-                      className="pr-3 py-2.5 text-white hover:text-slate-900 transition-colors"
+                      className="pr-3 py-2.5 text-white hover:text-blue-900 transition-colors"
                       aria-label="Toggle reports menu"
                     >
                       <ChevronDown
@@ -216,7 +216,7 @@ export function Sidebar() {
                       reportsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                     )}
                   >
-                    <div className="ml-4 mt-1 border-l-2 border-yellow-300 pl-3 pb-1 space-y-0.5">
+                    <div className="ml-4 mt-1 border-l-2 border-blue-300 pl-3 pb-1 space-y-0.5">
                       {reportSubItems.map((sub) => {
                         const subActive = pathname === sub.href
                         return (
@@ -226,8 +226,8 @@ export function Sidebar() {
                             className={cn(
                               "flex items-center py-1.5 px-2 rounded text-xs font-medium transition-colors",
                               subActive
-                                ? "bg-yellow-100 text-yellow-300"
-                                : "text-white hover:bg-yellow-100 hover:text-slate-900"
+                                ? "bg-blue-100 text-blue-300"
+                                : "text-white hover:bg-blue-100 hover:text-blue-900"
                             )}
                           >
                             {sub.label}
@@ -247,7 +247,7 @@ export function Sidebar() {
               href={href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                active ? "bg-yellow-100 text-slate-900" : "text-green-100 hover:bg-yellow-100 hover:text-slate-900"
+                active ? "bg-blue-100 text-blue-900" : "text-green-100 hover:bg-blue-100 hover:text-blue-900"
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -260,12 +260,12 @@ export function Sidebar() {
       {/* Collapse toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 w-6 h-6 bg-yellow-100 border border-yellow-300 rounded-full flex items-center justify-center hover:bg-yellow-100 transition-colors"
+        className="absolute -right-3 top-20 w-6 h-6 bg-blue-100 border border-blue-300 rounded-full flex items-center justify-center hover:bg-blue-100 transition-colors"
       >
         {collapsed ? (
-          <ChevronRight className="w-3 h-3 text-slate-900" />
+          <ChevronRight className="w-3 h-3 text-blue-900" />
         ) : (
-          <ChevronLeft className="w-3 h-3 text-slate-900" />
+          <ChevronLeft className="w-3 h-3 text-blue-900" />
         )}
       </button>
     </aside>

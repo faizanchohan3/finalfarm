@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Store, Eye, EyeOff, Loader2, ShoppingBag, CheckCircle } from "lucide-react"
+import { Eye, EyeOff, Loader2, CheckCircle, Zap, CheckCircle2, BarChart3, Lock, Zap as ZapIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -83,71 +83,61 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Banner with Rice Illustration */}
-        <div className="bg-gradient-to-r from-yellow-400 to-amber-500 rounded-3xl p-8 mb-6 text-center shadow-2xl border-4 border-yellow-300">
-          {/* Rice Plant SVG Logo */}
-          <svg className="w-24 h-24 mx-auto mb-4" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Rice stems */}
-            <line x1="30" y1="120" x2="25" y2="40" stroke="#1a1a2e" strokeWidth="2.5" strokeLinecap="round" />
-            <line x1="50" y1="120" x2="50" y2="20" stroke="#1a1a2e" strokeWidth="2.5" strokeLinecap="round" />
-            <line x1="70" y1="120" x2="75" y2="45" stroke="#1a1a2e" strokeWidth="2.5" strokeLinecap="round" />
+    <div className="min-h-screen bg-white flex">
+      {/* Left Side - Blue Gradient Panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 text-white p-12 flex-col justify-between relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400 rounded-full opacity-10 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-400 rounded-full opacity-10 blur-3xl"></div>
 
-            {/* Rice grains - left stem */}
-            <ellipse cx="20" cy="35" rx="4" ry="7" fill="#fbbf24" transform="rotate(-20 20 35)" />
-            <ellipse cx="18" cy="48" rx="4" ry="7" fill="#fbbf24" transform="rotate(-15 18 48)" />
-            <ellipse cx="22" cy="60" rx="4" ry="7" fill="#fbbf24" transform="rotate(-25 22 60)" />
-
-            {/* Rice grains - center stem (main) */}
-            <ellipse cx="45" cy="15" rx="4.5" ry="8" fill="#f59e0b" />
-            <ellipse cx="40" cy="28" rx="4.5" ry="8" fill="#f59e0b" />
-            <ellipse cx="55" cy="25" rx="4.5" ry="8" fill="#f59e0b" />
-            <ellipse cx="50" cy="38" rx="4.5" ry="8" fill="#fbbf24" />
-            <ellipse cx="43" cy="50" rx="4.5" ry="8" fill="#fbbf24" />
-            <ellipse cx="57" cy="48" rx="4.5" ry="8" fill="#fbbf24" />
-
-            {/* Rice grains - right stem */}
-            <ellipse cx="80" cy="40" rx="4" ry="7" fill="#fbbf24" transform="rotate(20 80 40)" />
-            <ellipse cx="82" cy="53" rx="4" ry="7" fill="#fbbf24" transform="rotate(15 82 53)" />
-            <ellipse cx="78" cy="65" rx="4" ry="7" fill="#fbbf24" transform="rotate(25 78 65)" />
-          </svg>
-
-          <h2 className="text-3xl font-bold text-slate-900 mb-1">ArgoFirm</h2>
-          <p className="text-slate-800 text-sm font-bold">Modern Farm Management</p>
-        </div>
-
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          {/* Tabs */}
-          <div className="flex border-b border-slate-200">
-            <button
-              onClick={() => setTab("login")}
-              className={`flex-1 py-4 text-sm font-bold transition-colors ${
-                tab === "login"
-                  ? "bg-yellow-400 text-slate-900"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-              }`}
-            >
-              Sign In
-            </button>
-            <button
-              onClick={() => setTab("register")}
-              className={`flex-1 py-4 text-sm font-bold transition-colors ${
-                tab === "register"
-                  ? "bg-yellow-400 text-slate-900"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-              }`}
-            >
-              Register Shop
-            </button>
+        <div className="relative z-10">
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-12">
+            <Zap className="w-10 h-10" strokeWidth={3} />
+            <div>
+              <h1 className="text-4xl font-bold">Agrifarm ERP</h1>
+              <p className="text-blue-100 text-sm">Enterprise Resource Planning</p>
+            </div>
           </div>
 
-          <div className="p-8">
-            {/* LOGIN FORM */}
-            {tab === "login" && (
-              <>
-                <h2 className="text-xl font-semibold text-gray-800 mb-6">Sign in to your account</h2>
+          {/* Description */}
+          <p className="text-lg text-blue-100 mb-12 leading-relaxed">
+            Manage your business operations with ease. Track sales, purchases, inventory, and more in one powerful platform.
+          </p>
+
+          {/* Features */}
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="w-6 h-6 flex-shrink-0 mt-1" />
+              <span className="text-lg">Complete ERP Solution</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <BarChart3 className="w-6 h-6 flex-shrink-0 mt-1" />
+              <span className="text-lg">Real-time Analytics</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <Lock className="w-6 h-6 flex-shrink-0 mt-1" />
+              <span className="text-lg">Secure & Reliable</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <ZapIcon className="w-6 h-6 flex-shrink-0 mt-1" />
+              <span className="text-lg">Fast & Efficient</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="relative z-10 text-blue-100 text-sm">
+          <p>© 2026 Softtech. All rights reserved.</p>
+        </div>
+      </div>
+
+      {/* Right Side - Login Form */}
+      <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          {tab === "login" && (
+            <>
+              <h2 className="text-3xl font-bold text-gray-900 mb-8">Sign In</h2>
                 <form onSubmit={handleLogin} className="space-y-5">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
@@ -189,14 +179,14 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full bg-yellow-100 hover:bg-white" disabled={loginLoading}>
+                  <Button type="submit" className="w-full bg-blue-100 hover:bg-white" disabled={loginLoading}>
                     {loginLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</> : "Sign In"}
                   </Button>
                 </form>
 
                 <p className="mt-6 text-center text-sm text-gray-500">
                   Want to register your shop?{" "}
-                  <button onClick={() => setTab("register")} className="text-yellow-600 font-medium hover:underline">
+                  <button onClick={() => setTab("register")} className="text-blue-600 font-medium hover:underline">
                     Register here
                   </button>
                 </p>
@@ -209,7 +199,7 @@ export default function LoginPage() {
                 {regSuccess ? (
                   <div className="text-center py-6">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                      <CheckCircle className="w-9 h-9 text-yellow-600" />
+                      <CheckCircle className="w-9 h-9 text-blue-600" />
                     </div>
                     <h2 className="text-xl font-bold text-gray-800 mb-2">Registration Submitted!</h2>
                     <p className="text-gray-500 text-sm mb-6">
@@ -218,7 +208,7 @@ export default function LoginPage() {
                     </p>
                     <Button
                       onClick={() => { setTab("login"); setRegSuccess(false) }}
-                      className="bg-yellow-100 hover:bg-white"
+                      className="bg-blue-100 hover:bg-white"
                     >
                       Back to Sign In
                     </Button>
@@ -226,7 +216,7 @@ export default function LoginPage() {
                 ) : (
                   <>
                     <div className="flex items-center gap-2 mb-6">
-                      <ShoppingBag className="w-5 h-5 text-yellow-600" />
+                      <ShoppingBag className="w-5 h-5 text-blue-600" />
                       <h2 className="text-xl font-semibold text-gray-800">Register Your Shop</h2>
                     </div>
                     <form onSubmit={handleRegister} className="space-y-4">
@@ -310,14 +300,14 @@ export default function LoginPage() {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full bg-yellow-100 hover:bg-white mt-2" disabled={regLoading}>
+                      <Button type="submit" className="w-full bg-blue-100 hover:bg-white mt-2" disabled={regLoading}>
                         {regLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</> : "Submit Registration"}
                       </Button>
                     </form>
 
                     <p className="mt-4 text-center text-xs text-gray-400">
                       Already have an account?{" "}
-                      <button onClick={() => setTab("login")} className="text-yellow-600 font-medium hover:underline">
+                      <button onClick={() => setTab("login")} className="text-blue-600 font-medium hover:underline">
                         Sign In
                       </button>
                     </p>

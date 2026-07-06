@@ -370,7 +370,7 @@ ${buildPrintHeader(shop)}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-yellow-300">
+                  <tr className="border-b border-blue-300">
                     {["#", "From", "Type", "Total", "Paid", "Balance", "Status", "Date", "By", ""].map((h) => (
                       <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
                     ))}
@@ -378,7 +378,7 @@ ${buildPrintHeader(shop)}
                 </thead>
                 <tbody>
                   {filtered.map((p, i) => (
-                    <tr key={p.id} className="border-b border-gray-50 hover:bg-slate-50">
+                    <tr key={p.id} className="border-b border-gray-50 hover:bg-blue-50">
                       <td className="py-3 px-3 text-gray-400 text-xs">{i + 1}</td>
                       <td className="py-3 px-3 font-medium text-gray-800">{p.farmer?.name || p.supplier?.name || p.sellerCustomer?.name || p.walkinSeller || "Direct"}</td>
                       <td className="py-3 px-3">
@@ -389,7 +389,7 @@ ${buildPrintHeader(shop)}
                         ) : p.sellerCustomer ? (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">Trader</span>
                         ) : p.walkinSeller ? (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">Walk-in</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Walk-in</span>
                         ) : (
                           <span className="text-xs text-gray-400">Direct</span>
                         )}
@@ -460,12 +460,12 @@ ${buildPrintHeader(shop)}
           )}
 
           {/* Type toggle */}
-          <div className="flex rounded-lg border border-yellow-300 p-1 gap-1">
+          <div className="flex rounded-lg border border-blue-300 p-1 gap-1">
             <button
               onClick={() => setPurchaseType("stock")}
               className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-colors ${
                 purchaseType === "stock"
-                  ? "bg-purple-700 text-slate-900 shadow-sm"
+                  ? "bg-purple-700 text-blue-900 shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -542,7 +542,7 @@ ${buildPrintHeader(shop)}
                   ))}
                 </div>
               </div>
-              <div className="bg-slate-50 rounded-lg p-4 space-y-2">
+              <div className="bg-blue-50 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Total:</span><span className="font-bold">{formatCurrency(stockTotal)}</span>
                 </div>
@@ -685,7 +685,7 @@ ${buildPrintHeader(shop)}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 text-sm space-y-1">
+            <div className="bg-blue-50 rounded-xl p-4 border border-blue-300 text-sm space-y-1">
               <div className="flex justify-between">
                 <span className="text-gray-500">Reference</span>
                 <span className="font-semibold">#{deleteTarget?.id?.slice(-8).toUpperCase()}</span>
@@ -703,7 +703,7 @@ ${buildPrintHeader(shop)}
                 <span>{deleteTarget ? formatDate(deleteTarget.createdAt) : ""}</span>
               </div>
             </div>
-            <div className="bg-slate-50 border border-yellow-300 rounded-xl p-3 text-xs text-slate-800 space-y-1">
+            <div className="bg-blue-50 border border-blue-300 rounded-xl p-3 text-xs text-blue-800 space-y-1">
               <p className="font-semibold">What happens when deleted:</p>
               <p>✓ Purchase removed from supplier/farmer ledger</p>
               <p>✓ Stock quantities reversed</p>

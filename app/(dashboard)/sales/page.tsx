@@ -329,7 +329,7 @@ ${buildPrintHeader(shop)}
     <>
       {/* ── Pesticide Sale Print Invoice (branded format) ── */}
       {selectedPesticideSaleDetail && (
-        <div className="hidden print:block fixed inset-0 bg-slate-50 z-50">
+        <div className="hidden print:block fixed inset-0 bg-blue-50 z-50">
           <style>{`@media print { @page { size: A4 portrait; margin: 0; } }`}</style>
           <div style={{background:"linear-gradient(135deg,#14532d 0%,#166534 60%,#15803d 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
@@ -414,7 +414,7 @@ ${buildPrintHeader(shop)}
 
       {/* ── Product Sale Print Invoice (branded format) ── */}
       {selectedSale && (
-        <div className="hidden print:block fixed inset-0 bg-slate-50 z-50">
+        <div className="hidden print:block fixed inset-0 bg-blue-50 z-50">
           <style>{`@media print { @page { size: A4 portrait; margin: 0; } }`}</style>
           {/* Green gradient header */}
           <div style={{background:"linear-gradient(135deg,#14532d 0%,#166534 60%,#15803d 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -531,7 +531,7 @@ ${buildPrintHeader(shop)}
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-yellow-300">
+        <div className="flex gap-2 border-b border-blue-300">
           <button
             onClick={() => setActiveTab("products")}
             className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "products" ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
@@ -562,7 +562,7 @@ ${buildPrintHeader(shop)}
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-yellow-300">
+                      <tr className="border-b border-blue-300">
                         {["#", "Customer", "Total", "Paid", "Balance", "Status", "Date", "By", ""].map((h) => (
                           <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
                         ))}
@@ -570,7 +570,7 @@ ${buildPrintHeader(shop)}
                     </thead>
                     <tbody>
                       {filtered.map((s, i) => (
-                        <tr key={s.id} className="border-b border-gray-50 hover:bg-slate-50">
+                        <tr key={s.id} className="border-b border-gray-50 hover:bg-blue-50">
                           <td className="py-3 px-3 text-gray-400 text-xs">{i + 1}</td>
                           <td className="py-3 px-3">
                             <div className="font-medium text-gray-800">
@@ -649,7 +649,7 @@ ${buildPrintHeader(shop)}
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-yellow-300">
+                      <tr className="border-b border-blue-300">
                         {["#", "Pesticide", "Qty", "Unit Price", "Total", "Customer", "Paid", "Balance", "Date", "By", ""].map((h) => (
                           <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
                         ))}
@@ -660,7 +660,7 @@ ${buildPrintHeader(shop)}
                         const bal = s.balance ?? (s.totalAmount - s.paidAmount)
                         const displayName = s.customer?.name || s.customerName
                         return (
-                          <tr key={s.id} className="border-b border-gray-50 hover:bg-slate-50">
+                          <tr key={s.id} className="border-b border-gray-50 hover:bg-blue-50">
                             <td className="py-3 px-3 text-gray-400 text-xs">{i + 1}</td>
                             <td className="py-3 px-3 font-medium text-gray-800">{s.pesticide?.name}</td>
                             <td className="py-3 px-3 text-gray-700">{s.quantity} {s.pesticide?.unit}</td>
@@ -800,7 +800,7 @@ ${buildPrintHeader(shop)}
                   ))}
                 </div>
               </div>
-              <div className="bg-slate-50 rounded-lg p-4 space-y-2">
+              <div className="bg-blue-50 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Total Amount:</span>
                   <span className="font-bold text-gray-900">{formatCurrency(total)}</span>
@@ -857,7 +857,7 @@ ${buildPrintHeader(shop)}
                 <Input type="number" value={pesticideSaleForm.quantity} onChange={(e) => setPesticideSaleForm({ ...pesticideSaleForm, quantity: e.target.value })} />
               </div>
               {selectedPesticide && (
-                <div className="flex justify-between items-center bg-slate-50 rounded px-3 py-2">
+                <div className="flex justify-between items-center bg-blue-50 rounded px-3 py-2">
                   <span className="text-sm text-gray-600">Total Amount:</span>
                   <span className="text-lg font-bold text-purple-700">{formatCurrency(pesticideSaleTotal)}</span>
                 </div>
@@ -924,7 +924,7 @@ ${buildPrintHeader(shop)}
                       <p className="text-sm text-gray-600">{selectedSale.customer.phone}</p>
                     )}
                   </div>
-                  <div className="bg-slate-50 rounded-lg p-3">
+                  <div className="bg-blue-50 rounded-lg p-3">
                     <p className="text-xs text-gray-500 font-medium uppercase mb-1">Sale Info</p>
                     <p className="text-sm text-gray-700">Date: <span className="font-medium">{formatDate(selectedSale.createdAt)}</span></p>
                     <p className="text-sm text-gray-700">By: <span className="font-medium">{selectedSale.createdBy?.name}</span></p>
@@ -939,7 +939,7 @@ ${buildPrintHeader(shop)}
                   <p className="text-sm font-semibold text-gray-700 mb-2">Items</p>
                   <div className="border rounded-lg overflow-hidden">
                     <table className="w-full text-sm">
-                      <thead className="bg-slate-50 border-b">
+                      <thead className="bg-blue-50 border-b">
                         <tr>
                           <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600">#</th>
                           <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600">Product</th>
@@ -951,7 +951,7 @@ ${buildPrintHeader(shop)}
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {selectedSale.items?.map((item: any, i: number) => (
-                          <tr key={item.id} className="hover:bg-slate-50">
+                          <tr key={item.id} className="hover:bg-blue-50">
                             <td className="px-3 py-2.5 text-gray-400 text-xs">{i + 1}</td>
                             <td className="px-3 py-2.5 font-medium text-gray-900">{item.product?.name}</td>
                             <td className="px-3 py-2.5 text-center text-gray-700">{item.quantity}</td>
@@ -964,7 +964,7 @@ ${buildPrintHeader(shop)}
                     </table>
                   </div>
                 </div>
-                <div className="bg-slate-50 rounded-lg p-4">
+                <div className="bg-blue-50 rounded-lg p-4">
                   <div className="flex justify-end">
                     <div className="w-56 space-y-2 text-sm">
                       <div className="flex justify-between">
@@ -975,7 +975,7 @@ ${buildPrintHeader(shop)}
                         <span>Amount Paid:</span>
                         <span className="font-semibold">{formatCurrency(selectedSale.paidAmount)}</span>
                       </div>
-                      <div className={`flex justify-between border-t border-yellow-300 pt-2 font-bold ${selectedSale.balance > 0 ? "text-red-600" : "text-purple-600"}`}>
+                      <div className={`flex justify-between border-t border-blue-300 pt-2 font-bold ${selectedSale.balance > 0 ? "text-red-600" : "text-purple-600"}`}>
                         <span>{selectedSale.balance > 0 ? "Balance Due:" : "Change:"}</span>
                         <span>{formatCurrency(Math.abs(selectedSale.balance))}</span>
                       </div>
@@ -983,7 +983,7 @@ ${buildPrintHeader(shop)}
                   </div>
                 </div>
                 {selectedSale.notes && (
-                  <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3">
+                  <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
                     <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Notes</p>
                     <p className="text-sm text-gray-700">{selectedSale.notes}</p>
                   </div>
@@ -1020,7 +1020,7 @@ ${buildPrintHeader(shop)}
                       <p className="text-sm text-gray-600">{selectedPesticideSaleDetail.customer.phone}</p>
                     )}
                   </div>
-                  <div className="bg-slate-50 rounded-lg p-3">
+                  <div className="bg-blue-50 rounded-lg p-3">
                     <p className="text-xs text-gray-500 font-medium uppercase mb-1">Sale Info</p>
                     <p className="text-sm text-gray-700">Date: <span className="font-medium">{formatDate(selectedPesticideSaleDetail.createdAt)}</span></p>
                     <p className="text-sm text-gray-700">By: <span className="font-medium">{selectedPesticideSaleDetail.soldBy?.name}</span></p>
@@ -1028,7 +1028,7 @@ ${buildPrintHeader(shop)}
                 </div>
                 <div className="border rounded-lg overflow-hidden">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-50 border-b">
+                    <thead className="bg-blue-50 border-b">
                       <tr>
                         <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600">Pesticide</th>
                         <th className="px-3 py-2 text-center text-xs font-semibold text-gray-600">Qty</th>
@@ -1048,7 +1048,7 @@ ${buildPrintHeader(shop)}
                     </tbody>
                   </table>
                 </div>
-                <div className="bg-slate-50 rounded-lg p-4">
+                <div className="bg-blue-50 rounded-lg p-4">
                   <div className="flex justify-end">
                     <div className="w-56 space-y-2 text-sm">
                       <div className="flex justify-between">
@@ -1059,7 +1059,7 @@ ${buildPrintHeader(shop)}
                         <span>Amount Paid:</span>
                         <span className="font-semibold">{formatCurrency(selectedPesticideSaleDetail.paidAmount)}</span>
                       </div>
-                      <div className={`flex justify-between border-t border-yellow-300 pt-2 font-bold ${(selectedPesticideSaleDetail.balance ?? 0) > 0 ? "text-red-600" : "text-purple-600"}`}>
+                      <div className={`flex justify-between border-t border-blue-300 pt-2 font-bold ${(selectedPesticideSaleDetail.balance ?? 0) > 0 ? "text-red-600" : "text-purple-600"}`}>
                         <span>{(selectedPesticideSaleDetail.balance ?? 0) > 0 ? "Balance Due:" : "Paid"}</span>
                         <span>{formatCurrency(Math.abs(selectedPesticideSaleDetail.balance ?? 0))}</span>
                       </div>
@@ -1067,7 +1067,7 @@ ${buildPrintHeader(shop)}
                   </div>
                 </div>
                 {selectedPesticideSaleDetail.notes && (
-                  <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3">
+                  <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
                     <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Notes</p>
                     <p className="text-sm text-gray-700">{selectedPesticideSaleDetail.notes}</p>
                   </div>
@@ -1088,7 +1088,7 @@ ${buildPrintHeader(shop)}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 text-sm space-y-1">
+            <div className="bg-blue-50 rounded-xl p-4 border border-blue-300 text-sm space-y-1">
               <div className="flex justify-between">
                 <span className="text-gray-500">Invoice</span>
                 <span className="font-semibold">#{deleteTarget?.id?.slice(-8).toUpperCase()}</span>
@@ -1106,7 +1106,7 @@ ${buildPrintHeader(shop)}
                 <span>{deleteTarget ? formatDate(deleteTarget.createdAt) : ""}</span>
               </div>
             </div>
-            <div className="bg-slate-50 border border-yellow-300 rounded-xl p-3 text-xs text-slate-800 space-y-1">
+            <div className="bg-blue-50 border border-blue-300 rounded-xl p-3 text-xs text-blue-800 space-y-1">
               <p className="font-semibold">What happens when deleted:</p>
               <p>✓ Sale removed from customer ledger</p>
               <p>✓ Stock quantities restored</p>

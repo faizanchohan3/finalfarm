@@ -146,7 +146,7 @@ export default function PurchasesReportPage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 border-b border-t">
+              <thead className="bg-blue-50 border-b border-t">
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs uppercase">Date</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs uppercase">Supplier</th>
@@ -159,7 +159,7 @@ export default function PurchasesReportPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {purchases.map((purchase) => (
-                  <tr key={purchase.id} className="hover:bg-slate-50">
+                  <tr key={purchase.id} className="hover:bg-blue-50">
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(purchase.createdAt)}</td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-900">{purchase.supplier?.name || "Unknown"}</div>
@@ -184,7 +184,7 @@ export default function PurchasesReportPage() {
                   </tr>
                 )}
               </tbody>
-              <tfoot className="bg-slate-50 border-t-2 border-yellow-300">
+              <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                 <tr>
                   <td colSpan={3} className="px-4 py-3 font-bold text-gray-700">Total — {purchases.length} purchases</td>
                   <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCurrency(totals.totalAmount)}</td>
@@ -199,7 +199,7 @@ export default function PurchasesReportPage() {
       </Card>
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t border-yellow-300 text-center text-xs text-yellow-600">
+      <div className="mt-8 pt-4 border-t border-blue-300 text-center text-xs text-blue-600">
         Powered by Softtech
       </div>
     </div>

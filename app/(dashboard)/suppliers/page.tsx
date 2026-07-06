@@ -278,7 +278,7 @@ export default function SuppliersPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-yellow-300">
+                  <tr className="border-b border-blue-300">
                     {["#", "Name", "Phone", "Address", "Balance", "Status", "Actions"].map((h) => (
                       <th key={h} className={`py-3 px-3 text-gray-500 font-medium ${h === "Balance" ? "text-right" : "text-left"}`}>{h}</th>
                     ))}
@@ -286,7 +286,7 @@ export default function SuppliersPage() {
                 </thead>
                 <tbody>
                   {filtered.map((s, i) => (
-                    <tr key={s.id} className="border-b border-gray-50 hover:bg-slate-50">
+                    <tr key={s.id} className="border-b border-gray-50 hover:bg-blue-50">
                       <td className="py-3 px-3 text-gray-400 text-xs">{i + 1}</td>
                       <td className="py-3 px-3">
                         <button
@@ -312,7 +312,7 @@ export default function SuppliersPage() {
                         {formatCurrency(s.ledgerBalance || 0)}
                       </td>
                       <td className="py-3 px-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${s.isActive ? "bg-green-100 text-purple-700" : "bg-yellow-100 text-gray-500"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${s.isActive ? "bg-green-100 text-purple-700" : "bg-blue-100 text-gray-500"}`}>
                           {s.isActive ? "Active" : "Inactive"}
                         </span>
                       </td>
@@ -359,7 +359,7 @@ export default function SuppliersPage() {
               <Label>Picture (Optional)</Label>
               <div className="flex gap-3 items-end">
                 <div className="flex-1">
-                  <div className="relative border-2 border-yellow-300 rounded-lg p-3 text-center hover:border-green-500 transition-colors">
+                  <div className="relative border-2 border-blue-300 rounded-lg p-3 text-center hover:border-green-500 transition-colors">
                     <input type="file" accept="image/*" onChange={handlePhotoUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                     <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
                       <Upload className="w-4 h-4" />
@@ -428,7 +428,7 @@ export default function SuppliersPage() {
                   <p className="text-xl font-bold text-purple-700">{formatCurrency(detail.totalPaid)}</p>
                   <p className="text-xs text-purple-600 mt-1">Total Paid</p>
                 </div>
-                <div className={`rounded-lg p-4 text-center ${detail.totalBalance > 0 ? "bg-red-50" : "bg-slate-50"}`}>
+                <div className={`rounded-lg p-4 text-center ${detail.totalBalance > 0 ? "bg-red-50" : "bg-blue-50"}`}>
                   <p className={`text-xl font-bold ${detail.totalBalance > 0 ? "text-red-700" : "text-gray-700"}`}>
                     {formatCurrency(detail.totalBalance)}
                   </p>
@@ -439,7 +439,7 @@ export default function SuppliersPage() {
               </div>
 
               {/* Contact */}
-              <div className="flex gap-4 text-sm text-gray-600 bg-slate-50 rounded-lg p-3">
+              <div className="flex gap-4 text-sm text-gray-600 bg-blue-50 rounded-lg p-3">
                 {selected?.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{selected.phone}</span>}
                 {selected?.address && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{selected.address}</span>}
               </div>
@@ -458,7 +458,7 @@ export default function SuppliersPage() {
               </div>
 
               {/* Tabs */}
-              <div className="border-b border-yellow-300">
+              <div className="border-b border-blue-300">
                 <div className="flex gap-0">
                   {([["ledger", "Account Ledger", <BookOpen key="b" className="w-4 h-4" />], ["purchases", "Purchase History", <ShoppingBag key="s" className="w-4 h-4" />]] as const).map(([key, label, icon]) => (
                     <button key={key} onClick={() => setActiveTab(key as any)}
@@ -466,7 +466,7 @@ export default function SuppliersPage() {
                         activeTab === key ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"
                       }`}>
                       {icon}{label}
-                      <span className="text-xs bg-yellow-100 text-gray-500 px-1.5 py-0.5 rounded">
+                      <span className="text-xs bg-blue-100 text-gray-500 px-1.5 py-0.5 rounded">
                         {key === "ledger" ? detail.ledger?.length || 0 : detail.purchases?.length || 0}
                       </span>
                     </button>
@@ -483,14 +483,14 @@ export default function SuppliersPage() {
                     {selectedPayments.size > 0 && (
                       <div className="flex items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <span className="text-sm font-medium text-blue-900">{selectedPayments.size} payment(s) selected</span>
-                        <button onClick={showDeleteConfirmModal} className="ml-auto px-3 py-1 bg-red-600 text-slate-900 text-sm rounded hover:bg-red-700">
+                        <button onClick={showDeleteConfirmModal} className="ml-auto px-3 py-1 bg-red-600 text-blue-900 text-sm rounded hover:bg-red-700">
                           Delete Selected
                         </button>
                       </div>
                     )}
-                    <div className="overflow-x-auto rounded-lg border border-slate-200">
+                    <div className="overflow-x-auto rounded-lg border border-blue-300">
                       <table className="w-full text-sm">
-                        <thead className="bg-slate-50">
+                        <thead className="bg-blue-50">
                           <tr>
                             <th className="text-center py-2 px-3 w-10"></th>
                             <th className="text-left py-2 px-3 text-gray-500 font-medium text-xs">Date</th>
@@ -534,7 +534,7 @@ export default function SuppliersPage() {
                             )
                           })}
                         </tbody>
-                        <tfoot className="bg-slate-50 border-t-2 border-yellow-300">
+                        <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                           <tr>
                             <td colSpan={4} className="py-2 px-3 font-bold text-gray-700 text-xs">Closing Balance</td>
                             <td className="py-2 px-3 text-right font-bold text-gray-900">{formatCurrency((detail.ledger || []).reduce((s: number, e: any) => s + e.debit, 0))}</td>
@@ -560,7 +560,7 @@ export default function SuppliersPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-yellow-300">
+                        <tr className="border-b border-blue-300">
                           {["Date", "Items", "Total", "Paid", "Balance", "Status"].map((h) => (
                             <th key={h} className="text-left py-2 px-3 text-gray-500 font-medium">{h}</th>
                           ))}
@@ -568,7 +568,7 @@ export default function SuppliersPage() {
                       </thead>
                       <tbody>
                         {detail.purchases.map((p: any) => (
-                          <tr key={p.id} className="border-b border-gray-50 hover:bg-slate-50">
+                          <tr key={p.id} className="border-b border-gray-50 hover:bg-blue-50">
                             <td className="py-2 px-3 text-gray-500">{formatDate(p.createdAt)}</td>
                             <td className="py-2 px-3 text-gray-600 text-xs">
                               {p.items.map((i: any) => `${i.product?.name} ×${i.quantity}`).join(", ")}
@@ -595,7 +595,7 @@ export default function SuppliersPage() {
 
       {/* Payment Receipt Print Template */}
       {lastPayment && showPaymentModal && (
-        <div className="hidden print:block fixed inset-0 bg-slate-50 z-[9999] p-10">
+        <div className="hidden print:block fixed inset-0 bg-blue-50 z-[9999] p-10">
           <div className="max-w-xs mx-auto">
             <div className="text-center border-b-2 border-gray-800 pb-4 mb-5">
               <h1 className="text-2xl font-bold text-gray-900">Gala Mandi</h1>
@@ -639,7 +639,7 @@ export default function SuppliersPage() {
                 <p className={`font-semibold ${lastPayment.direction === "RECEIVE" ? "text-orange-800" : "text-blue-800"}`}>{lastPayment.name}</p>
                 {lastPayment.phone && <p className={`text-xs ${lastPayment.direction === "RECEIVE" ? "text-orange-600" : "text-blue-600"}`}>{lastPayment.phone}</p>}
               </div>
-              <div className="border border-slate-200 rounded-lg p-4 space-y-2 text-sm">
+              <div className="border border-blue-300 rounded-lg p-4 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">{lastPayment.direction === "RECEIVE" ? "Received from Supplier" : "Paid to Supplier"}</span>
                   <span className={`font-bold ${lastPayment.direction === "RECEIVE" ? "text-orange-700" : "text-blue-700"}`}>{formatCurrency(lastPayment.amount)}</span>
@@ -668,7 +668,7 @@ export default function SuppliersPage() {
                   className={`py-2 px-3 rounded-lg text-sm font-medium border-2 transition-colors ${
                     paymentForm.direction === "PAY"
                       ? "border-blue-600 bg-blue-50 text-blue-700"
-                      : "border-yellow-300 text-gray-500 hover:border-gray-300"
+                      : "border-blue-300 text-gray-500 hover:border-gray-300"
                   }`}
                 >
                   Paid to Supplier
@@ -679,7 +679,7 @@ export default function SuppliersPage() {
                   className={`py-2 px-3 rounded-lg text-sm font-medium border-2 transition-colors ${
                     paymentForm.direction === "RECEIVE"
                       ? "border-orange-500 bg-orange-50 text-orange-700"
-                      : "border-yellow-300 text-gray-500 hover:border-gray-300"
+                      : "border-blue-300 text-gray-500 hover:border-gray-300"
                   }`}
                 >
                   Received
@@ -759,8 +759,8 @@ export default function SuppliersPage() {
                 This action will remove the transactions from the ledger and reverse the balance calculations.
               </p>
             </div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <p className="text-xs text-yellow-900">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-xs text-blue-900">
                 ⚠️ <strong>Warning:</strong> This action cannot be undone.
               </p>
             </div>

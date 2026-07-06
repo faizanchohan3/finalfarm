@@ -23,11 +23,11 @@ export default function DashboardNotFound() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
+    <div className="flex items-center justify-center min-h-screen bg-blue-50 p-4">
       <Card className="max-w-md w-full">
         <CardContent className="p-8 text-center">
           <div className="flex justify-center mb-4">
-            <AlertTriangle className="w-16 h-16 text-yellow-600" />
+            <AlertTriangle className="w-16 h-16 text-blue-600" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">404</h1>
           <p className="text-gray-600 mb-6">Page not found</p>

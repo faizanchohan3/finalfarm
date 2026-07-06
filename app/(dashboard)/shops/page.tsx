@@ -20,7 +20,7 @@ type Shop = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  PENDING: "bg-yellow-100 text-yellow-800 border-yellow-300",
+  PENDING: "bg-blue-100 text-blue-800 border-blue-300",
   APPROVED: "bg-green-100 text-purple-800 border-green-300",
   REJECTED: "bg-red-100 text-red-800 border-red-300",
 }
@@ -72,16 +72,16 @@ export default function ShopsPage() {
 
       {/* Pending alert */}
       {pending > 0 && (
-        <div className="bg-yellow-50 border border-yellow-300 rounded-xl px-5 py-4 flex items-center gap-3">
-          <Clock className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-          <p className="text-yellow-800 font-medium">
+        <div className="bg-blue-50 border border-blue-300 rounded-xl px-5 py-4 flex items-center gap-3">
+          <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
+          <p className="text-blue-800 font-medium">
             {pending} shop{pending > 1 ? "s" : ""} pending approval — review and approve below.
           </p>
         </div>
       )}
 
       {/* Filter tabs */}
-      <div className="flex gap-2 border-b border-yellow-300 pb-0">
+      <div className="flex gap-2 border-b border-blue-300 pb-0">
         {["ALL", "PENDING", "APPROVED", "REJECTED"].map((f) => (
           <button
             key={f}
@@ -94,7 +94,7 @@ export default function ShopsPage() {
           >
             {f === "ALL" ? "All Shops" : f.charAt(0) + f.slice(1).toLowerCase()}
             {f === "PENDING" && pending > 0 && (
-              <span className="ml-2 bg-yellow-500 text-slate-900 text-xs rounded-full px-1.5 py-0.5">{pending}</span>
+              <span className="ml-2 bg-blue-500 text-blue-900 text-xs rounded-full px-1.5 py-0.5">{pending}</span>
             )}
           </button>
         ))}
@@ -108,7 +108,7 @@ export default function ShopsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {shops.map((shop) => (
-            <div key={shop.id} className="bg-slate-50 rounded-xl border border-yellow-300 p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div key={shop.id} className="bg-blue-50 rounded-xl border border-blue-300 p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -143,7 +143,7 @@ export default function ShopsPage() {
                 )}
               </div>
 
-              <div className="flex gap-3 text-xs text-gray-600 mb-4 bg-slate-50 rounded-lg p-3">
+              <div className="flex gap-3 text-xs text-gray-600 mb-4 bg-blue-50 rounded-lg p-3">
                 <div className="flex items-center gap-1">
                   <Users className="w-3.5 h-3.5 text-blue-500" />
                   <span>{shop._count.users} users</span>

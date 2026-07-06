@@ -70,16 +70,16 @@ export default function AuditPage() {
               {logs.map((log) => {
                 const Icon = moduleIcon[log.module] || Shield
                 return (
-                  <div key={log.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-slate-50 border border-slate-200">
-                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <div key={log.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-blue-50 border border-blue-300">
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                       <Icon className="w-4 h-4 text-gray-600" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${actionColor[log.action] || "bg-yellow-100 text-gray-700"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${actionColor[log.action] || "bg-blue-100 text-gray-700"}`}>
                           {log.action}
                         </span>
-                        <span className="text-xs bg-yellow-100 text-gray-600 px-2 py-0.5 rounded-full">{log.module}</span>
+                        <span className="text-xs bg-blue-100 text-gray-600 px-2 py-0.5 rounded-full">{log.module}</span>
                         <span className="text-sm text-gray-700">{log.details}</span>
                       </div>
                       <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
@@ -109,7 +109,7 @@ export default function AuditPage() {
           <button
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page === 1}
-            className="px-3 py-1.5 text-sm border border-yellow-300 rounded-lg disabled:opacity-50 hover:bg-slate-50"
+            className="px-3 py-1.5 text-sm border border-blue-300 rounded-lg disabled:opacity-50 hover:bg-blue-50"
           >
             Previous
           </button>
@@ -117,7 +117,7 @@ export default function AuditPage() {
           <button
             onClick={() => setPage(page + 1)}
             disabled={page >= Math.ceil(total / 50)}
-            className="px-3 py-1.5 text-sm border border-yellow-300 rounded-lg disabled:opacity-50 hover:bg-slate-50"
+            className="px-3 py-1.5 text-sm border border-blue-300 rounded-lg disabled:opacity-50 hover:bg-blue-50"
           >
             Next
           </button>

@@ -108,10 +108,10 @@ export default function ProfilePage() {
       </div>
 
       {/* Account Info Card */}
-      <div className="bg-slate-50 rounded-xl border border-yellow-300 p-6 shadow-sm">
+      <div className="bg-blue-50 rounded-xl border border-blue-300 p-6 shadow-sm">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center flex-shrink-0">
-            <User className="w-8 h-8 text-slate-900" />
+            <User className="w-8 h-8 text-blue-900" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900">{profile?.name}</h2>
@@ -128,7 +128,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 mb-6 bg-slate-50 rounded-lg p-4">
+        <div className="grid grid-cols-1 gap-3 mb-6 bg-blue-50 rounded-lg p-4">
           <div className="flex items-center gap-3 text-sm">
             <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
             <span className="text-gray-500 w-20">Email</span>
@@ -181,7 +181,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Change Password Card */}
-      <div className="bg-slate-50 rounded-xl border border-yellow-300 p-6 shadow-sm">
+      <div className="bg-blue-50 rounded-xl border border-blue-300 p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-5">
           <Lock className="w-5 h-5 text-gray-600" />
           <h3 className="font-semibold text-gray-800">Change Password</h3>

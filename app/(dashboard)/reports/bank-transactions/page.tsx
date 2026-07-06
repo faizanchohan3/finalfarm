@@ -108,7 +108,7 @@ export default function BankTransactionsPage() {
                     <SelectValue placeholder="All Banks" />
                   </SelectTrigger>
                   <SelectContent className="max-h-64 overflow-y-auto">
-                    <div className="sticky top-0 bg-slate-50 p-2 border-b">
+                    <div className="sticky top-0 bg-blue-50 p-2 border-b">
                       <Input
                         placeholder="Search banks..."
                         value={bankSearch}
@@ -212,7 +212,7 @@ export default function BankTransactionsPage() {
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-slate-50 border-b border-t">
+                  <thead className="bg-blue-50 border-b border-t">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">#</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
@@ -231,7 +231,7 @@ export default function BankTransactionsPage() {
                         <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                         <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(e.date)}</td>
                         <td className="px-4 py-3">
-                          <span className={`text-xs font-semibold px-2 py-0.5 rounded ${TYPE_LABELS[e.type]?.color || "bg-yellow-100 text-gray-600"}`}>
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded ${TYPE_LABELS[e.type]?.color || "bg-blue-100 text-gray-600"}`}>
                             {TYPE_LABELS[e.type]?.label || e.type}
                           </span>
                         </td>
@@ -258,7 +258,7 @@ export default function BankTransactionsPage() {
                     )}
                   </tbody>
                   {entries.length > 0 && (
-                    <tfoot className="bg-slate-50 border-t-2 border-yellow-300">
+                    <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                       <tr>
                         <td colSpan={7} className="px-4 py-3 font-bold text-gray-700">Total</td>
                         <td className="px-4 py-3 text-right font-bold text-purple-700">{formatCurrency(summary.totalIn)}</td>
@@ -274,7 +274,7 @@ export default function BankTransactionsPage() {
       )}
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t border-yellow-300 text-center text-xs text-yellow-600">
+      <div className="mt-8 pt-4 border-t border-blue-300 text-center text-xs text-blue-600">
         Powered by Softtech
       </div>
     </div>
