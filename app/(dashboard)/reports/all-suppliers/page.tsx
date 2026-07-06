@@ -208,7 +208,7 @@ ${buildPrintHeader(shop)}
                 onChange={(e) => setSearch(e.target.value)} className="pl-9" />
             </div>
             {isRestrictedRole && (
-              <div className="text-xs text-gray-500 bg-amber-50 px-3 py-1.5 rounded">
+              <div className="text-xs text-gray-500 bg-slate-50 px-3 py-1.5 rounded">
                 Summary view only
               </div>
             )}
@@ -217,7 +217,7 @@ ${buildPrintHeader(shop)}
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-amber-50 border-b border-t">
+              <thead className="bg-slate-50 border-b border-t">
                 <tr>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase text-left">#</th>
                   {isRestrictedRole && <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase text-center">Photo</th>}
@@ -250,14 +250,14 @@ ${buildPrintHeader(shop)}
                 ) : filtered.map((s, i) => {
                   const bal = s.balance || 0
                   return (
-                    <tr key={s.id} className="hover:bg-amber-50">
+                    <tr key={s.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                       {isRestrictedRole && (
                         <td className="px-4 py-3 text-center">
                           {s.picture ? (
                             <img src={s.picture} alt={s.name} className="w-8 h-8 rounded-full object-cover mx-auto" />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-amber-200 mx-auto flex items-center justify-center text-xs text-gray-500">
+                            <div className="w-8 h-8 rounded-full bg-yellow-200 mx-auto flex items-center justify-center text-xs text-gray-500">
                               {s.name.charAt(0).toUpperCase()}
                             </div>
                           )}
@@ -280,7 +280,7 @@ ${buildPrintHeader(shop)}
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                               bal > 0 ? "bg-red-100 text-red-700"
                               : bal < 0 ? "bg-green-100 text-purple-700"
-                              : "bg-amber-100 text-gray-500"
+                              : "bg-yellow-100 text-gray-500"
                             }`}>
                               {bal > 0 ? "Payable" : bal < 0 ? "Advance" : "Settled"}
                             </span>
@@ -298,7 +298,7 @@ ${buildPrintHeader(shop)}
                 })}
               </tbody>
               {!loading && filtered.length > 0 && (
-                <tfoot className="bg-amber-50 border-t-2 border-amber-200">
+                <tfoot className="bg-slate-50 border-t-2 border-yellow-300">
                   <tr>
                     <td colSpan={isRestrictedRole ? 4 : 4} className="px-4 py-3 font-bold text-gray-700">{filtered.length} suppliers</td>
                     {!isRestrictedRole && (
@@ -324,7 +324,7 @@ ${buildPrintHeader(shop)}
       </Card>
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+      <div className="mt-8 pt-4 border-t border-yellow-300 text-center text-xs text-yellow-600">
         Powered by Softtech
       </div>
     </div>

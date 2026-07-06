@@ -34,7 +34,7 @@ export default async function DashboardLayout({
         <div className="print:hidden">
           <Header title="Gala Mandi" />
         </div>
-        <main className="flex-1 overflow-y-auto p-6 bg-amber-50 print:overflow-visible print:p-4 print:bg-amber-50">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6 bg-slate-50 print:overflow-visible print:p-4 print:bg-slate-50">{children}</main>
       </div>
     </div>
   )

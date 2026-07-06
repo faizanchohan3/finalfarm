@@ -34,7 +34,7 @@ export function Header({ title }: { title: string }) {
   }, [isSuperAdmin])
 
   return (
-    <header className="h-16 bg-amber-50 border-b border-amber-200 flex items-center justify-between px-6 flex-shrink-0">
+    <header className="h-16 bg-slate-50 border-b border-yellow-300 flex items-center justify-between px-6 flex-shrink-0">
       <div className="flex items-center gap-3">
         <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
         {!isSuperAdmin && session?.user?.shopName && (
@@ -48,16 +48,16 @@ export function Header({ title }: { title: string }) {
       <div className="flex items-center gap-4">
         {/* Pending shops bell for super admin */}
         {isSuperAdmin ? (
-          <Link href="/shops" className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-amber-100 rounded-lg">
+          <Link href="/shops" className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-yellow-100 rounded-lg">
             <Bell className="w-5 h-5" />
             {pendingShops > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-amber-950 text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-slate-900 text-[10px] font-bold rounded-full flex items-center justify-center">
                 {pendingShops}
               </span>
             )}
           </Link>
         ) : (
-          <button className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-amber-100 rounded-lg">
+          <button className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-yellow-100 rounded-lg">
             <Bell className="w-5 h-5" />
           </button>
         )}
@@ -66,10 +66,10 @@ export function Header({ title }: { title: string }) {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((o) => !o)}
-            className="flex items-center gap-3 hover:bg-amber-100 rounded-lg px-2 py-1.5 transition-colors"
+            className="flex items-center gap-3 hover:bg-yellow-100 rounded-lg px-2 py-1.5 transition-colors"
           >
             <div className="w-8 h-8 bg-purple-700 rounded-full flex items-center justify-center flex-shrink-0">
-              <User className="w-4 h-4 text-amber-950" />
+              <User className="w-4 h-4 text-slate-900" />
             </div>
             <div className="hidden sm:block text-left">
               <p className="text-sm font-medium text-gray-800 leading-tight">{session?.user?.name}</p>
@@ -80,8 +80,8 @@ export function Header({ title }: { title: string }) {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-52 bg-amber-50 border border-amber-200 rounded-xl shadow-lg z-50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-amber-100 bg-amber-50">
+            <div className="absolute right-0 top-full mt-2 w-52 bg-slate-50 border border-yellow-300 rounded-xl shadow-lg z-50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
                 <p className="text-xs text-gray-500">Signed in as</p>
                 <p className="text-sm font-semibold text-gray-800 truncate">{session?.user?.email}</p>
               </div>
@@ -89,7 +89,7 @@ export function Header({ title }: { title: string }) {
                 <Link
                   href="/profile"
                   onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-amber-50 transition-colors"
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-slate-50 transition-colors"
                 >
                   <Settings className="w-4 h-4 text-gray-400" />
                   My Profile & Password

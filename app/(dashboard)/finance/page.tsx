@@ -224,7 +224,7 @@ export default function FinancePage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-amber-200">
+                  <tr className="border-b border-yellow-300">
                     {["Type", "Description", "Category", "Bank", "Amount", "Reference", "By", "Date", "Action"].map((h) => (
                       <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
                     ))}
@@ -242,7 +242,7 @@ export default function FinancePage() {
                       return true
                     })
                     .map((t) => (
-                    <tr key={t.id} className="border-b border-gray-50 hover:bg-amber-50">
+                    <tr key={t.id} className="border-b border-gray-50 hover:bg-slate-50">
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-1.5">
                           {t.type === "CREDIT" ? (
@@ -323,7 +323,7 @@ export default function FinancePage() {
                 className={`flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
                   form.type === "CREDIT"
                     ? "border-green-500 bg-green-50 text-purple-700 shadow-sm"
-                    : "border-amber-200 text-gray-500 hover:border-gray-300 hover:bg-amber-50"
+                    : "border-yellow-300 text-gray-500 hover:border-gray-300 hover:bg-slate-50"
                 }`}
               >
                 <ArrowUpCircle className="w-4 h-4" />
@@ -334,7 +334,7 @@ export default function FinancePage() {
                 className={`flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
                   form.type === "DEBIT"
                     ? "border-red-500 bg-red-50 text-red-700 shadow-sm"
-                    : "border-amber-200 text-gray-500 hover:border-gray-300 hover:bg-amber-50"
+                    : "border-yellow-300 text-gray-500 hover:border-gray-300 hover:bg-slate-50"
                 }`}
               >
                 <ArrowDownCircle className="w-4 h-4" />
@@ -398,9 +398,9 @@ export default function FinancePage() {
                       className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
                         form.category === cat
                           ? form.type === "CREDIT"
-                            ? "bg-purple-600 text-amber-950 border-purple-600"
-                            : "bg-red-600 text-amber-950 border-red-600"
-                          : "bg-amber-50 text-gray-600 border-amber-200 hover:border-gray-400"
+                            ? "bg-purple-600 text-slate-900 border-purple-600"
+                            : "bg-red-600 text-slate-900 border-red-600"
+                          : "bg-slate-50 text-gray-600 border-yellow-300 hover:border-gray-400"
                       }`}
                     >
                       {cat}
@@ -440,7 +440,7 @@ export default function FinancePage() {
                   className={`flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
                     !form.bankId
                       ? "border-blue-500 bg-blue-50 text-blue-700"
-                      : "border-amber-200 text-gray-500 hover:border-gray-300"
+                      : "border-yellow-300 text-gray-500 hover:border-gray-300"
                   }`}
                 >
                   <Banknote className="w-4 h-4" /> Cash
@@ -450,7 +450,7 @@ export default function FinancePage() {
                   className={`flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
                     form.bankId
                       ? "border-blue-500 bg-blue-50 text-blue-700"
-                      : "border-amber-200 text-gray-500 hover:border-gray-300"
+                      : "border-yellow-300 text-gray-500 hover:border-gray-300"
                   }`}
                 >
                   <CreditCard className="w-4 h-4" /> Bank
@@ -467,7 +467,7 @@ export default function FinancePage() {
                 </Select>
               )}
               {form.bankId && banks.length === 0 && (
-                <p className="text-xs text-amber-600 mt-1.5">No banks added yet — <Link href="/banks" className="underline">add a bank</Link></p>
+                <p className="text-xs text-yellow-600 mt-1.5">No banks added yet — <Link href="/banks" className="underline">add a bank</Link></p>
               )}
             </div>
 
@@ -514,7 +514,7 @@ export default function FinancePage() {
                     className={`py-2 px-3 rounded-lg text-sm font-medium border-2 transition-colors ${
                       form.entryType === "DEBIT"
                         ? "border-red-500 bg-red-50 text-red-700"
-                        : "border-amber-200 text-gray-600 hover:border-gray-300"
+                        : "border-yellow-300 text-gray-600 hover:border-gray-300"
                     }`}
                   >
                     Debit (Dr)
@@ -524,7 +524,7 @@ export default function FinancePage() {
                     className={`py-2 px-3 rounded-lg text-sm font-medium border-2 transition-colors ${
                       form.entryType === "CREDIT"
                         ? "border-green-500 bg-green-50 text-purple-700"
-                        : "border-amber-200 text-gray-600 hover:border-gray-300"
+                        : "border-yellow-300 text-gray-600 hover:border-gray-300"
                     }`}
                   >
                     Credit (Cr)
@@ -590,9 +590,9 @@ export default function FinancePage() {
               </div>
             )}
 
-            <div className="overflow-x-auto rounded-lg border border-amber-100">
+            <div className="overflow-x-auto rounded-lg border border-slate-200">
               <table className="w-full text-sm">
-                <thead className="bg-amber-50 sticky top-0">
+                <thead className="bg-slate-50 sticky top-0">
                   <tr>
                     <th className="text-left py-3 px-4 text-gray-600 font-semibold">Date</th>
                     <th className="text-left py-3 px-4 text-gray-600 font-semibold">Description</th>
@@ -609,7 +609,7 @@ export default function FinancePage() {
                       return true
                     })
                     .map((t, i) => (
-                      <tr key={i} className="hover:bg-amber-50">
+                      <tr key={i} className="hover:bg-slate-50">
                         <td className="py-3 px-4 text-gray-500 text-xs whitespace-nowrap">{formatDate(t.createdAt)}</td>
                         <td className="py-3 px-4 text-gray-700">{t.description}</td>
                         <td className="py-3 px-4 text-gray-600 text-xs">{t.category || "—"}</td>

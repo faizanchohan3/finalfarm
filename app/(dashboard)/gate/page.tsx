@@ -13,7 +13,7 @@ import { Plus, DoorOpen, Scale, FileCheck, LogOut, Clock, Printer } from "lucide
 
 const STATUS_COLORS: Record<string, string> = {
   OPEN: "bg-green-100 text-purple-700",
-  CLOSED: "bg-amber-100 text-gray-600",
+  CLOSED: "bg-yellow-100 text-gray-600",
 }
 const TYPE_COLORS: Record<string, string> = {
   IN: "bg-blue-100 text-blue-700",
@@ -195,7 +195,7 @@ ${buildPrintHeader(shop)}
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-amber-50 border-b">
+              <thead className="bg-slate-50 border-b">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Entry #</th>
                   <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Type</th>
@@ -216,7 +216,7 @@ ${buildPrintHeader(shop)}
                 ) : entries.map((e) => {
                   const latestWeigh = e.weighbridgeEntries?.[e.weighbridgeEntries.length - 1]
                   return (
-                    <tr key={e.id} className="hover:bg-amber-50">
+                    <tr key={e.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-mono text-xs text-gray-500">{e.entryNo}</td>
                       <td className="px-4 py-3 text-center">
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_COLORS[e.type]}`}>{e.type}</span>

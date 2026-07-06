@@ -144,17 +144,17 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "relative flex flex-col bg-white text-amber-950 transition-all duration-300 h-screen overflow-hidden border-r border-amber-200",
+        "relative flex flex-col bg-slate-900 text-white transition-all duration-300 h-screen overflow-hidden border-r border-yellow-400",
         collapsed ? "w-16" : "w-64"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-amber-200 flex-shrink-0">
-        <div className="flex-shrink-0 w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-amber-300">
+      <div className="flex items-center gap-3 px-4 py-5 border-b border-yellow-400 flex-shrink-0">
+        <div className="flex-shrink-0 w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-yellow-400">
           {shopLogo ? (
             <img src={shopLogo} alt="Shop Logo" className="w-full h-full object-cover" />
           ) : (
-            <Store className="w-5 h-5 text-amber-900" />
+            <Store className="w-5 h-5 text-slate-900" />
           )}
         </div>
         {!collapsed && (
@@ -162,7 +162,7 @@ export function Sidebar() {
             <p className="font-bold text-sm leading-tight truncate">
               {isSuperAdmin ? "Gala Mandi" : (shopName || "Gala Mandi")}
             </p>
-            <p className="text-amber-100 text-xs">
+            <p className="text-white text-xs">
               {isSuperAdmin ? "Platform Head" : "Shop Management"}
             </p>
           </div>
@@ -183,20 +183,20 @@ export function Sidebar() {
                 <div
                   className={cn(
                     "flex items-center rounded-lg transition-colors",
-                    active ? "bg-amber-100" : "hover:bg-amber-100"
+                    active ? "bg-yellow-100" : "hover:bg-yellow-100"
                   )}
                 >
                   <Link
                     href={href}
                     className="flex items-center gap-3 px-3 py-2.5 flex-1 text-sm font-medium"
                   >
-                    <Icon className="w-5 h-5 flex-shrink-0 text-amber-950" />
-                    {!collapsed && <span className="text-amber-950">{label}</span>}
+                    <Icon className="w-5 h-5 flex-shrink-0 text-slate-900" />
+                    {!collapsed && <span className="text-slate-900">{label}</span>}
                   </Link>
                   {!collapsed && (
                     <button
                       onClick={() => setReportsOpen((o) => !o)}
-                      className="pr-3 py-2.5 text-amber-100 hover:text-amber-950 transition-colors"
+                      className="pr-3 py-2.5 text-white hover:text-slate-900 transition-colors"
                       aria-label="Toggle reports menu"
                     >
                       <ChevronDown
@@ -216,7 +216,7 @@ export function Sidebar() {
                       reportsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                     )}
                   >
-                    <div className="ml-4 mt-1 border-l-2 border-amber-200 pl-3 pb-1 space-y-0.5">
+                    <div className="ml-4 mt-1 border-l-2 border-yellow-300 pl-3 pb-1 space-y-0.5">
                       {reportSubItems.map((sub) => {
                         const subActive = pathname === sub.href
                         return (
@@ -226,8 +226,8 @@ export function Sidebar() {
                             className={cn(
                               "flex items-center py-1.5 px-2 rounded text-xs font-medium transition-colors",
                               subActive
-                                ? "bg-amber-100 text-yellow-300"
-                                : "text-amber-100 hover:bg-amber-100 hover:text-amber-950"
+                                ? "bg-yellow-100 text-yellow-300"
+                                : "text-white hover:bg-yellow-100 hover:text-slate-900"
                             )}
                           >
                             {sub.label}
@@ -247,7 +247,7 @@ export function Sidebar() {
               href={href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                active ? "bg-amber-100 text-amber-950" : "text-green-100 hover:bg-amber-100 hover:text-amber-950"
+                active ? "bg-yellow-100 text-slate-900" : "text-green-100 hover:bg-yellow-100 hover:text-slate-900"
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -260,12 +260,12 @@ export function Sidebar() {
       {/* Collapse toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 w-6 h-6 bg-amber-100 border border-amber-200 rounded-full flex items-center justify-center hover:bg-amber-100 transition-colors"
+        className="absolute -right-3 top-20 w-6 h-6 bg-yellow-100 border border-yellow-300 rounded-full flex items-center justify-center hover:bg-yellow-100 transition-colors"
       >
         {collapsed ? (
-          <ChevronRight className="w-3 h-3 text-amber-950" />
+          <ChevronRight className="w-3 h-3 text-slate-900" />
         ) : (
-          <ChevronLeft className="w-3 h-3 text-amber-950" />
+          <ChevronLeft className="w-3 h-3 text-slate-900" />
         )}
       </button>
     </aside>

@@ -124,7 +124,7 @@ export default async function DashboardPage() {
               </p>
               <p className="text-yellow-700 text-xs mt-0.5">Click to review and approve shop registrations</p>
             </div>
-            <span className="bg-yellow-500 text-amber-950 text-sm font-bold px-3 py-1 rounded-full">
+            <span className="bg-yellow-500 text-slate-900 text-sm font-bold px-3 py-1 rounded-full">
               {data.pendingShops}
             </span>
           </div>
@@ -134,13 +134,13 @@ export default async function DashboardPage() {
       {/* Super Admin: total shops stat */}
       {isSuperAdmin && (
         <Link href="/shops">
-          <div className="bg-purple-700 text-amber-950 rounded-xl px-5 py-4 flex items-center gap-4 hover:bg-purple-800 transition-colors cursor-pointer">
+          <div className="bg-purple-700 text-slate-900 rounded-xl px-5 py-4 flex items-center gap-4 hover:bg-purple-800 transition-colors cursor-pointer">
             <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Store className="w-6 h-6 text-amber-950" />
+              <Store className="w-6 h-6 text-slate-900" />
             </div>
             <div className="flex-1">
               <p className="text-purple-200 text-xs font-medium uppercase tracking-wider">Platform Head</p>
-              <p className="text-amber-950 font-bold text-lg">Manage All Shops</p>
+              <p className="text-slate-900 font-bold text-lg">Manage All Shops</p>
               <p className="text-purple-300 text-xs">Approve registrations, suspend or reactivate shops</p>
             </div>
             <span className="text-purple-300 text-sm">View →</span>

@@ -442,7 +442,7 @@ export default function BalanceSheetPage() {
             <Card>
               <CardContent className="p-4">
                 <p className="text-xs text-gray-500 uppercase font-medium">Total Payables</p>
-                <p className="text-xl font-bold text-amber-700 mt-1">{formatCurrency(data.supplierPayables)}</p>
+                <p className="text-xl font-bold text-yellow-600 mt-1">{formatCurrency(data.supplierPayables)}</p>
                 <p className="text-xs text-gray-400 mt-1">To suppliers</p>
               </CardContent>
             </Card>
@@ -451,7 +451,7 @@ export default function BalanceSheetPage() {
       )}
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+      <div className="mt-8 pt-4 border-t border-yellow-300 text-center text-xs text-yellow-600">
         Powered by Softtech
       </div>
     </div>

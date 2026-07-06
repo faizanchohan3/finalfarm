@@ -121,7 +121,7 @@ export default function BanksPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-amber-200">
+                  <tr className="border-b border-yellow-300">
                     <th className="text-left py-3 px-4 text-gray-500 font-medium">#</th>
                     <th className="text-left py-3 px-4 text-gray-500 font-medium">Bank Name</th>
                     <th className="text-left py-3 px-4 text-gray-500 font-medium">Account Number</th>
@@ -131,7 +131,7 @@ export default function BanksPage() {
                 </thead>
                 <tbody>
                   {banks.map((bank, i) => (
-                    <tr key={bank.id} className="border-b border-gray-50 hover:bg-amber-50">
+                    <tr key={bank.id} className="border-b border-gray-50 hover:bg-slate-50">
                       <td className="py-3 px-4 text-gray-400 text-xs">{i + 1}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">

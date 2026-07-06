@@ -168,7 +168,7 @@ export default function ShopDetailPage() {
       </div>
 
       {/* Shop Info Card */}
-      <div className="bg-amber-50 rounded-xl border border-amber-200 p-6 shadow-sm">
+      <div className="bg-slate-50 rounded-xl border border-yellow-300 p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
@@ -233,15 +233,15 @@ export default function ShopDetailPage() {
 
         {/* Stats */}
         <div className="flex gap-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600 bg-amber-50 rounded-lg px-4 py-2">
+          <div className="flex items-center gap-2 text-sm text-gray-600 bg-slate-50 rounded-lg px-4 py-2">
             <ShoppingCart className="w-4 h-4 text-green-500" />
             <span><strong>{shop._count.sales}</strong> Sales</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 bg-amber-50 rounded-lg px-4 py-2">
+          <div className="flex items-center gap-2 text-sm text-gray-600 bg-slate-50 rounded-lg px-4 py-2">
             <Users className="w-4 h-4 text-blue-500" />
             <span><strong>{shop._count.customers}</strong> Customers</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 bg-amber-50 rounded-lg px-4 py-2">
+          <div className="flex items-center gap-2 text-sm text-gray-600 bg-slate-50 rounded-lg px-4 py-2">
             <Package className="w-4 h-4 text-purple-500" />
             <span><strong>{shop._count.products}</strong> Products</span>
           </div>
@@ -249,8 +249,8 @@ export default function ShopDetailPage() {
       </div>
 
       {/* Users Section */}
-      <div className="bg-amber-50 rounded-xl border border-amber-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-amber-100 flex items-center gap-2">
+      <div className="bg-slate-50 rounded-xl border border-yellow-300 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center gap-2">
           <Users className="w-5 h-5 text-gray-600" />
           <h2 className="font-semibold text-gray-800">Shop Users ({shop.users.length})</h2>
         </div>
@@ -278,7 +278,7 @@ export default function ShopDetailPage() {
                     <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getRoleColor(user.role)}`}>
                       {user.role}
                     </span>
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${user.isActive ? "bg-green-100 text-purple-700" : "bg-amber-100 text-gray-500"}`}>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${user.isActive ? "bg-green-100 text-purple-700" : "bg-yellow-100 text-gray-500"}`}>
                       {user.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
@@ -302,7 +302,7 @@ export default function ShopDetailPage() {
                       <Input
                         value={edit.value}
                         onChange={(e) => setEdit({ ...edit, value: e.target.value })}
-                        className="flex-1 bg-amber-50 text-sm"
+                        className="flex-1 bg-slate-50 text-sm"
                         placeholder="Enter new name"
                         autoFocus
                       />
@@ -328,7 +328,7 @@ export default function ShopDetailPage() {
                           type={edit.showPw ? "text" : "password"}
                           value={edit.value}
                           onChange={(e) => setEdit({ ...edit, value: e.target.value })}
-                          className="bg-amber-50 text-sm pr-10"
+                          className="bg-slate-50 text-sm pr-10"
                           placeholder="New password (min 6 chars)"
                           autoFocus
                         />
@@ -344,7 +344,7 @@ export default function ShopDetailPage() {
                         type="password"
                         value={edit.confirm || ""}
                         onChange={(e) => setEdit({ ...edit, confirm: e.target.value })}
-                        className="bg-amber-50 text-sm"
+                        className="bg-slate-50 text-sm"
                         placeholder="Confirm new password"
                       />
                       <div className="flex gap-2">

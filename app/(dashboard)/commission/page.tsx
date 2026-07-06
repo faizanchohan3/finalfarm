@@ -404,7 +404,7 @@ ${buildPrintHeader(shop)}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-amber-200">
+                  <tr className="border-b border-yellow-300">
                     {["#", "Seller", "Buyer", "Commodity", "Total Value", "Comm %", "Commission", "Labour", "Seller Payable", "Paid", "Balance", "Status", "Date", "Action", ""].map((h) => (
                       <th key={h} className="text-left py-3 px-2 text-gray-500 font-medium whitespace-nowrap">{h}</th>
                     ))}
@@ -412,7 +412,7 @@ ${buildPrintHeader(shop)}
                 </thead>
                 <tbody>
                   {filtered.map((c, i) => (
-                    <tr key={c.id} className="border-b border-gray-50 hover:bg-amber-50">
+                    <tr key={c.id} className="border-b border-gray-50 hover:bg-slate-50">
                       <td className="py-3 px-2 text-gray-400 text-xs">{i + 1}</td>
                       <td className="py-3 px-2 font-medium text-gray-800">
                         {c.farmer?.name || c.supplier?.name || c.walkInSeller || <span className="text-gray-400">—</span>}
@@ -476,10 +476,10 @@ ${buildPrintHeader(shop)}
       <Dialog open={showNew} onOpenChange={setShowNew}>
         <DialogContent className="w-[96vw] max-w-2xl max-h-[92vh] overflow-y-auto p-0">
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-gradient-to-r from-orange-600 to-orange-500 text-amber-950 px-6 py-4 rounded-t-lg flex items-center justify-between">
+          <div className="sticky top-0 z-10 bg-gradient-to-r from-orange-600 to-orange-500 text-slate-900 px-6 py-4 rounded-t-lg flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-amber-50/20 flex items-center justify-center flex-shrink-0">
-                <Percent className="w-5 h-5 text-amber-950" />
+              <div className="w-9 h-9 rounded-full bg-slate-50/20 flex items-center justify-center flex-shrink-0">
+                <Percent className="w-5 h-5 text-slate-900" />
               </div>
               <div>
                 <h2 className="text-lg font-bold">New Commission</h2>
@@ -488,7 +488,7 @@ ${buildPrintHeader(shop)}
             </div>
             <button
               onClick={() => setShowNew(false)}
-              className="text-amber-950 hover:bg-amber-50/20 rounded-lg p-1.5 transition-colors flex-shrink-0"
+              className="text-slate-900 hover:bg-slate-50/20 rounded-lg p-1.5 transition-colors flex-shrink-0"
               title="Close"
             >
               <X className="w-5 h-5" />
@@ -500,7 +500,7 @@ ${buildPrintHeader(shop)}
             {/* ── Section 1: Parties ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Seller & Buyer</h3>
-              <div className="bg-amber-50 rounded-xl p-4 space-y-3 border border-amber-100">
+              <div className="bg-slate-50 rounded-xl p-4 space-y-3 border border-slate-200">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">Seller (Farmer / Supplier)</Label>
@@ -540,7 +540,7 @@ ${buildPrintHeader(shop)}
             </div>
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Commodity Details</h3>
-              <div className="bg-amber-50 rounded-xl p-4 space-y-3 border border-amber-100">
+              <div className="bg-slate-50 rounded-xl p-4 space-y-3 border border-slate-200">
               <div>
                 <Label className="text-xs font-semibold text-gray-600">Commodity / Product</Label>
                 <Input className="mt-1" placeholder="e.g. Wheat, Rice, Cotton, Sugar..." value={commodity}
@@ -559,7 +559,7 @@ ${buildPrintHeader(shop)}
                 </div>
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">Mound <span className="font-normal text-gray-400">(auto)</span></Label>
-                  <Input type="number" className="mt-1 bg-amber-50" placeholder="0" value={mound}
+                  <Input type="number" className="mt-1 bg-slate-50" placeholder="0" value={mound}
                     onChange={(e) => setMound(e.target.value)} />
                 </div>
                 <div>
@@ -573,7 +573,7 @@ ${buildPrintHeader(shop)}
             {/* ── Section 3: Amounts ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Amounts & Commission</h3>
-              <div className="bg-amber-50 rounded-xl p-4 space-y-3 border border-amber-100">
+              <div className="bg-slate-50 rounded-xl p-4 space-y-3 border border-slate-200">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-1">
                   <Label className="text-xs font-semibold text-gray-600">Total Amount (PKR) <span className="text-red-500">*</span></Label>
@@ -605,7 +605,7 @@ ${buildPrintHeader(shop)}
 
               {/* Live Summary */}
               {total > 0 && (
-                <div className="bg-amber-50 rounded-lg border border-orange-100 p-3 mt-1">
+                <div className="bg-slate-50 rounded-lg border border-orange-100 p-3 mt-1">
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="bg-blue-50 rounded-lg p-2.5">
                       <p className="text-xs text-blue-500 font-medium">Buyer Owes</p>
@@ -627,7 +627,7 @@ ${buildPrintHeader(shop)}
             {/* ── Section 4: Payment & Notes ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Payment & Notes</h3>
-              <div className="bg-amber-50 rounded-xl p-4 space-y-3 border border-amber-100">
+              <div className="bg-slate-50 rounded-xl p-4 space-y-3 border border-slate-200">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">Initial Payment (PKR)</Label>
@@ -673,7 +673,7 @@ ${buildPrintHeader(shop)}
           </DialogHeader>
           {payTarget && (
             <div className="space-y-4">
-              <div className="bg-amber-50 rounded-lg p-3 text-sm space-y-1">
+              <div className="bg-slate-50 rounded-lg p-3 text-sm space-y-1">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Buyer:</span>
                   <span className="font-medium">{payTarget.customer?.name || payTarget.walkInCustomer}</span>
@@ -726,7 +726,7 @@ ${buildPrintHeader(shop)}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="bg-amber-50 rounded-xl p-4 border border-amber-100 text-sm space-y-1.5">
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 text-sm space-y-1.5">
               <div className="flex justify-between">
                 <span className="text-gray-500">Reference</span>
                 <span className="font-semibold">#{deleteTarget?.id?.slice(-6).toUpperCase()}</span>
@@ -752,7 +752,7 @@ ${buildPrintHeader(shop)}
                 <span>{deleteTarget ? formatDate(deleteTarget.createdAt) : ""}</span>
               </div>
             </div>
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 space-y-1">
+            <div className="bg-slate-50 border border-yellow-300 rounded-xl p-3 text-xs text-slate-800 space-y-1">
               <p className="font-semibold">What happens when deleted:</p>
               <p>✓ Removed from buyer (trader) ledger</p>
               <p>✓ Removed from seller (farmer/supplier) ledger</p>

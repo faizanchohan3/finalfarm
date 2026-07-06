@@ -106,7 +106,7 @@ export function StatsSlider(props: SliderData) {
           className="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center"
           style={{ background: "rgba(255,255,255,0.15)" }}
         >
-          <Icon className="w-7 h-7 text-amber-950" />
+          <Icon className="w-7 h-7 text-slate-900" />
         </div>
 
         {/* Text */}
@@ -114,7 +114,7 @@ export function StatsSlider(props: SliderData) {
           <p className="text-sm font-medium mb-0.5" style={{ color: accent }}>
             {slide.label}
           </p>
-          <p className="text-3xl font-bold text-amber-950 leading-tight truncate">{slide.value}</p>
+          <p className="text-3xl font-bold text-slate-900 leading-tight truncate">{slide.value}</p>
           <p className="text-sm mt-1" style={{ color: accent }}>
             {slide.sub}
           </p>
@@ -123,7 +123,7 @@ export function StatsSlider(props: SliderData) {
         {/* Alert badge */}
         {slide.badge !== null && (
           <div
-            className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center font-bold text-amber-950 text-lg"
+            className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center font-bold text-slate-900 text-lg"
             style={{ background: "rgba(255,255,255,0.2)", border: "2px solid rgba(255,255,255,0.4)" }}
           >
             {slide.badge}
@@ -140,7 +140,7 @@ export function StatsSlider(props: SliderData) {
         onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.2)")}
         aria-label="Previous"
       >
-        <ChevronLeft className="w-4 h-4 text-amber-950" />
+        <ChevronLeft className="w-4 h-4 text-slate-900" />
       </button>
 
       {/* Next button */}
@@ -152,7 +152,7 @@ export function StatsSlider(props: SliderData) {
         onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.2)")}
         aria-label="Next"
       >
-        <ChevronRight className="w-4 h-4 text-amber-950" />
+        <ChevronRight className="w-4 h-4 text-slate-900" />
       </button>
 
       {/* Dot indicators */}

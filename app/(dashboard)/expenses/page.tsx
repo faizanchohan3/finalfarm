@@ -146,7 +146,7 @@ export default function ExpensesPage() {
                 return (
                   <div key={cat.category} className="flex items-center gap-3">
                     <p className="text-xs text-gray-600 w-28 truncate">{cat.category || "General"}</p>
-                    <div className="flex-1 h-2 bg-amber-100 rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-yellow-100 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-red-500 rounded-full transition-all duration-500"
                         style={{ width: `${pct}%` }}
@@ -180,7 +180,7 @@ export default function ExpensesPage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-amber-50 border-b border-t">
+              <thead className="bg-slate-50 border-b border-t">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">#</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
@@ -233,7 +233,7 @@ export default function ExpensesPage() {
                 )}
               </tbody>
               {!loading && filtered.length > 0 && (
-                <tfoot className="bg-amber-50 border-t-2 border-amber-200">
+                <tfoot className="bg-slate-50 border-t-2 border-yellow-300">
                   <tr>
                     <td colSpan={6} className="px-4 py-3 font-bold text-gray-700">
                       Total — {filtered.length} entries

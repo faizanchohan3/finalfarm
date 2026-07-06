@@ -275,7 +275,7 @@ export default function SettingsPage() {
                 className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all select-none
                   ${modules[key]
                     ? "border-purple-600 bg-green-50"
-                    : "border-amber-200 bg-amber-50 hover:border-gray-300"
+                    : "border-yellow-300 bg-slate-50 hover:border-gray-300"
                   }`}
               >
                 <div>
@@ -315,7 +315,7 @@ export default function SettingsPage() {
           <div className="flex items-start gap-6">
             {/* Preview area */}
             <div className="flex-shrink-0">
-              <div className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-amber-50">
+              <div className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-slate-50">
                 {logoPreview ? (
                   <img src={logoPreview} alt="Preview" className="w-full h-full object-cover" />
                 ) : currentLogo ? (
@@ -381,7 +381,7 @@ export default function SettingsPage() {
           <CardContent>
             <div className="space-y-2">
               {categories.map((c) => (
-                <div key={c.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                <div key={c.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-700">{c.name}</span>
                   <span className="text-xs text-gray-400">ID: {c.id.slice(0, 8)}</span>
                 </div>
@@ -404,7 +404,7 @@ export default function SettingsPage() {
           <CardContent>
             <div className="space-y-2">
               {pestCategories.map((c) => (
-                <div key={c.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                <div key={c.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-700">{c.name}</span>
                 </div>
               ))}
