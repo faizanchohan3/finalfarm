@@ -88,10 +88,10 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-2xl mb-4 shadow-lg">
-            <Store className="w-9 h-9 text-green-900" />
+            <Store className="w-9 h-9 text-purple-900" />
           </div>
           <h1 className="text-3xl font-bold text-amber-950">ArgoFirm</h1>
-          <p className="text-green-200 mt-1">Farm Management System</p>
+          <p className="text-purple-200 mt-1">Farm Management System</p>
         </div>
 
         {/* Card */}
@@ -102,7 +102,7 @@ export default function LoginPage() {
               onClick={() => setTab("login")}
               className={`flex-1 py-4 text-sm font-medium transition-colors ${
                 tab === "login"
-                  ? "bg-green-700 text-amber-950"
+                  ? "bg-purple-700 text-amber-950"
                   : "text-gray-600 hover:text-gray-800 hover:bg-amber-50"
               }`}
             >
@@ -112,7 +112,7 @@ export default function LoginPage() {
               onClick={() => setTab("register")}
               className={`flex-1 py-4 text-sm font-medium transition-colors ${
                 tab === "register"
-                  ? "bg-green-700 text-amber-950"
+                  ? "bg-purple-700 text-amber-950"
                   : "text-gray-600 hover:text-gray-800 hover:bg-amber-50"
               }`}
             >
@@ -166,14 +166,14 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full bg-green-700 hover:bg-green-800" disabled={loginLoading}>
+                  <Button type="submit" className="w-full bg-purple-700 hover:bg-purple-800" disabled={loginLoading}>
                     {loginLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</> : "Sign In"}
                   </Button>
                 </form>
 
                 <p className="mt-6 text-center text-sm text-gray-500">
                   Want to register your shop?{" "}
-                  <button onClick={() => setTab("register")} className="text-green-700 font-medium hover:underline">
+                  <button onClick={() => setTab("register")} className="text-purple-700 font-medium hover:underline">
                     Register here
                   </button>
                 </p>
@@ -186,7 +186,7 @@ export default function LoginPage() {
                 {regSuccess ? (
                   <div className="text-center py-6">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                      <CheckCircle className="w-9 h-9 text-green-600" />
+                      <CheckCircle className="w-9 h-9 text-purple-600" />
                     </div>
                     <h2 className="text-xl font-bold text-gray-800 mb-2">Registration Submitted!</h2>
                     <p className="text-gray-500 text-sm mb-6">
@@ -195,7 +195,7 @@ export default function LoginPage() {
                     </p>
                     <Button
                       onClick={() => { setTab("login"); setRegSuccess(false) }}
-                      className="bg-green-700 hover:bg-green-800"
+                      className="bg-purple-700 hover:bg-purple-800"
                     >
                       Back to Sign In
                     </Button>
@@ -203,7 +203,7 @@ export default function LoginPage() {
                 ) : (
                   <>
                     <div className="flex items-center gap-2 mb-6">
-                      <ShoppingBag className="w-5 h-5 text-green-700" />
+                      <ShoppingBag className="w-5 h-5 text-purple-700" />
                       <h2 className="text-xl font-semibold text-gray-800">Register Your Shop</h2>
                     </div>
                     <form onSubmit={handleRegister} className="space-y-4">
@@ -287,14 +287,14 @@ export default function LoginPage() {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full bg-green-700 hover:bg-green-800 mt-2" disabled={regLoading}>
+                      <Button type="submit" className="w-full bg-purple-700 hover:bg-purple-800 mt-2" disabled={regLoading}>
                         {regLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</> : "Submit Registration"}
                       </Button>
                     </form>
 
                     <p className="mt-4 text-center text-xs text-gray-400">
                       Already have an account?{" "}
-                      <button onClick={() => setTab("login")} className="text-green-700 font-medium hover:underline">
+                      <button onClick={() => setTab("login")} className="text-purple-700 font-medium hover:underline">
                         Sign In
                       </button>
                     </p>

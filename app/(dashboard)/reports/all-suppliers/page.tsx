@@ -184,8 +184,8 @@ ${buildPrintHeader(shop)}
         </Card>
         <Card className="border-green-200 bg-green-50/40">
           <CardContent className="p-4">
-            <p className="text-xs text-green-600 font-medium uppercase">Advance Paid</p>
-            <p className="text-2xl font-bold text-green-700 mt-1">{loading ? "—" : formatCurrency(totalAdvance)}</p>
+            <p className="text-xs text-purple-600 font-medium uppercase">Advance Paid</p>
+            <p className="text-2xl font-bold text-purple-700 mt-1">{loading ? "—" : formatCurrency(totalAdvance)}</p>
             <p className="text-xs text-green-500 mt-0.5">{filtered.filter((s) => s.balance < 0).length} suppliers</p>
           </CardContent>
         </Card>
@@ -271,15 +271,15 @@ ${buildPrintHeader(shop)}
                       {!isRestrictedRole && (
                         <>
                           <td className="px-4 py-3 text-right text-gray-700">{formatCurrency(s.totalDebit || 0)}</td>
-                          <td className="px-4 py-3 text-right text-green-700">{formatCurrency(s.totalCredit || 0)}</td>
-                          <td className={`px-4 py-3 text-right font-bold ${bal > 0 ? "text-red-600" : bal < 0 ? "text-green-700" : "text-gray-400"}`}>
+                          <td className="px-4 py-3 text-right text-purple-700">{formatCurrency(s.totalCredit || 0)}</td>
+                          <td className={`px-4 py-3 text-right font-bold ${bal > 0 ? "text-red-600" : bal < 0 ? "text-purple-700" : "text-gray-400"}`}>
                             {formatCurrency(Math.abs(bal))}
                             {bal !== 0 && <span className="text-xs font-normal ml-1">{bal > 0 ? "Dr" : "Cr"}</span>}
                           </td>
                           <td className="px-4 py-3">
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                               bal > 0 ? "bg-red-100 text-red-700"
-                              : bal < 0 ? "bg-green-100 text-green-700"
+                              : bal < 0 ? "bg-green-100 text-purple-700"
                               : "bg-amber-100 text-gray-500"
                             }`}>
                               {bal > 0 ? "Payable" : bal < 0 ? "Advance" : "Settled"}
@@ -306,7 +306,7 @@ ${buildPrintHeader(shop)}
                         <td className="px-4 py-3 text-right font-bold text-gray-900">
                           {formatCurrency(filtered.reduce((s, f) => s + (f.totalDebit || 0), 0))}
                         </td>
-                        <td className="px-4 py-3 text-right font-bold text-green-700">
+                        <td className="px-4 py-3 text-right font-bold text-purple-700">
                           {formatCurrency(filtered.reduce((s, f) => s + (f.totalCredit || 0), 0))}
                         </td>
                         <td className="px-4 py-3 text-right font-bold text-red-600">

@@ -144,17 +144,17 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "relative flex flex-col bg-green-800 text-amber-950 transition-all duration-300 h-screen overflow-hidden",
+        "relative flex flex-col bg-purple-800 text-amber-950 transition-all duration-300 h-screen overflow-hidden",
         collapsed ? "w-16" : "w-64"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-green-700 flex-shrink-0">
+      <div className="flex items-center gap-3 px-4 py-5 border-b border-purple-700 flex-shrink-0">
         <div className="flex-shrink-0 w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-yellow-400">
           {shopLogo ? (
             <img src={shopLogo} alt="Shop Logo" className="w-full h-full object-cover" />
           ) : (
-            <Store className="w-5 h-5 text-green-900" />
+            <Store className="w-5 h-5 text-purple-900" />
           )}
         </div>
         {!collapsed && (
@@ -162,7 +162,7 @@ export function Sidebar() {
             <p className="font-bold text-sm leading-tight truncate">
               {isSuperAdmin ? "Gala Mandi" : (shopName || "Gala Mandi")}
             </p>
-            <p className="text-green-300 text-xs">
+            <p className="text-purple-300 text-xs">
               {isSuperAdmin ? "Platform Head" : "Shop Management"}
             </p>
           </div>
@@ -183,7 +183,7 @@ export function Sidebar() {
                 <div
                   className={cn(
                     "flex items-center rounded-lg transition-colors",
-                    active ? "bg-green-600" : "hover:bg-green-700"
+                    active ? "bg-purple-600" : "hover:bg-purple-700"
                   )}
                 >
                   <Link
@@ -196,7 +196,7 @@ export function Sidebar() {
                   {!collapsed && (
                     <button
                       onClick={() => setReportsOpen((o) => !o)}
-                      className="pr-3 py-2.5 text-green-200 hover:text-amber-950 transition-colors"
+                      className="pr-3 py-2.5 text-purple-200 hover:text-amber-950 transition-colors"
                       aria-label="Toggle reports menu"
                     >
                       <ChevronDown
@@ -216,7 +216,7 @@ export function Sidebar() {
                       reportsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                     )}
                   >
-                    <div className="ml-4 mt-1 border-l-2 border-green-600 pl-3 pb-1 space-y-0.5">
+                    <div className="ml-4 mt-1 border-l-2 border-purple-600 pl-3 pb-1 space-y-0.5">
                       {reportSubItems.map((sub) => {
                         const subActive = pathname === sub.href
                         return (
@@ -226,8 +226,8 @@ export function Sidebar() {
                             className={cn(
                               "flex items-center py-1.5 px-2 rounded text-xs font-medium transition-colors",
                               subActive
-                                ? "bg-green-700 text-yellow-300"
-                                : "text-green-300 hover:bg-green-700 hover:text-amber-950"
+                                ? "bg-purple-700 text-yellow-300"
+                                : "text-purple-300 hover:bg-purple-700 hover:text-amber-950"
                             )}
                           >
                             {sub.label}
@@ -247,7 +247,7 @@ export function Sidebar() {
               href={href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                active ? "bg-green-600 text-amber-950" : "text-green-100 hover:bg-green-700 hover:text-amber-950"
+                active ? "bg-purple-600 text-amber-950" : "text-green-100 hover:bg-purple-700 hover:text-amber-950"
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -260,7 +260,7 @@ export function Sidebar() {
       {/* Collapse toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 w-6 h-6 bg-green-700 border border-green-600 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
+        className="absolute -right-3 top-20 w-6 h-6 bg-purple-700 border border-purple-600 rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors"
       >
         {collapsed ? (
           <ChevronRight className="w-3 h-3 text-amber-950" />

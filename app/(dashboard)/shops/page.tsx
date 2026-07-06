@@ -21,7 +21,7 @@ type Shop = {
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  APPROVED: "bg-green-100 text-green-800 border-green-300",
+  APPROVED: "bg-green-100 text-purple-800 border-green-300",
   REJECTED: "bg-red-100 text-red-800 border-red-300",
 }
 
@@ -88,7 +88,7 @@ export default function ShopsPage() {
             onClick={() => setFilter(f)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ${
               filter === f
-                ? "border-green-700 text-green-700"
+                ? "border-purple-700 text-purple-700"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
@@ -112,7 +112,7 @@ export default function ShopsPage() {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Store className="w-5 h-5 text-green-700" />
+                    <Store className="w-5 h-5 text-purple-700" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 leading-tight">{shop.name}</h3>
@@ -163,7 +163,7 @@ export default function ShopsPage() {
                   <>
                     <Button
                       size="sm"
-                      className="flex-1 bg-green-700 hover:bg-green-800 text-xs gap-1"
+                      className="flex-1 bg-purple-700 hover:bg-purple-800 text-xs gap-1"
                       disabled={!!actionLoading}
                       onClick={() => doAction(shop.id, "approve")}
                     >
@@ -198,7 +198,7 @@ export default function ShopsPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="flex-1 text-xs gap-1 text-green-700 border-green-300 hover:bg-green-50"
+                    className="flex-1 text-xs gap-1 text-purple-700 border-green-300 hover:bg-green-50"
                     disabled={!!actionLoading}
                     onClick={() => doAction(shop.id, "reactivate")}
                   >
@@ -214,7 +214,7 @@ export default function ShopsPage() {
                 </p>
                 <Link
                   href={`/shops/${shop.id}`}
-                  className="flex items-center gap-1 text-xs text-green-700 font-medium hover:text-green-900 hover:underline"
+                  className="flex items-center gap-1 text-xs text-purple-700 font-medium hover:text-purple-900 hover:underline"
                 >
                   <Users className="w-3.5 h-3.5" />
                   Manage Users

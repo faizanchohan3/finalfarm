@@ -97,7 +97,7 @@ export default function BanksPage() {
           <h2 className="text-2xl font-bold text-gray-900">Bank Accounts</h2>
           <p className="text-gray-500 text-sm">Manage your bank accounts used in transactions</p>
         </div>
-        <Button onClick={openAdd} className="bg-green-700 hover:bg-green-800 gap-2">
+        <Button onClick={openAdd} className="bg-purple-700 hover:bg-purple-800 gap-2">
           <Plus className="w-4 h-4" /> Add Bank
         </Button>
       </div>
@@ -204,7 +204,7 @@ export default function BanksPage() {
             </div>
             <div className="flex gap-3 pt-1">
               <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
-              <Button onClick={handleSave} disabled={saving} className="flex-1 bg-green-700 hover:bg-green-800">
+              <Button onClick={handleSave} disabled={saving} className="flex-1 bg-purple-700 hover:bg-purple-800">
                 {saving ? "Saving..." : editing ? "Update Bank" : "Add Bank"}
               </Button>
             </div>

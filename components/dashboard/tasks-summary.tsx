@@ -20,7 +20,7 @@ export function TasksSummary() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-base">My Notes</CardTitle>
-        <Link href="/tasks" className="text-xs text-green-700 hover:underline">
+        <Link href="/tasks" className="text-xs text-purple-700 hover:underline">
           View all
         </Link>
       </CardHeader>

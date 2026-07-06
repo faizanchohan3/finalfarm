@@ -9,7 +9,7 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import { Building2, Printer, ArrowDownCircle, ArrowUpCircle, TrendingDown, TrendingUp, Wallet } from "lucide-react"
 
 const TYPE_LABELS: Record<string, { label: string; color: string }> = {
-  RECEIPT:        { label: "Receipt",       color: "bg-green-100 text-green-700" },
+  RECEIPT:        { label: "Receipt",       color: "bg-green-100 text-purple-700" },
   PAYMENT:        { label: "Payment",       color: "bg-blue-100 text-blue-700" },
   FARMER_PAYMENT: { label: "Farmer Pay",    color: "bg-orange-100 text-orange-700" },
   INCOME:         { label: "Income",        color: "bg-emerald-100 text-emerald-700" },
@@ -140,7 +140,7 @@ export default function BankTransactionsPage() {
               <label className="text-xs text-gray-500 font-medium">To Date</label>
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
             </div>
-            <Button onClick={loadReport} disabled={loading} className="bg-green-700 hover:bg-green-800">
+            <Button onClick={loadReport} disabled={loading} className="bg-purple-700 hover:bg-purple-800">
               {loading ? "Loading..." : "View Report"}
             </Button>
           </div>
@@ -164,11 +164,11 @@ export default function BankTransactionsPage() {
               <CardContent className="p-5 flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Total Inflow</p>
-                  <p className="text-2xl font-bold text-green-600">{formatCurrency(summary.totalIn)}</p>
+                  <p className="text-2xl font-bold text-purple-600">{formatCurrency(summary.totalIn)}</p>
                   <p className="text-xs text-gray-400 mt-0.5">Receipts + Income</p>
                 </div>
                 <div className="p-3 bg-green-50 rounded-full">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
+                  <TrendingUp className="w-6 h-6 text-purple-600" />
                 </div>
               </CardContent>
             </Card>
@@ -221,7 +221,7 @@ export default function BankTransactionsPage() {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Party</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Description</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Method</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-green-700 uppercase">In (Dr)</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-purple-700 uppercase">In (Dr)</th>
                       <th className="px-4 py-3 text-right text-xs font-semibold text-red-700 uppercase">Out (Cr)</th>
                     </tr>
                   </thead>
@@ -241,7 +241,7 @@ export default function BankTransactionsPage() {
                         <td className="px-4 py-3 text-gray-700 font-medium text-xs">{e.party}</td>
                         <td className="px-4 py-3 text-gray-500 text-xs">{e.description}</td>
                         <td className="px-4 py-3 text-gray-500 text-xs capitalize">{e.method?.replace("_", " ") || "-"}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-green-700">
+                        <td className="px-4 py-3 text-right font-semibold text-purple-700">
                           {isInflow(e.type) ? formatCurrency(e.amount) : "—"}
                         </td>
                         <td className="px-4 py-3 text-right font-semibold text-red-600">
@@ -261,7 +261,7 @@ export default function BankTransactionsPage() {
                     <tfoot className="bg-amber-50 border-t-2 border-amber-200">
                       <tr>
                         <td colSpan={7} className="px-4 py-3 font-bold text-gray-700">Total</td>
-                        <td className="px-4 py-3 text-right font-bold text-green-700">{formatCurrency(summary.totalIn)}</td>
+                        <td className="px-4 py-3 text-right font-bold text-purple-700">{formatCurrency(summary.totalIn)}</td>
                         <td className="px-4 py-3 text-right font-bold text-red-600">{formatCurrency(summary.totalOut)}</td>
                       </tr>
                     </tfoot>

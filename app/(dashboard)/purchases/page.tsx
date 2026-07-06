@@ -383,7 +383,7 @@ ${buildPrintHeader(shop)}
                       <td className="py-3 px-3 font-medium text-gray-800">{p.farmer?.name || p.supplier?.name || p.sellerCustomer?.name || p.walkinSeller || "Direct"}</td>
                       <td className="py-3 px-3">
                         {p.farmer ? (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Farmer</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-purple-700">Farmer</span>
                         ) : p.supplier ? (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Supplier</span>
                         ) : p.sellerCustomer ? (
@@ -395,7 +395,7 @@ ${buildPrintHeader(shop)}
                         )}
                       </td>
                       <td className="py-3 px-3 text-gray-700">{formatCurrency(p.totalAmount)}</td>
-                      <td className="py-3 px-3 text-green-600">{formatCurrency(p.paidAmount)}</td>
+                      <td className="py-3 px-3 text-purple-600">{formatCurrency(p.paidAmount)}</td>
                       <td className="py-3 px-3 text-red-600">{formatCurrency(p.balance)}</td>
                       <td className="py-3 px-3">
                         <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(p.status)}`}>{p.status}</span>
@@ -404,7 +404,7 @@ ${buildPrintHeader(shop)}
                       <td className="py-3 px-3 text-gray-500">{p.createdBy?.name}</td>
                       <td className="py-3 px-3">
                         <div className="flex gap-1">
-                          <button onClick={() => printPurchase(p)} className="p-1.5 text-gray-400 hover:text-green-700 hover:bg-green-50 rounded" title="Print">
+                          <button onClick={() => printPurchase(p)} className="p-1.5 text-gray-400 hover:text-purple-700 hover:bg-green-50 rounded" title="Print">
                             <Printer className="w-4 h-4" />
                           </button>
                           <button onClick={() => setDeleteTarget(p)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete Purchase">
@@ -465,7 +465,7 @@ ${buildPrintHeader(shop)}
               onClick={() => setPurchaseType("stock")}
               className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-colors ${
                 purchaseType === "stock"
-                  ? "bg-green-700 text-amber-950 shadow-sm"
+                  ? "bg-purple-700 text-amber-950 shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -552,7 +552,7 @@ ${buildPrintHeader(shop)}
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Balance:</span>
-                  <span className={`font-bold ${stockBalance > 0 ? "text-red-600" : "text-green-600"}`}>{formatCurrency(stockBalance)}</span>
+                  <span className={`font-bold ${stockBalance > 0 ? "text-red-600" : "text-purple-600"}`}>{formatCurrency(stockBalance)}</span>
                 </div>
               </div>
               <div>
@@ -561,7 +561,7 @@ ${buildPrintHeader(shop)}
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
-                <Button onClick={handleSaveStock} className="flex-1 bg-green-700 hover:bg-green-800">Add to Stock</Button>
+                <Button onClick={handleSaveStock} className="flex-1 bg-purple-700 hover:bg-purple-800">Add to Stock</Button>
               </div>
             </div>
           )}
@@ -647,7 +647,7 @@ ${buildPrintHeader(shop)}
                   <span className="text-gray-600">Total Value (buyer owes):</span>
                   <span className="font-medium">{formatCurrency(cTotal)}</span>
                 </div>
-                <div className="flex justify-between text-green-700">
+                <div className="flex justify-between text-purple-700">
                   <span>Your Commission ({cCommissionRate}%):</span>
                   <span className="font-bold">{formatCurrency(cCommAmt)}</span>
                 </div>

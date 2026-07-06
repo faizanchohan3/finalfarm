@@ -78,7 +78,7 @@ export default async function DashboardPage() {
   // ADMIN: Show all stats
   const allStats = [
     { title: "Today's Sales", value: formatCurrency(data.todaySales), icon: ShoppingCart, color: "text-blue-600", bg: "bg-blue-50", href: "/sales", role: "all" },
-    { title: "Month Sales", value: formatCurrency(data.monthSales), icon: TrendingUp, color: "text-green-600", bg: "bg-green-50", href: "/sales", role: "all" },
+    { title: "Month Sales", value: formatCurrency(data.monthSales), icon: TrendingUp, color: "text-purple-600", bg: "bg-green-50", href: "/sales", role: "all" },
     { title: "Total Products", value: data.totalProducts.toString(), icon: Package, color: "text-purple-600", bg: "bg-purple-50", href: "/inventory", role: "admin" },
     { title: "Total Traders", value: data.totalCustomers.toString(), icon: Users, color: "text-orange-600", bg: "bg-orange-50", href: "/customers", role: "admin" },
     { title: "Pending Notes", value: data.pendingTasks.toString(), icon: CheckSquare, color: "text-yellow-600", bg: "bg-yellow-50", href: "/tasks", role: "admin" },
@@ -134,16 +134,16 @@ export default async function DashboardPage() {
       {/* Super Admin: total shops stat */}
       {isSuperAdmin && (
         <Link href="/shops">
-          <div className="bg-green-700 text-amber-950 rounded-xl px-5 py-4 flex items-center gap-4 hover:bg-green-800 transition-colors cursor-pointer">
-            <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+          <div className="bg-purple-700 text-amber-950 rounded-xl px-5 py-4 flex items-center gap-4 hover:bg-purple-800 transition-colors cursor-pointer">
+            <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
               <Store className="w-6 h-6 text-amber-950" />
             </div>
             <div className="flex-1">
-              <p className="text-green-200 text-xs font-medium uppercase tracking-wider">Platform Head</p>
+              <p className="text-purple-200 text-xs font-medium uppercase tracking-wider">Platform Head</p>
               <p className="text-amber-950 font-bold text-lg">Manage All Shops</p>
-              <p className="text-green-300 text-xs">Approve registrations, suspend or reactivate shops</p>
+              <p className="text-purple-300 text-xs">Approve registrations, suspend or reactivate shops</p>
             </div>
-            <span className="text-green-300 text-sm">View →</span>
+            <span className="text-purple-300 text-sm">View →</span>
           </div>
         </Link>
       )}

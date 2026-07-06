@@ -379,7 +379,7 @@ ${buildPrintHeader(shop)}
         <Card>
           <CardContent className="pt-4">
             <p className="text-sm text-gray-500">Total Commission Earned</p>
-            <p className="text-2xl font-bold text-green-600">{formatCurrency(totalCommEarned)}</p>
+            <p className="text-2xl font-bold text-purple-600">{formatCurrency(totalCommEarned)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -429,10 +429,10 @@ ${buildPrintHeader(shop)}
                       </td>
                       <td className="py-3 px-2 text-gray-700">{formatCurrency(c.totalValue)}</td>
                       <td className="py-3 px-2 text-gray-600">{c.commissionRate}%</td>
-                      <td className="py-3 px-2 text-green-700 font-medium">{formatCurrency(c.commissionAmount)}</td>
+                      <td className="py-3 px-2 text-purple-700 font-medium">{formatCurrency(c.commissionAmount)}</td>
                       <td className="py-3 px-2 text-orange-600">{c.labourAmount > 0 ? formatCurrency(c.labourAmount) : "—"}</td>
                       <td className="py-3 px-2 text-blue-700">{formatCurrency(c.sellerPayable)}</td>
-                      <td className="py-3 px-2 text-green-600">{formatCurrency(c.paidAmount)}</td>
+                      <td className="py-3 px-2 text-purple-600">{formatCurrency(c.paidAmount)}</td>
                       <td className="py-3 px-2 text-red-600">{formatCurrency(c.balance)}</td>
                       <td className="py-3 px-2">
                         <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(c.status)}`}>{c.status}</span>
@@ -452,7 +452,7 @@ ${buildPrintHeader(shop)}
                           <button onClick={() => printForSeller(c)} className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 whitespace-nowrap">
                             <Printer className="w-3 h-3" /> Seller
                           </button>
-                          <button onClick={() => printForBuyer(c)} className="flex items-center gap-1 px-2 py-1 text-xs bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100 whitespace-nowrap">
+                          <button onClick={() => printForBuyer(c)} className="flex items-center gap-1 px-2 py-1 text-xs bg-green-50 text-purple-700 border border-green-200 rounded hover:bg-green-100 whitespace-nowrap">
                             <Printer className="w-3 h-3" /> Buyer
                           </button>
                           <button onClick={() => setDeleteTarget(c)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete Commission">
@@ -613,7 +613,7 @@ ${buildPrintHeader(shop)}
                     </div>
                     <div className="bg-green-50 rounded-lg p-2.5">
                       <p className="text-xs text-green-500 font-medium">Net Commission</p>
-                      <p className="font-bold text-green-700 text-sm mt-0.5">{formatCurrency(netCommission)}</p>
+                      <p className="font-bold text-purple-700 text-sm mt-0.5">{formatCurrency(netCommission)}</p>
                     </div>
                     <div className="bg-orange-50 rounded-lg p-2.5">
                       <p className="text-xs text-orange-500 font-medium">Seller Gets</p>
@@ -640,7 +640,7 @@ ${buildPrintHeader(shop)}
                 <div className="flex flex-col justify-end">
                   <div className={`rounded-lg px-3 py-2.5 text-center ${balance > 0 ? "bg-red-50 border border-red-100" : "bg-green-50 border border-green-100"}`}>
                     <p className="text-xs text-gray-500">Balance Due</p>
-                    <p className={`font-bold text-base ${balance > 0 ? "text-red-600" : "text-green-600"}`}>{formatCurrency(balance)}</p>
+                    <p className={`font-bold text-base ${balance > 0 ? "text-red-600" : "text-purple-600"}`}>{formatCurrency(balance)}</p>
                   </div>
                 </div>
               </div>

@@ -265,9 +265,9 @@ ${buildPrintHeader(shop)}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "Total Products", value: products.length, icon: Package, color: "bg-blue-50 text-blue-600" },
-          { label: "Low Stock", value: lowStock.length, icon: AlertTriangle, color: lowStock.length > 0 ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600" },
+          { label: "Low Stock", value: lowStock.length, icon: AlertTriangle, color: lowStock.length > 0 ? "bg-red-50 text-red-600" : "bg-green-50 text-purple-600" },
           { label: "Categories", value: categories.length, icon: Package, color: "bg-purple-50 text-purple-600" },
-          { label: "Total Value", value: formatCurrency(products.reduce((s, p) => s + p.currentStock * p.purchasePrice, 0)), icon: Package, color: "bg-green-50 text-green-600" },
+          { label: "Total Value", value: formatCurrency(products.reduce((s, p) => s + p.currentStock * p.purchasePrice, 0)), icon: Package, color: "bg-green-50 text-purple-600" },
         ].map((s) => (
           <Card key={s.label}>
             <CardContent className="p-4">
@@ -324,7 +324,7 @@ ${buildPrintHeader(shop)}
                       <td className="py-3 px-3 text-gray-700">{formatCurrency(p.purchasePrice)}</td>
                       <td className="py-3 px-3 text-gray-700">{formatCurrency(p.salePrice)}</td>
                       <td className="py-3 px-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${p.currentStock <= p.minStock ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${p.currentStock <= p.minStock ? "bg-red-100 text-red-700" : "bg-green-100 text-purple-700"}`}>
                           {p.currentStock <= p.minStock ? "Low Stock" : "In Stock"}
                         </span>
                       </td>

@@ -38,7 +38,7 @@ type Shop = {
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  APPROVED: "bg-green-100 text-green-800 border-green-300",
+  APPROVED: "bg-green-100 text-purple-800 border-green-300",
   REJECTED: "bg-red-100 text-red-800 border-red-300",
 }
 
@@ -172,7 +172,7 @@ export default function ShopDetailPage() {
         <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
-              <Store className="w-7 h-7 text-green-700" />
+              <Store className="w-7 h-7 text-purple-700" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{shop.name}</h1>
@@ -187,7 +187,7 @@ export default function ShopDetailPage() {
           <div className="flex gap-2 flex-wrap">
             {shop.status === "PENDING" && (
               <>
-                <Button size="sm" className="bg-green-700 hover:bg-green-800 gap-1 text-xs" disabled={!!actionLoading} onClick={() => doShopAction("approve")}>
+                <Button size="sm" className="bg-purple-700 hover:bg-purple-800 gap-1 text-xs" disabled={!!actionLoading} onClick={() => doShopAction("approve")}>
                   <CheckCircle className="w-3.5 h-3.5" /> {actionLoading === "shopapprove" ? "..." : "Approve"}
                 </Button>
                 <Button size="sm" variant="destructive" className="gap-1 text-xs" disabled={!!actionLoading} onClick={() => doShopAction("reject")}>
@@ -201,7 +201,7 @@ export default function ShopDetailPage() {
               </Button>
             )}
             {(!shop.isActive && shop.status !== "PENDING") && (
-              <Button size="sm" variant="outline" className="gap-1 text-xs text-green-700 border-green-300" disabled={!!actionLoading} onClick={() => doShopAction("reactivate")}>
+              <Button size="sm" variant="outline" className="gap-1 text-xs text-purple-700 border-green-300" disabled={!!actionLoading} onClick={() => doShopAction("reactivate")}>
                 <RefreshCw className="w-3.5 h-3.5" /> {actionLoading === "shopreactivate" ? "..." : "Reactivate"}
               </Button>
             )}
@@ -265,7 +265,7 @@ export default function ShopDetailPage() {
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-green-800 font-bold text-sm">
+                      <span className="text-purple-800 font-bold text-sm">
                         {user.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
@@ -278,7 +278,7 @@ export default function ShopDetailPage() {
                     <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getRoleColor(user.role)}`}>
                       {user.role}
                     </span>
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${user.isActive ? "bg-green-100 text-green-700" : "bg-amber-100 text-gray-500"}`}>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${user.isActive ? "bg-green-100 text-purple-700" : "bg-amber-100 text-gray-500"}`}>
                       {user.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
@@ -287,7 +287,7 @@ export default function ShopDetailPage() {
                 {/* Success/error message for this user */}
                 {msg?.userId === user.id && (
                   <div className={`mb-3 flex items-center gap-2 text-sm px-4 py-2.5 rounded-lg ${
-                    msg.type === "success" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"
+                    msg.type === "success" ? "bg-green-50 text-purple-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"
                   }`}>
                     {msg.type === "success" && <Check className="w-4 h-4 flex-shrink-0" />}
                     {msg.text}
@@ -383,7 +383,7 @@ export default function ShopDetailPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className={`gap-1.5 text-xs ${user.isActive ? "text-red-600 border-red-200 hover:bg-red-50" : "text-green-700 border-green-200 hover:bg-green-50"}`}
+                      className={`gap-1.5 text-xs ${user.isActive ? "text-red-600 border-red-200 hover:bg-red-50" : "text-purple-700 border-green-200 hover:bg-green-50"}`}
                       disabled={actionLoading === user.id + "toggle"}
                       onClick={() => toggleActive(user)}
                     >

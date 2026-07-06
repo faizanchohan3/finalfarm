@@ -139,8 +139,8 @@ export default function WarehousePage() {
                     <p className="text-xl font-bold text-blue-700">{w.totalItems}</p>
                   </div>
                   <div className="bg-green-50 rounded-lg p-3">
-                    <p className="text-xs text-green-600 font-medium">Value</p>
-                    <p className="text-lg font-bold text-green-700">{formatCurrency(w.totalValue)}</p>
+                    <p className="text-xs text-purple-600 font-medium">Value</p>
+                    <p className="text-lg font-bold text-purple-700">{formatCurrency(w.totalValue)}</p>
                   </div>
                 </div>
                 {w.capacity && (
@@ -202,7 +202,7 @@ export default function WarehousePage() {
                       <td className="px-4 py-3 text-center">
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                           t.status === "PENDING" ? "bg-yellow-100 text-yellow-700" :
-                          t.status === "APPROVED" ? "bg-green-100 text-green-700" :
+                          t.status === "APPROVED" ? "bg-green-100 text-purple-700" :
                           "bg-amber-100 text-gray-600"
                         }`}>{t.status}</span>
                       </td>
@@ -212,7 +212,7 @@ export default function WarehousePage() {
                         {t.status === "PENDING" && (
                           <button
                             onClick={() => handleApproveTransfer(t.id)}
-                            className="text-xs bg-green-700 hover:bg-green-800 text-amber-950 px-3 py-1 rounded font-medium"
+                            className="text-xs bg-purple-700 hover:bg-purple-800 text-amber-950 px-3 py-1 rounded font-medium"
                           >
                             Approve
                           </button>
@@ -253,7 +253,7 @@ export default function WarehousePage() {
                       <td className="px-4 py-3 font-medium text-gray-800">{a.product.name}</td>
                       <td className="px-4 py-3 text-gray-600">{a.warehouse?.name || "Main"}</td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${a.type === "INCREASE" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${a.type === "INCREASE" ? "bg-green-100 text-purple-700" : "bg-red-100 text-red-700"}`}>
                           {a.type}
                         </span>
                       </td>

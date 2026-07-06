@@ -98,7 +98,7 @@ export default function AgentsPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-gray-500 uppercase font-medium tracking-wide">Total Earned</p>
-            <p className="text-xl font-bold text-green-700 mt-1">
+            <p className="text-xl font-bold text-purple-700 mt-1">
               {formatCurrency(agents.reduce((s, a) => s + (a.totalEarned || 0), 0))}
             </p>
           </CardContent>
@@ -172,7 +172,7 @@ export default function AgentsPage() {
                       <td className="px-4 py-3 text-center">
                         <span className="text-xs px-2 py-0.5 bg-orange-50 text-orange-700 rounded-full font-medium">{a.commissionRate}%</span>
                       </td>
-                      <td className="px-4 py-3 text-right text-green-700 font-medium">{formatCurrency(a.totalEarned || 0)}</td>
+                      <td className="px-4 py-3 text-right text-purple-700 font-medium">{formatCurrency(a.totalEarned || 0)}</td>
                       <td className="px-4 py-3 text-right text-red-600 font-medium">{formatCurrency(a.totalPaid || 0)}</td>
                       <td className={`px-4 py-3 text-right font-bold ${((a.totalEarned || 0) - (a.totalPaid || 0)) > 0 ? "text-orange-600" : "text-gray-400"}`}>
                         {formatCurrency((a.totalEarned || 0) - (a.totalPaid || 0))}
@@ -182,7 +182,7 @@ export default function AgentsPage() {
                           <button onClick={() => { setEditing(a); setForm({ name: a.name, phone: a.phone || "", address: a.address || "", cnic: a.cnic || "", commissionRate: String(a.commissionRate) }); setShowModal(true) }}
                             className="p-1 text-gray-400 hover:text-blue-600"><Edit className="w-4 h-4" /></button>
                           <button onClick={() => setShowPayModal(a)}
-                            className="p-1 text-gray-400 hover:text-green-600" title="Add commission"><DollarSign className="w-4 h-4" /></button>
+                            className="p-1 text-gray-400 hover:text-purple-600" title="Add commission"><DollarSign className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>
@@ -199,7 +199,7 @@ export default function AgentsPage() {
                                   <tr className="border-b border-amber-100">
                                     <th className="px-3 py-2 text-left text-gray-500">Date</th>
                                     <th className="px-3 py-2 text-left text-gray-500">Notes</th>
-                                    <th className="px-3 py-2 text-right text-green-700">Earned (Cr)</th>
+                                    <th className="px-3 py-2 text-right text-purple-700">Earned (Cr)</th>
                                     <th className="px-3 py-2 text-right text-red-600">Paid (Dr)</th>
                                     <th className="px-3 py-2 text-right text-gray-700">Balance</th>
                                   </tr>
@@ -209,7 +209,7 @@ export default function AgentsPage() {
                                     <tr key={li} className="border-b border-gray-50">
                                       <td className="px-3 py-2 text-gray-500">{formatDate(e.createdAt)}</td>
                                       <td className="px-3 py-2 text-gray-600">{e.notes || (e.type === "CREDIT" ? "Commission earned" : "Commission paid")}</td>
-                                      <td className="px-3 py-2 text-right text-green-700">{e.type === "CREDIT" ? formatCurrency(e.amount) : "—"}</td>
+                                      <td className="px-3 py-2 text-right text-purple-700">{e.type === "CREDIT" ? formatCurrency(e.amount) : "—"}</td>
                                       <td className="px-3 py-2 text-right text-red-600">{e.type === "DEBIT" ? formatCurrency(e.amount) : "—"}</td>
                                       <td className="px-3 py-2 text-right font-semibold">{formatCurrency(Math.abs(e.balance))} {e.balance > 0 ? "Dr" : "Cr"}</td>
                                     </tr>

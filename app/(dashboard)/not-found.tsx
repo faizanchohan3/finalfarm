@@ -36,7 +36,7 @@ export default function DashboardNotFound() {
           </p>
           <Button
             onClick={() => router.push("/dashboard")}
-            className="w-full bg-green-700 hover:bg-green-800 flex items-center justify-center gap-2"
+            className="w-full bg-purple-700 hover:bg-purple-800 flex items-center justify-center gap-2"
           >
             <Home className="w-4 h-4" />
             Return to Dashboard

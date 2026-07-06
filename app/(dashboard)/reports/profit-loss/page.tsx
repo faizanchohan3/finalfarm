@@ -84,7 +84,7 @@ export default function ProfitLossPage() {
               <label className="text-xs text-gray-500 font-medium">To Date</label>
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
             </div>
-            <Button onClick={loadReport} disabled={loading} className="bg-green-700 hover:bg-green-800">
+            <Button onClick={loadReport} disabled={loading} className="bg-purple-700 hover:bg-purple-800">
               {loading ? "Loading..." : "Apply Filter"}
             </Button>
           </div>
@@ -98,7 +98,7 @@ export default function ProfitLossPage() {
             {/* Revenue */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2 text-green-700">
+                <CardTitle className="text-base flex items-center gap-2 text-purple-700">
                   <TrendingUp className="w-4 h-4" /> Revenue
                 </CardTitle>
               </CardHeader>
@@ -112,7 +112,7 @@ export default function ProfitLossPage() {
                 </div>
                 <div className="flex justify-between items-center py-2 border-b">
                   <p className="text-gray-600 text-sm">Sales Collected</p>
-                  <p className="text-green-700">{formatCurrency(data.salesPaid)}</p>
+                  <p className="text-purple-700">{formatCurrency(data.salesPaid)}</p>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b">
                   <p className="text-gray-600 text-sm">Sales Receivable</p>
@@ -129,7 +129,7 @@ export default function ProfitLossPage() {
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
                       <p className="text-gray-600 text-sm">Pesticide Collected</p>
-                      <p className="text-green-700">{formatCurrency(data.pesticideSalesPaid)}</p>
+                      <p className="text-purple-700">{formatCurrency(data.pesticideSalesPaid)}</p>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
                       <p className="text-gray-600 text-sm">Pesticide Receivable</p>
@@ -140,16 +140,16 @@ export default function ProfitLossPage() {
                 {data.pesticideDiscountFromSupplier > 0 && (
                   <div className="flex justify-between items-center py-2 border-b bg-green-50 px-2">
                     <p className="text-gray-600 text-sm font-medium">Pesticide Discount from Supplier</p>
-                    <p className="text-green-700 font-medium">{formatCurrency(data.pesticideDiscountFromSupplier)}</p>
+                    <p className="text-purple-700 font-medium">{formatCurrency(data.pesticideDiscountFromSupplier)}</p>
                   </div>
                 )}
                 {data.otherIncome > 0 && (
                   <div className="flex justify-between items-center py-2 border-b">
                     <p className="text-gray-600 text-sm">Other Income</p>
-                    <p className="text-green-700">{formatCurrency(data.otherIncome)}</p>
+                    <p className="text-purple-700">{formatCurrency(data.otherIncome)}</p>
                   </div>
                 )}
-                <div className="flex justify-between items-center pt-2 font-bold text-green-700 bg-green-50 px-2 py-2 rounded">
+                <div className="flex justify-between items-center pt-2 font-bold text-purple-700 bg-green-50 px-2 py-2 rounded">
                   <p>Total Revenue</p>
                   <p>{formatCurrency(data.totalRevenue + data.otherIncome)}</p>
                 </div>
@@ -212,7 +212,7 @@ export default function ProfitLossPage() {
                     <p className="font-medium">{formatCurrency(data.pesticideSalesTotal)}</p>
                   </div>
                 )}
-                <div className="flex justify-between py-2 border-b font-semibold text-green-700 bg-green-50 px-2">
+                <div className="flex justify-between py-2 border-b font-semibold text-purple-700 bg-green-50 px-2">
                   <p>Total Revenue</p>
                   <p>{formatCurrency(data.totalRevenue)}</p>
                 </div>
@@ -228,20 +228,20 @@ export default function ProfitLossPage() {
                 )}
                 <div className="flex justify-between py-2 border-b font-semibold">
                   <p className="text-gray-800">Gross Profit</p>
-                  <p className={data.grossProfit >= 0 ? "text-green-700" : "text-red-600"}>
+                  <p className={data.grossProfit >= 0 ? "text-purple-700" : "text-red-600"}>
                     {formatCurrency(data.grossProfit)}
                   </p>
                 </div>
                 {data.pesticideDiscountFromSupplier > 0 && (
                   <div className="flex justify-between py-2 border-b">
                     <p className="text-gray-600">Pesticide Discount from Supplier</p>
-                    <p className="text-green-700">+ {formatCurrency(data.pesticideDiscountFromSupplier)}</p>
+                    <p className="text-purple-700">+ {formatCurrency(data.pesticideDiscountFromSupplier)}</p>
                   </div>
                 )}
                 {data.otherIncome > 0 && (
                   <div className="flex justify-between py-2 border-b">
                     <p className="text-gray-600">Other Income</p>
-                    <p className="text-green-700">+ {formatCurrency(data.otherIncome)}</p>
+                    <p className="text-purple-700">+ {formatCurrency(data.otherIncome)}</p>
                   </div>
                 )}
                 {data.otherExpense > 0 && (
@@ -250,7 +250,7 @@ export default function ProfitLossPage() {
                     <p className="text-red-600">− {formatCurrency(data.otherExpense)}</p>
                   </div>
                 )}
-                <div className={`flex justify-between py-3 px-3 rounded-lg font-bold text-lg ${data.netIncome >= 0 ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
+                <div className={`flex justify-between py-3 px-3 rounded-lg font-bold text-lg ${data.netIncome >= 0 ? "bg-green-50 text-purple-800" : "bg-red-50 text-red-800"}`}>
                   <p>Net {data.netIncome >= 0 ? "Profit" : "Loss"}</p>
                   <p>{formatCurrency(Math.abs(data.netIncome))}</p>
                 </div>
@@ -280,11 +280,11 @@ export default function ProfitLossPage() {
                         <td className="px-4 py-2 text-gray-500 text-xs">{formatDate(t.createdAt)}</td>
                         <td className="px-4 py-2 text-gray-700">{t.description || "—"}</td>
                         <td className="px-4 py-2">
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded ${t.type === "CREDIT" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded ${t.type === "CREDIT" ? "bg-green-100 text-purple-700" : "bg-red-100 text-red-700"}`}>
                             {t.type}
                           </span>
                         </td>
-                        <td className={`px-4 py-2 text-right font-medium ${t.type === "CREDIT" ? "text-green-700" : "text-red-600"}`}>
+                        <td className={`px-4 py-2 text-right font-medium ${t.type === "CREDIT" ? "text-purple-700" : "text-red-600"}`}>
                           {formatCurrency(t.amount)}
                         </td>
                       </tr>

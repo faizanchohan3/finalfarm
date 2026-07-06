@@ -184,8 +184,8 @@ ${buildPrintHeader(shop)}
           <p className="text-xl font-bold text-red-600 mt-1">{formatCurrency(totalPayable)}</p>
         </CardContent></Card>
         <Card className="border-green-200 bg-green-50/40"><CardContent className="p-4">
-          <p className="text-xs text-green-600 uppercase font-medium">Advance Paid</p>
-          <p className="text-xl font-bold text-green-700 mt-1">{formatCurrency(totalAdvance)}</p>
+          <p className="text-xs text-purple-600 uppercase font-medium">Advance Paid</p>
+          <p className="text-xl font-bold text-purple-700 mt-1">{formatCurrency(totalAdvance)}</p>
         </CardContent></Card>
       </div>
 
@@ -221,12 +221,12 @@ ${buildPrintHeader(shop)}
                       <td className="px-3 py-2 text-gray-500 text-xs">{s.phone||"—"}</td>
                       <td className="px-3 py-2 text-gray-500 text-xs">{s.address||"—"}</td>
                       <td className="px-3 py-2 text-right text-gray-700 text-xs">{formatCurrency(s.totalDebit||0)}</td>
-                      <td className="px-3 py-2 text-right text-green-700 text-xs">{formatCurrency(s.totalCredit||0)}</td>
-                      <td className={`px-3 py-2 text-right font-bold text-xs ${bal>0?"text-red-600":bal<0?"text-green-700":"text-gray-400"}`}>
+                      <td className="px-3 py-2 text-right text-purple-700 text-xs">{formatCurrency(s.totalCredit||0)}</td>
+                      <td className={`px-3 py-2 text-right font-bold text-xs ${bal>0?"text-red-600":bal<0?"text-purple-700":"text-gray-400"}`}>
                         {formatCurrency(Math.abs(bal))}{bal!==0&&<span className="font-normal ml-0.5">{bal>0?"Cr":"Dr"}</span>}
                       </td>
                       <td className="px-3 py-2">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${bal>0?"bg-red-100 text-red-700":bal<0?"bg-green-100 text-green-700":"bg-amber-100 text-gray-500"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${bal>0?"bg-red-100 text-red-700":bal<0?"bg-green-100 text-purple-700":"bg-amber-100 text-gray-500"}`}>
                           {bal>0?"Payable":bal<0?"Advance":"Settled"}
                         </span>
                       </td>
@@ -263,7 +263,7 @@ ${buildPrintHeader(shop)}
                   <label className="text-xs text-gray-500 font-medium">To Date</label>
                   <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
                 </div>
-                <Button onClick={loadLedger} disabled={loading} className="bg-green-700 hover:bg-green-800">{loading ? "Loading..." : "Apply Filter"}</Button>
+                <Button onClick={loadLedger} disabled={loading} className="bg-purple-700 hover:bg-purple-800">{loading ? "Loading..." : "Apply Filter"}</Button>
                 <Button variant="outline" onClick={clearLedger} className="gap-1"><X className="w-4 h-4" /> Clear</Button>
               </div>
             </CardContent>
@@ -285,7 +285,7 @@ ${buildPrintHeader(shop)}
                 </CardContent></Card>
                 <Card><CardContent className="p-4">
                   <p className="text-xs text-gray-500 font-medium uppercase">Total Cr</p>
-                  <p className="text-xl font-bold text-green-700 mt-1">{formatCurrency(ledger.totalCredit)}</p>
+                  <p className="text-xl font-bold text-purple-700 mt-1">{formatCurrency(ledger.totalCredit)}</p>
                 </CardContent></Card>
               </div>
 
@@ -295,8 +295,8 @@ ${buildPrintHeader(shop)}
                   <p className="text-xs text-gray-500">{ledger.entries?.length || 0} transactions · {dateLabel}</p>
                 </div>
                 <div className="text-right">
-                  <p className={`text-2xl font-bold ${ledger.closingBalance > 0 ? "text-red-700" : "text-green-700"}`}>{formatCurrency(Math.abs(ledger.closingBalance))}</p>
-                  <p className={`text-sm font-semibold ${ledger.closingBalance > 0 ? "text-red-600" : "text-green-600"}`}>
+                  <p className={`text-2xl font-bold ${ledger.closingBalance > 0 ? "text-red-700" : "text-purple-700"}`}>{formatCurrency(Math.abs(ledger.closingBalance))}</p>
+                  <p className={`text-sm font-semibold ${ledger.closingBalance > 0 ? "text-red-600" : "text-purple-600"}`}>
                     {ledger.closingBalance > 0 ? "Payable to Supplier" : ledger.closingBalance < 0 ? "Advance Paid" : "Settled"}
                   </p>
                 </div>
@@ -324,12 +324,12 @@ ${buildPrintHeader(shop)}
                           <tr key={i} className={entry.type === "PAYMENT" ? "bg-green-50/40" : ""}>
                             <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(entry.date)}</td>
                             <td className="px-4 py-3">
-                              <span className={`text-xs font-semibold px-2 py-0.5 rounded ${entry.type==="PAYMENT"?"bg-green-100 text-green-700":"bg-orange-100 text-orange-700"}`}>{entry.type}</span>
+                              <span className={`text-xs font-semibold px-2 py-0.5 rounded ${entry.type==="PAYMENT"?"bg-green-100 text-purple-700":"bg-orange-100 text-orange-700"}`}>{entry.type}</span>
                             </td>
                             <td className="px-4 py-3 text-gray-700 text-xs">{entry.description}</td>
                             <td className="px-4 py-3 text-right text-gray-900">{entry.debit > 0 ? formatCurrency(entry.debit) : "—"}</td>
-                            <td className="px-4 py-3 text-right text-green-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "—"}</td>
-                            <td className={`px-4 py-3 text-right font-medium ${entry.balance > 0 ? "text-red-600" : "text-green-700"}`}>
+                            <td className="px-4 py-3 text-right text-purple-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "—"}</td>
+                            <td className={`px-4 py-3 text-right font-medium ${entry.balance > 0 ? "text-red-600" : "text-purple-700"}`}>
                               {formatCurrency(Math.abs(entry.balance))}
                               {entry.balance !== 0 && <span className="text-xs ml-1">{entry.balance > 0 ? "Cr" : "Dr"}</span>}
                             </td>
@@ -341,8 +341,8 @@ ${buildPrintHeader(shop)}
                         <tr>
                           <td colSpan={3} className="px-4 py-3 font-bold text-gray-700">Closing Balance</td>
                           <td className="px-4 py-3 text-right font-bold">{formatCurrency(ledger.totalDebit)}</td>
-                          <td className="px-4 py-3 text-right font-bold text-green-700">{formatCurrency(ledger.totalCredit)}</td>
-                          <td className={`px-4 py-3 text-right font-bold text-lg ${ledger.closingBalance > 0 ? "text-red-600" : "text-green-700"}`}>
+                          <td className="px-4 py-3 text-right font-bold text-purple-700">{formatCurrency(ledger.totalCredit)}</td>
+                          <td className={`px-4 py-3 text-right font-bold text-lg ${ledger.closingBalance > 0 ? "text-red-600" : "text-purple-700"}`}>
                             {formatCurrency(Math.abs(ledger.closingBalance))}
                             <span className="text-sm ml-1">{ledger.closingBalance > 0 ? "Cr" : "Dr"}</span>
                           </td>

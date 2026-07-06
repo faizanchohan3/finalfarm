@@ -117,7 +117,7 @@ export default function ProductReportPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-gray-500 uppercase font-medium tracking-wide">Sale Amount</p>
-            <p className="text-xl font-bold text-green-700 mt-1">{formatCurrency(totals.totalSaleAmount || 0)}</p>
+            <p className="text-xl font-bold text-purple-700 mt-1">{formatCurrency(totals.totalSaleAmount || 0)}</p>
             <p className="text-xs text-gray-400 mt-0.5">{from || to ? "In selected period" : "All time"}</p>
           </CardContent>
         </Card>
@@ -153,14 +153,14 @@ export default function ProductReportPage() {
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
           />
         </div>
-        <Button size="sm" className="bg-green-700 hover:bg-green-800" onClick={() => loadReport()}>
+        <Button size="sm" className="bg-purple-700 hover:bg-purple-800" onClick={() => loadReport()}>
           Apply
         </Button>
         <Button size="sm" variant="outline" onClick={() => { setFrom(""); setTo(""); loadReport("", "") }}>
           Clear (All Time)
         </Button>
         {(from || to) && (
-          <span className="text-xs text-green-700 font-medium bg-green-50 border border-green-200 px-3 py-2 rounded-lg">
+          <span className="text-xs text-purple-700 font-medium bg-green-50 border border-green-200 px-3 py-2 rounded-lg">
             Sales filtered: {from || "start"} → {to || "today"}
           </span>
         )}
@@ -181,7 +181,7 @@ export default function ProductReportPage() {
           variant={filter === "all" ? "default" : "outline"}
           size="sm"
           onClick={() => setFilter("all")}
-          className={filter === "all" ? "bg-green-700 hover:bg-green-800" : ""}
+          className={filter === "all" ? "bg-purple-700 hover:bg-purple-800" : ""}
         >
           All Products
         </Button>
@@ -254,13 +254,13 @@ export default function ProductReportPage() {
                     <td className="px-4 py-3 text-right text-gray-700">{formatCurrency(p.purchasePrice)}</td>
                     <td className="px-4 py-3 text-right text-gray-700">{formatCurrency(p.salePrice)}</td>
                     <td className="px-4 py-3 text-right">
-                      <span className={`text-xs font-medium ${p.margin > 20 ? "text-green-700" : p.margin > 0 ? "text-orange-600" : "text-gray-400"}`}>
+                      <span className={`text-xs font-medium ${p.margin > 20 ? "text-purple-700" : p.margin > 0 ? "text-orange-600" : "text-gray-400"}`}>
                         {p.margin.toFixed(1)}%
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right font-medium text-blue-700">{formatCurrency(p.stockValue)}</td>
                     <td className="px-4 py-3 text-right text-gray-700">{p.totalQtySold} {p.unit}</td>
-                    <td className="px-4 py-3 text-right text-green-700">{formatCurrency(p.totalSaleAmount)}</td>
+                    <td className="px-4 py-3 text-right text-purple-700">{formatCurrency(p.totalSaleAmount)}</td>
                   </tr>
                 ))}
                 {!loading && filtered.length === 0 && (
@@ -278,7 +278,7 @@ export default function ProductReportPage() {
                   <td className="px-4 py-3 text-right font-bold text-gray-700">
                     {filtered.reduce((s, p) => s + p.totalQtySold, 0)}
                   </td>
-                  <td className="px-4 py-3 text-right font-bold text-green-700">
+                  <td className="px-4 py-3 text-right font-bold text-purple-700">
                     {formatCurrency(filtered.reduce((s, p) => s + p.totalSaleAmount, 0))}
                   </td>
                 </tr>

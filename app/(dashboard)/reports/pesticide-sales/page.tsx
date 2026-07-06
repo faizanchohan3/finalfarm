@@ -113,7 +113,7 @@ export default function PesticideSalesReportPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={loadReport} disabled={loading} className="bg-green-700 hover:bg-green-800">
+            <Button onClick={loadReport} disabled={loading} className="bg-purple-700 hover:bg-purple-800">
               {loading ? "Loading..." : "Apply Filter"}
             </Button>
           </div>
@@ -137,7 +137,7 @@ export default function PesticideSalesReportPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-gray-500 uppercase font-medium tracking-wide">Total Collected</p>
-            <p className="text-xl font-bold text-green-700 mt-1">{formatCurrency(totals.totalPaid)}</p>
+            <p className="text-xl font-bold text-purple-700 mt-1">{formatCurrency(totals.totalPaid)}</p>
           </CardContent>
         </Card>
         <Card className={totals.totalBalance > 0 ? "border-red-200" : ""}>
@@ -154,7 +154,7 @@ export default function PesticideSalesReportPage() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <Sprout className="w-4 h-4 text-green-700" />
+            <Sprout className="w-4 h-4 text-purple-700" />
             Pesticide Sales
             <span className="text-gray-400 font-normal text-sm">({sales.length} records)</span>
           </CardTitle>
@@ -194,7 +194,7 @@ export default function PesticideSalesReportPage() {
                       <td className="px-4 py-3">
                         <div className="font-medium text-gray-900">{buyer}</div>
                         {buyerType && (
-                          <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${buyerType === "farmer" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
+                          <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${buyerType === "farmer" ? "bg-green-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>
                             {buyerType === "farmer" ? "Farmer" : "Customer"}
                           </span>
                         )}
@@ -202,11 +202,11 @@ export default function PesticideSalesReportPage() {
                       <td className="px-4 py-3 text-right text-gray-700">{s.quantity} {s.pesticide?.unit}</td>
                       <td className="px-4 py-3 text-right text-gray-700">{formatCurrency(s.unitPrice)}</td>
                       <td className="px-4 py-3 text-right font-medium text-gray-900">{formatCurrency(s.totalAmount)}</td>
-                      <td className="px-4 py-3 text-right text-green-700">{formatCurrency(s.paidAmount)}</td>
+                      <td className="px-4 py-3 text-right text-purple-700">{formatCurrency(s.paidAmount)}</td>
                       <td className="px-4 py-3 text-right text-red-600">{s.balance > 0 ? formatCurrency(s.balance) : "—"}</td>
                       <td className="px-4 py-3 text-center print:hidden">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                          status === "PAID" ? "bg-green-100 text-green-700"
+                          status === "PAID" ? "bg-green-100 text-purple-700"
                           : status === "PARTIAL" ? "bg-yellow-100 text-yellow-700"
                           : "bg-red-100 text-red-700"
                         }`}>{status}</span>
@@ -228,7 +228,7 @@ export default function PesticideSalesReportPage() {
                   <tr>
                     <td colSpan={6} className="px-4 py-3 font-bold text-gray-700">Total — {sales.length} sales</td>
                     <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCurrency(totals.totalAmount)}</td>
-                    <td className="px-4 py-3 text-right font-bold text-green-700">{formatCurrency(totals.totalPaid)}</td>
+                    <td className="px-4 py-3 text-right font-bold text-purple-700">{formatCurrency(totals.totalPaid)}</td>
                     <td className="px-4 py-3 text-right font-bold text-red-600">{totals.totalBalance > 0 ? formatCurrency(totals.totalBalance) : "—"}</td>
                     <td className="print:hidden" />
                   </tr>

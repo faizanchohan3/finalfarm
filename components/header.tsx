@@ -38,7 +38,7 @@ export function Header({ title }: { title: string }) {
       <div className="flex items-center gap-3">
         <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
         {!isSuperAdmin && session?.user?.shopName && (
-          <span className="hidden sm:inline text-xs bg-green-100 text-green-800 px-2.5 py-1 rounded-full font-medium border border-green-200">
+          <span className="hidden sm:inline text-xs bg-green-100 text-purple-800 px-2.5 py-1 rounded-full font-medium border border-green-200">
             <Store className="w-3 h-3 inline mr-1" />
             {session.user.shopName}
           </span>
@@ -68,7 +68,7 @@ export function Header({ title }: { title: string }) {
             onClick={() => setDropdownOpen((o) => !o)}
             className="flex items-center gap-3 hover:bg-amber-100 rounded-lg px-2 py-1.5 transition-colors"
           >
-            <div className="w-8 h-8 bg-green-700 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-purple-700 rounded-full flex items-center justify-center flex-shrink-0">
               <User className="w-4 h-4 text-amber-950" />
             </div>
             <div className="hidden sm:block text-left">

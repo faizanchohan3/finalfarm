@@ -352,7 +352,7 @@ ${buildPrintHeader(shop)}
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium capitalize border-b-2 transition-colors ${
-              activeTab === tab ? "border-green-700 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"
+              activeTab === tab ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
             {tab === "stock" ? "Stock" : "Sales History"}
@@ -397,7 +397,7 @@ ${buildPrintHeader(shop)}
                         <td className="py-3 px-3 text-gray-600">{p.batchNumber || "-"}</td>
                         <td className="py-3 px-3">
                           {p.expiryDate ? (
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${isExpired ? "bg-red-100 text-red-700" : isExpiring ? "bg-orange-100 text-orange-700" : "bg-green-100 text-green-700"}`}>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${isExpired ? "bg-red-100 text-red-700" : isExpiring ? "bg-orange-100 text-orange-700" : "bg-green-100 text-purple-700"}`}>
                               {formatDateDMY(p.expiryDate)}
                             </span>
                           ) : "-"}
@@ -411,7 +411,7 @@ ${buildPrintHeader(shop)}
                         <td className="py-3 px-3">{formatCurrency(p.salePrice)}</td>
                         <td className="py-3 px-3">
                           <div className="flex items-center gap-2">
-                            <button onClick={() => openSale(p)} className="p-1 text-gray-400 hover:text-green-600" title="Sell">
+                            <button onClick={() => openSale(p)} className="p-1 text-gray-400 hover:text-purple-600" title="Sell">
                               <ShoppingCart className="w-4 h-4" />
                             </button>
                             <button onClick={() => printSinglePesticide(p)} className="p-1 text-gray-400 hover:text-purple-600" title="Print Stock Card">
@@ -453,7 +453,7 @@ ${buildPrintHeader(shop)}
                     <td className="py-3 px-3">{formatCurrency(s.unitPrice)}</td>
                     <td className="py-3 px-3 font-semibold">{formatCurrency(s.totalAmount)}</td>
                     <td className="py-3 px-3">{s.customerName || "-"}</td>
-                    <td className="py-3 px-3 text-green-600">{formatCurrency(s.paidAmount)}</td>
+                    <td className="py-3 px-3 text-purple-600">{formatCurrency(s.paidAmount)}</td>
                     <td className="py-3 px-3 text-blue-600">{s.incentive > 0 ? formatCurrency(s.incentive) : "—"}</td>
                     <td className="py-3 px-3 text-gray-500">{formatDateDMY(s.createdAt)}</td>
                     <td className="py-3 px-3 text-gray-500">{s.soldBy?.name}</td>
@@ -653,8 +653,8 @@ ${buildPrintHeader(shop)}
                 </div>
                 <div><Label>Quantity</Label><Input type="number" value={saleForm.quantity} onChange={(e) => setSaleForm({ ...saleForm, quantity: e.target.value })} /></div>
                 <div className="bg-green-50 rounded-lg px-4 py-3 flex justify-between items-center border border-green-200">
-                  <span className="text-sm font-semibold text-green-800">Total Amount</span>
-                  <span className="text-xl font-bold text-green-700">{formatCurrency(totalAmount)}</span>
+                  <span className="text-sm font-semibold text-purple-800">Total Amount</span>
+                  <span className="text-xl font-bold text-purple-700">{formatCurrency(totalAmount)}</span>
                 </div>
                 <div><Label>Customer Name</Label><Input value={saleForm.customerName} onChange={(e) => setSaleForm({ ...saleForm, customerName: e.target.value })} /></div>
                 <div><Label>Amount Paid</Label><Input type="number" value={saleForm.paidAmount} onChange={(e) => setSaleForm({ ...saleForm, paidAmount: e.target.value })} /></div>

@@ -256,7 +256,7 @@ export default function CustomersPage() {
           <h2 className="text-2xl font-bold text-gray-900">Traders</h2>
           <p className="text-gray-500 text-sm">{activeCustomers.length} active · {inactiveCustomers.length} inactive</p>
         </div>
-        <Button onClick={openAdd} className="bg-green-700 hover:bg-green-800 gap-2">
+        <Button onClick={openAdd} className="bg-purple-700 hover:bg-purple-800 gap-2">
           <Plus className="w-4 h-4" /> Add Traders
         </Button>
       </div>
@@ -274,7 +274,7 @@ export default function CustomersPage() {
         </Card>
         <Card>
           <CardContent className="p-5 flex items-center gap-3">
-            <div className="p-2 bg-green-50 rounded-lg"><TrendingUp className="w-5 h-5 text-green-600" /></div>
+            <div className="p-2 bg-green-50 rounded-lg"><TrendingUp className="w-5 h-5 text-purple-600" /></div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{activeCustomers.length}</p>
               <p className="text-sm text-gray-500">Active Traders</p>
@@ -305,7 +305,7 @@ export default function CustomersPage() {
       <div className="flex gap-1 border-b">
         {([["active", "Active", activeCustomers.length], ["inactive", "Inactive", inactiveCustomers.length]] as const).map(([key, label, count]) => (
           <button key={key} onClick={() => { setStatusTab(key); setSearch("") }}
-            className={`pb-2 px-4 text-sm font-medium transition-colors border-b-2 ${statusTab === key ? "border-green-700 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+            className={`pb-2 px-4 text-sm font-medium transition-colors border-b-2 ${statusTab === key ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
             {label} <span className="text-xs text-gray-400 ml-1">({count})</span>
           </button>
         ))}
@@ -349,11 +349,11 @@ export default function CustomersPage() {
                               className="w-8 h-8 rounded-full object-cover border border-amber-200 flex-shrink-0" />
                           ) : (
                             <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                              <span className="text-green-700 font-bold text-xs">{c.name.charAt(0).toUpperCase()}</span>
+                              <span className="text-purple-700 font-bold text-xs">{c.name.charAt(0).toUpperCase()}</span>
                             </div>
                           )}
                           <button onClick={() => openDetail(c)}
-                            className="font-semibold text-green-700 hover:underline text-left">
+                            className="font-semibold text-purple-700 hover:underline text-left">
                             {c.name}
                           </button>
                         </div>
@@ -378,20 +378,20 @@ export default function CustomersPage() {
                       </td>
                       <td className="py-3 px-3">
                         {(c.ledgerBalance || 0) !== 0 ? (
-                          <span className={`font-bold ${(c.ledgerBalance || 0) > 0 ? "text-red-600" : "text-green-700"}`}>
+                          <span className={`font-bold ${(c.ledgerBalance || 0) > 0 ? "text-red-600" : "text-purple-700"}`}>
                             {formatCurrency(Math.abs(c.ledgerBalance || 0))}
                             {(c.ledgerBalance || 0) !== 0 && <span className="text-xs ml-1 font-normal">{(c.ledgerBalance || 0) > 0 ? "Dr" : "Cr"}</span>}
                           </span>
                         ) : <span className="text-gray-400">—</span>}
                       </td>
                       <td className="py-3 px-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${c.isActive ? "bg-green-100 text-green-700" : "bg-amber-100 text-gray-500"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${c.isActive ? "bg-green-100 text-purple-700" : "bg-amber-100 text-gray-500"}`}>
                           {c.isActive ? "Active" : "Inactive"}
                         </span>
                       </td>
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-1">
-                          <button onClick={() => openDetail(c)} className="p-1.5 text-gray-400 hover:text-green-700 hover:bg-green-50 rounded" title="View ledger">
+                          <button onClick={() => openDetail(c)} className="p-1.5 text-gray-400 hover:text-purple-700 hover:bg-green-50 rounded" title="View ledger">
                             <Eye className="w-4 h-4" />
                           </button>
                           <button onClick={() => openPayment(c)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Record payment">
@@ -402,7 +402,7 @@ export default function CustomersPage() {
                           </button>
                           <button
                             onClick={() => handleToggleActive(c)}
-                            className={`p-1.5 rounded text-xs font-medium px-2 ${c.isActive ? "text-red-500 hover:text-red-700 hover:bg-red-50" : "text-green-600 hover:text-green-800 hover:bg-green-50"}`}
+                            className={`p-1.5 rounded text-xs font-medium px-2 ${c.isActive ? "text-red-500 hover:text-red-700 hover:bg-red-50" : "text-purple-600 hover:text-purple-800 hover:bg-green-50"}`}
                             title={c.isActive ? "Deactivate" : "Activate"}
                           >
                             {c.isActive ? "Deactivate" : "Activate"}
@@ -452,7 +452,7 @@ export default function CustomersPage() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-700 text-amber-950 rounded-full flex items-center justify-center hover:bg-green-800"
+                  className="absolute -bottom-1 -right-1 w-6 h-6 bg-purple-700 text-amber-950 rounded-full flex items-center justify-center hover:bg-purple-800"
                 >
                   <Plus className="w-3.5 h-3.5" />
                 </button>
@@ -512,7 +512,7 @@ export default function CustomersPage() {
 
             <div className="flex gap-3 pt-1">
               <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
-              <Button onClick={handleSave} disabled={saving} className="flex-1 bg-green-700 hover:bg-green-800">
+              <Button onClick={handleSave} disabled={saving} className="flex-1 bg-purple-700 hover:bg-purple-800">
                 {saving ? "Saving..." : editing ? "Update Customer" : "Add Customer"}
               </Button>
             </div>
@@ -530,14 +530,14 @@ export default function CustomersPage() {
                   className="w-9 h-9 rounded-full object-cover border border-amber-200 flex-shrink-0" />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-green-700 font-bold text-sm">{selected?.name?.charAt(0)}</span>
+                  <span className="text-purple-700 font-bold text-sm">{selected?.name?.charAt(0)}</span>
                 </div>
               )}
               <span>{selected?.name}</span>
               {selected && (
                 <Link
                   href={`/reports/customer-ledger?id=${selected.id}`}
-                  className="ml-auto flex items-center gap-1 text-xs font-normal text-green-600 hover:underline"
+                  className="ml-auto flex items-center gap-1 text-xs font-normal text-purple-600 hover:underline"
                   onClick={() => { setShowDetailModal(false); setSelectedPayments(new Set()) }}
                 >
                   <ExternalLink className="w-3.5 h-3.5" /> Full Ledger Report
@@ -559,7 +559,7 @@ export default function CustomersPage() {
                       className="w-24 h-24 rounded-xl object-cover border border-amber-200 mx-auto" />
                   ) : (
                     <div className="w-24 h-24 rounded-xl bg-green-100 flex items-center justify-center mx-auto">
-                      <span className="text-green-700 font-bold text-3xl">{selected?.name?.charAt(0)}</span>
+                      <span className="text-purple-700 font-bold text-3xl">{selected?.name?.charAt(0)}</span>
                     </div>
                   )}
                   <p className="mt-2 text-xs font-semibold text-gray-700 truncate">{selected?.name}</p>
@@ -596,8 +596,8 @@ export default function CustomersPage() {
                   {/* Balance Cards */}
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-green-50 rounded-lg p-3 text-center">
-                      <p className="text-lg font-bold text-green-700">{formatCurrency(detail.totalBusiness)}</p>
-                      <p className="text-xs text-green-600 mt-0.5">Total Business</p>
+                      <p className="text-lg font-bold text-purple-700">{formatCurrency(detail.totalBusiness)}</p>
+                      <p className="text-xs text-purple-600 mt-0.5">Total Business</p>
                     </div>
                     <div className="bg-orange-50 rounded-lg p-3 text-center">
                       <p className="text-lg font-bold text-orange-700">{formatCurrency(detail.totalAdvances || 0)}</p>
@@ -628,7 +628,7 @@ export default function CustomersPage() {
                         <div
                           className={`h-full rounded-full transition-all ${
                             detail.totalBalance / selected.creditLimit > 0.9 ? "bg-red-500" :
-                            detail.totalBalance / selected.creditLimit > 0.6 ? "bg-orange-400" : "bg-green-500"
+                            detail.totalBalance / selected.creditLimit > 0.6 ? "bg-orange-400" : "bg-purple-500"
                           }`}
                           style={{ width: `${Math.min((detail.totalBalance / selected.creditLimit) * 100, 100)}%` }}
                         />
@@ -640,7 +640,7 @@ export default function CustomersPage() {
 
               {/* Actions */}
               <div className="flex gap-2 justify-end">
-                <Button size="sm" className="bg-green-700 hover:bg-green-800"
+                <Button size="sm" className="bg-purple-700 hover:bg-purple-800"
                   onClick={() => { setShowDetailModal(false); setSelectedPayments(new Set()); openPayment(selected) }}>
                   <ArrowDownCircle className="w-4 h-4" /> Record Payment
                 </Button>
@@ -655,7 +655,7 @@ export default function CustomersPage() {
                   {(["ledger", "sales"] as Tab[]).map((t) => (
                     <button key={t} onClick={() => setActiveTab(t)}
                       className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-                        activeTab === t ? "border-green-700 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"
+                        activeTab === t ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"
                       }`}>
                       {t === "ledger" ? <BookOpen className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
                       {t === "ledger" ? "Account Ledger" : "Sales History"}
@@ -712,7 +712,7 @@ export default function CustomersPage() {
                               <td className="py-2 px-3 text-gray-500 whitespace-nowrap text-xs">{formatDate(entry.date)}</td>
                               <td className="py-2 px-3">
                                 <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
-                                  entry.type === "PAYMENT" ? "bg-green-100 text-green-700"
+                                  entry.type === "PAYMENT" ? "bg-green-100 text-purple-700"
                                   : entry.type === "COMMISSION" ? "bg-purple-100 text-purple-700"
                                   : entry.type === "PESTICIDE" ? "bg-orange-100 text-orange-700"
                                   : "bg-blue-100 text-blue-700"
@@ -722,8 +722,8 @@ export default function CustomersPage() {
                               </td>
                               <td className="py-2 px-3 text-gray-700 text-xs max-w-xs truncate">{entry.description}</td>
                               <td className="py-2 px-3 text-right font-medium text-gray-900">{entry.debit > 0 ? formatCurrency(entry.debit) : "—"}</td>
-                              <td className="py-2 px-3 text-right text-green-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "—"}</td>
-                              <td className={`py-2 px-3 text-right font-semibold ${entry.balance > 0 ? "text-red-600" : "text-green-700"}`}>
+                              <td className="py-2 px-3 text-right text-purple-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "—"}</td>
+                              <td className={`py-2 px-3 text-right font-semibold ${entry.balance > 0 ? "text-red-600" : "text-purple-700"}`}>
                                 {formatCurrency(Math.abs(entry.balance))}
                                 {entry.balance !== 0 && <span className="text-xs ml-1 font-normal">{entry.balance > 0 ? "Dr" : "Cr"}</span>}
                               </td>
@@ -735,8 +735,8 @@ export default function CustomersPage() {
                         <tr>
                           <td colSpan={4} className="py-2 px-3 font-bold text-gray-700 text-xs">Closing Balance</td>
                           <td className="py-2 px-3 text-right font-bold text-gray-900">{formatCurrency((detail.ledger || []).reduce((s: number, e: any) => s + e.debit, 0))}</td>
-                          <td className="py-2 px-3 text-right font-bold text-green-700">{formatCurrency((detail.ledger || []).reduce((s: number, e: any) => s + e.credit, 0))}</td>
-                          <td className={`py-2 px-3 text-right font-bold ${detail.totalBalance > 0 ? "text-red-600" : "text-green-700"}`}>
+                          <td className="py-2 px-3 text-right font-bold text-purple-700">{formatCurrency((detail.ledger || []).reduce((s: number, e: any) => s + e.credit, 0))}</td>
+                          <td className={`py-2 px-3 text-right font-bold ${detail.totalBalance > 0 ? "text-red-600" : "text-purple-700"}`}>
                             {formatCurrency(detail.totalBalance)}
                             <span className="text-xs ml-1 font-normal">{detail.totalBalance > 0 ? "Dr" : "Cr"}</span>
                           </td>
@@ -769,7 +769,7 @@ export default function CustomersPage() {
                               {sale.items.map((i: any) => `${i.quantity} ${i.product?.unit} ${i.product?.name}`).join(", ")}
                             </td>
                             <td className="py-2 px-3 font-medium">{formatCurrency(sale.totalAmount)}</td>
-                            <td className="py-2 px-3 text-green-700">{formatCurrency(sale.paidAmount)}</td>
+                            <td className="py-2 px-3 text-purple-700">{formatCurrency(sale.paidAmount)}</td>
                             <td className="py-2 px-3 text-red-600 font-medium">{formatCurrency(sale.balance)}</td>
                             <td className="py-2 px-3">
                               <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(sale.status)}`}>{sale.status}</span>
@@ -781,7 +781,7 @@ export default function CustomersPage() {
                         <tr>
                           <td colSpan={2} className="py-2 px-3 font-semibold text-gray-600 text-xs">Total ({detail.sales.length} sales)</td>
                           <td className="py-2 px-3 font-bold">{formatCurrency(detail.totalBusiness)}</td>
-                          <td className="py-2 px-3 font-bold text-green-700">{formatCurrency(detail.totalPaid)}</td>
+                          <td className="py-2 px-3 font-bold text-purple-700">{formatCurrency(detail.totalPaid)}</td>
                           <td className="py-2 px-3 font-bold text-red-600">{formatCurrency(detail.totalBalance)}</td>
                           <td />
                         </tr>
@@ -808,13 +808,13 @@ export default function CustomersPage() {
               <div className="flex justify-between"><span className="text-gray-500">Customer:</span><span className="font-semibold">{lastPayment.name}</span></div>
               {lastPayment.phone && <div className="flex justify-between"><span className="text-gray-500">Phone:</span><span>{lastPayment.phone}</span></div>}
               <div className="border-t pt-2 mt-2">
-                <div className="flex justify-between"><span className="text-gray-500">Amount Received:</span><span className="text-lg font-bold text-green-700">{formatCurrency(lastPayment.amount)}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Amount Received:</span><span className="text-lg font-bold text-purple-700">{formatCurrency(lastPayment.amount)}</span></div>
                 <div className="flex justify-between mt-1"><span className="text-gray-500">Method:</span><span>{lastPayment.method.replace("_", " ")}</span></div>
                 {lastPayment.notes && <div className="flex justify-between mt-1"><span className="text-gray-500">Reference:</span><span>{lastPayment.notes}</span></div>}
               </div>
               <div className="border-t-2 border-gray-800 pt-2 flex justify-between font-bold text-base">
                 <span>Remaining Balance:</span>
-                <span className={lastPayment.balance > 0 ? "text-red-700" : "text-green-700"}>{formatCurrency(lastPayment.balance)}</span>
+                <span className={lastPayment.balance > 0 ? "text-red-700" : "text-purple-700"}>{formatCurrency(lastPayment.balance)}</span>
               </div>
             </div>
             <p className="mt-8 text-center text-xs text-gray-400 border-t pt-4">Thank you for your payment</p>
@@ -837,7 +837,7 @@ export default function CustomersPage() {
             {/* Trader info */}
             <div className="flex items-center gap-3 bg-amber-50 rounded-xl p-4 border border-amber-100">
               <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-green-700 font-bold text-sm">
+                <span className="text-purple-700 font-bold text-sm">
                   {deleteTarget?.name?.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -860,11 +860,11 @@ export default function CustomersPage() {
                   <span>Trader profile (name, phone, address) will be <strong>removed</strong></span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-green-600 mt-0.5">✓</span>
+                  <span className="text-purple-600 mt-0.5">✓</span>
                   <span>All sales, commissions & ledger records are <strong>kept safe</strong></span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-green-600 mt-0.5">✓</span>
+                  <span className="text-purple-600 mt-0.5">✓</span>
                   <span>Your financial totals and reports <strong>remain accurate</strong></span>
                 </li>
               </ul>
@@ -899,7 +899,7 @@ export default function CustomersPage() {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {lastPayment ? <Check className="w-5 h-5 text-green-600" /> : <ArrowDownCircle className="w-5 h-5 text-green-600" />}
+              {lastPayment ? <Check className="w-5 h-5 text-purple-600" /> : <ArrowDownCircle className="w-5 h-5 text-purple-600" />}
               {lastPayment ? "Payment Recorded" : "Record Payment"}
             </DialogTitle>
           </DialogHeader>
@@ -909,21 +909,21 @@ export default function CustomersPage() {
             <div className="space-y-4">
               <div className="bg-green-50 rounded-lg p-4 text-center">
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <Check className="w-5 h-5 text-green-700" />
+                  <Check className="w-5 h-5 text-purple-700" />
                 </div>
-                <p className="font-semibold text-green-800">{lastPayment.name}</p>
-                {lastPayment.phone && <p className="text-xs text-green-600">{lastPayment.phone}</p>}
+                <p className="font-semibold text-purple-800">{lastPayment.name}</p>
+                {lastPayment.phone && <p className="text-xs text-purple-600">{lastPayment.phone}</p>}
               </div>
               <div className="border border-amber-100 rounded-lg p-4 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">{(lastPayment as any).direction === "PAY" ? "Paid to Customer" : "Amount Received"}</span>
-                  <span className="font-bold text-green-700">{formatCurrency(lastPayment.amount)}</span>
+                  <span className="font-bold text-purple-700">{formatCurrency(lastPayment.amount)}</span>
                 </div>
                 <div className="flex justify-between"><span className="text-gray-500">Method</span><span>{lastPayment.method.replace("_", " ")}</span></div>
                 {lastPayment.notes && <div className="flex justify-between"><span className="text-gray-500">Reference</span><span className="text-xs">{lastPayment.notes}</span></div>}
                 <div className="border-t pt-2 flex justify-between font-semibold">
                   <span className="text-gray-600">Updated Balance</span>
-                  <span className={lastPayment.balance > 0 ? "text-red-600" : lastPayment.balance < 0 ? "text-blue-600" : "text-green-700"}>
+                  <span className={lastPayment.balance > 0 ? "text-red-600" : lastPayment.balance < 0 ? "text-blue-600" : "text-purple-700"}>
                     {formatCurrency(Math.abs(lastPayment.balance))}
                     {lastPayment.balance < 0 && <span className="text-xs ml-1 font-normal">(Credit)</span>}
                   </span>
@@ -956,7 +956,7 @@ export default function CustomersPage() {
                   <Trash2 className="w-4 h-4" /> Delete
                 </Button>
                 <Button variant="outline" onClick={() => { setShowPaymentModal(false); setLastPayment(null) }} className="flex-1">Close</Button>
-                <Button onClick={() => window.print()} className="flex-1 bg-green-700 hover:bg-green-800 gap-2">
+                <Button onClick={() => window.print()} className="flex-1 bg-purple-700 hover:bg-purple-800 gap-2">
                   <Printer className="w-4 h-4" /> Print Receipt
                 </Button>
               </div>
@@ -969,12 +969,12 @@ export default function CustomersPage() {
                   <img src={selected.image} alt={selected?.name} className="w-8 h-8 rounded-full object-cover" />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-green-200 flex items-center justify-center">
-                    <span className="text-green-800 font-bold text-xs">{selected?.name?.charAt(0)}</span>
+                    <span className="text-purple-800 font-bold text-xs">{selected?.name?.charAt(0)}</span>
                   </div>
                 )}
                 <div>
-                  <p className="font-semibold text-green-800 text-sm">{selected?.name}</p>
-                  {selected?.phone && <p className="text-xs text-green-600">{selected.phone}</p>}
+                  <p className="font-semibold text-purple-800 text-sm">{selected?.name}</p>
+                  {selected?.phone && <p className="text-xs text-purple-600">{selected.phone}</p>}
                 </div>
               </div>
               {/* Direction toggle */}
@@ -984,7 +984,7 @@ export default function CustomersPage() {
                   onClick={() => setPaymentForm({ ...paymentForm, direction: "RECEIVE" })}
                   className={`py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-colors ${
                     paymentForm.direction === "RECEIVE"
-                      ? "border-green-600 bg-green-50 text-green-700"
+                      ? "border-purple-600 bg-green-50 text-purple-700"
                       : "border-amber-200 text-gray-500 hover:border-gray-300"
                   }`}
                 >
@@ -1039,7 +1039,7 @@ export default function CustomersPage() {
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setShowPaymentModal(false)} className="flex-1">Cancel</Button>
-                <Button onClick={handlePayment} disabled={saving} className="flex-1 bg-green-700 hover:bg-green-800">
+                <Button onClick={handlePayment} disabled={saving} className="flex-1 bg-purple-700 hover:bg-purple-800">
                   {saving ? "Processing..." : "Confirm Payment"}
                 </Button>
               </div>

@@ -110,7 +110,7 @@ export default function ProfilePage() {
       {/* Account Info Card */}
       <div className="bg-amber-50 rounded-xl border border-amber-200 p-6 shadow-sm">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 bg-green-700 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center flex-shrink-0">
             <User className="w-8 h-8 text-amber-950" />
           </div>
           <div>
@@ -165,7 +165,7 @@ export default function ProfilePage() {
           {profileMsg && (
             <div className={`flex items-center gap-2 text-sm px-4 py-3 rounded-lg ${
               profileMsg.type === "success"
-                ? "bg-green-50 text-green-700 border border-green-200"
+                ? "bg-green-50 text-purple-700 border border-green-200"
                 : "bg-red-50 text-red-700 border border-red-200"
             }`}>
               {profileMsg.type === "success" && <CheckCircle className="w-4 h-4 flex-shrink-0" />}
@@ -173,7 +173,7 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <Button type="submit" disabled={saving} className="bg-green-700 hover:bg-green-800 gap-2">
+          <Button type="submit" disabled={saving} className="bg-purple-700 hover:bg-purple-800 gap-2">
             <Save className="w-4 h-4" />
             {saving ? "Saving..." : "Save Name"}
           </Button>
@@ -247,7 +247,7 @@ export default function ProfilePage() {
           {pwMsg && (
             <div className={`flex items-center gap-2 text-sm px-4 py-3 rounded-lg ${
               pwMsg.type === "success"
-                ? "bg-green-50 text-green-700 border border-green-200"
+                ? "bg-green-50 text-purple-700 border border-green-200"
                 : "bg-red-50 text-red-700 border border-red-200"
             }`}>
               {pwMsg.type === "success" && <CheckCircle className="w-4 h-4 flex-shrink-0" />}
@@ -255,7 +255,7 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <Button type="submit" disabled={pwSaving} variant="outline" className="gap-2 border-green-300 text-green-700 hover:bg-green-50">
+          <Button type="submit" disabled={pwSaving} variant="outline" className="gap-2 border-green-300 text-purple-700 hover:bg-green-50">
             <Lock className="w-4 h-4" />
             {pwSaving ? "Updating..." : "Change Password"}
           </Button>

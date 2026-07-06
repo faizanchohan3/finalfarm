@@ -121,7 +121,7 @@ export default function TasksPage() {
             onClick={() => setFilter(status)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === status
-                ? "bg-green-700 text-amber-950"
+                ? "bg-purple-700 text-amber-950"
                 : "bg-amber-50 text-gray-600 border border-amber-200 hover:bg-amber-50"
             }`}
           >
@@ -172,7 +172,7 @@ export default function TasksPage() {
                     {task.status !== "COMPLETED" && (
                       <button
                         onClick={() => quickStatus(task.id, task.status === "PENDING" ? "IN_PROGRESS" : "COMPLETED")}
-                        className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded"
+                        className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-green-50 rounded"
                         title={task.status === "PENDING" ? "Start" : "Complete"}
                       >
                         <CheckCircle className="w-4 h-4" />

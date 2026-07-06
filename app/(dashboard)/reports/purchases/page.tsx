@@ -106,7 +106,7 @@ export default function PurchasesReportPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={loadReport} disabled={loading} className="bg-green-700 hover:bg-green-800">
+            <Button onClick={loadReport} disabled={loading} className="bg-purple-700 hover:bg-purple-800">
               {loading ? "Loading..." : "Apply Filter"}
             </Button>
           </div>
@@ -124,7 +124,7 @@ export default function PurchasesReportPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Total Paid</p>
-            <p className="text-xl font-bold text-green-700 mt-1">{formatCurrency(totals.totalPaid)}</p>
+            <p className="text-xl font-bold text-purple-700 mt-1">{formatCurrency(totals.totalPaid)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -171,7 +171,7 @@ export default function PurchasesReportPage() {
                       {purchase.items?.map((item: any) => `${item.quantity} ${item.product?.unit} ${item.product?.name}`).join(", ")}
                     </td>
                     <td className="px-4 py-3 text-right font-medium">{formatCurrency(purchase.totalAmount)}</td>
-                    <td className="px-4 py-3 text-right text-green-700">{formatCurrency(purchase.paidAmount)}</td>
+                    <td className="px-4 py-3 text-right text-purple-700">{formatCurrency(purchase.paidAmount)}</td>
                     <td className="px-4 py-3 text-right text-red-600">{formatCurrency(purchase.balance)}</td>
                     <td className="px-4 py-3 text-center print:hidden">
                       <Badge className={`text-xs ${getStatusColor(purchase.status)}`}>{purchase.status}</Badge>
@@ -188,7 +188,7 @@ export default function PurchasesReportPage() {
                 <tr>
                   <td colSpan={3} className="px-4 py-3 font-bold text-gray-700">Total — {purchases.length} purchases</td>
                   <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCurrency(totals.totalAmount)}</td>
-                  <td className="px-4 py-3 text-right font-bold text-green-700">{formatCurrency(totals.totalPaid)}</td>
+                  <td className="px-4 py-3 text-right font-bold text-purple-700">{formatCurrency(totals.totalPaid)}</td>
                   <td className="px-4 py-3 text-right font-bold text-red-600">{formatCurrency(totals.totalBalance)}</td>
                   <td />
                 </tr>

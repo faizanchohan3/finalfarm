@@ -159,10 +159,10 @@ export default function FinancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">Total Income</p>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(summary.income)}</p>
+                <p className="text-2xl font-bold text-purple-600">{formatCurrency(summary.income)}</p>
               </div>
               <div className="p-3 bg-green-50 rounded-full">
-                <TrendingUp className="w-6 h-6 text-green-600" />
+                <TrendingUp className="w-6 h-6 text-purple-600" />
               </div>
             </div>
           </CardContent>
@@ -250,7 +250,7 @@ export default function FinancePage() {
                           ) : (
                             <ArrowDownCircle className="w-4 h-4 text-red-500" />
                           )}
-                          <span className={`text-xs font-medium ${t.type === "CREDIT" ? "text-green-600" : "text-red-600"}`}>
+                          <span className={`text-xs font-medium ${t.type === "CREDIT" ? "text-purple-600" : "text-red-600"}`}>
                             {t.type}
                           </span>
                         </div>
@@ -266,7 +266,7 @@ export default function FinancePage() {
                           <span className="text-gray-400 text-xs">Cash</span>
                         )}
                       </td>
-                      <td className={`py-3 px-3 font-semibold ${t.type === "CREDIT" ? "text-green-600" : "text-red-600"}`}>
+                      <td className={`py-3 px-3 font-semibold ${t.type === "CREDIT" ? "text-purple-600" : "text-red-600"}`}>
                         {t.type === "CREDIT" ? "+" : "-"}{formatCurrency(t.amount)}
                       </td>
                       <td className="py-3 px-3 text-gray-500">{t.reference || "-"}</td>
@@ -307,7 +307,7 @@ export default function FinancePage() {
             <DialogTitle className="flex items-center gap-2 text-lg">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${form.type === "CREDIT" ? "bg-green-100" : "bg-red-100"}`}>
                 {form.type === "CREDIT"
-                  ? <ArrowUpCircle className="w-4 h-4 text-green-600" />
+                  ? <ArrowUpCircle className="w-4 h-4 text-purple-600" />
                   : <ArrowDownCircle className="w-4 h-4 text-red-600" />}
               </div>
               Add Transaction
@@ -322,7 +322,7 @@ export default function FinancePage() {
                 onClick={() => setForm({ ...form, type: "CREDIT", category: "", accountId: "" })}
                 className={`flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
                   form.type === "CREDIT"
-                    ? "border-green-500 bg-green-50 text-green-700 shadow-sm"
+                    ? "border-green-500 bg-green-50 text-purple-700 shadow-sm"
                     : "border-amber-200 text-gray-500 hover:border-gray-300 hover:bg-amber-50"
                 }`}
               >
@@ -357,7 +357,7 @@ export default function FinancePage() {
                 />
               </div>
               {form.amount && parseFloat(form.amount) > 0 && (
-                <p className={`text-xs mt-1 font-medium ${form.type === "CREDIT" ? "text-green-600" : "text-red-600"}`}>
+                <p className={`text-xs mt-1 font-medium ${form.type === "CREDIT" ? "text-purple-600" : "text-red-600"}`}>
                   {form.type === "CREDIT" ? "+" : "−"} {formatCurrency(parseFloat(form.amount))}
                 </p>
               )}
@@ -398,7 +398,7 @@ export default function FinancePage() {
                       className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
                         form.category === cat
                           ? form.type === "CREDIT"
-                            ? "bg-green-600 text-amber-950 border-green-600"
+                            ? "bg-purple-600 text-amber-950 border-purple-600"
                             : "bg-red-600 text-amber-950 border-red-600"
                           : "bg-amber-50 text-gray-600 border-amber-200 hover:border-gray-400"
                       }`}
@@ -523,7 +523,7 @@ export default function FinancePage() {
                     onClick={() => setForm({ ...form, entryType: "CREDIT" })}
                     className={`py-2 px-3 rounded-lg text-sm font-medium border-2 transition-colors ${
                       form.entryType === "CREDIT"
-                        ? "border-green-500 bg-green-50 text-green-700"
+                        ? "border-green-500 bg-green-50 text-purple-700"
                         : "border-amber-200 text-gray-600 hover:border-gray-300"
                     }`}
                   >
@@ -548,7 +548,7 @@ export default function FinancePage() {
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className={`flex-1 gap-2 ${form.type === "CREDIT" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}`}
+                className={`flex-1 gap-2 ${form.type === "CREDIT" ? "bg-purple-600 hover:bg-purple-700" : "bg-red-600 hover:bg-red-700"}`}
               >
                 {form.type === "CREDIT"
                   ? <ArrowUpCircle className="w-4 h-4" />
@@ -576,8 +576,8 @@ export default function FinancePage() {
             {detailType === "balance" && (
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <p className="text-sm text-green-600 font-medium">Total Income</p>
-                  <p className="text-2xl font-bold text-green-700">{formatCurrency(summary.income)}</p>
+                  <p className="text-sm text-purple-600 font-medium">Total Income</p>
+                  <p className="text-2xl font-bold text-purple-700">{formatCurrency(summary.income)}</p>
                 </div>
                 <div className="bg-red-50 p-4 rounded-lg border border-red-200">
                   <p className="text-sm text-red-600 font-medium">Total Expenses</p>
@@ -614,11 +614,11 @@ export default function FinancePage() {
                         <td className="py-3 px-4 text-gray-700">{t.description}</td>
                         <td className="py-3 px-4 text-gray-600 text-xs">{t.category || "—"}</td>
                         <td className="py-3 px-4">
-                          <span className={`text-xs font-medium px-2 py-1 rounded-full ${t.type === "CREDIT" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                          <span className={`text-xs font-medium px-2 py-1 rounded-full ${t.type === "CREDIT" ? "bg-green-100 text-purple-700" : "bg-red-100 text-red-700"}`}>
                             {t.type === "CREDIT" ? "Income" : "Expense"}
                           </span>
                         </td>
-                        <td className={`py-3 px-4 text-right font-semibold ${t.type === "CREDIT" ? "text-green-600" : "text-red-600"}`}>
+                        <td className={`py-3 px-4 text-right font-semibold ${t.type === "CREDIT" ? "text-purple-600" : "text-red-600"}`}>
                           {formatCurrency(t.amount)}
                         </td>
                       </tr>

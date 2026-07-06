@@ -180,8 +180,8 @@ export default function ReportsPage() {
           >
             <ShoppingCart className="w-6 h-6 mb-3 opacity-80" />
             <p className="text-2xl font-bold">{loading ? "—" : formatCurrency(financeData.income)}</p>
-            <p className="text-green-200 text-sm mt-1">Total Revenue</p>
-            <p className="text-green-300 text-xs mt-2 flex items-center gap-1">View Sales Report <ArrowRight className="w-3 h-3" /></p>
+            <p className="text-purple-200 text-sm mt-1">Total Revenue</p>
+            <p className="text-purple-300 text-xs mt-2 flex items-center gap-1">View Sales Report <ArrowRight className="w-3 h-3" /></p>
           </div>
         </Link>
 
@@ -232,9 +232,9 @@ export default function ReportsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Net Balance</p>
-              <Wallet className="w-4 h-4 text-green-600" />
+              <Wallet className="w-4 h-4 text-purple-600" />
             </div>
-            <p className={`text-xl font-bold ${financeData.balance >= 0 ? "text-green-700" : "text-red-600"}`}>
+            <p className={`text-xl font-bold ${financeData.balance >= 0 ? "text-purple-700" : "text-red-600"}`}>
               {loading ? "—" : formatCurrency(financeData.balance)}
             </p>
             <p className="text-xs text-gray-400 mt-1">Income minus expenses</p>
@@ -374,10 +374,10 @@ export default function ReportsPage() {
                     <Icon className="w-5 h-5 text-amber-950" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 text-sm group-hover:text-green-700 transition-colors">{title}</p>
+                    <p className="font-semibold text-gray-900 text-sm group-hover:text-purple-700 transition-colors">{title}</p>
                     <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{description}</p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-green-600 transition-colors flex-shrink-0 mt-0.5" />
+                  <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-purple-600 transition-colors flex-shrink-0 mt-0.5" />
                 </CardContent>
               </Card>
             </Link>

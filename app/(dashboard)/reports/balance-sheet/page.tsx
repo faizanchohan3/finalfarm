@@ -59,7 +59,7 @@ export default function BalanceSheetPage() {
               <label className="text-xs text-gray-500 font-medium">To Date</label>
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
             </div>
-            <Button onClick={loadReport} disabled={loading} className="bg-green-700 hover:bg-green-800">
+            <Button onClick={loadReport} disabled={loading} className="bg-purple-700 hover:bg-purple-800">
               {loading ? "Loading..." : "Apply Filter"}
             </Button>
           </div>
@@ -78,7 +78,7 @@ export default function BalanceSheetPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Revenue Side */}
                 <div className="space-y-3">
-                  <h3 className="font-bold text-green-800 text-sm uppercase bg-green-100 px-3 py-2 rounded">Revenue</h3>
+                  <h3 className="font-bold text-purple-800 text-sm uppercase bg-green-100 px-3 py-2 rounded">Revenue</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-700">Agricultural Sales</span>
@@ -90,27 +90,27 @@ export default function BalanceSheetPage() {
                         <span className="font-semibold">{formatCurrency(data.pesticideSalesTotal)}</span>
                       </div>
                     )}
-                    <div className="border-t pt-2 flex justify-between text-sm font-bold text-green-700">
+                    <div className="border-t pt-2 flex justify-between text-sm font-bold text-purple-700">
                       <span>Total Revenue</span>
                       <span>{formatCurrency(data.totalRevenue)}</span>
                     </div>
                   </div>
 
-                  <h3 className="font-bold text-green-800 text-sm uppercase bg-green-100 px-3 py-2 rounded mt-4">Income</h3>
+                  <h3 className="font-bold text-purple-800 text-sm uppercase bg-green-100 px-3 py-2 rounded mt-4">Income</h3>
                   <div className="space-y-2">
                     {data.pesticideDiscountFromSupplier > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-700">Pesticide Discount from Supplier</span>
-                        <span className="text-green-700">+ {formatCurrency(data.pesticideDiscountFromSupplier)}</span>
+                        <span className="text-purple-700">+ {formatCurrency(data.pesticideDiscountFromSupplier)}</span>
                       </div>
                     )}
                     {data.otherIncome > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-700">Other Income</span>
-                        <span className="text-green-700">+ {formatCurrency(data.otherIncome)}</span>
+                        <span className="text-purple-700">+ {formatCurrency(data.otherIncome)}</span>
                       </div>
                     )}
-                    <div className="border-t pt-2 flex justify-between text-sm font-bold text-green-700">
+                    <div className="border-t pt-2 flex justify-between text-sm font-bold text-purple-700">
                       <span>Total Income</span>
                       <span>+ {formatCurrency(data.totalIncome)}</span>
                     </div>
@@ -141,7 +141,7 @@ export default function BalanceSheetPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-700">Gross Profit</span>
-                      <span className={`font-bold ${data.grossProfit >= 0 ? "text-green-700" : "text-red-600"}`}>
+                      <span className={`font-bold ${data.grossProfit >= 0 ? "text-purple-700" : "text-red-600"}`}>
                         {formatCurrency(data.grossProfit)}
                       </span>
                     </div>
@@ -214,20 +214,20 @@ export default function BalanceSheetPage() {
 
                 {/* EQUITY */}
                 <div>
-                  <h3 className="font-bold text-green-900 text-sm uppercase bg-green-100 px-3 py-2 rounded mb-3">EQUITY</h3>
+                  <h3 className="font-bold text-purple-900 text-sm uppercase bg-green-100 px-3 py-2 rounded mb-3">EQUITY</h3>
                   <div className="space-y-3">
                     <div className="border-l-4 border-green-500 pl-3">
                       <p className="text-xs text-gray-600 font-medium">Owner's Capital</p>
                       <div className="space-y-2 mt-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-gray-700">Net Income/(Loss)</span>
-                          <span className={`font-semibold ${data.netIncome >= 0 ? "text-green-700" : "text-red-600"}`}>
+                          <span className={`font-semibold ${data.netIncome >= 0 ? "text-purple-700" : "text-red-600"}`}>
                             {formatCurrency(data.netIncome)}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-green-100 rounded px-3 py-2 flex justify-between font-bold text-green-900 border-2 border-green-300">
+                    <div className="bg-green-100 rounded px-3 py-2 flex justify-between font-bold text-purple-900 border-2 border-green-300">
                       <span>TOTAL EQUITY</span>
                       <span>{formatCurrency(data.equity)}</span>
                     </div>
@@ -239,7 +239,7 @@ export default function BalanceSheetPage() {
               <div className={`mt-6 p-4 rounded-lg border-2 ${data.accountingEquation ? "bg-green-50 border-green-300" : "bg-red-50 border-red-300"}`}>
                 <div className="flex items-center gap-2 mb-2">
                   {data.accountingEquation ? (
-                    <div className="text-green-700 text-sm font-bold">✓ Accounting Equation Balanced</div>
+                    <div className="text-purple-700 text-sm font-bold">✓ Accounting Equation Balanced</div>
                   ) : (
                     <div className="text-red-700 text-sm font-bold flex items-center gap-1"><AlertCircle className="w-4 h-4" /> Equation Imbalanced</div>
                   )}
@@ -284,11 +284,11 @@ export default function BalanceSheetPage() {
                   <div className="text-center flex-1">
                     <div className="bg-green-100 border-2 border-green-500 rounded-lg p-4">
                       <p className="text-xs text-gray-600 font-medium">EQUITY</p>
-                      <p className="text-xl font-bold text-green-700">{formatCurrency(data.equity)}</p>
+                      <p className="text-xl font-bold text-purple-700">{formatCurrency(data.equity)}</p>
                     </div>
                   </div>
                 </div>
-                <div className={`p-3 rounded-lg text-center font-bold ${data.accountingEquation ? "bg-green-100 text-green-800 border-2 border-green-500" : "bg-red-100 text-red-800 border-2 border-red-500"}`}>
+                <div className={`p-3 rounded-lg text-center font-bold ${data.accountingEquation ? "bg-green-100 text-purple-800 border-2 border-green-500" : "bg-red-100 text-red-800 border-2 border-red-500"}`}>
                   {data.accountingEquation ? "✓ EQUATION BALANCED" : "⚠ EQUATION IMBALANCED"}
                 </div>
               </CardContent>

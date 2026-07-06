@@ -237,7 +237,7 @@ export default function SuppliersPage() {
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-50 rounded-lg"><TrendingDown className="w-5 h-5 text-green-600" /></div>
+              <div className="p-2 bg-green-50 rounded-lg"><TrendingDown className="w-5 h-5 text-purple-600" /></div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{suppliers.filter(s => s.isActive).length}</p>
                 <p className="text-sm text-gray-500">Active Suppliers</p>
@@ -291,7 +291,7 @@ export default function SuppliersPage() {
                       <td className="py-3 px-3">
                         <button
                           onClick={() => openDetail(s)}
-                          className="font-semibold text-green-700 hover:underline text-left"
+                          className="font-semibold text-purple-700 hover:underline text-left"
                         >
                           {s.name}
                         </button>
@@ -308,17 +308,17 @@ export default function SuppliersPage() {
                           </span>
                         ) : "—"}
                       </td>
-                      <td className={`py-3 px-3 text-right font-semibold ${(s.ledgerBalance || 0) > 0 ? "text-green-600" : (s.ledgerBalance || 0) < 0 ? "text-red-600" : "text-gray-600"}`}>
+                      <td className={`py-3 px-3 text-right font-semibold ${(s.ledgerBalance || 0) > 0 ? "text-purple-600" : (s.ledgerBalance || 0) < 0 ? "text-red-600" : "text-gray-600"}`}>
                         {formatCurrency(s.ledgerBalance || 0)}
                       </td>
                       <td className="py-3 px-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${s.isActive ? "bg-green-100 text-green-700" : "bg-amber-100 text-gray-500"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${s.isActive ? "bg-green-100 text-purple-700" : "bg-amber-100 text-gray-500"}`}>
                           {s.isActive ? "Active" : "Inactive"}
                         </span>
                       </td>
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-1">
-                          <button onClick={() => openDetail(s)} className="p-1.5 text-gray-400 hover:text-green-700 hover:bg-green-50 rounded" title="View details">
+                          <button onClick={() => openDetail(s)} className="p-1.5 text-gray-400 hover:text-purple-700 hover:bg-green-50 rounded" title="View details">
                             <Eye className="w-4 h-4" />
                           </button>
                           <button onClick={() => openPayment(s)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Record payment">
@@ -425,8 +425,8 @@ export default function SuppliersPage() {
                   <p className="text-xs text-blue-600 mt-1">Total Purchased</p>
                 </div>
                 <div className="bg-green-50 rounded-lg p-4 text-center">
-                  <p className="text-xl font-bold text-green-700">{formatCurrency(detail.totalPaid)}</p>
-                  <p className="text-xs text-green-600 mt-1">Total Paid</p>
+                  <p className="text-xl font-bold text-purple-700">{formatCurrency(detail.totalPaid)}</p>
+                  <p className="text-xs text-purple-600 mt-1">Total Paid</p>
                 </div>
                 <div className={`rounded-lg p-4 text-center ${detail.totalBalance > 0 ? "bg-red-50" : "bg-amber-50"}`}>
                   <p className={`text-xl font-bold ${detail.totalBalance > 0 ? "text-red-700" : "text-gray-700"}`}>
@@ -463,7 +463,7 @@ export default function SuppliersPage() {
                   {([["ledger", "Account Ledger", <BookOpen key="b" className="w-4 h-4" />], ["purchases", "Purchase History", <ShoppingBag key="s" className="w-4 h-4" />]] as const).map(([key, label, icon]) => (
                     <button key={key} onClick={() => setActiveTab(key as any)}
                       className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-                        activeTab === key ? "border-green-700 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"
+                        activeTab === key ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"
                       }`}>
                       {icon}{label}
                       <span className="text-xs bg-amber-100 text-gray-500 px-1.5 py-0.5 rounded">
@@ -519,14 +519,14 @@ export default function SuppliersPage() {
                                 </td>
                                 <td className="py-2 px-3 text-gray-500 whitespace-nowrap text-xs">{formatDate(entry.date)}</td>
                                 <td className="py-2 px-3">
-                                  <span className={`text-xs font-semibold px-2 py-0.5 rounded ${entry.type === "PAYMENT" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
+                                  <span className={`text-xs font-semibold px-2 py-0.5 rounded ${entry.type === "PAYMENT" ? "bg-green-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>
                                     {entry.type}
                                   </span>
                                 </td>
                                 <td className="py-2 px-3 text-gray-700 text-xs max-w-xs truncate">{entry.description}</td>
                                 <td className="py-2 px-3 text-right font-medium text-gray-900">{entry.debit > 0 ? formatCurrency(entry.debit) : "—"}</td>
-                                <td className="py-2 px-3 text-right text-green-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "—"}</td>
-                                <td className={`py-2 px-3 text-right font-semibold ${entry.balance > 0 ? "text-red-600" : "text-green-700"}`}>
+                                <td className="py-2 px-3 text-right text-purple-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "—"}</td>
+                                <td className={`py-2 px-3 text-right font-semibold ${entry.balance > 0 ? "text-red-600" : "text-purple-700"}`}>
                                   {formatCurrency(Math.abs(entry.balance))}
                                   {entry.balance !== 0 && <span className="text-xs ml-1 font-normal">{entry.balance > 0 ? "Dr" : "Cr"}</span>}
                                 </td>
@@ -538,8 +538,8 @@ export default function SuppliersPage() {
                           <tr>
                             <td colSpan={4} className="py-2 px-3 font-bold text-gray-700 text-xs">Closing Balance</td>
                             <td className="py-2 px-3 text-right font-bold text-gray-900">{formatCurrency((detail.ledger || []).reduce((s: number, e: any) => s + e.debit, 0))}</td>
-                            <td className="py-2 px-3 text-right font-bold text-green-700">{formatCurrency((detail.ledger || []).reduce((s: number, e: any) => s + e.credit, 0))}</td>
-                            <td className={`py-2 px-3 text-right font-bold ${detail.totalBalance > 0 ? "text-red-600" : "text-green-700"}`}>
+                            <td className="py-2 px-3 text-right font-bold text-purple-700">{formatCurrency((detail.ledger || []).reduce((s: number, e: any) => s + e.credit, 0))}</td>
+                            <td className={`py-2 px-3 text-right font-bold ${detail.totalBalance > 0 ? "text-red-600" : "text-purple-700"}`}>
                               {formatCurrency(detail.totalBalance)}
                               <span className="text-xs ml-1 font-normal">{detail.totalBalance > 0 ? "Dr" : "Cr"}</span>
                             </td>
@@ -574,7 +574,7 @@ export default function SuppliersPage() {
                               {p.items.map((i: any) => `${i.product?.name} ×${i.quantity}`).join(", ")}
                             </td>
                             <td className="py-2 px-3 font-medium">{formatCurrency(p.totalAmount)}</td>
-                            <td className="py-2 px-3 text-green-600">{formatCurrency(p.paidAmount)}</td>
+                            <td className="py-2 px-3 text-purple-600">{formatCurrency(p.paidAmount)}</td>
                             <td className="py-2 px-3 text-red-600">{formatCurrency(p.balance)}</td>
                             <td className="py-2 px-3">
                               <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(p.status)}`}>
@@ -612,7 +612,7 @@ export default function SuppliersPage() {
               </div>
               <div className="border-t-2 border-gray-800 pt-2 flex justify-between font-bold text-base">
                 <span>Balance:</span>
-                <span className={lastPayment.balance > 0 ? "text-red-700" : "text-green-700"}>{formatCurrency(Math.abs(lastPayment.balance))}</span>
+                <span className={lastPayment.balance > 0 ? "text-red-700" : "text-purple-700"}>{formatCurrency(Math.abs(lastPayment.balance))}</span>
               </div>
             </div>
             <p className="mt-8 text-center text-xs text-gray-400 border-t pt-4">Payment receipt — Gala Mandi</p>
@@ -625,7 +625,7 @@ export default function SuppliersPage() {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {lastPayment ? <Check className="w-5 h-5 text-green-600" /> : <ArrowUpCircle className="w-5 h-5 text-blue-600" />}
+              {lastPayment ? <Check className="w-5 h-5 text-purple-600" /> : <ArrowUpCircle className="w-5 h-5 text-blue-600" />}
               {lastPayment ? "Payment Recorded" : "Pay Supplier"}
             </DialogTitle>
           </DialogHeader>
@@ -648,7 +648,7 @@ export default function SuppliersPage() {
                 {lastPayment.notes && <div className="flex justify-between"><span className="text-gray-500">Reference</span><span className="text-xs">{lastPayment.notes}</span></div>}
                 <div className="border-t pt-2 flex justify-between font-semibold">
                   <span className="text-gray-600">Balance</span>
-                  <span className={lastPayment.balance > 0 ? "text-red-600" : "text-green-700"}>{formatCurrency(Math.abs(lastPayment.balance))}</span>
+                  <span className={lastPayment.balance > 0 ? "text-red-600" : "text-purple-700"}>{formatCurrency(Math.abs(lastPayment.balance))}</span>
                 </div>
               </div>
               <div className="flex gap-3">

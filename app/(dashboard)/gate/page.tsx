@@ -12,7 +12,7 @@ import { buildPrintHeader, receiptCSS } from "@/lib/print-utils"
 import { Plus, DoorOpen, Scale, FileCheck, LogOut, Clock, Printer } from "lucide-react"
 
 const STATUS_COLORS: Record<string, string> = {
-  OPEN: "bg-green-100 text-green-700",
+  OPEN: "bg-green-100 text-purple-700",
   CLOSED: "bg-amber-100 text-gray-600",
 }
 const TYPE_COLORS: Record<string, string> = {
@@ -145,7 +145,7 @@ ${buildPrintHeader(shop)}
           <p className="text-gray-500 text-sm">Weighbridge, gate passes & vehicle tracking</p>
         </div>
         <Button onClick={() => { setForm({ type: "IN", vehicleId: "", vehicleNo: "", driverName: "", farmerId: "", agentId: "", commodity: "", bags: "", purpose: "", notes: "" }); setShowEntryModal(true) }}
-          className="bg-green-700 hover:bg-green-800 gap-2">
+          className="bg-purple-700 hover:bg-purple-800 gap-2">
           <Plus className="w-4 h-4" /> New Entry
         </Button>
       </div>
@@ -160,8 +160,8 @@ ${buildPrintHeader(shop)}
         </Card>
         <Card className="border-green-200">
           <CardContent className="p-4">
-            <p className="text-xs text-green-600 uppercase font-medium tracking-wide">Open (Inside)</p>
-            <p className="text-2xl font-bold text-green-700 mt-1">{open}</p>
+            <p className="text-xs text-purple-600 uppercase font-medium tracking-wide">Open (Inside)</p>
+            <p className="text-2xl font-bold text-purple-700 mt-1">{open}</p>
           </CardContent>
         </Card>
         <Card>
@@ -322,7 +322,7 @@ ${buildPrintHeader(shop)}
               <Input value={form.purpose} onChange={(e) => setForm({ ...form, purpose: e.target.value })} /></div>
             <div className="flex gap-3 pt-2">
               <Button variant="outline" onClick={() => setShowEntryModal(false)} className="flex-1">Cancel</Button>
-              <Button onClick={handleCreateEntry} className="flex-1 bg-green-700 hover:bg-green-800">Create Entry</Button>
+              <Button onClick={handleCreateEntry} className="flex-1 bg-purple-700 hover:bg-purple-800">Create Entry</Button>
             </div>
           </div>
         </DialogContent>

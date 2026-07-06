@@ -274,16 +274,16 @@ export default function SettingsPage() {
                 onClick={() => !savingModules && toggleModule(key)}
                 className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all select-none
                   ${modules[key]
-                    ? "border-green-600 bg-green-50"
+                    ? "border-purple-600 bg-green-50"
                     : "border-amber-200 bg-amber-50 hover:border-gray-300"
                   }`}
               >
                 <div>
-                  <p className={`text-sm font-semibold ${modules[key] ? "text-green-800" : "text-gray-700"}`}>{label}</p>
+                  <p className={`text-sm font-semibold ${modules[key] ? "text-purple-800" : "text-gray-700"}`}>{label}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
                 </div>
                 {modules[key]
-                  ? <ToggleRight className="w-7 h-7 text-green-600 flex-shrink-0" />
+                  ? <ToggleRight className="w-7 h-7 text-purple-600 flex-shrink-0" />
                   : <ToggleLeft className="w-7 h-7 text-gray-400 flex-shrink-0" />
                 }
               </div>
@@ -298,7 +298,7 @@ export default function SettingsPage() {
               {savingModules ? "Saving..." : "Save Modules"}
             </Button>
             {moduleSavedKey === "saved" && (
-              <span className="text-sm text-green-600 font-medium">✓ Modules saved successfully</span>
+              <span className="text-sm text-purple-600 font-medium">✓ Modules saved successfully</span>
             )}
           </div>
         </CardContent>

@@ -534,13 +534,13 @@ ${buildPrintHeader(shop)}
         <div className="flex gap-2 border-b border-amber-200">
           <button
             onClick={() => setActiveTab("products")}
-            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "products" ? "border-green-700 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "products" ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
           >
             <ShoppingCart className="w-4 h-4" /> Product Sales
           </button>
           <button
             onClick={() => setActiveTab("pesticides")}
-            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "pesticides" ? "border-green-700 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "pesticides" ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
           >
             <Sprout className="w-4 h-4" /> Pesticide Sales
           </button>
@@ -578,7 +578,7 @@ ${buildPrintHeader(shop)}
                             </div>
                             {(s.customer || s.farmer) && (
                               <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${s.farmer ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
+                                <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${s.farmer ? "bg-green-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>
                                   {s.farmer ? "Farmer" : "Customer"}
                                 </span>
                                 {(s.customer?.phone || s.farmer?.phone) && (
@@ -588,7 +588,7 @@ ${buildPrintHeader(shop)}
                             )}
                           </td>
                           <td className="py-3 px-3 text-gray-700">{formatCurrency(s.totalAmount)}</td>
-                          <td className="py-3 px-3 text-green-600">{formatCurrency(s.paidAmount)}</td>
+                          <td className="py-3 px-3 text-purple-600">{formatCurrency(s.paidAmount)}</td>
                           <td className="py-3 px-3 text-red-600">{formatCurrency(s.balance)}</td>
                           <td className="py-3 px-3">
                             <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(s.status)}`}>{s.status}</span>
@@ -599,7 +599,7 @@ ${buildPrintHeader(shop)}
                             <div className="flex gap-1">
                               <button
                                 onClick={() => openDetail(s)}
-                                className="p-1.5 text-gray-400 hover:text-green-700 hover:bg-green-50 rounded transition-colors"
+                                className="p-1.5 text-gray-400 hover:text-purple-700 hover:bg-green-50 rounded transition-colors"
                                 title="View Details"
                               >
                                 <Eye className="w-4 h-4" />
@@ -673,7 +673,7 @@ ${buildPrintHeader(shop)}
                                 <span className="text-gray-400 text-xs">Walk-in</span>
                               )}
                             </td>
-                            <td className="py-3 px-3 text-green-600">{formatCurrency(s.paidAmount)}</td>
+                            <td className="py-3 px-3 text-purple-600">{formatCurrency(s.paidAmount)}</td>
                             <td className="py-3 px-3 text-red-600">{formatCurrency(bal)}</td>
                             <td className="py-3 px-3 text-gray-500">{formatDate(s.createdAt)}</td>
                             <td className="py-3 px-3 text-gray-500">{s.soldBy?.name}</td>
@@ -681,7 +681,7 @@ ${buildPrintHeader(shop)}
                               <div className="flex gap-1">
                                 <button
                                   onClick={() => { setSelectedPesticideSaleDetail(s); setShowPesticideDetailModal(true) }}
-                                  className="p-1.5 text-gray-400 hover:text-green-700 hover:bg-green-50 rounded transition-colors"
+                                  className="p-1.5 text-gray-400 hover:text-purple-700 hover:bg-green-50 rounded transition-colors"
                                   title="View Details"
                                 >
                                   <Eye className="w-4 h-4" />
@@ -811,7 +811,7 @@ ${buildPrintHeader(shop)}
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Balance:</span>
-                  <span className={`font-bold ${balance > 0 ? "text-red-600" : "text-green-600"}`}>{formatCurrency(balance)}</span>
+                  <span className={`font-bold ${balance > 0 ? "text-red-600" : "text-purple-600"}`}>{formatCurrency(balance)}</span>
                 </div>
               </div>
               <div>
@@ -831,7 +831,7 @@ ${buildPrintHeader(shop)}
           <DialogContent className="max-w-sm">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Sprout className="w-5 h-5 text-green-600" /> New Pesticide Sale
+                <Sprout className="w-5 h-5 text-purple-600" /> New Pesticide Sale
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
@@ -859,7 +859,7 @@ ${buildPrintHeader(shop)}
               {selectedPesticide && (
                 <div className="flex justify-between items-center bg-amber-50 rounded px-3 py-2">
                   <span className="text-sm text-gray-600">Total Amount:</span>
-                  <span className="text-lg font-bold text-green-700">{formatCurrency(pesticideSaleTotal)}</span>
+                  <span className="text-lg font-bold text-purple-700">{formatCurrency(pesticideSaleTotal)}</span>
                 </div>
               )}
               <div>
@@ -906,7 +906,7 @@ ${buildPrintHeader(shop)}
               <DialogHeader>
                 <div className="flex items-center justify-between">
                   <DialogTitle className="flex items-center gap-2">
-                    <ShoppingCart className="w-5 h-5 text-green-600" />
+                    <ShoppingCart className="w-5 h-5 text-purple-600" />
                     Sale Details
                     <span className="text-sm font-normal text-gray-400">#{selectedSale.id.slice(-8).toUpperCase()}</span>
                   </DialogTitle>
@@ -971,11 +971,11 @@ ${buildPrintHeader(shop)}
                         <span className="text-gray-600">Total Amount:</span>
                         <span className="font-bold text-gray-900">{formatCurrency(selectedSale.totalAmount)}</span>
                       </div>
-                      <div className="flex justify-between text-green-700">
+                      <div className="flex justify-between text-purple-700">
                         <span>Amount Paid:</span>
                         <span className="font-semibold">{formatCurrency(selectedSale.paidAmount)}</span>
                       </div>
-                      <div className={`flex justify-between border-t border-amber-200 pt-2 font-bold ${selectedSale.balance > 0 ? "text-red-600" : "text-green-600"}`}>
+                      <div className={`flex justify-between border-t border-amber-200 pt-2 font-bold ${selectedSale.balance > 0 ? "text-red-600" : "text-purple-600"}`}>
                         <span>{selectedSale.balance > 0 ? "Balance Due:" : "Change:"}</span>
                         <span>{formatCurrency(Math.abs(selectedSale.balance))}</span>
                       </div>
@@ -1000,7 +1000,7 @@ ${buildPrintHeader(shop)}
               <DialogHeader>
                 <div className="flex items-center justify-between">
                   <DialogTitle className="flex items-center gap-2">
-                    <Sprout className="w-5 h-5 text-green-600" />
+                    <Sprout className="w-5 h-5 text-purple-600" />
                     Pesticide Sale
                     <span className="text-sm font-normal text-gray-400">#{selectedPesticideSaleDetail.id.slice(-8).toUpperCase()}</span>
                   </DialogTitle>
@@ -1055,11 +1055,11 @@ ${buildPrintHeader(shop)}
                         <span className="text-gray-600">Total Amount:</span>
                         <span className="font-bold text-gray-900">{formatCurrency(selectedPesticideSaleDetail.totalAmount)}</span>
                       </div>
-                      <div className="flex justify-between text-green-700">
+                      <div className="flex justify-between text-purple-700">
                         <span>Amount Paid:</span>
                         <span className="font-semibold">{formatCurrency(selectedPesticideSaleDetail.paidAmount)}</span>
                       </div>
-                      <div className={`flex justify-between border-t border-amber-200 pt-2 font-bold ${(selectedPesticideSaleDetail.balance ?? 0) > 0 ? "text-red-600" : "text-green-600"}`}>
+                      <div className={`flex justify-between border-t border-amber-200 pt-2 font-bold ${(selectedPesticideSaleDetail.balance ?? 0) > 0 ? "text-red-600" : "text-purple-600"}`}>
                         <span>{(selectedPesticideSaleDetail.balance ?? 0) > 0 ? "Balance Due:" : "Paid"}</span>
                         <span>{formatCurrency(Math.abs(selectedPesticideSaleDetail.balance ?? 0))}</span>
                       </div>
