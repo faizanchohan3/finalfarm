@@ -41,16 +41,10 @@ export default function BalanceSheetPage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Balance Sheet & P&L</h2>
           <p className="text-gray-500 text-sm">Complete financial statement with assets, liabilities, equity</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
         <Button onClick={() => window.print()} variant="outline" className="gap-2">
           <Printer className="w-4 h-4" /> Print
         </Button>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       {/* Filters */}
@@ -60,23 +54,14 @@ export default function BalanceSheetPage() {
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">From Date</label>
               <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-40" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">To Date</label>
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
             <Button onClick={loadReport} disabled={loading} className="bg-green-700 hover:bg-green-800">
               {loading ? "Loading..." : "Apply Filter"}
             </Button>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
         </CardContent>
       </Card>
@@ -98,29 +83,17 @@ export default function BalanceSheetPage() {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-700">Agricultural Sales</span>
                       <span className="font-semibold">{formatCurrency(data.salesTotal)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
                     {data.pesticideSalesTotal > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-700">Pesticide Sales</span>
                         <span className="font-semibold">{formatCurrency(data.pesticideSalesTotal)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                       </div>
                     )}
                     <div className="border-t pt-2 flex justify-between text-sm font-bold text-green-700">
                       <span>Total Revenue</span>
                       <span>{formatCurrency(data.totalRevenue)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
 
                   <h3 className="font-bold text-green-800 text-sm uppercase bg-green-100 px-3 py-2 rounded mt-4">Income</h3>
@@ -129,34 +102,19 @@ export default function BalanceSheetPage() {
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-700">Pesticide Discount from Supplier</span>
                         <span className="text-green-700">+ {formatCurrency(data.pesticideDiscountFromSupplier)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                       </div>
                     )}
                     {data.otherIncome > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-700">Other Income</span>
                         <span className="text-green-700">+ {formatCurrency(data.otherIncome)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                       </div>
                     )}
                     <div className="border-t pt-2 flex justify-between text-sm font-bold text-green-700">
                       <span>Total Income</span>
                       <span>+ {formatCurrency(data.totalIncome)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
 
                 {/* Expense Side */}
@@ -166,29 +124,17 @@ export default function BalanceSheetPage() {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-700">Cost of Purchases</span>
                       <span className="font-semibold text-red-600">− {formatCurrency(data.purchasesTotal)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
                     {data.otherExpense > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-700">Other Expenses</span>
                         <span className="text-red-600">− {formatCurrency(data.otherExpense)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                       </div>
                     )}
                     <div className="border-t pt-2 flex justify-between text-sm font-bold text-red-600">
                       <span>Total Expenses</span>
                       <span>− {formatCurrency(data.purchasesTotal + data.otherExpense)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
 
                   <h3 className="font-bold text-blue-800 text-sm uppercase bg-blue-100 px-3 py-2 rounded mt-4">Profit/Loss</h3>
@@ -198,29 +144,14 @@ export default function BalanceSheetPage() {
                       <span className={`font-bold ${data.grossProfit >= 0 ? "text-green-700" : "text-red-600"}`}>
                         {formatCurrency(data.grossProfit)}
                       </span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
                     <div className="border-t-2 pt-2 flex justify-between text-base font-bold rounded px-2 py-2"
                       style={{background: data.netIncome >= 0 ? "#dcfce7" : "#fee2e2", color: data.netIncome >= 0 ? "#15803d" : "#991b1b"}}>
                       <span>Net {data.netIncome >= 0 ? "Profit" : "Loss"}</span>
                       <span>{formatCurrency(Math.abs(data.netIncome))}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               </div>
             </CardContent>
           </Card>
@@ -243,46 +174,22 @@ export default function BalanceSheetPage() {
                         <div className="flex justify-between">
                           <span className="text-gray-700">Customer Receivables</span>
                           <span className="font-semibold">{formatCurrency(data.customerReceivables)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-700">Farmer Receivables</span>
                           <span className="font-semibold">{formatCurrency(data.farmerReceivables)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                         </div>
                         <div className="flex justify-between border-t pt-2">
                           <span className="text-gray-700">Stock Value</span>
                           <span className="font-semibold">{formatCurrency(data.totalStockValue)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                         </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                       </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
                     <div className="bg-blue-100 rounded px-3 py-2 flex justify-between font-bold text-blue-900 border-2 border-blue-300">
                       <span>TOTAL ASSETS</span>
                       <span>{formatCurrency(data.totalAssets)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
 
                 {/* LIABILITIES */}
@@ -295,32 +202,14 @@ export default function BalanceSheetPage() {
                         <div className="flex justify-between">
                           <span className="text-gray-700">Supplier Payables</span>
                           <span className="font-semibold text-red-600">{formatCurrency(data.supplierPayables)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                         </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                       </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
                     <div className="bg-red-100 rounded px-3 py-2 flex justify-between font-bold text-red-900 border-2 border-red-300">
                       <span>TOTAL LIABILITIES</span>
                       <span>{formatCurrency(data.totalLiabilities)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
 
                 {/* EQUITY */}
@@ -335,78 +224,36 @@ export default function BalanceSheetPage() {
                           <span className={`font-semibold ${data.netIncome >= 0 ? "text-green-700" : "text-red-600"}`}>
                             {formatCurrency(data.netIncome)}
                           </span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                         </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                       </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
                     <div className="bg-green-100 rounded px-3 py-2 flex justify-between font-bold text-green-900 border-2 border-green-300">
                       <span>TOTAL EQUITY</span>
                       <span>{formatCurrency(data.equity)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               </div>
 
               {/* Accounting Equation Verification */}
               <div className={`mt-6 p-4 rounded-lg border-2 ${data.accountingEquation ? "bg-green-50 border-green-300" : "bg-red-50 border-red-300"}`}>
                 <div className="flex items-center gap-2 mb-2">
                   {data.accountingEquation ? (
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     <div className="text-green-700 text-sm font-bold">✓ Accounting Equation Balanced</div>
                   ) : (
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     <div className="text-red-700 text-sm font-bold flex items-center gap-1"><AlertCircle className="w-4 h-4" /> Equation Imbalanced</div>
                   )}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="text-xs text-gray-700 space-y-1">
                   <div className="flex justify-between">
                     <span>Assets:</span>
                     <span className="font-semibold">{formatCurrency(data.totalAssets)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                   <div className="flex justify-between">
                     <span>Liabilities + Equity:</span>
                     <span className="font-semibold">{formatCurrency(data.totalLiabilities + data.equity)}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               </div>
             </CardContent>
           </Card>
@@ -424,61 +271,28 @@ export default function BalanceSheetPage() {
                     <div className="bg-blue-100 border-2 border-blue-500 rounded-lg p-4">
                       <p className="text-xs text-gray-600 font-medium">ASSETS</p>
                       <p className="text-2xl font-bold text-blue-700">{formatCurrency(data.totalAssets)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   <div className="text-2xl font-bold text-gray-600">=</div>
                   <div className="text-center flex-1">
                     <div className="bg-red-100 border-2 border-red-500 rounded-lg p-4">
                       <p className="text-xs text-gray-600 font-medium">LIABILITIES</p>
                       <p className="text-xl font-bold text-red-700">{formatCurrency(data.totalLiabilities)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   <div className="text-2xl font-bold text-gray-600">+</div>
                   <div className="text-center flex-1">
                     <div className="bg-green-100 border-2 border-green-500 rounded-lg p-4">
                       <p className="text-xs text-gray-600 font-medium">EQUITY</p>
                       <p className="text-xl font-bold text-green-700">{formatCurrency(data.equity)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className={`p-3 rounded-lg text-center font-bold ${data.accountingEquation ? "bg-green-100 text-green-800 border-2 border-green-500" : "bg-red-100 text-red-800 border-2 border-red-500"}`}>
                   {data.accountingEquation ? "✓ EQUATION BALANCED" : "⚠ EQUATION IMBALANCED"}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
               </CardContent>
             </Card>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
 
           {/* Pie Charts Grid */}
@@ -545,9 +359,6 @@ export default function BalanceSheetPage() {
                 </CardContent>
               </Card>
             )}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
 
           {/* Financial Summary Bar Chart */}
@@ -635,15 +446,9 @@ export default function BalanceSheetPage() {
                 <p className="text-xs text-gray-400 mt-1">To suppliers</p>
               </CardContent>
             </Card>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
         </>
       )}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
     </div>
   )
 }

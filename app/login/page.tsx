@@ -90,8 +90,8 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-2xl mb-4 shadow-lg">
             <Store className="w-9 h-9 text-green-900" />
           </div>
-          <h1 className="text-3xl font-bold text-amber-950">ArgoFirm</h1>
-          <p className="text-green-200 mt-1">Farm Management System</p>
+          <h1 className="text-3xl font-bold text-amber-950">Gala Mandi</h1>
+          <p className="text-green-200 mt-1">Multi-Shop Management System</p>
         </div>
 
         {/* Card */}

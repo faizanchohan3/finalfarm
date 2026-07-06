@@ -41,57 +41,24 @@ export default function ProfitLossPage() {
           <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
             {shop?.logo
               ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
             }
             <div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
           <div style={{textAlign:"right",fontSize:"11px",lineHeight:1.9,opacity:0.9}}>
             {shop?.phone && <div>&#9990;&nbsp;{shop.phone}</div>}
             {shop?.address && <div>&#9679;&nbsp;{shop.address}</div>}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             <div style={{fontSize:"10px",opacity:0.75}}>Generated: {new Date().toLocaleDateString("en-PK")}</div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb"}}>
           <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Profit &amp; Loss Statement</h2>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>Period: {dateLabel}</div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       {/* Screen header */}
@@ -99,16 +66,10 @@ export default function ProfitLossPage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Profit & Loss</h2>
           <p className="text-gray-500 text-sm">Income, expenses and net profit overview</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
         <Button onClick={() => window.print()} variant="outline" className="gap-2">
           <Printer className="w-4 h-4" /> Print Report
         </Button>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       {/* Filters */}
@@ -118,23 +79,14 @@ export default function ProfitLossPage() {
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">From Date</label>
               <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-40" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">To Date</label>
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
             <Button onClick={loadReport} disabled={loading} className="bg-green-700 hover:bg-green-800">
               {loading ? "Loading..." : "Apply Filter"}
             </Button>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
         </CardContent>
       </Card>
@@ -155,28 +107,16 @@ export default function ProfitLossPage() {
                   <div>
                     <p className="font-medium text-gray-800">Agricultural Sales</p>
                     <p className="text-xs text-gray-500">{data.salesCount} transactions</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                   <p className="font-semibold text-gray-900">{formatCurrency(data.salesTotal)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b">
                   <p className="text-gray-600 text-sm">Sales Collected</p>
                   <p className="text-green-700">{formatCurrency(data.salesPaid)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b">
                   <p className="text-gray-600 text-sm">Sales Receivable</p>
                   <p className="text-orange-600">{formatCurrency(data.salesBalance)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 {data.pesticideSalesTotal > 0 && (
                   <>
@@ -184,28 +124,16 @@ export default function ProfitLossPage() {
                       <div>
                         <p className="font-medium text-gray-800">Pesticide Sales</p>
                         <p className="text-xs text-gray-500">{data.pesticideSalesCount} transactions</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                       </div>
                       <p className="font-semibold text-gray-900">{formatCurrency(data.pesticideSalesTotal)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
                       <p className="text-gray-600 text-sm">Pesticide Collected</p>
                       <p className="text-green-700">{formatCurrency(data.pesticideSalesPaid)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
                       <p className="text-gray-600 text-sm">Pesticide Receivable</p>
                       <p className="text-orange-600">{formatCurrency(data.pesticideSalesBalance)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
                   </>
                 )}
@@ -213,26 +141,17 @@ export default function ProfitLossPage() {
                   <div className="flex justify-between items-center py-2 border-b bg-green-50 px-2">
                     <p className="text-gray-600 text-sm font-medium">Pesticide Discount from Supplier</p>
                     <p className="text-green-700 font-medium">{formatCurrency(data.pesticideDiscountFromSupplier)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                 )}
                 {data.otherIncome > 0 && (
                   <div className="flex justify-between items-center py-2 border-b">
                     <p className="text-gray-600 text-sm">Other Income</p>
                     <p className="text-green-700">{formatCurrency(data.otherIncome)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                 )}
                 <div className="flex justify-between items-center pt-2 font-bold text-green-700 bg-green-50 px-2 py-2 rounded">
                   <p>Total Revenue</p>
                   <p>{formatCurrency(data.totalRevenue + data.otherIncome)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
               </CardContent>
             </Card>
@@ -249,50 +168,29 @@ export default function ProfitLossPage() {
                   <div>
                     <p className="font-medium text-gray-800">Purchases (Cost of Goods)</p>
                     <p className="text-xs text-gray-500">{data.purchasesCount} orders</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                   <p className="font-semibold text-gray-900">{formatCurrency(data.purchasesTotal)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b">
                   <p className="text-gray-600 text-sm">Purchases Paid</p>
                   <p className="text-red-600">{formatCurrency(data.purchasesPaid)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b">
                   <p className="text-gray-600 text-sm">Purchases Payable</p>
                   <p className="text-orange-600">{formatCurrency(data.purchasesBalance)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 {data.otherExpense > 0 && (
                   <div className="flex justify-between items-center py-2 border-b">
                     <p className="text-gray-600 text-sm">Other Expenses</p>
                     <p className="text-red-600">{formatCurrency(data.otherExpense)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                 )}
                 <div className="flex justify-between items-center pt-2 font-bold text-red-600 bg-red-50 px-2 py-2 rounded">
                   <p>Total Expenses</p>
                   <p>{formatCurrency(data.purchasesTotal + data.otherExpense)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
               </CardContent>
             </Card>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
 
           {/* Net Summary */}
@@ -307,40 +205,25 @@ export default function ProfitLossPage() {
                 <div className="flex justify-between py-2 border-b">
                   <p className="text-gray-600">Agricultural Sales</p>
                   <p className="font-medium">{formatCurrency(data.salesTotal)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 {data.pesticideSalesTotal > 0 && (
                   <div className="flex justify-between py-2 border-b">
                     <p className="text-gray-600">Pesticide Sales</p>
                     <p className="font-medium">{formatCurrency(data.pesticideSalesTotal)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                 )}
                 <div className="flex justify-between py-2 border-b font-semibold text-green-700 bg-green-50 px-2">
                   <p>Total Revenue</p>
                   <p>{formatCurrency(data.totalRevenue)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="flex justify-between py-2 border-b">
                   <p className="text-gray-600">Cost of Purchases</p>
                   <p className="font-medium text-red-600">− {formatCurrency(data.purchasesTotal)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 {data.pesticideIncentive > 0 && (
                   <div className="flex justify-between py-2 border-b">
                     <p className="text-gray-600 text-sm">Pesticide Incentive</p>
                     <p className="font-medium text-amber-600">− {formatCurrency(data.pesticideIncentive)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                 )}
                 <div className="flex justify-between py-2 border-b font-semibold">
@@ -348,47 +231,29 @@ export default function ProfitLossPage() {
                   <p className={data.grossProfit >= 0 ? "text-green-700" : "text-red-600"}>
                     {formatCurrency(data.grossProfit)}
                   </p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 {data.pesticideDiscountFromSupplier > 0 && (
                   <div className="flex justify-between py-2 border-b">
                     <p className="text-gray-600">Pesticide Discount from Supplier</p>
                     <p className="text-green-700">+ {formatCurrency(data.pesticideDiscountFromSupplier)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                 )}
                 {data.otherIncome > 0 && (
                   <div className="flex justify-between py-2 border-b">
                     <p className="text-gray-600">Other Income</p>
                     <p className="text-green-700">+ {formatCurrency(data.otherIncome)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                 )}
                 {data.otherExpense > 0 && (
                   <div className="flex justify-between py-2 border-b">
                     <p className="text-gray-600">Other Expenses</p>
                     <p className="text-red-600">− {formatCurrency(data.otherExpense)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                 )}
                 <div className={`flex justify-between py-3 px-3 rounded-lg font-bold text-lg ${data.netIncome >= 0 ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
                   <p>Net {data.netIncome >= 0 ? "Profit" : "Loss"}</p>
                   <p>{formatCurrency(Math.abs(data.netIncome))}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               </div>
             </CardContent>
           </Card>
@@ -433,14 +298,8 @@ export default function ProfitLossPage() {
       )}
 
       {loading && (
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         <div className="text-center py-20 text-gray-400">Loading report...</div>
       )}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
     </div>
   )
 }

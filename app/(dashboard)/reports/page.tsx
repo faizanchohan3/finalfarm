@@ -169,9 +169,6 @@ export default function ReportsPage() {
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
         <p className="text-gray-500 text-sm">Business performance overview — select a report below</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       {/* ── Key Metrics — Colorful Gradient Cards ── */}
@@ -185,9 +182,6 @@ export default function ReportsPage() {
             <p className="text-2xl font-bold">{loading ? "—" : formatCurrency(financeData.income)}</p>
             <p className="text-green-200 text-sm mt-1">Total Revenue</p>
             <p className="text-green-300 text-xs mt-2 flex items-center gap-1">View Sales Report <ArrowRight className="w-3 h-3" /></p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
         </Link>
 
@@ -202,9 +196,6 @@ export default function ReportsPage() {
             <p className="text-blue-300 text-xs mt-2 flex items-center gap-1">
               Udhar: {loading ? "—" : formatCurrency(customerData.outstanding)} <ArrowRight className="w-3 h-3" />
             </p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
         </Link>
 
@@ -219,9 +210,6 @@ export default function ReportsPage() {
             <p className="text-violet-300 text-xs mt-2 flex items-center gap-1">
               {loading ? "—" : productData.totalProducts} products · {loading ? "—" : productData.lowStockCount} low stock <ArrowRight className="w-3 h-3" />
             </p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
         </Link>
 
@@ -234,14 +222,8 @@ export default function ReportsPage() {
             <p className="text-2xl font-bold">{loading ? "—" : formatCurrency(expenseData.total)}</p>
             <p className="text-red-200 text-sm mt-1">Total Expenses</p>
             <p className="text-red-300 text-xs mt-2 flex items-center gap-1">View Expenses <ArrowRight className="w-3 h-3" /></p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
         </Link>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       {/* ── Secondary Metric Cards ── */}
@@ -251,9 +233,6 @@ export default function ReportsPage() {
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Net Balance</p>
               <Wallet className="w-4 h-4 text-green-600" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
             <p className={`text-xl font-bold ${financeData.balance >= 0 ? "text-green-700" : "text-red-600"}`}>
               {loading ? "—" : formatCurrency(financeData.balance)}
@@ -267,9 +246,6 @@ export default function ReportsPage() {
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Trader Udhar</p>
               <BookOpen className="w-4 h-4 text-orange-500" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
             <p className={`text-xl font-bold ${customerData.outstanding > 0 ? "text-orange-600" : "text-gray-500"}`}>
               {loading ? "—" : formatCurrency(customerData.outstanding)}
@@ -283,9 +259,6 @@ export default function ReportsPage() {
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Products Sold</p>
               <TrendingUp className="w-4 h-4 text-violet-600" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
             <p className="text-xl font-bold text-violet-700">
               {loading ? "—" : formatCurrency(productData.totalSaleAmount)}
@@ -301,9 +274,6 @@ export default function ReportsPage() {
                 Low Stock
               </p>
               <AlertTriangle className={`w-4 h-4 ${productData.lowStockCount > 0 ? "text-red-500" : "text-gray-400"}`} />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
             <p className={`text-xl font-bold ${productData.lowStockCount > 0 ? "text-red-600" : "text-gray-500"}`}>
               {loading ? "—" : productData.lowStockCount} items
@@ -313,9 +283,6 @@ export default function ReportsPage() {
             </Link>
           </CardContent>
         </Card>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       {/* ── Charts Row ── */}
@@ -368,14 +335,8 @@ export default function ReportsPage() {
                 <div key={d.name} className="flex items-center gap-1.5 text-sm">
                   <div className="w-3 h-3 rounded-full" style={{ background: d.color }} />
                   <span className="text-gray-600">{d.name}</span>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
               ))}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
 
             {/* Expense category breakdown */}
@@ -390,27 +351,15 @@ export default function ReportsPage() {
                       <p className="text-xs text-gray-500 w-20 truncate">{cat.category}</p>
                       <div className="flex-1 h-1.5 bg-amber-100 rounded-full overflow-hidden">
                         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: CATEGORY_COLORS[i] }} />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                       </div>
                       <p className="text-xs font-medium text-gray-700 w-20 text-right">{formatCurrency(cat._sum.amount)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
                   )
                 })}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               </div>
             )}
           </CardContent>
         </Card>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       {/* ── Report Navigation Cards ── */}
@@ -423,32 +372,17 @@ export default function ReportsPage() {
                 <CardContent className="p-5 flex items-start gap-4">
                   <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center flex-shrink-0`}>
                     <Icon className="w-5 h-5 text-amber-950" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 text-sm group-hover:text-green-700 transition-colors">{title}</p>
                     <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{description}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-green-600 transition-colors flex-shrink-0 mt-0.5" />
                 </CardContent>
               </Card>
             </Link>
           ))}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
-      </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
       </div>
     </div>
   )

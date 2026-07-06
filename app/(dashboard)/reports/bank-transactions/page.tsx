@@ -62,61 +62,25 @@ export default function BankTransactionsPage() {
           <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
             {shop?.logo
               ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>
             }
             <div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               <div style={{fontSize:"20px",fontWeight:900,letterSpacing:"-0.5px"}}>{shop?.name||"Gala Mandi"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8,marginTop:"2px"}}>{shop.ownerName}</div>}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
           <div style={{textAlign:"right",fontSize:"11px",lineHeight:1.9,opacity:0.9}}>
             {shop?.phone && <div>&#9990;&nbsp;{shop.phone}</div>}
             {shop?.address && <div>&#9679;&nbsp;{shop.address}</div>}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             <div style={{fontSize:"10px",opacity:0.75}}>Generated: {new Date().toLocaleDateString("en-PK")}</div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb"}}>
           <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Bank Transactions Report</h2>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           <div style={{fontSize:"13px",fontWeight:600,color:"#374151",marginTop:"4px"}}>{selectedBankName}</div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>Period: {dateLabel}</div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       {/* Screen header */}
@@ -124,18 +88,12 @@ export default function BankTransactionsPage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Bank Transactions</h2>
           <p className="text-gray-500 text-sm">Filter by bank and date range</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
         {loaded && (
           <Button onClick={() => window.print()} variant="outline" className="gap-2">
             <Printer className="w-4 h-4" /> Print Report
           </Button>
         )}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       {/* Filters */}
@@ -158,9 +116,6 @@ export default function BankTransactionsPage() {
                         className="mb-0"
                         onClick={(e) => e.stopPropagation()}
                       />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                     </div>
                     <SelectItem value="ALL">All Banks</SelectItem>
                     {banks
@@ -175,34 +130,19 @@ export default function BankTransactionsPage() {
                       ))}
                   </SelectContent>
                 </Select>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">From Date</label>
               <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-40" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">To Date</label>
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
             <Button onClick={loadReport} disabled={loading} className="bg-green-700 hover:bg-green-800">
               {loading ? "Loading..." : "View Report"}
             </Button>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
         </CardContent>
       </Card>
@@ -211,9 +151,6 @@ export default function BankTransactionsPage() {
         <div className="text-center py-20 text-gray-400">
           <Building2 className="w-10 h-10 mx-auto mb-3 opacity-30" />
           <p>Select a bank and date range, then click View Report</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
       )}
 
@@ -229,15 +166,9 @@ export default function BankTransactionsPage() {
                   <p className="text-sm text-gray-500">Total Inflow</p>
                   <p className="text-2xl font-bold text-green-600">{formatCurrency(summary.totalIn)}</p>
                   <p className="text-xs text-gray-400 mt-0.5">Receipts + Income</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="p-3 bg-green-50 rounded-full">
                   <TrendingUp className="w-6 h-6 text-green-600" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
               </CardContent>
             </Card>
@@ -247,15 +178,9 @@ export default function BankTransactionsPage() {
                   <p className="text-sm text-gray-500">Total Outflow</p>
                   <p className="text-2xl font-bold text-red-600">{formatCurrency(summary.totalOut)}</p>
                   <p className="text-xs text-gray-400 mt-0.5">Payments + Expenses</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="p-3 bg-red-50 rounded-full">
                   <TrendingDown className="w-6 h-6 text-red-600" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
               </CardContent>
             </Card>
@@ -267,21 +192,12 @@ export default function BankTransactionsPage() {
                     {formatCurrency(Math.abs(summary.totalIn - summary.totalOut))}
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">{summary.count} transactions</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="p-3 bg-blue-50 rounded-full">
                   <Wallet className="w-6 h-6 text-blue-600" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
               </CardContent>
             </Card>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
 
           {/* Transactions Table */}
@@ -351,17 +267,11 @@ export default function BankTransactionsPage() {
                     </tfoot>
                   )}
                 </table>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               </div>
             </CardContent>
           </Card>
         </>
       )}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
     </div>
   )
 }

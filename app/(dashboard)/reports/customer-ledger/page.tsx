@@ -107,34 +107,13 @@ function CustomerLedgerContent() {
       return `<div style="margin-bottom:28px">
         <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
           <div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             <div style="font-size:13px;font-weight:800;color:#7c2d12">${c.name}</div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             <div style="font-size:10px;color:#6b7280;margin-top:2px">${[c.phone,c.address].filter(Boolean).join(" · ")||"No contact info"}</div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
           <div style="text-align:right">
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             <div style="font-size:15px;font-weight:900;color:${balColor}">PKR ${Math.abs(bal).toLocaleString()}</div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             <div style="font-size:9px;color:${balColor};font-weight:700">${balLabel}</div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
         ${(data.entries||[]).length>0?`<table>
           <thead><tr><th>#</th><th>Date</th><th>Type</th><th>Description</th><th style="text-align:right">Debit</th><th style="text-align:right">Credit</th><th style="text-align:right">Balance</th></tr></thead>
@@ -152,25 +131,10 @@ function CustomerLedgerContent() {
 <style>${reportCSS} body{max-width:960px;margin:0 auto}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
   <div><div class="doc-title">All Traders — Full Ledger</div><div class="doc-sub">${filtered.length} traders · ${date}</div></div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
   <div class="doc-meta"><div>Outstanding: PKR ${totalOutstanding.toLocaleString()}</div><div>Credit: PKR ${totalCredit.toLocaleString()}</div></div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
 </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
 <div class="body-pad">${sections}</div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
 <div class="sig-row" style="margin:0 20px 20px"><span>Generated: ${date}</span><span>${shop?.name||""}</span></div>
 <script>window.onload=()=>{window.print()}<\/script></body></html>`)
     w.document.close()
@@ -184,67 +148,31 @@ ${buildPrintHeader(shop)}
             {shop?.logo ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900}}>{(shop?.name||"G")[0].toUpperCase()}</div>}
             <div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               <div style={{fontSize:"20px",fontWeight:900}}>{shop?.name||"Gala Mandi"}</div>
               {shop?.ownerName && <div style={{fontSize:"11px",opacity:0.8}}>{shop.ownerName}</div>}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
             </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
           <div style={{textAlign:"right",fontSize:"11px",lineHeight:1.9,opacity:0.9}}>
             {shop?.phone && <div>&#9990;&nbsp;{shop.phone}</div>}
             {shop?.address && <div>&#9679;&nbsp;{shop.address}</div>}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24,#d97706)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb"}}>
           <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Trader Ledger — {selectedCustomer?.name}</h2>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>Period: {dateLabel}</div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       <div className="flex items-center justify-between print:hidden">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Trader Ledger</h2>
           <p className="text-gray-500 text-sm">{customers.length} traders · Outstanding: {formatCurrency(totalOutstanding)}</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
         <div className="flex gap-2">
           {ledger && <Button onClick={() => window.print()} variant="outline" className="gap-2"><Printer className="w-4 h-4" /> Print Ledger</Button>}
           <Button onClick={printAll} disabled={printingAll} variant="outline" className="gap-2"><Printer className="w-4 h-4" />{printingAll ? "Preparing..." : "Print All Ledgers"}</Button>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4 print:hidden">
@@ -260,9 +188,6 @@ ${buildPrintHeader(shop)}
           <p className="text-xs text-green-600 uppercase font-medium">Overpaid / Credit</p>
           <p className="text-xl font-bold text-green-700 mt-1">{formatCurrency(totalCredit)}</p>
         </CardContent></Card>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
       </div>
 
       <Card className="print:hidden">
@@ -270,14 +195,8 @@ ${buildPrintHeader(shop)}
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input placeholder="Search traders..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
           <p className="text-xs text-gray-400">{filtered.length} traders — click a row to view ledger</p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
         </div>
         <CardContent className="p-0">
           <div className="overflow-x-auto max-h-64 overflow-y-auto">
@@ -321,9 +240,6 @@ ${buildPrintHeader(shop)}
                 )}
               </tbody>
             </table>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
           </div>
         </CardContent>
       </Card>
@@ -339,29 +255,17 @@ ${buildPrintHeader(shop)}
                     <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
                     <SelectContent>{customers.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                   </Select>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-xs text-gray-500 font-medium">From Date</label>
                   <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-40" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-xs text-gray-500 font-medium">To Date</label>
                   <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <Button onClick={loadLedger} disabled={loading} className="bg-green-700 hover:bg-green-800">{loading ? "Loading..." : "Apply Filter"}</Button>
                 <Button variant="outline" onClick={clearLedger} className="gap-1"><X className="w-4 h-4" /> Clear</Button>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               </div>
             </CardContent>
           </Card>
@@ -385,9 +289,6 @@ ${buildPrintHeader(shop)}
                   <p className="text-xs text-gray-500 font-medium uppercase">Total Cr</p>
                   <p className="text-xl font-bold text-green-700 mt-1">{formatCurrency(ledger.totalCredit)}</p>
                 </CardContent></Card>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               </div>
 
               <div className={`rounded-lg px-5 py-4 flex items-center justify-between ${ledger.closingBalance > 0 ? "bg-red-50 border border-red-200" : "bg-green-50 border border-green-200"}`}>
@@ -397,22 +298,13 @@ ${buildPrintHeader(shop)}
                   <p className="text-xs text-gray-600 mt-1">
                     Sales: {formatCurrency(ledger.totalDebit)} — Payments Received: {formatCurrency(ledger.totalCredit)}
                   </p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
                 <div className="text-right">
                   <p className={`text-2xl font-bold ${ledger.closingBalance > 0 ? "text-red-700" : "text-green-700"}`}>{formatCurrency(Math.abs(ledger.closingBalance))}</p>
                   <p className={`text-sm font-semibold ${ledger.closingBalance > 0 ? "text-red-600" : "text-green-600"}`}>
                     {ledger.closingBalance > 0 ? `Outstanding (Udhar) — Trader Owes ${formatCurrency(ledger.closingBalance)}` : ledger.closingBalance < 0 ? `Overpaid (Credit) — We Owe ${formatCurrency(Math.abs(ledger.closingBalance))}` : "Settled — No Balance"}
                   </p>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                 </div>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
               </div>
 
               <Card>
@@ -465,9 +357,6 @@ ${buildPrintHeader(shop)}
                         </tr>
                       </tfoot>
                     </table>
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
                   </div>
                 </CardContent>
               </Card>
@@ -475,9 +364,6 @@ ${buildPrintHeader(shop)}
           )}
         </>
       )}
-      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
-        Powered by Softtech
-      </div>
     </div>
   )
 }
