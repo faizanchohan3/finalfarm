@@ -1,0 +1,310 @@
+"use client"
+
+import { useState } from "react"
+import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { Store, Eye, EyeOff, Loader2, ShoppingBag, CheckCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+type Tab = "login" | "register"
+
+export default function LoginPage() {
+  const router = useRouter()
+  const [tab, setTab] = useState<Tab>("login")
+
+  // Login state
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [loginLoading, setLoginLoading] = useState(false)
+  const [loginError, setLoginError] = useState("")
+
+  // Register state
+  const [reg, setReg] = useState({
+    shopName: "", ownerName: "", email: "", password: "", confirmPassword: "", phone: "", city: "",
+  })
+  const [regLoading, setRegLoading] = useState(false)
+  const [regError, setRegError] = useState("")
+  const [regSuccess, setRegSuccess] = useState(false)
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setLoginLoading(true)
+    setLoginError("")
+
+    const result = await signIn("credentials", { email, password, redirect: false })
+
+    if (result?.error) {
+      setLoginError("Invalid credentials or your shop account is pending approval.")
+      setLoginLoading(false)
+    } else {
+      router.push("/")
+      router.refresh()
+    }
+  }
+
+  async function handleRegister(e: React.FormEvent) {
+    e.preventDefault()
+    setRegError("")
+
+    if (reg.password !== reg.confirmPassword) {
+      setRegError("Passwords do not match.")
+      return
+    }
+    if (reg.password.length < 6) {
+      setRegError("Password must be at least 6 characters.")
+      return
+    }
+
+    setRegLoading(true)
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        shopName: reg.shopName,
+        ownerName: reg.ownerName,
+        email: reg.email,
+        password: reg.password,
+        phone: reg.phone,
+        city: reg.city,
+      }),
+    })
+
+    const data = await res.json()
+    setRegLoading(false)
+
+    if (!res.ok) {
+      setRegError(data.error || "Registration failed. Please try again.")
+    } else {
+      setRegSuccess(true)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-800 via-green-700 to-green-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-2xl mb-4 shadow-lg">
+            <Store className="w-9 h-9 text-green-900" />
+          </div>
+          <h1 className="text-3xl font-bold text-white">Gala Mandi</h1>
+          <p className="text-green-200 mt-1">Multi-Shop Management System</p>
+        </div>
+
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          {/* Tabs */}
+          <div className="flex border-b border-gray-200">
+            <button
+              onClick={() => setTab("login")}
+              className={`flex-1 py-4 text-sm font-medium transition-colors ${
+                tab === "login"
+                  ? "bg-green-700 text-white"
+                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => setTab("register")}
+              className={`flex-1 py-4 text-sm font-medium transition-colors ${
+                tab === "register"
+                  ? "bg-green-700 text-white"
+                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+              }`}
+            >
+              Register Shop
+            </button>
+          </div>
+
+          <div className="p-8">
+            {/* LOGIN FORM */}
+            {tab === "login" && (
+              <>
+                <h2 className="text-xl font-semibold text-gray-800 mb-6">Sign in to your account</h2>
+                <form onSubmit={handleLogin} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoFocus
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {loginError && (
+                    <div className="bg-red-50 text-red-700 text-sm px-4 py-3 rounded-lg border border-red-200">
+                      {loginError}
+                    </div>
+                  )}
+
+                  <Button type="submit" className="w-full bg-green-700 hover:bg-green-800" disabled={loginLoading}>
+                    {loginLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</> : "Sign In"}
+                  </Button>
+                </form>
+
+                <p className="mt-6 text-center text-sm text-gray-500">
+                  Want to register your shop?{" "}
+                  <button onClick={() => setTab("register")} className="text-green-700 font-medium hover:underline">
+                    Register here
+                  </button>
+                </p>
+              </>
+            )}
+
+            {/* REGISTER FORM */}
+            {tab === "register" && (
+              <>
+                {regSuccess ? (
+                  <div className="text-center py-6">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                      <CheckCircle className="w-9 h-9 text-green-600" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">Registration Submitted!</h2>
+                    <p className="text-gray-500 text-sm mb-6">
+                      Your shop <strong>"{reg.shopName}"</strong> has been registered and is pending approval.
+                      You will be able to login once the platform admin approves your shop.
+                    </p>
+                    <Button
+                      onClick={() => { setTab("login"); setRegSuccess(false) }}
+                      className="bg-green-700 hover:bg-green-800"
+                    >
+                      Back to Sign In
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 mb-6">
+                      <ShoppingBag className="w-5 h-5 text-green-700" />
+                      <h2 className="text-xl font-semibold text-gray-800">Register Your Shop</h2>
+                    </div>
+                    <form onSubmit={handleRegister} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="col-span-2 space-y-1">
+                          <Label htmlFor="shopName">Shop Name *</Label>
+                          <Input
+                            id="shopName"
+                            placeholder="e.g. Ahmad Traders"
+                            value={reg.shopName}
+                            onChange={(e) => setReg({ ...reg, shopName: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="col-span-2 space-y-1">
+                          <Label htmlFor="ownerName">Your Name (Owner) *</Label>
+                          <Input
+                            id="ownerName"
+                            placeholder="Full name"
+                            value={reg.ownerName}
+                            onChange={(e) => setReg({ ...reg, ownerName: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="col-span-2 space-y-1">
+                          <Label htmlFor="regEmail">Email Address *</Label>
+                          <Input
+                            id="regEmail"
+                            type="email"
+                            placeholder="your@email.com"
+                            value={reg.email}
+                            onChange={(e) => setReg({ ...reg, email: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="regPassword">Password *</Label>
+                          <Input
+                            id="regPassword"
+                            type="password"
+                            placeholder="Min 6 chars"
+                            value={reg.password}
+                            onChange={(e) => setReg({ ...reg, password: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                          <Input
+                            id="confirmPassword"
+                            type="password"
+                            placeholder="Repeat password"
+                            value={reg.confirmPassword}
+                            onChange={(e) => setReg({ ...reg, confirmPassword: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="phone">Phone</Label>
+                          <Input
+                            id="phone"
+                            placeholder="03XX-XXXXXXX"
+                            value={reg.phone}
+                            onChange={(e) => setReg({ ...reg, phone: e.target.value })}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="city">City</Label>
+                          <Input
+                            id="city"
+                            placeholder="e.g. Lahore"
+                            value={reg.city}
+                            onChange={(e) => setReg({ ...reg, city: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      {regError && (
+                        <div className="bg-red-50 text-red-700 text-sm px-4 py-3 rounded-lg border border-red-200">
+                          {regError}
+                        </div>
+                      )}
+
+                      <Button type="submit" className="w-full bg-green-700 hover:bg-green-800 mt-2" disabled={regLoading}>
+                        {regLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</> : "Submit Registration"}
+                      </Button>
+                    </form>
+
+                    <p className="mt-4 text-center text-xs text-gray-400">
+                      Already have an account?{" "}
+                      <button onClick={() => setTab("login")} className="text-green-700 font-medium hover:underline">
+                        Sign In
+                      </button>
+                    </p>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

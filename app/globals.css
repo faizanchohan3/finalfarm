@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #15803d;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  border-color: var(--border);
+}
+
+@media print {
+  /* Remove overflow clipping so tables can flow across multiple pages */
+  .overflow-x-auto,
+  .overflow-auto,
+  .overflow-hidden {
+    overflow: visible !important;
+  }
+
+  /* Allow cards and table wrappers to break freely across pages */
+  .rounded-xl,
+  [class*="rounded"] {
+    border-radius: 0 !important;
+  }
+
+  /* Table container: no fixed height, allow break */
+  table {
+    page-break-inside: auto;
+    break-inside: auto;
+    width: 100% !important;
+  }
+
+  /* Table headers repeat at the top of every printed page */
+  thead {
+    display: table-header-group;
+  }
+
+  /* Table footers stay at the bottom of the last page */
+  tfoot {
+    display: table-footer-group;
+  }
+
+  /* Never split a row across a page break */
+  tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Allow tbody to break freely */
+  tbody {
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+
+  /* Remove shadows and decorative borders for clean print */
+  .shadow,
+  .shadow-sm,
+  [class*="shadow"] {
+    box-shadow: none !important;
+  }
+
+  /* Hide screen-only controls */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  @page {
+    margin: 12mm;
+    size: A4;
+  }
+}

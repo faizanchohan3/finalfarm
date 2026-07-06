@@ -1,0 +1,891 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  CASHIER
+  AUDITOR
+}
+
+enum ShopStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  INCOME
+  EXPENSE
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CHEQUE
+}
+
+enum SaleStatus {
+  PENDING
+  PARTIAL
+  PAID
+  CANCELLED
+}
+
+// ── MULTI-SHOP ───────────────────────────────────────────────────────────────
+
+model Shop {
+  id        String     @id @default(cuid())
+  name      String
+  ownerName String
+  phone     String?
+  address   String?
+  city      String?
+  email     String     @unique
+  logo      String?
+  status    ShopStatus @default(PENDING)
+  isActive  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Optional modules — disabled by default, owner enables from Settings
+  moduleGodown     Boolean @default(false)
+  moduleGate       Boolean @default(false)
+  moduleTransport  Boolean @default(false)
+  moduleFarmers    Boolean @default(true)
+  moduleCommission Boolean @default(true)
+  modulePesticides Boolean @default(false)
+
+  users               User[]
+  customers           Customer[]
+  suppliers           Supplier[]
+  categories          Category[]
+  products            Product[]
+  sales               Sale[]
+  purchases           Purchase[]
+  farmers             Farmer[]
+  commissionAgents    CommissionAgent[]
+  warehouses          Warehouse[]
+  vehicles            Vehicle[]
+  drivers             Driver[]
+  freightSlips        FreightSlip[]
+  gateEntries         GateEntry[]
+  pesticideCategories PesticideCategory[]
+  pesticides          Pesticide[]
+  pesticideSales      PesticideSale[]
+  transactions        Transaction[]
+  tasks               Task[]
+  auditLogs           AuditLog[]
+  banks               Bank[]
+  commissions         Commission[]
+  accounts            Account[]
+}
+
+// ── BANKS ─────────────────────────────────────────────────────────────────────
+
+model Bank {
+  id            String   @id @default(cuid())
+  shopId        String?
+  name          String
+  accountNumber String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  shop           Shop?           @relation(fields: [shopId], references: [id])
+  payments       Payment[]
+  farmerPayments FarmerPayment[]
+  driverPayments DriverPayment[]
+  transactions   Transaction[]
+}
+
+// ── USERS ────────────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  shopId    String?
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CASHIER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shop             Shop?            @relation(fields: [shopId], references: [id])
+  assignedTasks    Task[]           @relation("AssignedTo")
+  createdTasks     Task[]           @relation("CreatedBy")
+  sales            Sale[]
+  purchases        Purchase[]
+  auditLogs        AuditLog[]
+  pesticideSales   PesticideSale[]
+  transactions     Transaction[]
+  farmerPurchases  FarmerPurchase[]
+  stockTransfers   StockTransfer[]
+  stockAdjustments StockAdjustment[]
+  freightSlips     FreightSlip[]
+  gateEntries      GateEntry[]
+  commissions      Commission[]
+}
+
+// ── INVENTORY ────────────────────────────────────────────────────────────────
+
+model Category {
+  id          String   @id @default(cuid())
+  shopId      String?
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  shop     Shop?     @relation(fields: [shopId], references: [id])
+  products Product[]
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  shopId        String?
+  name          String
+  categoryId    String
+  unit          String   @default("KG")
+  currentStock  Float    @default(0)
+  minStock      Float    @default(0)
+  purchasePrice Float    @default(0)
+  salePrice     Float    @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  shop                Shop?                @relation(fields: [shopId], references: [id])
+  category            Category             @relation(fields: [categoryId], references: [id])
+  saleItems           SaleItem[]
+  purchaseItems       PurchaseItem[]
+  stockMovements      StockMovement[]
+  farmerPurchaseItems FarmerPurchaseItem[]
+  warehouseStock      WarehouseStock[]
+  stockTransfers      StockTransfer[]
+  stockAdjustments    StockAdjustment[]
+}
+
+model StockMovement {
+  id        String   @id @default(cuid())
+  productId String
+  type      String   // IN / OUT / ADJUSTMENT
+  quantity  Float
+  reference String?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+}
+
+// ── CUSTOMERS ────────────────────────────────────────────────────────────────
+
+model Customer {
+  id             String   @id @default(cuid())
+  shopId         String?
+  name           String
+  phone          String?
+  address        String?
+  image          String?
+  referenceName  String?
+  referencePhone String?
+  balance        Float    @default(0)
+  creditLimit    Float    @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  shop              Shop?           @relation(fields: [shopId], references: [id])
+  sales             Sale[]
+  pesticideSales    PesticideSale[]
+  freightSlips      FreightSlip[]
+  commissions       Commission[]
+  payments          CustomerPayment[]
+  purchasesAsSeller Purchase[]      @relation("PurchaseSeller")
+}
+
+model CustomerPayment {
+  id         String        @id @default(cuid())
+  customerId String
+  amount     Float
+  direction  String        @default("RECEIVE")
+  method     PaymentMethod @default(CASH)
+  notes      String?
+  createdAt  DateTime      @default(now())
+
+  customer   Customer      @relation(fields: [customerId], references: [id])
+}
+
+// ── SUPPLIERS ────────────────────────────────────────────────────────────────
+
+model Supplier {
+  id        String   @id @default(cuid())
+  shopId    String?
+  name      String
+  phone     String?
+  otherPhone String?
+  address   String?
+  picture   String?
+  balance   Float    @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  shop        Shop?             @relation(fields: [shopId], references: [id])
+  purchases   Purchase[]
+  commissions Commission[]
+  payments    SupplierPayment[]
+}
+
+model SupplierPayment {
+  id         String        @id @default(cuid())
+  supplierId String
+  amount     Float
+  direction  String        @default("PAY")
+  method     PaymentMethod @default(CASH)
+  notes      String?
+  createdAt  DateTime      @default(now())
+
+  supplier   Supplier      @relation(fields: [supplierId], references: [id])
+}
+
+// ── SALES ────────────────────────────────────────────────────────────────────
+
+model Sale {
+  id          String     @id @default(cuid())
+  shopId      String?
+  customerId  String?
+  farmerId    String?
+  totalAmount Float
+  paidAmount  Float      @default(0)
+  balance     Float      @default(0)
+  status      SaleStatus @default(PENDING)
+  notes       String?
+  createdById String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  shop      Shop?      @relation(fields: [shopId], references: [id])
+  customer  Customer?  @relation(fields: [customerId], references: [id])
+  farmer    Farmer?    @relation(fields: [farmerId], references: [id])
+  createdBy User       @relation(fields: [createdById], references: [id])
+  items     SaleItem[]
+  payments  Payment[]
+}
+
+model SaleItem {
+  id        String @id @default(cuid())
+  saleId    String
+  productId String
+  quantity  Float
+  price     Float
+  total     Float
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}
+
+// ── PURCHASES ────────────────────────────────────────────────────────────────
+
+model Purchase {
+  id               String     @id @default(cuid())
+  shopId           String?
+  supplierId       String?
+  farmerId         String?
+  sellerCustomerId String?
+  walkinSeller     String?
+  totalAmount      Float
+  paidAmount       Float      @default(0)
+  balance          Float      @default(0)
+  status           SaleStatus @default(PENDING)
+  notes            String?
+  createdById      String
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  shop           Shop?          @relation(fields: [shopId], references: [id])
+  supplier       Supplier?      @relation(fields: [supplierId], references: [id])
+  farmer         Farmer?        @relation(fields: [farmerId], references: [id])
+  sellerCustomer Customer?      @relation("PurchaseSeller", fields: [sellerCustomerId], references: [id])
+  createdBy      User           @relation(fields: [createdById], references: [id])
+  items          PurchaseItem[]
+  payments       Payment[]
+}
+
+model PurchaseItem {
+  id         String @id @default(cuid())
+  purchaseId String
+  productId  String
+  quantity   Float
+  price      Float
+  total      Float
+
+  purchase Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id         String        @id @default(cuid())
+  saleId     String?
+  purchaseId String?
+  bankId     String?
+  amount     Float
+  method     PaymentMethod @default(CASH)
+  reference  String?
+  notes      String?
+  createdAt  DateTime      @default(now())
+
+  sale     Sale?     @relation(fields: [saleId], references: [id])
+  purchase Purchase? @relation(fields: [purchaseId], references: [id])
+  bank     Bank?     @relation(fields: [bankId], references: [id])
+}
+
+// ── PESTICIDES ───────────────────────────────────────────────────────────────
+
+model PesticideCategory {
+  id        String   @id @default(cuid())
+  shopId    String?
+  name      String
+  createdAt DateTime @default(now())
+
+  shop       Shop?       @relation(fields: [shopId], references: [id])
+  pesticides Pesticide[]
+}
+
+model Pesticide {
+  id            String    @id @default(cuid())
+  shopId        String?
+  name          String
+  categoryId    String
+  manufacturer  String?
+  batchNumber   String?
+  expiryDate    DateTime?
+  quantity      Float     @default(0)
+  unit          String    @default("Litre")
+  purchasePrice Float     @default(0)
+  salePrice     Float     @default(0)
+  incentive     Float     @default(0)
+  minStock      Float     @default(0)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  shop     Shop?             @relation(fields: [shopId], references: [id])
+  category PesticideCategory @relation(fields: [categoryId], references: [id])
+  sales    PesticideSale[]
+}
+
+model PesticideSale {
+  id           String   @id @default(cuid())
+  shopId       String?
+  pesticideId  String
+  customerId   String?
+  farmerId     String?
+  quantity     Float
+  unitPrice    Float
+  totalAmount  Float
+  customerName String?
+  paidAmount   Float    @default(0)
+  balance      Float    @default(0)
+  incentive    Float    @default(0)
+  soldById     String
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  shop      Shop?     @relation(fields: [shopId], references: [id])
+  pesticide Pesticide @relation(fields: [pesticideId], references: [id])
+  customer  Customer? @relation(fields: [customerId], references: [id])
+  farmer    Farmer?   @relation(fields: [farmerId], references: [id])
+  soldBy    User      @relation(fields: [soldById], references: [id])
+}
+
+// ── FINANCE ──────────────────────────────────────────────────────────────────
+
+model Transaction {
+  id          String          @id @default(cuid())
+  shopId      String?
+  bankId      String?
+  accountId   String?
+  type        TransactionType
+  amount      Float
+  description String
+  reference   String?
+  category    String?
+  createdById String
+  createdAt   DateTime        @default(now())
+
+  shop      Shop?    @relation(fields: [shopId], references: [id])
+  bank      Bank?    @relation(fields: [bankId], references: [id])
+  account   Account? @relation(fields: [accountId], references: [id])
+  createdBy User     @relation(fields: [createdById], references: [id])
+}
+
+// ── CHART OF ACCOUNTS ─────────────────────────────────────────────────────────
+
+model Account {
+  id          String      @id @default(cuid())
+  shopId      String?
+  code        String
+  name        String
+  type        AccountType
+  description String?
+  balance     Float       @default(0)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+
+  shop         Shop?         @relation(fields: [shopId], references: [id])
+  transactions Transaction[]
+}
+
+// ── TASKS ────────────────────────────────────────────────────────────────────
+
+model Task {
+  id           String       @id @default(cuid())
+  shopId       String?
+  title        String
+  description  String?
+  assignedToId String?
+  createdById  String
+  status       TaskStatus   @default(PENDING)
+  priority     TaskPriority @default(MEDIUM)
+  dueDate      DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  shop       Shop? @relation(fields: [shopId], references: [id])
+  assignedTo User? @relation("AssignedTo", fields: [assignedToId], references: [id])
+  createdBy  User  @relation("CreatedBy", fields: [createdById], references: [id])
+}
+
+// ── AUDIT ────────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  shopId    String?
+  userId    String
+  action    String
+  module    String
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  shop Shop? @relation(fields: [shopId], references: [id])
+  user User  @relation(fields: [userId], references: [id])
+}
+
+// ── FARMER MANAGEMENT ────────────────────────────────────────────────────────
+
+model Farmer {
+  id          String   @id @default(cuid())
+  shopId      String?
+  name        String
+  phone       String?
+  otherPhone  String?
+  address     String?
+  village     String?
+  cnic        String?
+  picture     String?
+  balance     Float    @default(0)
+  creditLimit Float    @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  shop             Shop?            @relation(fields: [shopId], references: [id])
+  purchases        FarmerPurchase[]
+  payments         FarmerPayment[]
+  gateEntries      GateEntry[]
+  sales            Sale[]
+  productPurchases Purchase[]
+  commissions      Commission[]
+  pesticideSales   PesticideSale[]
+}
+
+model FarmerPurchase {
+  id          String     @id @default(cuid())
+  farmerId    String
+  totalAmount Float
+  paidAmount  Float      @default(0)
+  balance     Float      @default(0)
+  status      SaleStatus @default(PENDING)
+  commodity   String?
+  weight      Float?
+  bags        Int?
+  notes       String?
+  createdById String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  farmer    Farmer               @relation(fields: [farmerId], references: [id])
+  createdBy User                 @relation(fields: [createdById], references: [id])
+  items     FarmerPurchaseItem[]
+  payments  FarmerPayment[]
+}
+
+model FarmerPurchaseItem {
+  id         String @id @default(cuid())
+  purchaseId String
+  productId  String
+  quantity   Float
+  weight     Float?
+  price      Float
+  total      Float
+
+  purchase FarmerPurchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product  Product        @relation(fields: [productId], references: [id])
+}
+
+model FarmerPayment {
+  id         String        @id @default(cuid())
+  farmerId   String
+  purchaseId String?
+  bankId     String?
+  amount     Float
+  method     PaymentMethod @default(CASH)
+  reference  String?
+  notes      String?
+  createdAt  DateTime      @default(now())
+
+  farmer   Farmer          @relation(fields: [farmerId], references: [id])
+  purchase FarmerPurchase? @relation(fields: [purchaseId], references: [id])
+  bank     Bank?           @relation(fields: [bankId], references: [id])
+}
+
+// ── COMMISSION AGENT (AADAT) ─────────────────────────────────────────────────
+
+model CommissionAgent {
+  id             String   @id @default(cuid())
+  shopId         String?
+  name           String
+  phone          String?
+  address        String?
+  cnic           String?
+  commissionRate Float    @default(2.5)
+  balance        Float    @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  shop        Shop?             @relation(fields: [shopId], references: [id])
+  commissions AgentCommission[]
+  gateEntries GateEntry[]
+}
+
+model AgentCommission {
+  id        String          @id @default(cuid())
+  agentId   String
+  type      TransactionType @default(CREDIT)
+  amount    Float
+  rate      Float?
+  saleValue Float?
+  reference String?
+  notes     String?
+  paidAt    DateTime?
+  createdAt DateTime        @default(now())
+
+  agent CommissionAgent @relation(fields: [agentId], references: [id])
+}
+
+// ── WAREHOUSE / GODOWN ───────────────────────────────────────────────────────
+
+model Warehouse {
+  id        String   @id @default(cuid())
+  shopId    String?
+  name      String
+  location  String?
+  capacity  Float?
+  manager   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  shop          Shop?             @relation(fields: [shopId], references: [id])
+  stock         WarehouseStock[]
+  transfersFrom StockTransfer[]   @relation("TransferFrom")
+  transfersTo   StockTransfer[]   @relation("TransferTo")
+  adjustments   StockAdjustment[]
+}
+
+model WarehouseStock {
+  id            String   @id @default(cuid())
+  warehouseId   String
+  productId     String
+  batchNumber   String?
+  lotNumber     String?
+  quantity      Float    @default(0)
+  purchasePrice Float?
+  receivedAt    DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+}
+
+model StockTransfer {
+  id              String   @id @default(cuid())
+  transferNo      String   @unique
+  fromWarehouseId String
+  toWarehouseId   String
+  productId       String
+  quantity        Float
+  batchNumber     String?
+  status          String   @default("PENDING")
+  notes           String?
+  createdById     String
+  createdAt       DateTime @default(now())
+
+  fromWarehouse Warehouse @relation("TransferFrom", fields: [fromWarehouseId], references: [id])
+  toWarehouse   Warehouse @relation("TransferTo", fields: [toWarehouseId], references: [id])
+  product       Product   @relation(fields: [productId], references: [id])
+  createdBy     User      @relation(fields: [createdById], references: [id])
+}
+
+model StockAdjustment {
+  id          String   @id @default(cuid())
+  adjustNo    String   @unique
+  warehouseId String?
+  productId   String
+  type        String   // INCREASE, DECREASE, CORRECTION
+  quantity    Float
+  reason      String?
+  createdById String
+  createdAt   DateTime @default(now())
+
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
+  product   Product    @relation(fields: [productId], references: [id])
+  createdBy User       @relation(fields: [createdById], references: [id])
+}
+
+// ── TRANSPORT / FREIGHT ──────────────────────────────────────────────────────
+
+model Driver {
+  id        String   @id @default(cuid())
+  shopId    String?
+  name      String
+  phone     String?
+  cnic      String?
+  address   String?
+  license   String?
+  balance   Float    @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shop         Shop?           @relation(fields: [shopId], references: [id])
+  freightSlips FreightSlip[]
+  payments     DriverPayment[]
+}
+
+model DriverPayment {
+  id        String        @id @default(cuid())
+  driverId  String
+  bankId    String?
+  amount    Float
+  method    PaymentMethod @default(CASH)
+  reference String?
+  notes     String?
+  createdAt DateTime      @default(now())
+
+  driver Driver @relation(fields: [driverId], references: [id])
+  bank   Bank?  @relation(fields: [bankId], references: [id])
+}
+
+model Vehicle {
+  id          String   @id @default(cuid())
+  shopId      String?
+  vehicleNo   String   @unique
+  vehicleType String   @default("Truck")
+  driverName  String?
+  driverPhone String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  shop         Shop?         @relation(fields: [shopId], references: [id])
+  freightSlips FreightSlip[]
+  gateEntries  GateEntry[]
+}
+
+model FreightSlip {
+  id           String    @id @default(cuid())
+  shopId       String?
+  slipNo       String    @unique
+  driverId     String?
+  walkInDriver String?
+  vehicleId    String?
+  walkInVehicle String?
+  customerId   String?
+  fromLocation String?
+  toLocation   String?
+  commodity    String?
+  builtyNo     String?
+  rate         Float     @default(0)
+  weighbridge  Float?
+  bags         Int?
+  mill         String?
+  netWeight    Float?
+  weight       Float?
+  freight      Float     @default(0)
+  netAmount    Float     @default(0)
+  rent         Float     @default(0)
+  deduction    Float     @default(0)
+  labour       Float     @default(0)
+  loadingDate  DateTime?
+  referenceNo  String?
+  unloadDate   DateTime?
+  status       String    @default("PENDING")
+  dispatchedAt DateTime?
+  deliveredAt  DateTime?
+  notes        String?
+  createdById  String
+  createdAt    DateTime  @default(now())
+
+  shop            Shop?            @relation(fields: [shopId], references: [id])
+  driver          Driver?          @relation(fields: [driverId], references: [id])
+  vehicle         Vehicle?         @relation(fields: [vehicleId], references: [id])
+  customer        Customer?        @relation(fields: [customerId], references: [id])
+  createdBy       User             @relation(fields: [createdById], references: [id])
+  deliveryChallan DeliveryChallan?
+}
+
+model DeliveryChallan {
+  id          String   @id @default(cuid())
+  challanNo   String   @unique
+  slipId      String   @unique
+  items       String
+  totalWeight Float?
+  totalBags   Int?
+  receivedBy  String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  slip FreightSlip @relation(fields: [slipId], references: [id])
+}
+
+// ── GATE ENTRY / EXIT ────────────────────────────────────────────────────────
+
+model GateEntry {
+  id          String    @id @default(cuid())
+  shopId      String?
+  entryNo     String    @unique
+  type        String    @default("IN")
+  vehicleId   String?
+  vehicleNo   String?
+  driverName  String?
+  farmerId    String?
+  agentId     String?
+  commodity   String?
+  bags        Int?
+  purpose     String?
+  status      String    @default("OPEN")
+  entryTime   DateTime  @default(now())
+  exitTime    DateTime?
+  notes       String?
+  createdById String
+
+  shop      Shop?            @relation(fields: [shopId], references: [id])
+  vehicle   Vehicle?         @relation(fields: [vehicleId], references: [id])
+  farmer    Farmer?          @relation(fields: [farmerId], references: [id])
+  agent     CommissionAgent? @relation(fields: [agentId], references: [id])
+  createdBy User             @relation(fields: [createdById], references: [id])
+
+  weighbridgeEntries WeighbridgeEntry[]
+  gatePass           GatePass?
+}
+
+model GatePass {
+  id           String    @id @default(cuid())
+  passNo       String    @unique
+  entryId      String    @unique
+  validUntil   DateTime?
+  purpose      String?
+  authorizedBy String?
+  createdAt    DateTime  @default(now())
+
+  entry GateEntry @relation(fields: [entryId], references: [id])
+}
+
+model WeighbridgeEntry {
+  id          String   @id @default(cuid())
+  entryId     String
+  grossWeight Float
+  tareWeight  Float    @default(0)
+  netWeight   Float
+  unit        String   @default("KG")
+  bags        Int?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  gateEntry GateEntry @relation(fields: [entryId], references: [id])
+}
+
+// ── COMMISSION TRANSACTIONS ──────────────────────────────────────────────────
+
+model Commission {
+  id               String     @id @default(cuid())
+  shopId           String?
+  farmerId         String?
+  supplierId       String?
+  customerId       String?
+  walkInSeller     String?
+  walkInCustomer   String?
+  commodity        String?
+  bags             Int?
+  weight           Float?
+  rate             Float      @default(0)
+  totalValue       Float
+  commissionRate   Float      @default(2.5)
+  commissionAmount Float
+  labourAmount     Float      @default(0)
+  sellerPayable    Float      @default(0)
+  paidAmount       Float      @default(0)
+  balance          Float      @default(0)
+  status           SaleStatus @default(PENDING)
+  notes            String?
+  createdById      String
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  shop       Shop?               @relation(fields: [shopId], references: [id])
+  farmer     Farmer?             @relation(fields: [farmerId], references: [id])
+  supplier   Supplier?           @relation(fields: [supplierId], references: [id])
+  customer   Customer?           @relation(fields: [customerId], references: [id])
+  createdBy  User                @relation(fields: [createdById], references: [id])
+  payments   CommissionPayment[]
+}
+
+model CommissionPayment {
+  id           String        @id @default(cuid())
+  commissionId String
+  amount       Float
+  method       PaymentMethod @default(CASH)
+  notes        String?
+  createdAt    DateTime      @default(now())
+
+  commission Commission @relation(fields: [commissionId], references: [id])
+}
