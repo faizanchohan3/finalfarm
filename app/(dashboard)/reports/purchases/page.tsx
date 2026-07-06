@@ -197,6 +197,11 @@ export default function PurchasesReportPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Footer */}
+      <div className="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-700">
+        Powered by Softtech
+      </div>
     </div>
   )
 }
