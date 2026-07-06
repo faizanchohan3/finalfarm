@@ -1,9 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#166534"/>
-  <!-- stem -->
-  <line x1="16" y1="27" x2="16" y2="13" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
-  <!-- left leaf -->
-  <path d="M16 21 C14 17 8 15 8 10 C8 10 14 12 16 21" fill="white"/>
-  <!-- right leaf -->
-  <path d="M16 17 C18 13 24 11 24 6 C24 6 18 8 16 17" fill="white"/>
+  <rect width="32" height="32" rx="7" fill="#1e40af"/>
+  <!-- Main grinding wheel -->
+  <circle cx="16" cy="17" r="9" fill="none" stroke="#fbbf24" stroke-width="2"/>
+  <circle cx="16" cy="17" r="6" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+  <!-- Center hub -->
+  <circle cx="16" cy="17" r="2.5" fill="#fbbf24"/>
+  <!-- Hopper/collection area -->
+  <rect x="10" y="4" width="12" height="6" fill="#93c5fd" stroke="#1e40af" stroke-width="1.5"/>
+  <!-- Chute down to mill -->
+  <path d="M12 10 L14 15 M20 10 L18 15" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Output spout -->
+  <path d="M 13 22 Q 12 25 11 27" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+  <!-- Support legs -->
+  <line x1="8" y1="26" x2="10" y2="28" stroke="#1e40af" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="24" y1="26" x2="22" y2="28" stroke="#1e40af" stroke-width="1.5" stroke-linecap="round"/>
 </svg>
