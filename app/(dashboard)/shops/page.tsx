@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from "react"
 import { Store, CheckCircle, XCircle, Clock, Users, ShoppingCart, Package, Phone, MapPin, Mail, RefreshCw, Ban, ChevronRight } from "lucide-react"

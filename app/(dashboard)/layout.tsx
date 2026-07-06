@@ -1,4 +1,4 @@
-﻿import { Sidebar } from "@/components/sidebar"
+import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
