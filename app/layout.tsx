@@ -4,8 +4,8 @@ import { SessionProvider } from "next-auth/react"
 import { auth } from "@/auth"
 
 export const metadata: Metadata = {
-  title: "Gala Mandi - Shop Management",
-  description: "Gala Mandi Shop Management System",
+  title: "ArgoFirm - Farm Management",
+  description: "ArgoFirm Farm Management System",
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg",
