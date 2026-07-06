@@ -85,50 +85,45 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-white flex">
       {/* Left Side - Blue Gradient Panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 text-white p-12 flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 text-white p-8 flex-col justify-center relative overflow-hidden">
         {/* Background decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400 rounded-full opacity-10 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-400 rounded-full opacity-10 blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-400 rounded-full opacity-10 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-400 rounded-full opacity-10 blur-3xl"></div>
 
         <div className="relative z-10">
           {/* Logo */}
-          <div className="flex items-center gap-3 mb-12">
-            <Zap className="w-10 h-10" strokeWidth={3} />
+          <div className="flex items-center gap-3 mb-6">
+            <Zap className="w-8 h-8" strokeWidth={3} />
             <div>
-              <h1 className="text-4xl font-bold">Agrifarm ERP</h1>
-              <p className="text-blue-100 text-sm">Enterprise Resource Planning</p>
+              <h1 className="text-3xl font-bold">Agrifarm ERP</h1>
+              <p className="text-blue-100 text-xs">Enterprise Resource Planning</p>
             </div>
           </div>
 
           {/* Description */}
-          <p className="text-lg text-blue-100 mb-12 leading-relaxed">
+          <p className="text-sm text-blue-100 mb-6 leading-relaxed">
             Manage your business operations with ease. Track sales, purchases, inventory, and more in one powerful platform.
           </p>
 
           {/* Features */}
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="w-6 h-6 flex-shrink-0 mt-1" />
-              <span className="text-lg">Complete ERP Solution</span>
+          <div className="space-y-3">
+            <div className="flex items-start gap-2">
+              <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">Complete ERP Solution</span>
             </div>
-            <div className="flex items-start gap-3">
-              <BarChart3 className="w-6 h-6 flex-shrink-0 mt-1" />
-              <span className="text-lg">Real-time Analytics</span>
+            <div className="flex items-start gap-2">
+              <BarChart3 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">Real-time Analytics</span>
             </div>
-            <div className="flex items-start gap-3">
-              <Lock className="w-6 h-6 flex-shrink-0 mt-1" />
-              <span className="text-lg">Secure & Reliable</span>
+            <div className="flex items-start gap-2">
+              <Lock className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">Secure & Reliable</span>
             </div>
-            <div className="flex items-start gap-3">
-              <ZapIcon className="w-6 h-6 flex-shrink-0 mt-1" />
-              <span className="text-lg">Fast & Efficient</span>
+            <div className="flex items-start gap-2">
+              <ZapIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">Fast & Efficient</span>
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="relative z-10 text-blue-100 text-sm">
-          <p>© 2026 Softtech. All rights reserved.</p>
         </div>
       </div>
 
