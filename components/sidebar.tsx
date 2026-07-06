@@ -58,11 +58,9 @@ const shopNavItems: NavItem[] = [
   
   { href: "/pesticides", label: "Pesticides", icon: Sprout },
   { href: "/finance", label: "Roznamcha", icon: Wallet },
-  { href: "/accounts", label: "Accounts", icon: BookOpen },
   { href: "/banks", label: "Banks", icon: Building2 },
   { href: "/expenses", label: "Expenses", icon: Receipt },
 
-  { href: "/transport", label: "FeedMills", icon: Truck },
   { href: "/warehouse", label: "Godowns", icon: Warehouse },
 
   { href: "/gate", label: "Gate / Weighbridge", icon: Scale },
