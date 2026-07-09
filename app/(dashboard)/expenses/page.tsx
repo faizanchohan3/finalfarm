@@ -102,7 +102,7 @@ export default function ExpensesPage() {
           <h2 className="text-2xl font-bold text-gray-900">Expenses</h2>
           <p className="text-gray-500 text-sm">Track all business expenditures</p>
         </div>
-        <Button onClick={() => setShowModal(true)} className="bg-red-600 hover:bg-red-700 gap-2">
+        <Button onClick={() => setShowModal(true)} className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300 gap-2">
           <Plus className="w-4 h-4" /> Add Expense
         </Button>
       </div>

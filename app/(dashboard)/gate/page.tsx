@@ -145,7 +145,7 @@ ${buildPrintHeader(shop)}
           <p className="text-gray-500 text-sm">Weighbridge, gate passes & vehicle tracking</p>
         </div>
         <Button onClick={() => { setForm({ type: "IN", vehicleId: "", vehicleNo: "", driverName: "", farmerId: "", agentId: "", commodity: "", bags: "", purpose: "", notes: "" }); setShowEntryModal(true) }}
-          className="bg-purple-700 hover:bg-purple-800 gap-2">
+          className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300 gap-2">
           <Plus className="w-4 h-4" /> New Entry
         </Button>
       </div>

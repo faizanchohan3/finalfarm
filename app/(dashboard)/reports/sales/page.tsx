@@ -107,7 +107,7 @@ export default function SalesReportPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={loadReport} disabled={loading} className="bg-purple-700 hover:bg-purple-800">
+            <Button onClick={loadReport} disabled={loading} className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300">
               {loading ? "Loading..." : "Apply Filter"}
             </Button>
           </div>

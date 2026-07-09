@@ -256,7 +256,7 @@ export default function CustomersPage() {
           <h2 className="text-2xl font-bold text-gray-900">Traders</h2>
           <p className="text-gray-500 text-sm">{activeCustomers.length} active Â· {inactiveCustomers.length} inactive</p>
         </div>
-        <Button onClick={openAdd} className="bg-purple-700 hover:bg-purple-800 gap-2">
+        <Button onClick={openAdd} className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300 gap-2">
           <Plus className="w-4 h-4" /> Add Traders
         </Button>
       </div>
@@ -640,7 +640,7 @@ export default function CustomersPage() {
 
               {/* Actions */}
               <div className="flex gap-2 justify-end">
-                <Button size="sm" className="bg-purple-700 hover:bg-purple-800"
+                <Button size="sm" className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300"
                   onClick={() => { setShowDetailModal(false); setSelectedPayments(new Set()); openPayment(selected) }}>
                   <ArrowDownCircle className="w-4 h-4" /> Record Payment
                 </Button>
@@ -1078,7 +1078,7 @@ export default function CustomersPage() {
             <Button
               onClick={confirmDelete}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300"
             >
               {deleting ? "Deleting..." : "Delete Transactions"}
             </Button>

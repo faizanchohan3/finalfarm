@@ -82,7 +82,7 @@ export default function AgentsPage() {
           <p className="text-gray-500 text-sm">Manage aadat agents, commissions & ledgers</p>
         </div>
         <Button onClick={() => { setEditing(null); setForm({ name: "", phone: "", address: "", cnic: "", commissionRate: "2.5" }); setShowModal(true) }}
-          className="bg-orange-600 hover:bg-orange-700 gap-2">
+          className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300 gap-2">
           <Plus className="w-4 h-4" /> Add Agent
         </Button>
       </div>

@@ -264,7 +264,7 @@ ${buildPrintHeader(shop)}
                   <label className="text-xs text-gray-500 font-medium">To Date</label>
                   <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
                 </div>
-                <Button onClick={loadLedger} disabled={loading} className="bg-purple-700 hover:bg-purple-800">{loading ? "Loading..." : "Apply Filter"}</Button>
+                <Button onClick={loadLedger} disabled={loading} className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300">{loading ? "Loading..." : "Apply Filter"}</Button>
                 <Button variant="outline" onClick={clearLedger} className="gap-1"><X className="w-4 h-4" /> Clear</Button>
               </div>
             </CardContent>

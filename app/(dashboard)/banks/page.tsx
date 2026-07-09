@@ -97,7 +97,7 @@ export default function BanksPage() {
           <h2 className="text-2xl font-bold text-gray-900">Bank Accounts</h2>
           <p className="text-gray-500 text-sm">Manage your bank accounts used in transactions</p>
         </div>
-        <Button onClick={openAdd} className="bg-purple-700 hover:bg-purple-800 gap-2">
+        <Button onClick={openAdd} className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300 gap-2">
           <Plus className="w-4 h-4" /> Add Bank
         </Button>
       </div>

@@ -685,7 +685,7 @@ export default function FinancePage() {
             <Button
               onClick={handleSaveEdit}
               disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300"
             >
               {saving ? "Saving..." : "Save Changes"}
             </Button>
@@ -726,7 +726,7 @@ export default function FinancePage() {
             <Button
               onClick={confirmDelete}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300"
             >
               {deleting ? "Deleting..." : "Delete Transaction"}
             </Button>
