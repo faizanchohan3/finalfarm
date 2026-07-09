@@ -34,7 +34,7 @@ export function Header({ title }: { title: string }) {
   }, [isSuperAdmin])
 
   return (
-    <header className="h-16 bg-blue-50 border-b border-blue-300 flex items-center justify-between px-6 flex-shrink-0">
+    <header className="h-16 bg-white flex items-center justify-between px-6 flex-shrink-0">
       <div className="flex items-center gap-3">
         <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
         {!isSuperAdmin && session?.user?.shopName && (

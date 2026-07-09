@@ -34,7 +34,7 @@ export default async function DashboardLayout({
         <div className="print:hidden">
           <Header title="Argo-Firn" />
         </div>
-        <main className="flex-1 overflow-y-auto p-6 bg-blue-50 print:overflow-visible print:p-4 print:bg-blue-50">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6 bg-white print:overflow-visible print:p-4 print:bg-white">{children}</main>
       </div>
     </div>
   )

@@ -166,12 +166,12 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "relative flex flex-col bg-white text-gray-900 transition-all duration-300 h-screen overflow-hidden border-r border-gray-200",
+        "relative flex flex-col bg-white text-gray-900 transition-all duration-300 h-screen overflow-hidden",
         collapsed ? "w-16" : "w-64"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-gray-200 flex-shrink-0">
+      <div className="flex items-center gap-3 px-4 py-5 flex-shrink-0">
         <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center bg-transparent">
           {shopLogo ? (
             <img src={shopLogo} alt="Shop Logo" className="w-full h-full object-cover" />
