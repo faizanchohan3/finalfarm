@@ -202,7 +202,11 @@ export function Sidebar() {
 
           if (hasChildren) {
             return (
-              <div key={href}>
+              <div
+                key={href}
+                onMouseEnter={() => setReportsOpen(true)}
+                onMouseLeave={() => setReportsOpen(false)}
+              >
                 <div
                   className={cn(
                     "flex items-center rounded-lg transition-all duration-200",
@@ -219,10 +223,8 @@ export function Sidebar() {
                     {!collapsed && <span className="text-gray-900 font-bold">{label}</span>}
                   </Link>
                   {!collapsed && (
-                    <button
-                      onClick={() => setReportsOpen((o) => !o)}
+                    <div
                       className={cn("pr-3 py-2.5 transition-colors text-gray-700")}
-                      aria-label="Toggle reports menu"
                     >
                       <ChevronDown
                         className={cn(
@@ -230,7 +232,7 @@ export function Sidebar() {
                           reportsOpen ? "rotate-180" : "rotate-0"
                         )}
                       />
-                    </button>
+                    </div>
                   )}
                 </div>
 
