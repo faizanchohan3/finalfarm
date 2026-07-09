@@ -10,6 +10,8 @@ import {
   ChevronLeft, ChevronRight, Store, CheckSquare, UserCheck,
   Truck, ChevronDown, Receipt, Warehouse,
   Scale, UserCircle, Building2, BookOpen, Zap,
+  TrendingUp, PieChart, DollarSign, ShoppingCart as CartIcon, FileText,
+  CreditCard, Building, Banknote,
 } from "lucide-react"
 import { useState, useEffect } from "react"
 
@@ -58,24 +60,23 @@ const getIconColor = (label: string): string => {
 }
 
 const allReportSubItems = [
-  { href: "/reports", label: "Overview" },
-  { href: "/reports/balance-sheet", label: "Balance Sheet & P&L" },
-  { href: "/reports/sales", label: "Sales Report" },
-  { href: "/reports/customers", label: "Trader Report" },
-  { href: "/reports/products", label: "Product Report" },
-  { href: "/reports/customer-ledger", label: "Trader Ledger" },
-  { href: "/reports/all-suppliers", label: "All Suppliers" },
-  { href: "/reports/supplier-ledger", label: "Supplier Ledger" },
-  { href: "/reports/all-traders", label: "All Traders" },
-  { href: "/reports/bank-transactions", label: "Bank Transactions" },
+  { href: "/reports", label: "Overview", icon: BarChart3, color: "text-blue-600", bgColor: "bg-blue-50" },
+  { href: "/reports/balance-sheet", label: "Balance Sheet & P&L", icon: FileText, color: "text-purple-600", bgColor: "bg-purple-50" },
+  { href: "/reports/sales", label: "Sales Report", icon: TrendingUp, color: "text-green-600", bgColor: "bg-green-50" },
+  { href: "/reports/customers", label: "Trader Report", icon: Users, color: "text-orange-600", bgColor: "bg-orange-50" },
+  { href: "/reports/products", label: "Product Report", icon: Package, color: "text-pink-600", bgColor: "bg-pink-50" },
+  { href: "/reports/customer-ledger", label: "Trader Ledger", icon: CreditCard, color: "text-red-600", bgColor: "bg-red-50" },
+  { href: "/reports/all-suppliers", label: "All Suppliers", icon: Truck, color: "text-cyan-600", bgColor: "bg-cyan-50" },
+  { href: "/reports/supplier-ledger", label: "Supplier Ledger", icon: ClipboardList, color: "text-indigo-600", bgColor: "bg-indigo-50" },
+  { href: "/reports/all-traders", label: "All Traders", icon: Store, color: "text-amber-600", bgColor: "bg-amber-50" },
+  { href: "/reports/bank-transactions", label: "Bank Transactions", icon: Banknote, color: "text-teal-600", bgColor: "bg-teal-50" },
 ]
 
 const cashierReportSubItems = [
-  { href: "/reports/sales", label: "Sales Report" },
-  { href: "/reports/purchases", label: "Purchase Report" },
-  { href: "/reports/all-farmers", label: "All Farmers" },
-  { href: "/reports/all-traders", label: "All Traders" },
-  { href: "/reports/all-suppliers", label: "All Suppliers" },
+  { href: "/reports/sales", label: "Sales Report", icon: TrendingUp, color: "text-green-600", bgColor: "bg-green-50" },
+  { href: "/reports/purchases", label: "Purchase Report", icon: ShoppingBag, color: "text-blue-600", bgColor: "bg-blue-50" },
+  { href: "/reports/all-traders", label: "All Traders", icon: Store, color: "text-amber-600", bgColor: "bg-amber-50" },
+  { href: "/reports/all-suppliers", label: "All Suppliers", icon: Truck, color: "text-cyan-600", bgColor: "bg-cyan-50" },
 ]
 
 const shopNavItems: NavItem[] = [
@@ -240,20 +241,22 @@ export function Sidebar() {
                       reportsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                     )}
                   >
-                    <div className="ml-4 mt-1 border-l-2 border-gray-300 pl-3 pb-1 space-y-0.5">
-                      {reportSubItems.map((sub) => {
+                    <div className="ml-4 mt-1 border-l-2 border-gray-300 pl-3 pb-1 space-y-1">
+                      {reportSubItems.map((sub: any) => {
                         const subActive = pathname === sub.href
+                        const Icon = sub.icon
                         return (
                           <Link
                             key={sub.href}
                             href={sub.href}
                             className={cn(
-                              "flex items-center py-1.5 px-2 rounded text-xs font-bold transition-colors",
+                              "flex items-center gap-2 py-2 px-2 rounded text-xs font-bold transition-all duration-200",
                               subActive
-                                ? "bg-gray-200 text-gray-900"
-                                : "text-gray-700 hover:bg-gray-100"
+                                ? `${sub.bgColor} ${sub.color} shadow-md`
+                                : `text-gray-700 hover:${sub.bgColor} hover:${sub.color}`
                             )}
                           >
+                            {Icon && <Icon className={cn("w-3.5 h-3.5 flex-shrink-0", subActive ? sub.color : "text-gray-400")} />}
                             {sub.label}
                           </Link>
                         )
