@@ -1,4 +1,4 @@
-﻿mport { NextResponse } from "next/server"
+mport { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"

@@ -1,4 +1,4 @@
-﻿mport { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+mport { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
 
 export function RecentSales({ sales }: { sales: any[] }) {

@@ -1,4 +1,4 @@
-﻿mport { redirect } from "next/navigation"
+mport { redirect } from "next/navigation"
 
 export default function Page() {
   redirect("/dashboard")
