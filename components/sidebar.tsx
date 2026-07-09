@@ -129,7 +129,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "relative flex flex-col bg-blue-900 text-white transition-all duration-300 h-screen overflow-hidden border-r border-blue-400",
+        "relative flex flex-col bg-gradient-to-b from-blue-900 via-blue-800 to-blue-900 text-white transition-all duration-300 h-screen overflow-hidden border-r border-blue-400",
         collapsed ? "w-16" : "w-64"
       )}
     >
@@ -167,8 +167,10 @@ export function Sidebar() {
               <div key={href}>
                 <div
                   className={cn(
-                    "flex items-center rounded-lg transition-colors",
-                    active ? "bg-yellow-400" : "hover:bg-white"
+                    "flex items-center rounded-lg transition-all duration-200",
+                    active
+                      ? "bg-gradient-to-r from-yellow-400 to-yellow-500 shadow-lg"
+                      : "hover:bg-gradient-to-r hover:from-blue-700 hover:to-blue-600"
                   )}
                 >
                   <Link
@@ -231,8 +233,10 @@ export function Sidebar() {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                active ? "bg-yellow-400 text-white" : "text-green-100 hover:bg-white hover:text-gray-900"
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                active
+                  ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-lg"
+                  : "text-green-100 hover:bg-gradient-to-r hover:from-blue-700 hover:to-blue-600"
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
