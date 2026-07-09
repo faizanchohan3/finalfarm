@@ -1,13 +1,11 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { formatCurrency } from "@/lib/utils"
-import { TrendingUp, ShoppingCart, Package, Users, CheckSquare, AlertTriangle, Store, Clock, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { TrendingUp, ShoppingCart, Package, Users, CheckSquare, ArrowUpRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RecentSales } from "@/components/dashboard/recent-sales"
-import { SalesChart } from "@/components/dashboard/sales-chart"
 import { RevenueChart } from "@/components/dashboard/revenue-chart"
 import { ProductDistribution } from "@/components/dashboard/product-distribution"
-import { TasksSummary } from "@/components/dashboard/tasks-summary"
 import { StatsSlider } from "@/components/dashboard/stats-slider"
 import Link from "next/link"
 
@@ -104,71 +102,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Alert Sections */}
-      {isSuperAdmin && data.pendingShops > 0 && (
-        <Link href="/shops">
-          <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100 hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-200 rounded-lg">
-                  <Clock className="w-6 h-6 text-blue-700" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-blue-900">
-                    {data.pendingShops} shop{data.pendingShops > 1 ? "s" : ""} pending approval
-                  </h3>
-                  <p className="text-sm text-blue-700 mt-1">Click to review and approve registrations</p>
-                </div>
-                <span className="bg-blue-600 text-white px-4 py-2 rounded-full font-semibold text-sm">
-                  {data.pendingShops}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      )}
-
-      {isSuperAdmin && (
-        <Link href="/shops">
-          <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-purple-100 hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-200 rounded-lg">
-                  <Store className="w-6 h-6 text-purple-700" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-xs font-semibold text-purple-600 uppercase tracking-wider">Platform Head</h4>
-                  <h3 className="font-semibold text-purple-900 text-lg">Manage All Shops</h3>
-                  <p className="text-sm text-purple-700 mt-1">Approve registrations and manage operations</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      )}
-
-      {!isCashier && data.criticalStockProducts.length > 0 && (
-        <Link href="/inventory">
-          <Card className="border-red-200 bg-gradient-to-r from-red-50 to-red-100 hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-red-200 rounded-lg">
-                  <AlertTriangle className="w-6 h-6 text-red-700" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-red-900">
-                    Critical Stock Alert – {data.criticalStockProducts.length} product{data.criticalStockProducts.length > 1 ? "s" : ""} low on stock
-                  </h3>
-                  <p className="text-sm text-red-700 mt-1">
-                    {data.criticalStockProducts.slice(0, 3).map((p) => `${p.name}`).join(" • ")}
-                    {data.criticalStockProducts.length > 3 && ` and ${data.criticalStockProducts.length - 3} more`}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -206,22 +139,6 @@ export default async function DashboardPage() {
       {/* Charts and Summaries */}
       {!isCashier && (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Card className="border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg">Sales Trend (Last 6 Months)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <SalesChart />
-                </CardContent>
-              </Card>
-            </div>
-            <div>
-              <TasksSummary />
-            </div>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="border-0 shadow-sm">
               <CardHeader>
