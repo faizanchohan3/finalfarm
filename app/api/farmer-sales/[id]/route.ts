@@ -1,63 +1,113 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { createAuditLog } from "@/lib/audit"
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const { id } = await params
 
-  const purchase = await db.farmerPurchase.findUnique({
-    where: { id },
-    include: {
-      farmer: true,
-      items: { include: { product: { select: { name: true, unit: true } } } },
-      payments: { orderBy: { createdAt: "asc" } },
-      createdBy: { select: { name: true } },
-    },
-  })
+  const { searchParams } = new URL(req.url)
+  const from = searchParams.get("from")
+  const to = searchParams.get("to")
 
-  if (!purchase) return NextResponse.json({ error: "Not found" }, { status: 404 })
-  return NextResponse.json({ purchase })
+  const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
+  const where: any = { type: "DEBIT", ...shopFilter }
+  if (from || to) {
+    where.createdAt = {}
+    if (from) where.createdAt.gte = new Date(from)
+    if (to) {
+      const toDate = new Date(to)
+      toDate.setHours(23, 59, 59, 999)
+      where.createdAt.lte = toDate
+    }
+  }
+
+  const [expenses, summary] = await Promise.all([
+    db.transaction.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: {
+        createdBy: { select: { name: true } },
+        account: { select: { name: true, code: true } },
+      },
+    }),
+    db.transaction.groupBy({
+      by: ["category"],
+      where,
+      _sum: { amount: true },
+      _count: true,
+    }),
+  ])
+
+  const total = expenses.reduce((s, e) => s + e.amount, 0)
+
+  return NextResponse.json({ expenses, total, summary })
 }
 
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const { id } = await params
 
-  const body = await req.json()
-  const payAmount = parseFloat(body.amount)
-  if (!payAmount || payAmount <= 0) return NextResponse.json({ error: "Invalid amount" }, { status: 400 })
+  const { amount, description, category, reference, accountId } = await req.json()
+  if (!amount || amount <= 0) return NextResponse.json({ error: "Invalid amount" }, { status: 400 })
+  if (!description?.trim()) return NextResponse.json({ error: "Description required" }, { status: 400 })
 
-  const purchase = await db.farmerPurchase.findUnique({ where: { id } })
-  if (!purchase) return NextResponse.json({ error: "Not found" }, { status: 404 })
+  const amt = parseFloat(amount)
 
-  const newPaid = purchase.paidAmount + payAmount
-  const newBalance = Math.max(0, purchase.totalAmount - newPaid)
-  const newStatus = newBalance <= 0 ? "PAID" : "PARTIAL"
-
-  await db.$transaction(async (tx) => {
-    await tx.farmerPayment.create({
+  const expense = await db.$transaction(async (tx) => {
+    const t = await tx.transaction.create({
       data: {
-        farmerId: purchase.farmerId,
-        purchaseId: id,
-        amount: payAmount,
-        method: body.method || "CASH",
-        notes: body.notes || null,
+        shopId: session.user.shopId || null,
+        type: "DEBIT",
+        amount: amt,
+        description,
+        category: category || "General",
+        reference: reference || null,
+        accountId: accountId || null,
+        createdById: session.user.id,
       },
     })
 
-    await tx.farmerPurchase.update({
-      where: { id },
-      data: { paidAmount: newPaid, balance: newBalance, status: newStatus },
-    })
+    if (accountId) {
+      const account = await tx.account.findUnique({ where: { id: accountId }, select: { type: true } })
+      if (account) {
+        const naturalDebit = ["ASSET", "EXPENSE"]
+        const isNatural = naturalDebit.includes(account.type)
+        await tx.account.update({
+          where: { id: accountId },
+          data: { balance: { [isNatural ? "increment" : "decrement"]: amt } },
+        })
+      }
+    }
 
-    await tx.farmer.update({
-      where: { id: purchase.farmerId },
-      data: { balance: { decrement: payAmount } },
-    })
+    return t
   })
 
-  return NextResponse.json({ ok: true })
+  await createAuditLog({
+    userId: session.user.id,
+    action: "CREATE",
+    module: "EXPENSES",
+    details: `Expense: PKR ${amount} â€” ${description}`,
+  })
+
+  return NextResponse.json({ expense }, { status: 201 })
 }
+
+export async function DELETE(req: Request) {
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { id } = await req.json()
+  await db.transaction.delete({ where: { id } })
+
+  await createAuditLog({
+    userId: session.user.id,
+    action: "DELETE",
+    module: "EXPENSES",
+    details: `Deleted expense ID: ${id}`,
+  })
+
+  return NextResponse.json({ success: true })
+}
+

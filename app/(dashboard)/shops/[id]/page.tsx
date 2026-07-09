@@ -1,402 +1,445 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
-import {
-  ArrowLeft, Store, Mail, Phone, MapPin, Users, ShoppingCart, Package,
-  Edit2, Lock, Check, X, Eye, EyeOff, UserCheck, UserX, Shield,
-  CheckCircle, RefreshCw, Ban,
-} from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { getRoleColor } from "@/lib/utils"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Plus, Tag, ImageIcon, Trash2, Upload, Store, ToggleLeft, ToggleRight } from "lucide-react"
 
-type User = {
-  id: string
-  name: string
-  email: string
-  role: string
-  isActive: boolean
-  createdAt: string
-}
+export default function SettingsPage() {
+  const [categories, setCategories] = useState<any[]>([])
+  const [pestCategories, setPestCategories] = useState<any[]>([])
+  const [showCatModal, setShowCatModal] = useState(false)
+  const [showPestCatModal, setShowPestCatModal] = useState(false)
+  const [catName, setCatName] = useState("")
+  const [pestCatName, setPestCatName] = useState("")
 
-type Shop = {
-  id: string
-  name: string
-  ownerName: string
-  phone: string | null
-  address: string | null
-  city: string | null
-  email: string
-  status: "PENDING" | "APPROVED" | "REJECTED"
-  isActive: boolean
-  createdAt: string
-  users: User[]
-  _count: { sales: number; customers: number; products: number }
-}
+  // Shop name state
+  const [shopName, setShopName] = useState("")
+  const [savingName, setSavingName] = useState(false)
 
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: "bg-blue-100 text-blue-800 border-blue-300",
-  APPROVED: "bg-green-100 text-purple-800 border-green-300",
-  REJECTED: "bg-red-100 text-red-800 border-red-300",
-}
+  // Module toggles
+  const [modules, setModules] = useState({
+    moduleGodown: false,
+    moduleGate: false,
+    moduleTransport: false,
+    moduleFarmers: true,
+    moduleCommission: true,
+    modulePesticides: false,
+  })
+  const [savingModules, setSavingModules] = useState(false)
+  const [moduleSavedKey, setModuleSavedKey] = useState<string | null>(null)
 
-type EditState = {
-  userId: string
-  field: "name" | "password"
-  value: string
-  confirm?: string
-  showPw?: boolean
-}
+  // Logo states
+  const [currentLogo, setCurrentLogo] = useState<string | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [savingLogo, setSavingLogo] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-export default function ShopDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const router = useRouter()
-
-  const [shop, setShop] = useState<Shop | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [edit, setEdit] = useState<EditState | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [msg, setMsg] = useState<{ type: "success" | "error"; text: string; userId?: string } | null>(null)
-  const [actionLoading, setActionLoading] = useState<string | null>(null)
-
-  async function fetchShop() {
-    setLoading(true)
-    const res = await fetch(`/api/shops/${id}`)
-    const data = await res.json()
-    setShop(data.shop)
-    setLoading(false)
+  async function loadData() {
+    const [cr, pcr, sr] = await Promise.allSettled([
+      fetch("/api/categories").then((r) => r.json()),
+      fetch("/api/pesticide-categories").then((r) => r.json()),
+      fetch("/api/settings").then((r) => r.json()),
+    ])
+    if (cr.status === "fulfilled") setCategories(cr.value.categories || [])
+    if (pcr.status === "fulfilled") setPestCategories(pcr.value.categories || [])
+    if (sr.status === "fulfilled" && sr.value.shop) {
+      const s = sr.value.shop
+      if (s.logo) setCurrentLogo(s.logo)
+      if (s.name) setShopName(s.name)
+      setModules({
+        moduleGodown:     !!s.moduleGodown,
+        moduleGate:       !!s.moduleGate,
+        moduleTransport:  !!s.moduleTransport,
+        moduleFarmers:    s.moduleFarmers !== false,
+        moduleCommission: s.moduleCommission !== false,
+        modulePesticides: !!s.modulePesticides,
+      })
+    }
   }
 
-  useEffect(() => { fetchShop() }, [id])
+  useEffect(() => { loadData() }, [])
 
-  async function saveEdit() {
-    if (!edit) return
-    setSaving(true)
-    setMsg(null)
+  async function addCategory() {
+    if (!catName.trim()) return
+    await fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: catName }),
+    })
+    setCatName("")
+    setShowCatModal(false)
+    loadData()
+  }
 
-    if (edit.field === "password") {
-      if (!edit.value || edit.value.length < 6) {
-        setMsg({ type: "error", text: "Password must be at least 6 characters.", userId: edit.userId })
-        setSaving(false)
-        return
+  async function addPestCategory() {
+    if (!pestCatName.trim()) return
+    await fetch("/api/pesticide-categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: pestCatName }),
+    })
+    setPestCatName("")
+    setShowPestCatModal(false)
+    loadData()
+  }
+
+  async function saveShopName() {
+    const name = shopName.trim()
+    if (!name) return alert("Shop name cannot be empty.")
+    setSavingName(true)
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        return alert(d?.error || "Failed to save name")
       }
-      if (edit.value !== edit.confirm) {
-        setMsg({ type: "error", text: "Passwords do not match.", userId: edit.userId })
-        setSaving(false)
-        return
+      alert("Shop name updated! The sidebar will reflect it immediately.")
+    } catch {
+      alert("Network error. Please try again.")
+    } finally {
+      setSavingName(false)
+    }
+  }
+
+  async function saveModules(updated: typeof modules) {
+    setSavingModules(true)
+    try {
+      await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      })
+    } catch {
+      alert("Network error. Please try again.")
+    } finally {
+      setSavingModules(false)
+    }
+  }
+
+  function toggleModule(key: keyof typeof modules) {
+    setModules((prev) => ({ ...prev, [key]: !prev[key] }))
+    setModuleSavedKey(null)
+  }
+
+  async function handleSaveModules() {
+    setSavingModules(true)
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(modules),
+      })
+      if (res.ok) {
+        setModuleSavedKey("saved")
+        setTimeout(() => setModuleSavedKey(null), 3000)
+      } else {
+        alert("Failed to save modules.")
       }
-    }
-
-    const body: any = {}
-    if (edit.field === "name") body.name = edit.value
-    if (edit.field === "password") body.password = edit.value
-
-    // Preserve existing values
-    const existing = shop?.users.find((u) => u.id === edit.userId)
-    if (existing) {
-      body.name = body.name ?? existing.name
-      body.role = existing.role
-      body.isActive = existing.isActive
-    }
-
-    const res = await fetch(`/api/users/${edit.userId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-    const data = await res.json()
-    setSaving(false)
-
-    if (res.ok) {
-      const label = edit.field === "name" ? "Name" : "Password"
-      setMsg({ type: "success", text: `${label} updated successfully.`, userId: edit.userId })
-      setEdit(null)
-      // Update local state
-      setShop((s) => s ? {
-        ...s,
-        users: s.users.map((u) => u.id === edit.userId ? { ...u, ...data.user } : u),
-      } : s)
-    } else {
-      setMsg({ type: "error", text: data.error || "Failed to update.", userId: edit.userId })
+    } catch {
+      alert("Network error. Please try again.")
+    } finally {
+      setSavingModules(false)
     }
   }
 
-  async function toggleActive(user: User) {
-    setActionLoading(user.id + "toggle")
-    const body = { name: user.name, role: user.role, isActive: !user.isActive }
-    const res = await fetch(`/api/users/${user.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-    const data = await res.json()
-    setActionLoading(null)
-    if (res.ok) {
-      setShop((s) => s ? {
-        ...s,
-        users: s.users.map((u) => u.id === user.id ? { ...u, isActive: !user.isActive } : u),
-      } : s)
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith("image/")) return alert("Please select an image file.")
+    if (file.size > 2 * 1024 * 1024) return alert("Image must be under 2 MB.")
+
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const base64 = ev.target?.result as string
+      // Resize to max 300Ã—300 using canvas
+      const img = new window.Image()
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        const MAX = 300
+        const ratio = Math.min(MAX / img.width, MAX / img.height, 1)
+        canvas.width = img.width * ratio
+        canvas.height = img.height * ratio
+        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height)
+        setLogoPreview(canvas.toDataURL("image/jpeg", 0.85))
+      }
+      img.src = base64
+    }
+    reader.readAsDataURL(file)
+    // Reset input so same file can be re-selected
+    e.target.value = ""
+  }
+
+  async function saveLogo() {
+    if (!logoPreview) return
+    setSavingLogo(true)
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logo: logoPreview }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        return alert(d?.error || "Failed to save logo")
+      }
+      setCurrentLogo(logoPreview)
+      setLogoPreview(null)
+      alert("Logo saved! Refresh the page to see it in the sidebar.")
+    } catch {
+      alert("Network error. Please try again.")
+    } finally {
+      setSavingLogo(false)
     }
   }
 
-  async function doShopAction(action: string) {
-    setActionLoading("shop" + action)
-    await fetch(`/api/shops/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action }),
-    })
-    setActionLoading(null)
-    fetchShop()
+  async function removeLogo() {
+    if (!confirm("Remove the shop logo?")) return
+    try {
+      await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logo: null }),
+      })
+      setCurrentLogo(null)
+      setLogoPreview(null)
+    } catch {
+      alert("Network error. Please try again.")
+    }
   }
-
-  if (loading) return <div className="flex items-center justify-center h-64 text-gray-400">Loading...</div>
-  if (!shop) return <div className="text-center py-12 text-gray-400">Shop not found.</div>
 
   return (
     <div className="space-y-6">
-      {/* Back + Header */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={() => router.push("/shops")}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Shops
-        </button>
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
+        <p className="text-gray-500 text-sm">Manage shop logo, categories and configuration</p>
       </div>
 
-      {/* Shop Info Card */}
-      <div className="bg-blue-50 rounded-xl border border-blue-300 p-6 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
-              <Store className="w-7 h-7 text-purple-700" />
+      {/* Shop Name */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Store className="w-4 h-4" /> Shop Name
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-end gap-3 max-w-sm">
+            <div className="flex-1">
+              <Label className="mb-1 block">Name shown in the sidebar</Label>
+              <Input
+                value={shopName}
+                onChange={(e) => setShopName(e.target.value)}
+                placeholder="e.g. Sulman Argo-Firn"
+                onKeyDown={(e) => e.key === "Enter" && saveShopName()}
+              />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{shop.name}</h1>
-              <p className="text-gray-500 text-sm">Owner: {shop.ownerName}</p>
-              <span className={`mt-1 inline-block text-xs font-medium px-2.5 py-1 rounded-full border ${STATUS_COLORS[shop.status]}`}>
-                {shop.status}
-              </span>
-            </div>
+            <Button
+              className="bg-teal-700 hover:bg-teal-800"
+              onClick={saveShopName}
+              disabled={savingName}
+            >
+              {savingName ? "Saving..." : "Save"}
+            </Button>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Shop actions */}
-          <div className="flex gap-2 flex-wrap">
-            {shop.status === "PENDING" && (
-              <>
-                <Button size="sm" className="bg-purple-700 hover:bg-purple-800 gap-1 text-xs" disabled={!!actionLoading} onClick={() => doShopAction("approve")}>
-                  <CheckCircle className="w-3.5 h-3.5" /> {actionLoading === "shopapprove" ? "..." : "Approve"}
-                </Button>
-                <Button size="sm" variant="destructive" className="gap-1 text-xs" disabled={!!actionLoading} onClick={() => doShopAction("reject")}>
-                  <X className="w-3.5 h-3.5" /> {actionLoading === "shopreject" ? "..." : "Reject"}
-                </Button>
-              </>
-            )}
-            {shop.status === "APPROVED" && shop.isActive && (
-              <Button size="sm" variant="outline" className="gap-1 text-xs text-orange-600 border-orange-300" disabled={!!actionLoading} onClick={() => doShopAction("suspend")}>
-                <Ban className="w-3.5 h-3.5" /> {actionLoading === "shopsuspend" ? "..." : "Suspend"}
-              </Button>
-            )}
-            {(!shop.isActive && shop.status !== "PENDING") && (
-              <Button size="sm" variant="outline" className="gap-1 text-xs text-purple-700 border-green-300" disabled={!!actionLoading} onClick={() => doShopAction("reactivate")}>
-                <RefreshCw className="w-3.5 h-3.5" /> {actionLoading === "shopreactivate" ? "..." : "Reactivate"}
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Shop details grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-600 mb-5">
-          <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-gray-400" />
-            <span className="truncate">{shop.email}</span>
-          </div>
-          {shop.phone && (
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-gray-400" />
-              <span>{shop.phone}</span>
-            </div>
-          )}
-          {shop.city && (
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-gray-400" />
-              <span>{shop.city}</span>
-            </div>
-          )}
-          <div className="text-xs text-gray-400">
-            Registered: {new Date(shop.createdAt).toLocaleDateString("en-PK")}
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="flex gap-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600 bg-blue-50 rounded-lg px-4 py-2">
-            <ShoppingCart className="w-4 h-4 text-green-500" />
-            <span><strong>{shop._count.sales}</strong> Sales</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 bg-blue-50 rounded-lg px-4 py-2">
-            <Users className="w-4 h-4 text-blue-500" />
-            <span><strong>{shop._count.customers}</strong> Customers</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 bg-blue-50 rounded-lg px-4 py-2">
-            <Package className="w-4 h-4 text-purple-500" />
-            <span><strong>{shop._count.products}</strong> Products</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Users Section */}
-      <div className="bg-blue-50 rounded-xl border border-blue-300 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-blue-300 flex items-center gap-2">
-          <Users className="w-5 h-5 text-gray-600" />
-          <h2 className="font-semibold text-gray-800">Shop Users ({shop.users.length})</h2>
-        </div>
-
-        {shop.users.length === 0 ? (
-          <div className="text-center py-10 text-gray-400">No users found for this shop.</div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {shop.users.map((user) => (
-              <div key={user.id} className="px-6 py-5">
-                {/* User header row */}
-                <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-purple-800 font-bold text-sm">
-                        {user.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{user.name}</p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getRoleColor(user.role)}`}>
-                      {user.role}
-                    </span>
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${user.isActive ? "bg-green-100 text-purple-700" : "bg-blue-100 text-gray-500"}`}>
-                      {user.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </div>
+      {/* Modules */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ToggleRight className="w-4 h-4" /> Sidebar Modules
+          </CardTitle>
+          <p className="text-xs text-gray-500">Enable only the modules your shop uses. Changes apply immediately in the sidebar.</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {([
+              { key: "moduleCommission", label: "Commission (Aadat)", desc: "Commission entries and payments" },
+              { key: "moduleFarmers",    label: "Farmers",            desc: "Farmer accounts, peshgi, ledger" },
+              { key: "modulePesticides", label: "Pesticides",         desc: "Pesticide stock and sales" },
+              { key: "moduleGodown",     label: "Godowns",            desc: "Warehouse and storage management" },
+              { key: "moduleGate",       label: "Gate / Weighbridge", desc: "Entry/exit and weight recording" },
+              { key: "moduleTransport",  label: "FeedMills",          desc: "Transport and freight slips" },
+            ] as { key: keyof typeof modules; label: string; desc: string }[]).map(({ key, label, desc }) => (
+              <div
+                key={key}
+                onClick={() => !savingModules && toggleModule(key)}
+                className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all select-none
+                  ${modules[key]
+                    ? "border-purple-600 bg-green-50"
+                    : "border-blue-300 bg-blue-50 hover:border-gray-300"
+                  }`}
+              >
+                <div>
+                  <p className={`text-sm font-semibold ${modules[key] ? "text-purple-800" : "text-gray-700"}`}>{label}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
                 </div>
-
-                {/* Success/error message for this user */}
-                {msg?.userId === user.id && (
-                  <div className={`mb-3 flex items-center gap-2 text-sm px-4 py-2.5 rounded-lg ${
-                    msg.type === "success" ? "bg-green-50 text-purple-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"
-                  }`}>
-                    {msg.type === "success" && <Check className="w-4 h-4 flex-shrink-0" />}
-                    {msg.text}
-                  </div>
-                )}
-
-                {/* Edit name form */}
-                {edit?.userId === user.id && edit.field === "name" && (
-                  <div className="mb-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <Label className="text-xs font-semibold text-blue-700 mb-2 block">Edit Display Name</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        value={edit.value}
-                        onChange={(e) => setEdit({ ...edit, value: e.target.value })}
-                        className="flex-1 bg-blue-50 text-sm"
-                        placeholder="Enter new name"
-                        autoFocus
-                      />
-                      <Button size="sm" onClick={saveEdit} disabled={saving} className="bg-blue-600 hover:bg-blue-700 gap-1">
-                        <Check className="w-3.5 h-3.5" /> {saving ? "..." : "Save"}
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => { setEdit(null); setMsg(null) }}>
-                        <X className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Reset password form */}
-                {edit?.userId === user.id && edit.field === "password" && (
-                  <div className="mb-3 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <Label className="text-xs font-semibold text-orange-700 mb-2 block">
-                      Set New Password for {user.name}
-                    </Label>
-                    <div className="space-y-2">
-                      <div className="relative">
-                        <Input
-                          type={edit.showPw ? "text" : "password"}
-                          value={edit.value}
-                          onChange={(e) => setEdit({ ...edit, value: e.target.value })}
-                          className="bg-blue-50 text-sm pr-10"
-                          placeholder="New password (min 6 chars)"
-                          autoFocus
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setEdit({ ...edit, showPw: !edit.showPw })}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                          {edit.showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                      <Input
-                        type="password"
-                        value={edit.confirm || ""}
-                        onChange={(e) => setEdit({ ...edit, confirm: e.target.value })}
-                        className="bg-blue-50 text-sm"
-                        placeholder="Confirm new password"
-                      />
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={saveEdit} disabled={saving} className="bg-orange-600 hover:bg-orange-700 gap-1">
-                          <Lock className="w-3.5 h-3.5" /> {saving ? "..." : "Set Password"}
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => { setEdit(null); setMsg(null) }}>
-                          <X className="w-3.5 h-3.5" /> Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Action buttons */}
-                {edit?.userId !== user.id && (
-                  <div className="flex gap-2 flex-wrap">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-1.5 text-xs"
-                      onClick={() => { setEdit({ userId: user.id, field: "name", value: user.name }); setMsg(null) }}
-                    >
-                      <Edit2 className="w-3.5 h-3.5 text-blue-500" />
-                      Edit Name
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-1.5 text-xs"
-                      onClick={() => { setEdit({ userId: user.id, field: "password", value: "", confirm: "" }); setMsg(null) }}
-                    >
-                      <Lock className="w-3.5 h-3.5 text-orange-500" />
-                      Reset Password
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className={`gap-1.5 text-xs ${user.isActive ? "text-red-600 border-red-200 hover:bg-red-50" : "text-purple-700 border-green-200 hover:bg-green-50"}`}
-                      disabled={actionLoading === user.id + "toggle"}
-                      onClick={() => toggleActive(user)}
-                    >
-                      {user.isActive ? <UserX className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
-                      {actionLoading === user.id + "toggle" ? "..." : user.isActive ? "Deactivate" : "Activate"}
-                    </Button>
-                  </div>
-                )}
+                {modules[key]
+                  ? <ToggleRight className="w-7 h-7 text-purple-600 flex-shrink-0" />
+                  : <ToggleLeft className="w-7 h-7 text-gray-400 flex-shrink-0" />
+                }
               </div>
             ))}
           </div>
-        )}
+          <div className="flex items-center gap-3 mt-4">
+            <Button
+              className="bg-teal-700 hover:bg-teal-800"
+              onClick={handleSaveModules}
+              disabled={savingModules}
+            >
+              {savingModules ? "Saving..." : "Save Modules"}
+            </Button>
+            {moduleSavedKey === "saved" && (
+              <span className="text-sm text-purple-600 font-medium">âœ“ Modules saved successfully</span>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Shop Logo */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ImageIcon className="w-4 h-4" /> Shop Logo
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start gap-6">
+            {/* Preview area */}
+            <div className="flex-shrink-0">
+              <div className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-blue-50">
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : currentLogo ? (
+                  <img src={currentLogo} alt="Shop Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="text-center p-2">
+                    <ImageIcon className="w-8 h-8 text-gray-300 mx-auto" />
+                    <p className="text-xs text-gray-400 mt-1">No logo</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="space-y-3">
+              <p className="text-sm text-gray-600">
+                Upload your shop logo. It will appear in the sidebar navigation.<br />
+                <span className="text-xs text-gray-400">Accepted: JPG, PNG, WEBP â€” max 2 MB. Auto-resized to 300Ã—300.</span>
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => fileInputRef.current?.click()}>
+                  <Upload className="w-3.5 h-3.5" /> Choose Image
+                </Button>
+                {logoPreview && (
+                  <Button size="sm" className="gap-2 bg-teal-700 hover:bg-teal-800" onClick={saveLogo} disabled={savingLogo}>
+                    {savingLogo ? "Saving..." : "Save Logo"}
+                  </Button>
+                )}
+                {logoPreview && (
+                  <Button variant="ghost" size="sm" onClick={() => setLogoPreview(null)}>
+                    Discard
+                  </Button>
+                )}
+                {currentLogo && !logoPreview && (
+                  <Button variant="ghost" size="sm" className="text-red-500 gap-2" onClick={removeLogo}>
+                    <Trash2 className="w-3.5 h-3.5" /> Remove
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Product Categories */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Tag className="w-4 h-4" /> Product Categories
+            </CardTitle>
+            <Button size="sm" onClick={() => setShowCatModal(true)}>
+              <Plus className="w-3 h-3" /> Add
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {categories.map((c) => (
+                <div key={c.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">{c.name}</span>
+                  <span className="text-xs text-gray-400">ID: {c.id.slice(0, 8)}</span>
+                </div>
+              ))}
+              {categories.length === 0 && <p className="text-gray-400 text-sm text-center py-4">No categories yet</p>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pesticide Categories */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Tag className="w-4 h-4" /> Pesticide Categories
+            </CardTitle>
+            <Button size="sm" onClick={() => setShowPestCatModal(true)}>
+              <Plus className="w-3 h-3" /> Add
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {pestCategories.map((c) => (
+                <div key={c.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">{c.name}</span>
+                </div>
+              ))}
+              {pestCategories.length === 0 && <p className="text-gray-400 text-sm text-center py-4">No categories yet</p>}
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      <Dialog open={showCatModal} onOpenChange={setShowCatModal}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Add Product Category</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Category Name</Label><Input value={catName} onChange={(e) => setCatName(e.target.value)} placeholder="e.g. Grains, Seeds" autoFocus /></div>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setShowCatModal(false)} className="flex-1">Cancel</Button>
+              <Button onClick={addCategory} className="flex-1">Add Category</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPestCatModal} onOpenChange={setShowPestCatModal}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Add Pesticide Category</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Category Name</Label><Input value={pestCatName} onChange={(e) => setPestCatName(e.target.value)} placeholder="e.g. Herbicide, Fungicide" autoFocus /></div>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setShowPestCatModal(false)} className="flex-1">Cancel</Button>
+              <Button onClick={addPestCategory} className="flex-1">Add Category</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
+

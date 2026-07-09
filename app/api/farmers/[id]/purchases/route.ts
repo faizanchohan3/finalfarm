@@ -2,61 +2,89 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const { id } = await params
-  const body = await req.json()
 
-  const paidAmount = body.paidAmount || 0
-  const totalAmount = body.totalAmount || 0
-  const balance = totalAmount - paidAmount
+  const { searchParams } = new URL(req.url)
+  const farmerId = searchParams.get("farmerId")
+  const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
 
-  const purchase = await db.$transaction(async (tx) => {
-    const p = await tx.farmerPurchase.create({
-      data: {
-        farmerId: id,
-        totalAmount,
-        paidAmount,
-        balance,
-        status: balance <= 0 ? "PAID" : paidAmount > 0 ? "PARTIAL" : "PENDING",
-        commodity: body.commodity || null,
-        weight: body.weight || null,
-        bags: body.bags || null,
-        notes: body.notes || null,
-        createdById: session.user!.id!,
-        items: {
-          create: (body.items || []).map((item: any) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            weight: item.weight || null,
-            price: item.price,
-            total: item.total,
-          })),
-        },
-      },
-    })
-
-    if (paidAmount > 0) {
-      await tx.farmerPayment.create({
-        data: {
-          farmerId: id,
-          purchaseId: p.id,
-          amount: paidAmount,
-          method: body.paymentMethod || "CASH",
-          notes: "Initial payment at purchase",
-        },
-      })
-    }
-
-    // Update farmer balance
-    await tx.farmer.update({
-      where: { id },
-      data: { balance: { increment: balance } },
-    })
-
-    return p
+  const purchases = await db.farmerPurchase.findMany({
+    where: {
+      farmer: { ...shopFilter, isActive: true },
+      ...(farmerId ? { farmerId } : {}),
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      farmer: { select: { id: true, name: true, phone: true, village: true } },
+      items: { include: { product: { select: { name: true, unit: true } } } },
+      payments: { orderBy: { createdAt: "asc" } },
+      createdBy: { select: { name: true } },
+    },
   })
 
-  return NextResponse.json({ purchase })
+  return NextResponse.json({ purchases })
 }
+
+export async function POST(req: Request) {
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  try {
+    const body = await req.json()
+    const { farmerId, commodity, bags, weight, totalAmount, paidAmount, paymentMethod, notes } = body
+
+    if (!farmerId) return NextResponse.json({ error: "Farmer is required" }, { status: 400 })
+
+    const total = parseFloat(totalAmount) || 0
+    if (total <= 0) return NextResponse.json({ error: "Amount must be greater than 0" }, { status: 400 })
+
+    const paid = Math.min(parseFloat(paidAmount) || 0, total)
+    const balance = total - paid
+    const status = balance <= 0 ? "PAID" : paid > 0 ? "PARTIAL" : "PENDING"
+
+    const purchase = await db.$transaction(async (tx) => {
+      const fp = await tx.farmerPurchase.create({
+        data: {
+          farmerId,
+          totalAmount: total,
+          paidAmount: paid,
+          balance,
+          status,
+          commodity: commodity || null,
+          weight: weight ? parseFloat(weight) : null,
+          bags: bags ? parseInt(bags) : null,
+          notes: notes || null,
+          createdById: session.user.id,
+        },
+        include: { farmer: true },
+      })
+
+      if (paid > 0) {
+        await tx.farmerPayment.create({
+          data: {
+            farmerId,
+            purchaseId: fp.id,
+            amount: paid,
+            method: paymentMethod || "CASH",
+            notes: "Payment at purchase",
+          },
+        })
+      }
+
+      await tx.farmer.update({
+        where: { id: farmerId },
+        data: { balance: { increment: balance } },
+      })
+
+      return fp
+    })
+
+    return NextResponse.json({ purchase })
+  } catch (err: any) {
+    console.error("Farmer purchase POST error:", err)
+    return NextResponse.json({ error: err?.message || "Failed to create" }, { status: 500 })
+  }
+}
+

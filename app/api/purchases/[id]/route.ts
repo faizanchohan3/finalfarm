@@ -1,44 +1,53 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { createAuditLog } from "@/lib/audit"
+import bcrypt from "bcryptjs"
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET() {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const { id } = await params
-
-  const purchase = await db.purchase.findUnique({
-    where: { id },
-    include: { items: true },
-  })
-  if (!purchase) return NextResponse.json({ error: "Purchase not found" }, { status: 404 })
-
-  await db.$transaction(async (tx) => {
-    // Reverse stock for every item (undo what the purchase added)
-    for (const item of purchase.items) {
-      await tx.product.update({
-        where: { id: item.productId },
-        data: { currentStock: { decrement: item.quantity } },
-      })
-    }
-    // Delete stock movements linked to this purchase
-    await tx.stockMovement.deleteMany({ where: { reference: { contains: `Purchase #${id}` } } })
-    // Delete payments linked to this purchase
-    await tx.payment.deleteMany({ where: { purchaseId: id } })
-    // Delete purchase items
-    await tx.purchaseItem.deleteMany({ where: { purchaseId: id } })
-    // Delete the purchase
-    await tx.purchase.delete({ where: { id } })
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, name: true, email: true, role: true, createdAt: true, shopId: true },
   })
 
-  await createAuditLog({
-    userId: session.user.id,
-    action: "DELETE",
-    module: "PURCHASES",
-    details: `Deleted purchase #${id.slice(-6).toUpperCase()} — PKR ${purchase.totalAmount.toLocaleString()} (stock reversed)`,
-  })
-
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ user })
 }
+
+export async function PUT(req: Request) {
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { name, currentPassword, newPassword } = await req.json()
+
+  // If changing password, verify current password first
+  if (newPassword) {
+    const user = await db.user.findUnique({ where: { id: session.user.id } })
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 })
+
+    const valid = await bcrypt.compare(currentPassword || "", user.password)
+    if (!valid) return NextResponse.json({ error: "Current password is incorrect." }, { status: 400 })
+
+    if (newPassword.length < 6) {
+      return NextResponse.json({ error: "New password must be at least 6 characters." }, { status: 400 })
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 12)
+    const updated = await db.user.update({
+      where: { id: session.user.id },
+      data: { name: name || undefined, password: hashed },
+      select: { id: true, name: true, email: true, role: true },
+    })
+    return NextResponse.json({ user: updated, message: "Profile and password updated." })
+  }
+
+  // Name-only update
+  const updated = await db.user.update({
+    where: { id: session.user.id },
+    data: { name },
+    select: { id: true, name: true, email: true, role: true },
+  })
+  return NextResponse.json({ user: updated, message: "Profile updated." })
+}
+

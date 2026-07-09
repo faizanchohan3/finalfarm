@@ -1,82 +1,52 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { createAuditLog } from "@/lib/audit"
+import { cachedJson } from "@/lib/api-cache"
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET() {
   const session = await auth()
-  if (!session || session.user.role !== "SUPER_ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!session.user.shopId) return NextResponse.json({ shop: null })
+
+  try {
+    const shop = await db.shop.findUnique({
+      where: { id: session.user.shopId },
+      select: {
+        id: true, name: true, ownerName: true, phone: true, address: true, logo: true,
+        moduleGodown: true, moduleGate: true, moduleTransport: true,
+        moduleFarmers: true, moduleCommission: true, modulePesticides: true,
+      },
+    })
+    return cachedJson({ shop }, 30, 120)
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message || "Failed to load settings" }, { status: 500 })
   }
-
-  const { id } = await params
-  const shop = await db.shop.findUnique({
-    where: { id },
-    include: {
-      users: { select: { id: true, name: true, email: true, role: true, isActive: true, createdAt: true } },
-      _count: { select: { sales: true, customers: true, products: true } },
-    },
-  })
-
-  if (!shop) return NextResponse.json({ error: "Not found" }, { status: 404 })
-  return NextResponse.json({ shop })
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(req: Request) {
   const session = await auth()
-  if (!session || session.user.role !== "SUPER_ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!session.user.shopId) return NextResponse.json({ error: "No shop associated" }, { status: 400 })
+
+  try {
+    const body = await req.json()
+    const data: any = {}
+    if ("logo" in body) data.logo = body.logo
+    if (body.name) data.name = body.name.trim()
+    if ("ownerName" in body) data.ownerName = body.ownerName || ""
+    if ("phone" in body) data.phone = body.phone || null
+    if ("address" in body) data.address = body.address || null
+    if ("moduleGodown" in body)     data.moduleGodown     = !!body.moduleGodown
+    if ("moduleGate" in body)       data.moduleGate       = !!body.moduleGate
+    if ("moduleTransport" in body)  data.moduleTransport  = !!body.moduleTransport
+    if ("moduleFarmers" in body)    data.moduleFarmers    = !!body.moduleFarmers
+    if ("moduleCommission" in body) data.moduleCommission = !!body.moduleCommission
+    if ("modulePesticides" in body) data.modulePesticides = !!body.modulePesticides
+
+    const shop = await db.shop.update({ where: { id: session.user.shopId }, data })
+    return NextResponse.json({ shop })
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message || "Failed to update settings" }, { status: 500 })
   }
-
-  const { id } = await params
-  const { action } = await req.json() // "approve" | "reject" | "suspend" | "reactivate"
-
-  let shopData: any = {}
-  let userUpdate: any = {}
-  let logDetails = ""
-
-  if (action === "approve") {
-    shopData = { status: "APPROVED", isActive: true }
-    userUpdate = { isActive: true }
-    logDetails = `Approved shop ID: ${id}`
-  } else if (action === "reject") {
-    shopData = { status: "REJECTED", isActive: false }
-    userUpdate = { isActive: false }
-    logDetails = `Rejected shop ID: ${id}`
-  } else if (action === "suspend") {
-    shopData = { isActive: false }
-    userUpdate = { isActive: false }
-    logDetails = `Suspended shop ID: ${id}`
-  } else if (action === "reactivate") {
-    shopData = { status: "APPROVED", isActive: true }
-    userUpdate = { isActive: true }
-    logDetails = `Reactivated shop ID: ${id}`
-  } else {
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 })
-  }
-
-  const shop = await db.$transaction(async (tx) => {
-    const updated = await tx.shop.update({ where: { id }, data: shopData })
-    // Update all users of this shop
-    await tx.user.updateMany({ where: { shopId: id }, data: userUpdate })
-    return updated
-  })
-
-  await createAuditLog({ userId: session.user.id, action: "UPDATE", module: "SHOPS", details: logDetails })
-
-  return NextResponse.json({ shop })
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth()
-  if (!session || session.user.role !== "SUPER_ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const { id } = await params
-  // Soft delete by suspending
-  await db.shop.update({ where: { id }, data: { isActive: false, status: "REJECTED" } })
-  await db.user.updateMany({ where: { shopId: id }, data: { isActive: false } })
-
-  return NextResponse.json({ success: true })
-}

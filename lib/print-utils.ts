@@ -1,4 +1,4 @@
-xport function buildPrintHeader(shop: any): string {
+export function buildPrintHeader(shop: any): string {
   const name = shop?.name || "Argo-Firn"
   const ownerName = shop?.ownerName || ""
   const phone = shop?.phone || ""

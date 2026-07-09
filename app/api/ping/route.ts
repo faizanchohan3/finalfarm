@@ -1,4 +1,4 @@
-mport { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 
 // Lightweight endpoint to warm up the Neon DB connection before the user clicks anything

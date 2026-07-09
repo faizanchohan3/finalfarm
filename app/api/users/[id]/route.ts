@@ -1,45 +1,57 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import bcrypt from "bcryptjs"
 import { createAuditLog } from "@/lib/audit"
 
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  if (!["SUPER_ADMIN", "ADMIN"].includes(session.user.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-  }
 
-  const { id } = await params
-  const { name, role, isActive, password } = await req.json()
+  const { searchParams } = new URL(req.url)
+  const limit = parseInt(searchParams.get("limit") || "50")
+  const statusFilter = searchParams.get("status")?.split(",")
+  const myTasks = searchParams.get("mine") === "true"
 
-  const data: any = { name, role, isActive }
-  if (password) data.password = await bcrypt.hash(password, 12)
-
-  const user = await db.user.update({
-    where: { id },
-    data,
-    select: { id: true, name: true, email: true, role: true, isActive: true },
+  const tasks = await db.task.findMany({
+    take: limit,
+    where: {
+      ...(statusFilter ? { status: { in: statusFilter as any[] } } : {}),
+      ...(myTasks ? { assignedToId: session.user.id } : {}),
+    },
+    orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
+    include: {
+      assignedTo: { select: { id: true, name: true, email: true } },
+      createdBy: { select: { id: true, name: true } },
+    },
   })
 
-  await createAuditLog({ userId: session.user.id, action: "UPDATE", module: "USERS", details: `Updated user: ${user.email}` })
-
-  return NextResponse.json({ user })
+  return NextResponse.json({ tasks })
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  if (session.user.role !== "SUPER_ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-  }
 
-  const { id } = await params
-  if (id === session.user.id) return NextResponse.json({ error: "Cannot delete yourself" }, { status: 400 })
+  const body = await req.json()
+  const { title, description, assignedToId, priority, dueDate } = body
 
-  await db.user.update({ where: { id }, data: { isActive: false } })
-  await createAuditLog({ userId: session.user.id, action: "DELETE", module: "USERS", details: `Deactivated user ID: ${id}` })
+  const task = await db.task.create({
+    data: {
+      title,
+      description,
+      assignedToId: assignedToId || null,
+      priority: priority || "MEDIUM",
+      dueDate: dueDate ? new Date(dueDate) : null,
+      createdById: session.user.id,
+    },
+    include: {
+      assignedTo: { select: { name: true } },
+      createdBy: { select: { name: true } },
+    },
+  })
 
-  return NextResponse.json({ success: true })
+  await createAuditLog({ userId: session.user.id, action: "CREATE", module: "TASKS", details: `Created task: ${title}` })
+
+  return NextResponse.json({ task }, { status: 201 })
 }
+

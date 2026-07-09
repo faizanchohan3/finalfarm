@@ -2,26 +2,30 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!["SUPER_ADMIN", "ADMIN", "AUDITOR"].includes(session.user.role)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
 
-  const { id } = await params
-  const { name, accountNumber } = await req.json()
-  if (!name?.trim()) return NextResponse.json({ error: "Bank name is required" }, { status: 400 })
+  const { searchParams } = new URL(req.url)
+  const page = parseInt(searchParams.get("page") || "1")
+  const limit = parseInt(searchParams.get("limit") || "50")
+  const module = searchParams.get("module")
+  const skip = (page - 1) * limit
 
-  const bank = await db.bank.update({
-    where: { id },
-    data: { name: name.trim(), accountNumber: accountNumber?.trim() || null },
-  })
-  return NextResponse.json({ bank })
+  const [logs, total] = await Promise.all([
+    db.auditLog.findMany({
+      skip,
+      take: limit,
+      where: module ? { module } : {},
+      orderBy: { createdAt: "desc" },
+      include: { user: { select: { name: true, email: true } } },
+    }),
+    db.auditLog.count(module ? { where: { module } } : undefined),
+  ])
+
+  return NextResponse.json({ logs, total, page, limit })
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth()
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
-  const { id } = await params
-  await db.bank.update({ where: { id }, data: { isActive: false } })
-  return NextResponse.json({ success: true })
-}

@@ -1,67 +1,90 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { createAuditLog } from "@/lib/audit"
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const { id } = await params
-  const { paymentId } = await req.json()
+  const { searchParams } = new URL(req.url)
+  const farmerId = searchParams.get("farmerId")
+  const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
 
-  if (!paymentId) return NextResponse.json({ error: "Payment ID required" }, { status: 400 })
+  const purchases = await db.farmerPurchase.findMany({
+    where: {
+      farmer: { ...shopFilter, isActive: true },
+      ...(farmerId ? { farmerId } : {}),
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      farmer: { select: { id: true, name: true, phone: true, village: true } },
+      items: { include: { product: { select: { name: true, unit: true } } } },
+      payments: { orderBy: { createdAt: "asc" } },
+      createdBy: { select: { name: true } },
+    },
+  })
+
+  return NextResponse.json({ purchases })
+}
+
+export async function POST(req: Request) {
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   try {
-    const payment = await db.farmerPayment.findUnique({ where: { id: paymentId } })
-    if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 })
+    const body = await req.json()
+    const { farmerId, commodity, bags, weight, totalAmount, paidAmount, paymentMethod, notes } = body
 
-    // Payment.amount is stored as: negative for RECEIVE, positive for PAY
-    const isReceive = payment.amount < 0
-    const displayAmt = Math.abs(payment.amount)
+    if (!farmerId) return NextResponse.json({ error: "Farmer is required" }, { status: 400 })
 
-    await db.$transaction(async (tx) => {
-      await tx.farmerPayment.delete({ where: { id: paymentId } })
+    const total = parseFloat(totalAmount) || 0
+    if (total <= 0) return NextResponse.json({ error: "Amount must be greater than 0" }, { status: 400 })
 
-      // Reverse the balance update
-      // RECEIVE (negative) was increment → now decrement to reverse
-      // PAY (positive) was decrement → now increment to reverse
-      const balanceChange = isReceive
-        ? { decrement: displayAmt }
-        : { increment: displayAmt }
+    const paid = Math.min(parseFloat(paidAmount) || 0, total)
+    const balance = total - paid
+    const status = balance <= 0 ? "PAID" : paid > 0 ? "PARTIAL" : "PENDING"
 
-      await tx.farmer.update({
-        where: { id },
-        data: { balance: balanceChange },
+    const purchase = await db.$transaction(async (tx) => {
+      const fp = await tx.farmerPurchase.create({
+        data: {
+          farmerId,
+          totalAmount: total,
+          paidAmount: paid,
+          balance,
+          status,
+          commodity: commodity || null,
+          weight: weight ? parseFloat(weight) : null,
+          bags: bags ? parseInt(bags) : null,
+          notes: notes || null,
+          createdById: session.user.id,
+        },
+        include: { farmer: true },
       })
 
-      // If payment was tied to a purchase, also reverse that
-      if (payment.purchaseId) {
-        const purchase = await tx.farmerPurchase.findUnique({ where: { id: payment.purchaseId } })
-        if (purchase && !isReceive) {
-          const newPaid = Math.max(0, purchase.paidAmount - displayAmt)
-          const newBalance = purchase.totalAmount - newPaid
-          await tx.farmerPurchase.update({
-            where: { id: payment.purchaseId },
-            data: {
-              paidAmount: newPaid,
-              balance: newBalance,
-              status: newBalance <= 0 ? "PAID" : newPaid > 0 ? "PARTIAL" : "PENDING",
-            },
-          })
-        }
+      if (paid > 0) {
+        await tx.farmerPayment.create({
+          data: {
+            farmerId,
+            purchaseId: fp.id,
+            amount: paid,
+            method: paymentMethod || "CASH",
+            notes: "Payment at purchase",
+          },
+        })
       }
+
+      await tx.farmer.update({
+        where: { id: farmerId },
+        data: { balance: { increment: balance } },
+      })
+
+      return fp
     })
 
-    await createAuditLog({
-      userId: session.user.id,
-      action: "DELETE",
-      module: "FARMERS",
-      details: `Deleted payment from farmer ID: ${id}`,
-    })
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to delete payment" }, { status: 500 })
+    return NextResponse.json({ purchase })
+  } catch (err: any) {
+    console.error("Farmer purchase POST error:", err)
+    return NextResponse.json({ error: err?.message || "Failed to create" }, { status: 500 })
   }
 }
+

@@ -1,4 +1,4 @@
-mport { db } from "./db"
+import { db } from "./db"
 
 export async function createAuditLog({
   userId,
