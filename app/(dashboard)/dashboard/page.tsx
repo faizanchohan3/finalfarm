@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RecentSales } from "@/components/dashboard/recent-sales"
 import { RevenueChart } from "@/components/dashboard/revenue-chart"
 import { ProductDistribution } from "@/components/dashboard/product-distribution"
-import { StatsSlider } from "@/components/dashboard/stats-slider"
 import Link from "next/link"
 
 async function getDashboardData(shopId: string | null) {
@@ -126,15 +125,6 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Stats Slider */}
-      <StatsSlider
-        todaySales={data.todaySales}
-        monthSales={data.monthSales}
-        totalProducts={data.totalProducts}
-        pendingTasks={data.pendingTasks}
-        totalCustomers={data.totalCustomers}
-        expiredPesticides={data.expiredPesticides}
-      />
 
       {/* Charts and Summaries */}
       {!isCashier && (
