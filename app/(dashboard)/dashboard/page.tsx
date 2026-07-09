@@ -5,6 +5,8 @@ import { TrendingUp, ShoppingCart, Package, Users, CheckSquare, AlertTriangle, S
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RecentSales } from "@/components/dashboard/recent-sales"
 import { SalesChart } from "@/components/dashboard/sales-chart"
+import { RevenueChart } from "@/components/dashboard/revenue-chart"
+import { ProductDistribution } from "@/components/dashboard/product-distribution"
 import { TasksSummary } from "@/components/dashboard/tasks-summary"
 import { StatsSlider } from "@/components/dashboard/stats-slider"
 import Link from "next/link"
@@ -208,7 +210,7 @@ export default async function DashboardPage() {
             <div className="lg:col-span-2">
               <Card className="border-0 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-lg">Sales Trend</CardTitle>
+                  <CardTitle className="text-lg">Sales Trend (Last 6 Months)</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <SalesChart />
@@ -218,6 +220,26 @@ export default async function DashboardPage() {
             <div>
               <TasksSummary />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg">Revenue vs Expenses</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RevenueChart />
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg">Product Distribution</CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center">
+                <ProductDistribution />
+              </CardContent>
+            </Card>
           </div>
 
           <div>

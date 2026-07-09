@@ -9,9 +9,21 @@ import {
   Wallet, BarChart3, ClipboardList, Users, Settings,
   ChevronLeft, ChevronRight, Store, CheckSquare, UserCheck,
   Truck, ChevronDown, Receipt, Warehouse,
-  Scale, UserCircle, Building2, BookOpen,
+  Scale, UserCircle, Building2, BookOpen, Zap,
 } from "lucide-react"
 import { useState, useEffect } from "react"
+
+const MillIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 text-green-600">
+    <rect x="4" y="4" width="16" height="16" rx="2" />
+    <circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.3" />
+    <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+    <line x1="12" y1="4" x2="12" y2="7" />
+    <line x1="12" y1="17" x2="12" y2="20" />
+    <line x1="4" y1="12" x2="7" y2="12" />
+    <line x1="17" y1="12" x2="20" y2="12" />
+  </svg>
+)
 
 type NavItem = {
   href: string
@@ -160,11 +172,11 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-gray-200 flex-shrink-0">
-        <div className="flex-shrink-0 w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-blue-100">
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center bg-transparent">
           {shopLogo ? (
             <img src={shopLogo} alt="Shop Logo" className="w-full h-full object-cover" />
           ) : (
-            <Store className="w-5 h-5 text-blue-600" />
+            <MillIcon />
           )}
         </div>
         {!collapsed && (
