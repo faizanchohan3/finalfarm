@@ -121,7 +121,6 @@ model Shop {
   banks               Bank[]
   commissions         Commission[]
   accounts            Account[]
-  commodities         Commodity[]
   lots                Lot[]
 }
 
@@ -183,6 +182,7 @@ model Category {
 
   shop     Shop?     @relation(fields: [shopId], references: [id])
   products Product[]
+  lots     Lot[]
 }
 
 model Product {
@@ -517,24 +517,6 @@ model AuditLog {
   user User  @relation(fields: [userId], references: [id])
 }
 
-// ── COMMODITY MASTER ─────────────────────────────────────────────────────────
-
-model Commodity {
-  id             String   @id @default(cuid())
-  shopId         String?
-  name           String
-  unit           String   @default("KG")
-  standardWeight Float?   // e.g. 40 KG = 1 maund, for maund/bag conversions
-  marketRate     Float    @default(0) // current rate per unit
-  notes          String?
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  shop Shop? @relation(fields: [shopId], references: [id])
-  lots Lot[]
-}
-
 // ── LOT MANAGEMENT ───────────────────────────────────────────────────────────
 
 model Lot {
@@ -542,7 +524,7 @@ model Lot {
   shopId        String?
   lotNo         String     @unique
   farmerId      String?
-  commodityId   String?
+  categoryId    String?
   warehouseId   String?
   buyerId       String?
   bags          Int?
@@ -564,7 +546,7 @@ model Lot {
 
   shop       Shop?       @relation(fields: [shopId], references: [id])
   farmer     Farmer?     @relation(fields: [farmerId], references: [id])
-  commodity  Commodity?  @relation(fields: [commodityId], references: [id])
+  category   Category?   @relation(fields: [categoryId], references: [id])
   warehouse  Warehouse?  @relation(fields: [warehouseId], references: [id])
   buyer      Customer?   @relation(fields: [buyerId], references: [id])
   commission Commission? @relation(fields: [commissionId], references: [id])

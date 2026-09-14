@@ -13,7 +13,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params
   const lot = await db.lot.findUnique({
     where: { id },
-    include: { commodity: { select: { name: true } } },
+    include: { category: { select: { name: true } } },
   })
   if (!lot) return NextResponse.json({ error: "Lot not found" }, { status: 404 })
   if (session.user.shopId && lot.shopId !== session.user.shopId) {
@@ -45,7 +45,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         shopId,
         customerId: lot.buyerId,
         farmerId: lot.farmerId,
-        commodity: lot.commodity?.name || null,
+        commodity: lot.category?.name || null,
         bags: lot.bags,
         weight: lot.netWeight,
         rate: lot.saleRate || 0,
@@ -80,7 +80,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         shopId,
         type: "CREDIT",
         amount: commAmount,
-        description: `Commission — ${lot.commodity?.name || "goods"} (${lot.lotNo})`,
+        description: `Commission — ${lot.category?.name || "goods"} (${lot.lotNo})`,
         reference: c.id,
         category: "Commission Income",
         accountId: commissionAccount?.id || null,
@@ -102,7 +102,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           shopId,
           type: "DEBIT",
           amount: labourAmt,
-          description: `Labour — ${lot.commodity?.name || "goods"} (${lot.lotNo})`,
+          description: `Labour — ${lot.category?.name || "goods"} (${lot.lotNo})`,
           reference: c.id,
           category: "Labour",
           accountId: labourAccount?.id || null,

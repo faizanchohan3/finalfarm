@@ -4,7 +4,7 @@ import { db } from "@/lib/db"
 
 const lotInclude = {
   farmer: { select: { id: true, name: true } },
-  commodity: { select: { id: true, name: true, unit: true } },
+  category: { select: { id: true, name: true } },
   warehouse: { select: { id: true, name: true } },
   buyer: { select: { id: true, name: true } },
 }

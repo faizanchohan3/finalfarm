@@ -27,12 +27,12 @@ const PAY_COLORS: Record<string, string> = {
   PENDING: "text-amber-600", PARTIAL: "text-blue-600", PAID: "text-green-600", CANCELLED: "text-red-500",
 }
 
-const EMPTY = { farmerId: "", commodityId: "", warehouseId: "", bags: "", grossWeight: "", tareWeight: "", grade: "", notes: "" }
+const EMPTY = { farmerId: "", categoryId: "", warehouseId: "", bags: "", grossWeight: "", tareWeight: "", grade: "", notes: "" }
 
 export default function LotsPage() {
   const [lots, setLots] = useState<any[]>([])
   const [farmers, setFarmers] = useState<any[]>([])
-  const [commodities, setCommodities] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
   const [warehouses, setWarehouses] = useState<any[]>([])
   const [buyers, setBuyers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -68,12 +68,12 @@ export default function LotsPage() {
   async function loadRefs() {
     const [f, c, w, b] = await Promise.all([
       fetch("/api/farmers").then((r) => r.json()).catch(() => ({})),
-      fetch("/api/commodities").then((r) => r.json()).catch(() => ({})),
+      fetch("/api/categories").then((r) => r.json()).catch(() => ({})),
       fetch("/api/warehouse").then((r) => r.json()).catch(() => ({})),
       fetch("/api/customers").then((r) => r.json()).catch(() => ({})),
     ])
     setFarmers(f.farmers || [])
-    setCommodities(c.commodities || [])
+    setCategories(c.categories || [])
     setWarehouses(w.warehouses || [])
     setBuyers(b.customers || [])
   }
@@ -91,7 +91,7 @@ export default function LotsPage() {
   })()
 
   async function handleCreate() {
-    if (!form.commodityId) { setError("Please select a commodity."); return }
+    if (!form.categoryId) { setError("Please select a category."); return }
     setSaving(true); setError(null)
     try {
       const res = await fetch("/api/lots", {
@@ -219,11 +219,11 @@ export default function LotsPage() {
                         {lot.status.replace("_", " ")}
                       </span>
                     </div>
-                    <p className="font-semibold text-gray-900">{lot.commodity?.name || "—"}{lot.grade ? ` · ${lot.grade}` : ""}</p>
+                    <p className="font-semibold text-gray-900">{lot.category?.name || "—"}{lot.grade ? ` · ${lot.grade}` : ""}</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
                       <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{lot.farmer?.name || "No farmer"}</span>
                       {lot.warehouse && <span className="flex items-center gap-1"><WarehouseIcon className="w-3.5 h-3.5" />{lot.warehouse.name}</span>}
-                      {lot.netWeight != null && <span>{lot.netWeight} {lot.commodity?.unit || "KG"}</span>}
+                      {lot.netWeight != null && <span>{lot.netWeight} KG</span>}
                       {lot.bags ? <span>{lot.bags} bags</span> : null}
                     </div>
                     {["SOLD", "DISPATCHED", "SETTLED"].includes(lot.status) && (
@@ -271,11 +271,11 @@ export default function LotsPage() {
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Commodity *</Label>
-                <Select value={form.commodityId} onValueChange={(v) => set("commodityId", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select commodity" /></SelectTrigger>
+                <Label>Category *</Label>
+                <Select value={form.categoryId} onValueChange={(v) => set("categoryId", v)}>
+                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
                   <SelectContent>
-                    {commodities.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                    {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -349,7 +349,7 @@ export default function LotsPage() {
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><Label>Sale rate (per {manage?.commodity?.unit || "unit"})</Label><Input type="number" value={mRate} onChange={(e) => setMRate(e.target.value)} placeholder="0" /></div>
+                  <div><Label>Sale rate (per unit)</Label><Input type="number" value={mRate} onChange={(e) => setMRate(e.target.value)} placeholder="0" /></div>
                   <div>
                     <Label>Payment</Label>
                     <Select value={mPay} onValueChange={setMPay}>

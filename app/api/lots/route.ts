@@ -4,7 +4,7 @@ import { db } from "@/lib/db"
 
 const lotInclude = {
   farmer: { select: { id: true, name: true } },
-  commodity: { select: { id: true, name: true, unit: true } },
+  category: { select: { id: true, name: true } },
   warehouse: { select: { id: true, name: true } },
   buyer: { select: { id: true, name: true } },
 }
@@ -46,8 +46,8 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  if (!body.commodityId) {
-    return NextResponse.json({ error: "Commodity is required." }, { status: 400 })
+  if (!body.categoryId) {
+    return NextResponse.json({ error: "Category is required." }, { status: 400 })
   }
 
   const gross = body.grossWeight !== "" && body.grossWeight != null ? parseFloat(body.grossWeight) : null
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       shopId: session.user.shopId || null,
       lotNo,
       farmerId: body.farmerId || null,
-      commodityId: body.commodityId,
+      categoryId: body.categoryId,
       warehouseId: body.warehouseId || null,
       bags: body.bags !== "" && body.bags != null ? parseInt(body.bags) : null,
       grossWeight: gross,
