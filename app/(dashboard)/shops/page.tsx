@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Store, CheckCircle, XCircle, Clock, Users, ShoppingCart, Package, Phone, MapPin, Mail, RefreshCw, Ban, ChevronRight } from "lucide-react"
+import { Store, CheckCircle, XCircle, Clock, Users, ShoppingCart, Package, Phone, MapPin, Mail, RefreshCw, Ban, ChevronRight, KeyRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import Link from "next/link"
 
 type Shop = {
@@ -32,6 +34,13 @@ export default function ShopsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [selected, setSelected] = useState<Shop | null>(null)
 
+  // Reset-password dialog state
+  const [resetShop, setResetShop] = useState<Shop | null>(null)
+  const [newPassword, setNewPassword] = useState("")
+  const [resetLoading, setResetLoading] = useState(false)
+  const [resetError, setResetError] = useState<string | null>(null)
+  const [resetDone, setResetDone] = useState<string | null>(null)
+
   async function fetchShops() {
     setLoading(true)
     const url = filter !== "ALL" ? `/api/shops?status=${filter}` : "/api/shops"
@@ -53,6 +62,35 @@ export default function ShopsPage() {
     setActionLoading(null)
     setSelected(null)
     fetchShops()
+  }
+
+  function openReset(shop: Shop) {
+    setResetShop(shop)
+    setNewPassword("")
+    setResetError(null)
+    setResetDone(null)
+  }
+
+  async function submitReset() {
+    if (!resetShop) return
+    setResetLoading(true)
+    setResetError(null)
+    try {
+      const res = await fetch(`/api/shops/${resetShop.id}/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setResetError(data.error || "Failed to reset password.")
+      } else {
+        setResetDone(data.email || resetShop.email)
+      }
+    } catch {
+      setResetError("Network error. Please try again.")
+    }
+    setResetLoading(false)
   }
 
   const pending = shops.filter((s) => s.status === "PENDING").length
@@ -209,9 +247,13 @@ export default function ShopsPage() {
               </div>
 
               <div className="flex items-center justify-between mt-3">
-                <p className="text-xs text-gray-400">
-                  Registered: {new Date(shop.createdAt).toLocaleDateString("en-PK")}
-                </p>
+                <button
+                  onClick={() => openReset(shop)}
+                  className="flex items-center gap-1 text-xs text-orange-600 font-medium hover:text-orange-800 hover:underline"
+                >
+                  <KeyRound className="w-3.5 h-3.5" />
+                  Reset Password
+                </button>
                 <Link
                   href={`/shops/${shop.id}`}
                   className="flex items-center gap-1 text-xs text-purple-700 font-medium hover:text-purple-900 hover:underline"
@@ -221,10 +263,76 @@ export default function ShopsPage() {
                   <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
+              <p className="text-xs text-gray-400 mt-2">
+                Registered: {new Date(shop.createdAt).toLocaleDateString("en-PK")}
+              </p>
             </div>
           ))}
         </div>
       )}
+
+      {/* Reset password dialog */}
+      <Dialog open={!!resetShop} onOpenChange={(o) => !o && setResetShop(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-orange-600" />
+              Reset Owner Password
+            </DialogTitle>
+            <DialogDescription>
+              {resetShop && (
+                <>Set a new login password for <b>{resetShop.name}</b>&apos;s owner account
+                (<span className="text-gray-700">{resetShop.email}</span>).</>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          {resetDone ? (
+            <div className="rounded-lg bg-green-50 border border-green-300 px-4 py-3 text-sm text-green-800">
+              <CheckCircle className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+              Password updated. The owner (<b>{resetDone}</b>) can now log in with the new password.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-700">New password</label>
+                <Input
+                  type="text"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                  autoFocus
+                />
+              </div>
+              {resetError && (
+                <p className="text-sm text-red-600">{resetError}</p>
+              )}
+              <p className="text-xs text-gray-400">
+                Share the new password with the shop owner. They can change it later from their profile.
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            {resetDone ? (
+              <Button onClick={() => setResetShop(null)}>Done</Button>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setResetShop(null)} disabled={resetLoading}>
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-orange-600 hover:bg-orange-700"
+                  onClick={submitReset}
+                  disabled={resetLoading || newPassword.length < 6}
+                >
+                  {resetLoading ? "Resetting..." : "Reset Password"}
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
