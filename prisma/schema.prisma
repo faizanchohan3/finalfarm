@@ -555,17 +555,20 @@ model Lot {
   saleAmount    Float      @default(0)
   paymentStatus SaleStatus @default(PENDING)
   soldAt        DateTime?
+  settledAt     DateTime?
+  commissionId  String?    @unique
   notes         String?
   createdById   String
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
-  shop      Shop?      @relation(fields: [shopId], references: [id])
-  farmer    Farmer?    @relation(fields: [farmerId], references: [id])
-  commodity Commodity? @relation(fields: [commodityId], references: [id])
-  warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
-  buyer     Customer?  @relation(fields: [buyerId], references: [id])
-  createdBy User       @relation(fields: [createdById], references: [id])
+  shop       Shop?       @relation(fields: [shopId], references: [id])
+  farmer     Farmer?     @relation(fields: [farmerId], references: [id])
+  commodity  Commodity?  @relation(fields: [commodityId], references: [id])
+  warehouse  Warehouse?  @relation(fields: [warehouseId], references: [id])
+  buyer      Customer?   @relation(fields: [buyerId], references: [id])
+  commission Commission? @relation(fields: [commissionId], references: [id])
+  createdBy  User        @relation(fields: [createdById], references: [id])
 }
 
 // ── FARMER MANAGEMENT ────────────────────────────────────────────────────────
@@ -947,6 +950,7 @@ model Commission {
   customer   Customer?           @relation(fields: [customerId], references: [id])
   createdBy  User                @relation(fields: [createdById], references: [id])
   payments   CommissionPayment[]
+  lot        Lot?
 }
 
 model CommissionPayment {

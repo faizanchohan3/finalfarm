@@ -49,6 +49,12 @@ export default function LotsPage() {
   const [mRate, setMRate] = useState("")
   const [mPay, setMPay] = useState("PENDING")
 
+  const [settle, setSettle] = useState<any | null>(null)
+  const [sCommRate, setSCommRate] = useState("2.5")
+  const [sLabour, setSLabour] = useState("")
+  const [sNotes, setSNotes] = useState("")
+  const [settleError, setSettleError] = useState<string | null>(null)
+
   async function loadLots() {
     setLoading(true)
     try {
@@ -132,6 +138,37 @@ export default function LotsPage() {
     loadLots()
   }
 
+  function openSettle(lot: any) {
+    setSettle(lot)
+    setSCommRate("2.5")
+    setSLabour("")
+    setSNotes("")
+    setSettleError(null)
+  }
+
+  const sTotal = settle?.saleAmount || 0
+  const sCommAmount = sTotal * (parseFloat(sCommRate) || 0) / 100
+  const sFarmerPayable = sTotal - sCommAmount
+
+  async function submitSettle() {
+    if (!settle) return
+    setSaving(true); setSettleError(null)
+    try {
+      const res = await fetch(`/api/lots/${settle.id}/settle`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commissionRate: sCommRate, labourAmount: sLabour, notes: sNotes }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        setSettleError(d?.error || "Failed to settle lot.")
+      } else {
+        setSettle(null); loadLots()
+      }
+    } catch { setSettleError("Network error. Please try again.") }
+    setSaving(false)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -198,8 +235,17 @@ export default function LotsPage() {
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="text-xs text-gray-400">{formatDate(lot.createdAt)}</p>
-                    <div className="flex gap-1 justify-end mt-2">
-                      {lot.status !== "CANCELLED" && (
+                    <div className="flex gap-1 justify-end mt-2 items-center">
+                      {["SOLD", "DISPATCHED"].includes(lot.status) && (
+                        <button
+                          onClick={() => openSettle(lot)}
+                          className="text-xs font-semibold px-2.5 py-1 rounded-md bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:from-emerald-600 hover:to-green-700"
+                          title="Settle lot"
+                        >
+                          Settle
+                        </button>
+                      )}
+                      {lot.status !== "CANCELLED" && lot.status !== "SETTLED" && (
                         <>
                           <button onClick={() => openManage(lot)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500" title="Manage">
                             <Settings2 className="w-4 h-4" />
@@ -284,7 +330,7 @@ export default function LotsPage() {
               <Select value={mStatus} onValueChange={setMStatus}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {STATUSES.filter((s) => s !== "CANCELLED").map((s) => (
+                  {STATUSES.filter((s) => s !== "CANCELLED" && s !== "SETTLED").map((s) => (
                     <SelectItem key={s} value={s}>{s.replace("_", " ")}</SelectItem>
                   ))}
                 </SelectContent>
@@ -322,6 +368,43 @@ export default function LotsPage() {
             <div className="flex gap-3 pt-1">
               <Button variant="outline" onClick={() => setManage(null)} className="flex-1" disabled={saving}>Close</Button>
               <Button onClick={saveManage} className="flex-1" disabled={saving}>{saving ? "Saving..." : "Save"}</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settle dialog */}
+      <Dialog open={!!settle} onOpenChange={(o) => !o && setSettle(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Settle {settle?.lotNo}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-gray-500">
+              Sold to <b className="text-gray-700">{settle?.buyer?.name || "—"}</b> for{" "}
+              <b className="text-gray-700">{formatCurrency(sTotal)}</b>. Settling posts the buyer receivable,
+              farmer payable and commission income.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Commission rate (%)</Label><Input type="number" value={sCommRate} onChange={(e) => setSCommRate(e.target.value)} placeholder="2.5" /></div>
+              <div><Label>Labour (Rs)</Label><Input type="number" value={sLabour} onChange={(e) => setSLabour(e.target.value)} placeholder="0" /></div>
+            </div>
+            <div><Label>Notes</Label><Input value={sNotes} onChange={(e) => setSNotes(e.target.value)} placeholder="Optional" /></div>
+
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm space-y-1">
+              <div className="flex justify-between"><span className="text-gray-500">Sale value</span><span className="font-medium">{formatCurrency(sTotal)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Commission ({sCommRate || 0}%)</span><span className="font-medium text-emerald-700">− {formatCurrency(sCommAmount)}</span></div>
+              <div className="flex justify-between border-t border-gray-200 pt-1 mt-1"><span className="text-gray-700 font-semibold">Farmer payable</span><span className="font-bold text-gray-900">{formatCurrency(sFarmerPayable)}</span></div>
+            </div>
+
+            {settleError && <p className="text-sm text-red-600">{settleError}</p>}
+            <div className="flex gap-3 pt-1">
+              <Button variant="outline" onClick={() => setSettle(null)} className="flex-1" disabled={saving}>Cancel</Button>
+              <Button
+                onClick={submitSettle}
+                className="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
+                disabled={saving}
+              >
+                {saving ? "Settling..." : "Confirm Settlement"}
+              </Button>
             </div>
           </div>
         </DialogContent>
