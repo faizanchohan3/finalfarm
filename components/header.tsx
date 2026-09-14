@@ -34,11 +34,11 @@ export function Header({ title }: { title: string }) {
   }, [isSuperAdmin])
 
   return (
-    <header className="h-16 bg-white flex items-center justify-between px-6 flex-shrink-0">
+    <header className="h-16 bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 flex items-center justify-between px-6 flex-shrink-0 shadow-md">
       <div className="flex items-center gap-3">
-        <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
+        <h1 className="text-xl font-semibold text-white">{title}</h1>
         {!isSuperAdmin && session?.user?.shopName && (
-          <span className="hidden sm:inline text-xs bg-green-100 text-purple-800 px-2.5 py-1 rounded-full font-medium border border-green-200">
+          <span className="hidden sm:inline text-xs bg-white/15 text-white px-2.5 py-1 rounded-full font-medium border border-white/25">
             <Store className="w-3 h-3 inline mr-1" />
             {session.user.shopName}
           </span>
@@ -48,16 +48,16 @@ export function Header({ title }: { title: string }) {
       <div className="flex items-center gap-4">
         {/* Pending shops bell for super admin */}
         {isSuperAdmin ? (
-          <Link href="/shops" className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-blue-100 rounded-lg">
+          <Link href="/shops" className="relative p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
             <Bell className="w-5 h-5" />
             {pendingShops > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-blue-900 text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {pendingShops}
               </span>
             )}
           </Link>
         ) : (
-          <button className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-blue-100 rounded-lg">
+          <button className="relative p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
             <Bell className="w-5 h-5" />
           </button>
         )}
@@ -66,13 +66,13 @@ export function Header({ title }: { title: string }) {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((o) => !o)}
-            className="flex items-center gap-3 hover:bg-blue-100 rounded-lg px-2 py-1.5 transition-colors"
+            className="flex items-center gap-3 hover:bg-white/10 rounded-lg px-2 py-1.5 transition-colors"
           >
-            <div className="w-8 h-8 bg-purple-700 rounded-full flex items-center justify-center flex-shrink-0">
-              <User className="w-4 h-4 text-blue-900" />
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <User className="w-4 h-4 text-white" />
             </div>
             <div className="hidden sm:block text-left">
-              <p className="text-sm font-medium text-gray-800 leading-tight">{session?.user?.name}</p>
+              <p className="text-sm font-medium text-white leading-tight">{session?.user?.name}</p>
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getRoleColor(session?.user?.role || "")}`}>
                 {session?.user?.role?.replace("_", " ")}
               </span>
