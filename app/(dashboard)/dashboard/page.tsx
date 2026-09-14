@@ -72,11 +72,11 @@ export default async function DashboardPage() {
   const data = await getDashboardData(shopId)
 
   const allStats = [
-    { title: "Today's Sales", value: formatCurrency(data.todaySales), icon: ShoppingCart, color: "from-blue-600 to-blue-700", trend: "+12%", href: "/sales", role: "all" },
-    { title: "Month Sales", value: formatCurrency(data.monthSales), icon: TrendingUp, color: "from-purple-600 to-purple-700", trend: "+8%", href: "/sales", role: "all" },
-    { title: "Total Products", value: data.totalProducts.toString(), icon: Package, color: "from-emerald-600 to-emerald-700", trend: "+5%", href: "/inventory", role: "admin" },
-    { title: "Total Traders", value: data.totalCustomers.toString(), icon: Users, color: "from-orange-600 to-orange-700", trend: "+3%", href: "/customers", role: "admin" },
-    { title: "Pending Notes", value: data.pendingTasks.toString(), icon: CheckSquare, color: "from-rose-600 to-rose-700", trend: "2", href: "/tasks", role: "admin" },
+    { title: "Today's Sales", value: formatCurrency(data.todaySales), icon: ShoppingCart, color: "from-blue-500 to-indigo-600", trend: "+12%", href: "/sales", role: "all" },
+    { title: "Month Sales", value: formatCurrency(data.monthSales), icon: TrendingUp, color: "from-purple-500 to-fuchsia-600", trend: "+8%", href: "/sales", role: "all" },
+    { title: "Total Products", value: data.totalProducts.toString(), icon: Package, color: "from-emerald-500 to-teal-600", trend: "+5%", href: "/inventory", role: "admin" },
+    { title: "Total Traders", value: data.totalCustomers.toString(), icon: Users, color: "from-orange-500 to-amber-600", trend: "+3%", href: "/customers", role: "admin" },
+    { title: "Pending Notes", value: data.pendingTasks.toString(), icon: CheckSquare, color: "from-rose-500 to-pink-600", trend: "2", href: "/tasks", role: "admin" },
   ]
 
   const stats = isCashier ? allStats.filter(s => s.role === "all") : allStats
@@ -106,19 +106,19 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map((stat) => (
           <Link key={stat.title} href={stat.href}>
-            <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer h-full border-0">
+            <Card className={`bg-gradient-to-br ${stat.color} text-white shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-pointer h-full border-0 overflow-hidden`}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`p-3 bg-gradient-to-br ${stat.color} rounded-lg`}>
+                  <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
                     <stat.icon className="w-6 h-6 text-white" />
                   </div>
-                  <div className="flex items-center gap-1 text-xs font-semibold text-green-600">
+                  <div className="flex items-center gap-1 text-xs font-semibold text-white/90 bg-white/15 rounded-full px-2 py-0.5">
                     <ArrowUpRight className="w-3 h-3" />
                     {stat.trend}
                   </div>
                 </div>
-                <h3 className="text-gray-600 text-sm font-medium mb-2">{stat.title}</h3>
-                <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                <h3 className="text-white/80 text-sm font-medium mb-2">{stat.title}</h3>
+                <p className="text-3xl font-bold text-white">{stat.value}</p>
               </CardContent>
             </Card>
           </Link>
