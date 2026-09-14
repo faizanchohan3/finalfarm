@@ -188,19 +188,9 @@ export function Sidebar() {
         collapsed ? "w-16" : "w-64"
       )}
     >
-      {/* Profile header */}
-      <div
-        className={cn(
-          "flex flex-col items-center bg-gradient-to-br from-purple-600 to-indigo-600 rounded-b-[2rem] shadow-md flex-shrink-0",
-          collapsed ? "px-2 pt-5 pb-6" : "px-4 pt-8 pb-9"
-        )}
-      >
-        <div
-          className={cn(
-            "rounded-full bg-white ring-4 ring-white/30 overflow-hidden flex items-center justify-center shadow-lg",
-            collapsed ? "w-10 h-10" : "w-20 h-20"
-          )}
-        >
+      {/* Logo */}
+      <div className="flex items-center gap-3 px-4 py-5 flex-shrink-0">
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center bg-transparent">
           {shopLogo ? (
             <img src={shopLogo} alt="Shop Logo" className="w-full h-full object-cover" />
           ) : (
@@ -208,11 +198,11 @@ export function Sidebar() {
           )}
         </div>
         {!collapsed && (
-          <div className="mt-3 text-center overflow-hidden w-full">
-            <p className="font-semibold text-sm leading-tight truncate text-white">
+          <div className="overflow-hidden">
+            <p className="font-bold text-sm leading-tight truncate text-gray-900">
               {isSuperAdmin ? "Argo-Firn" : (shopName || "Argo-Firn")}
             </p>
-            <p className="text-white/70 text-xs font-medium mt-0.5">
+            <p className="text-gray-600 text-xs font-medium">
               {isSuperAdmin ? "Platform Head" : "Shop Management"}
             </p>
           </div>
@@ -220,7 +210,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => {
           const { href, label, icon: Icon, hasChildren } = item
           const active =
