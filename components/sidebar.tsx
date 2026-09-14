@@ -27,7 +27,7 @@ const MillIcon = () => (
   </svg>
 )
 
-type ModuleKey = "moduleGodown" | "moduleGate" | "moduleTransport" | "moduleFarmers" | "moduleCommission" | "modulePesticides"
+type ModuleKey = "moduleGodown" | "moduleGate" | "moduleTransport" | "moduleFarmers" | "moduleCommission" | "modulePesticides" | "moduleLots" | "moduleAgents"
 
 type NavItem = {
   href: string
@@ -91,12 +91,12 @@ const cashierReportSubItems = [
 const shopNavItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/inventory", label: "Store", icon: Package },
-  { href: "/lots", label: "Lots", icon: Boxes },
+  { href: "/lots", label: "Lots", icon: Boxes, module: "moduleLots" },
   { href: "/customers", label: "Traders", icon: UserCheck },
   { href: "/suppliers", label: "Suppliers", icon: Truck },
   { href: "/farmers", label: "Farmers", icon: UserCheck, module: "moduleFarmers" },
   { href: "/commission", label: "Commission (Aadat)", icon: DollarSign, module: "moduleCommission" },
-  { href: "/agents", label: "Agents", icon: UserCircle, module: "moduleCommission" },
+  { href: "/agents", label: "Agents", icon: UserCircle, module: "moduleAgents" },
   { href: "/purchases", label: "Purchases", icon: ShoppingBag },
   { href: "/sales", label: "Sales", icon: ShoppingCart },
   { href: "/pesticides", label: "Pesticides", icon: Zap, module: "modulePesticides" },
@@ -129,6 +129,7 @@ export function Sidebar() {
   const [shopModules, setShopModules] = useState<Record<ModuleKey, boolean>>({
     moduleGodown: false, moduleGate: false, moduleTransport: false,
     moduleFarmers: true, moduleCommission: true, modulePesticides: false,
+    moduleLots: true, moduleAgents: true,
   })
 
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN"
@@ -171,6 +172,8 @@ export function Sidebar() {
               moduleFarmers:    d.shop.moduleFarmers !== false,
               moduleCommission: d.shop.moduleCommission !== false,
               modulePesticides: !!d.shop.modulePesticides,
+              moduleLots:       d.shop.moduleLots !== false,
+              moduleAgents:     d.shop.moduleAgents !== false,
             })
           }
         })

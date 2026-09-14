@@ -90,13 +90,15 @@ model Shop {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  // Optional modules — disabled by default, owner enables from Settings
+  // Optional modules — owner toggles from Settings
   moduleGodown     Boolean @default(false)
   moduleGate       Boolean @default(false)
   moduleTransport  Boolean @default(false)
   moduleFarmers    Boolean @default(true)
   moduleCommission Boolean @default(true)
   modulePesticides Boolean @default(false)
+  moduleLots       Boolean @default(true)
+  moduleAgents     Boolean @default(true)
 
   users               User[]
   customers           Customer[]
