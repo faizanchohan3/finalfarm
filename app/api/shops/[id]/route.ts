@@ -23,30 +23,44 @@ export async function GET() {
   }
 }
 
-export async function PATCH(req: Request) {
+// Super Admin lifecycle actions for a shop: approve / reject / suspend / reactivate.
+const ACTIONS: Record<
+  string,
+  { shop: { status?: "APPROVED" | "REJECTED"; isActive: boolean }; usersActive: boolean }
+> = {
+  approve:    { shop: { status: "APPROVED", isActive: true },  usersActive: true },
+  reactivate: { shop: { status: "APPROVED", isActive: true },  usersActive: true },
+  reject:     { shop: { status: "REJECTED", isActive: false }, usersActive: false },
+  suspend:    { shop: { isActive: false },                     usersActive: false },
+}
+
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  if (!session.user.shopId) return NextResponse.json({ error: "No shop associated" }, { status: 400 })
+  if (!session || session.user.role !== "SUPER_ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const { id } = await params
 
   try {
     const body = await req.json()
-    const data: any = {}
-    if ("logo" in body) data.logo = body.logo
-    if (body.name) data.name = body.name.trim()
-    if ("ownerName" in body) data.ownerName = body.ownerName || ""
-    if ("phone" in body) data.phone = body.phone || null
-    if ("address" in body) data.address = body.address || null
-    if ("moduleGodown" in body)     data.moduleGodown     = !!body.moduleGodown
-    if ("moduleGate" in body)       data.moduleGate       = !!body.moduleGate
-    if ("moduleTransport" in body)  data.moduleTransport  = !!body.moduleTransport
-    if ("moduleFarmers" in body)    data.moduleFarmers    = !!body.moduleFarmers
-    if ("moduleCommission" in body) data.moduleCommission = !!body.moduleCommission
-    if ("modulePesticides" in body) data.modulePesticides = !!body.modulePesticides
+    const config = ACTIONS[body.action]
+    if (!config) {
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 })
+    }
 
-    const shop = await db.shop.update({ where: { id: session.user.shopId }, data })
+    const exists = await db.shop.findUnique({ where: { id }, select: { id: true } })
+    if (!exists) return NextResponse.json({ error: "Shop not found" }, { status: 404 })
+
+    // Update the shop and its users together so login access stays in sync.
+    const [shop] = await db.$transaction([
+      db.shop.update({ where: { id }, data: config.shop }),
+      db.user.updateMany({ where: { shopId: id }, data: { isActive: config.usersActive } }),
+    ])
+
     return NextResponse.json({ shop })
   } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Failed to update settings" }, { status: 500 })
+    return NextResponse.json({ error: err?.message || "Failed to update shop" }, { status: 500 })
   }
 }
 
