@@ -109,6 +109,7 @@ model Shop {
   banks               Bank[]
   commissions         Commission[]
   accounts            Account[]
+  commodities         Commodity[]
 }
 
 // ── BANKS ─────────────────────────────────────────────────────────────────────
@@ -499,6 +500,23 @@ model AuditLog {
 
   shop Shop? @relation(fields: [shopId], references: [id])
   user User  @relation(fields: [userId], references: [id])
+}
+
+// ── COMMODITY MASTER ─────────────────────────────────────────────────────────
+
+model Commodity {
+  id             String   @id @default(cuid())
+  shopId         String?
+  name           String
+  unit           String   @default("KG")
+  standardWeight Float?   // e.g. 40 KG = 1 maund, for maund/bag conversions
+  marketRate     Float    @default(0) // current rate per unit
+  notes          String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  shop Shop? @relation(fields: [shopId], references: [id])
 }
 
 // ── FARMER MANAGEMENT ────────────────────────────────────────────────────────

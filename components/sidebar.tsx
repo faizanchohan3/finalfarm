@@ -9,7 +9,7 @@ import {
   Wallet, BarChart3, ClipboardList, Users, Settings,
   ChevronLeft, ChevronRight, Store, CheckSquare, UserCheck,
   Truck, ChevronDown, Receipt, Warehouse,
-  Scale, UserCircle, Building2, BookOpen, Zap,
+  Scale, UserCircle, Building2, BookOpen, Zap, Wheat,
   TrendingUp, PieChart, DollarSign, ShoppingCart as CartIcon, FileText,
   CreditCard, Building, Banknote,
 } from "lucide-react"
@@ -42,6 +42,7 @@ const getIconColor = (label: string): string => {
   const colors: Record<string, string> = {
     "Dashboard": "text-blue-600",
     "Store": "text-purple-600",
+    "Commodities": "text-amber-600",
     "Traders": "text-green-600",
     "Suppliers": "text-orange-600",
     "Purchases": "text-red-600",
@@ -90,6 +91,7 @@ const cashierReportSubItems = [
 const shopNavItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/inventory", label: "Store", icon: Package },
+  { href: "/commodities", label: "Commodities", icon: Wheat },
   { href: "/customers", label: "Traders", icon: UserCheck },
   { href: "/suppliers", label: "Suppliers", icon: Truck },
   { href: "/farmers", label: "Farmers", icon: UserCheck, module: "moduleFarmers" },
