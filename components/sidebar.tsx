@@ -189,8 +189,8 @@ export function Sidebar() {
       )}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 flex-shrink-0 bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600">
-        <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center bg-white/15">
+      <div className="flex items-center gap-3 px-4 py-5 flex-shrink-0">
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center bg-transparent">
           {shopLogo ? (
             <img src={shopLogo} alt="Shop Logo" className="w-full h-full object-cover" />
           ) : (
@@ -199,10 +199,10 @@ export function Sidebar() {
         </div>
         {!collapsed && (
           <div className="overflow-hidden">
-            <p className="font-bold text-sm leading-tight truncate text-white">
+            <p className="font-bold text-sm leading-tight truncate text-gray-900">
               {isSuperAdmin ? "Argo-Firn" : (shopName || "Argo-Firn")}
             </p>
-            <p className="text-white/70 text-xs font-medium">
+            <p className="text-gray-600 text-xs font-medium">
               {isSuperAdmin ? "Platform Head" : "Shop Management"}
             </p>
           </div>
