@@ -27,12 +27,15 @@ const MillIcon = () => (
   </svg>
 )
 
+type ModuleKey = "moduleGodown" | "moduleGate" | "moduleTransport" | "moduleFarmers" | "moduleCommission" | "modulePesticides"
+
 type NavItem = {
   href: string
   label: string
   icon: React.ComponentType<{ className?: string }>
   hasChildren?: true
   iconColor?: string
+  module?: ModuleKey
 }
 
 const getIconColor = (label: string): string => {
@@ -48,6 +51,11 @@ const getIconColor = (label: string): string => {
     "Expenses": "text-cyan-600",
     "Godowns": "text-amber-600",
     "Gate / Weighbridge": "text-teal-600",
+    "Transport": "text-blue-600",
+    "Farmers": "text-green-600",
+    "Commission (Aadat)": "text-emerald-600",
+    "Agents": "text-indigo-600",
+    "Pesticides": "text-lime-600",
     "Notes": "text-violet-600",
     "Reports": "text-fuchsia-600",
     "Audit Log": "text-rose-600",
@@ -84,13 +92,18 @@ const shopNavItems: NavItem[] = [
   { href: "/inventory", label: "Store", icon: Package },
   { href: "/customers", label: "Traders", icon: UserCheck },
   { href: "/suppliers", label: "Suppliers", icon: Truck },
+  { href: "/farmers", label: "Farmers", icon: UserCheck, module: "moduleFarmers" },
+  { href: "/commission", label: "Commission (Aadat)", icon: DollarSign, module: "moduleCommission" },
+  { href: "/agents", label: "Agents", icon: UserCircle, module: "moduleCommission" },
   { href: "/purchases", label: "Purchases", icon: ShoppingBag },
   { href: "/sales", label: "Sales", icon: ShoppingCart },
+  { href: "/pesticides", label: "Pesticides", icon: Zap, module: "modulePesticides" },
   { href: "/finance", label: "Roznamcha", icon: Wallet },
   { href: "/banks", label: "Banks", icon: Building2 },
   { href: "/expenses", label: "Expenses", icon: Receipt },
-  { href: "/warehouse", label: "Godowns", icon: Warehouse },
-  { href: "/gate", label: "Gate / Weighbridge", icon: Scale },
+  { href: "/warehouse", label: "Godowns", icon: Warehouse, module: "moduleGodown" },
+  { href: "/gate", label: "Gate / Weighbridge", icon: Scale, module: "moduleGate" },
+  { href: "/transport", label: "Transport", icon: Truck, module: "moduleTransport" },
   { href: "/tasks", label: "Notes", icon: CheckSquare },
   { href: "/reports", label: "Reports", icon: BarChart3, hasChildren: true },
   { href: "/audit", label: "Audit Log", icon: ClipboardList },
@@ -111,8 +124,9 @@ export function Sidebar() {
   const [reportsOpen, setReportsOpen] = useState(false)
   const [shopLogo, setShopLogo] = useState<string | null>(null)
   const [liveShopName, setLiveShopName] = useState<string | null>(null)
-  const [shopModules, setShopModules] = useState({
+  const [shopModules, setShopModules] = useState<Record<ModuleKey, boolean>>({
     moduleGodown: false, moduleGate: false, moduleTransport: false,
+    moduleFarmers: true, moduleCommission: true, modulePesticides: false,
   })
 
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN"
@@ -128,10 +142,8 @@ export function Sidebar() {
       if (!allowedPaths.includes(item.href)) return false
     }
 
-    // Module-based filtering
-    if (item.href === "/warehouse")  return shopModules.moduleGodown
-    if (item.href === "/gate")       return shopModules.moduleGate
-    if (item.href === "/transport")  return shopModules.moduleTransport
+    // Module-based filtering — hide any item whose module toggle is off
+    if (item.module && !shopModules[item.module]) return false
     return true
   })
 
@@ -154,6 +166,9 @@ export function Sidebar() {
               moduleGodown:     !!d.shop.moduleGodown,
               moduleGate:       !!d.shop.moduleGate,
               moduleTransport:  !!d.shop.moduleTransport,
+              moduleFarmers:    d.shop.moduleFarmers !== false,
+              moduleCommission: d.shop.moduleCommission !== false,
+              modulePesticides: !!d.shop.modulePesticides,
             })
           }
         })

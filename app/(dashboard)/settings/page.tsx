@@ -267,7 +267,7 @@ export default function SettingsPage() {
               { key: "modulePesticides", label: "Pesticides",         desc: "Pesticide stock and sales" },
               { key: "moduleGodown",     label: "Godowns",            desc: "Warehouse and storage management" },
               { key: "moduleGate",       label: "Gate / Weighbridge", desc: "Entry/exit and weight recording" },
-              { key: "moduleTransport",  label: "FeedMills",          desc: "Transport and freight slips" },
+              { key: "moduleTransport",  label: "Transport",          desc: "Transport and freight slips" },
             ] as { key: keyof typeof modules; label: string; desc: string }[]).map(({ key, label, desc }) => (
               <div
                 key={key}
