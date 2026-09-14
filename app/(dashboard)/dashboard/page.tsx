@@ -1,67 +1,90 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { formatCurrency } from "@/lib/utils"
-import { TrendingUp, ShoppingCart, Package, Users, CheckSquare, ArrowUpRight } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RecentSales } from "@/components/dashboard/recent-sales"
-import { RevenueChart } from "@/components/dashboard/revenue-chart"
-import { ProductDistribution } from "@/components/dashboard/product-distribution"
+import { ShoppingCart, TrendingUp, Users, Wheat, ArrowUpRight, ArrowDownRight, Clock, CheckSquare } from "lucide-react"
 import Link from "next/link"
+
+function initials(name?: string | null) {
+  if (!name) return "—"
+  const parts = name.trim().split(/\s+/)
+  return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase() || name[0].toUpperCase()
+}
 
 async function getDashboardData(shopId: string | null) {
   const now = new Date()
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const startYesterday = new Date(startOfDay); startYesterday.setDate(startYesterday.getDate() - 1)
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-
+  const startLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const sevenDaysAgo = new Date(startOfDay); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
   const shopFilter = shopId ? { shopId } : {}
+  const active = { status: { not: "CANCELLED" as const } }
 
-  const [todaySales, monthSales, totalProducts, pendingTasks, totalCustomers, recentSales, expiredPesticides, criticalStockProducts, pendingShops] =
-    await Promise.all([
-      db.sale.aggregate({
-        where: { ...shopFilter, createdAt: { gte: startOfDay }, status: { not: "CANCELLED" } },
-        _sum: { totalAmount: true },
-      }),
-      db.sale.aggregate({
-        where: { ...shopFilter, createdAt: { gte: startOfMonth }, status: { not: "CANCELLED" } },
-        _sum: { totalAmount: true },
-      }),
-      db.product.count({ where: { ...shopFilter, isActive: true } }),
-      db.task.count({ where: { ...shopFilter, status: { in: ["PENDING", "IN_PROGRESS"] } } }),
-      db.customer.count({ where: { ...shopFilter, isActive: true } }),
-      db.sale.findMany({
-        take: 5,
-        where: shopFilter,
-        orderBy: { createdAt: "desc" },
-        include: { customer: true, createdBy: { select: { name: true } } },
-      }),
-      db.pesticide.count({
-        where: {
-          ...shopFilter,
-          expiryDate: { lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
-          isActive: true,
-        },
-      }),
-      db.product.findMany({
-        where: { ...shopFilter, isActive: true, currentStock: { lte: 2 } },
-        select: { name: true, currentStock: true, unit: true },
-        orderBy: { currentStock: "asc" },
-      }),
-      shopId === null
-        ? db.shop.count({ where: { status: "PENDING" } })
-        : Promise.resolve(0),
-    ])
+  const [
+    todayAgg, yesterdayAgg, monthAgg, lastMonthAgg,
+    totalCustomers, totalFarmers, pendingTasks,
+    last7, salesAgg, recentSales, taskList,
+  ] = await Promise.all([
+    db.sale.aggregate({ where: { ...shopFilter, ...active, createdAt: { gte: startOfDay } }, _sum: { totalAmount: true } }),
+    db.sale.aggregate({ where: { ...shopFilter, ...active, createdAt: { gte: startYesterday, lt: startOfDay } }, _sum: { totalAmount: true } }),
+    db.sale.aggregate({ where: { ...shopFilter, ...active, createdAt: { gte: startOfMonth } }, _sum: { totalAmount: true } }),
+    db.sale.aggregate({ where: { ...shopFilter, ...active, createdAt: { gte: startLastMonth, lt: startOfMonth } }, _sum: { totalAmount: true } }),
+    db.customer.count({ where: { ...shopFilter, isActive: true } }),
+    db.farmer.count({ where: { ...shopFilter, isActive: true } }),
+    db.task.count({ where: { ...shopFilter, status: { in: ["PENDING", "IN_PROGRESS"] } } }),
+    db.sale.findMany({ where: { ...shopFilter, ...active, createdAt: { gte: sevenDaysAgo } }, select: { createdAt: true, totalAmount: true } }),
+    db.sale.aggregate({ where: { ...shopFilter, ...active }, _sum: { totalAmount: true, paidAmount: true } }),
+    db.sale.findMany({ take: 6, where: shopFilter, orderBy: { createdAt: "desc" }, include: { customer: { select: { name: true } } } }),
+    db.task.findMany({ where: { ...shopFilter, status: { in: ["PENDING", "IN_PROGRESS"] } }, take: 5, orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }], include: { assignedTo: { select: { name: true } } } }),
+  ])
+
+  // Build 7-day daily sales series
+  const days: { label: string; total: number }[] = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(startOfDay); d.setDate(d.getDate() - i)
+    days.push({ label: d.toLocaleDateString("en-US", { weekday: "short" }), total: 0 })
+  }
+  for (const s of last7) {
+    const sd = new Date(s.createdAt)
+    const sDay = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate())
+    const diff = Math.round((startOfDay.getTime() - sDay.getTime()) / 86400000)
+    const idx = 6 - diff
+    if (idx >= 0 && idx <= 6) days[idx].total += s.totalAmount
+  }
+
+  const totalSales = salesAgg._sum.totalAmount || 0
+  const collected = salesAgg._sum.paidAmount || 0
 
   return {
-    todaySales: todaySales._sum.totalAmount || 0,
-    monthSales: monthSales._sum.totalAmount || 0,
-    totalProducts,
-    pendingTasks,
-    totalCustomers,
-    recentSales,
-    expiredPesticides,
-    criticalStockProducts,
-    pendingShops: pendingShops as number,
+    today: todayAgg._sum.totalAmount || 0,
+    yesterday: yesterdayAgg._sum.totalAmount || 0,
+    month: monthAgg._sum.totalAmount || 0,
+    lastMonth: lastMonthAgg._sum.totalAmount || 0,
+    totalCustomers, totalFarmers, pendingTasks,
+    days, totalSales, collected,
+    recentSales, taskList,
   }
+}
+
+function delta(curr: number, prev: number) {
+  if (prev <= 0) return curr > 0 ? 100 : 0
+  return ((curr - prev) / prev) * 100
+}
+
+const CARD = "rounded-2xl bg-[#1a1a27] border border-white/[0.06] p-5"
+const STATUS_DOT: Record<string, string> = {
+  PAID: "bg-emerald-400", PARTIAL: "bg-amber-400", PENDING: "bg-slate-500", CANCELLED: "bg-rose-400",
+}
+
+function Spark({ series, className = "" }: { series: number[]; className?: string }) {
+  const max = Math.max(...series, 1)
+  return (
+    <div className={`flex items-end gap-[3px] h-9 ${className}`}>
+      {series.map((v, i) => (
+        <div key={i} className="w-1.5 rounded-sm bg-gradient-to-t from-violet-600/40 to-violet-400" style={{ height: `${Math.max((v / max) * 100, 6)}%` }} />
+      ))}
+    </div>
+  )
 }
 
 export default async function DashboardPage() {
@@ -69,88 +92,181 @@ export default async function DashboardPage() {
   const shopId = session?.user?.shopId ?? null
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN"
   const isCashier = session?.user?.role === "CASHIER"
-  const data = await getDashboardData(shopId)
+  const d = await getDashboardData(shopId)
 
-  const allStats = [
-    { title: "Today's Sales", value: formatCurrency(data.todaySales), icon: ShoppingCart, color: "from-blue-500 to-indigo-600", trend: "+12%", href: "/sales", role: "all" },
-    { title: "Month Sales", value: formatCurrency(data.monthSales), icon: TrendingUp, color: "from-purple-500 to-fuchsia-600", trend: "+8%", href: "/sales", role: "all" },
-    { title: "Total Products", value: data.totalProducts.toString(), icon: Package, color: "from-emerald-500 to-teal-600", trend: "+5%", href: "/inventory", role: "admin" },
-    { title: "Total Traders", value: data.totalCustomers.toString(), icon: Users, color: "from-orange-500 to-amber-600", trend: "+3%", href: "/customers", role: "admin" },
-    { title: "Pending Notes", value: data.pendingTasks.toString(), icon: CheckSquare, color: "from-rose-500 to-pink-600", trend: "2", href: "/tasks", role: "admin" },
+  const series = d.days.map((x) => x.total)
+  const maxDay = Math.max(...series, 1)
+  const todayDelta = delta(d.today, d.yesterday)
+  const monthDelta = delta(d.month, d.lastMonth)
+  const collectionRate = d.totalSales > 0 ? (d.collected / d.totalSales) * 100 : 0
+  const outstanding = d.totalSales - d.collected
+
+  const stats = [
+    { title: "Today's Sales", value: formatCurrency(d.today), icon: ShoppingCart, href: "/sales", d: todayDelta, spark: true },
+    { title: "This Month", value: formatCurrency(d.month), icon: TrendingUp, href: "/sales", d: monthDelta, spark: true },
+    { title: "Total Traders", value: String(d.totalCustomers), icon: Users, href: "/customers", d: null, spark: false },
+    { title: "Total Farmers", value: String(d.totalFarmers), icon: Wheat, href: "/farmers", d: null, spark: false },
   ]
+  const shown = isCashier ? stats.slice(0, 2) : stats
 
-  const stats = isCashier ? allStats.filter(s => s.role === "all") : allStats
+  // Gauge geometry (donut)
+  const R = 46, C = 2 * Math.PI * R
+  const dash = (collectionRate / 100) * C
 
   return (
-    <div className="space-y-8">
-      {/* Header Section */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900">
-              Welcome back, {session?.user?.name?.split(" ")[0]}
-            </h1>
-            <p className="text-gray-600 text-sm mt-2">
-              {isSuperAdmin
-                ? "Platform overview – manage all shops and operations."
-                : isCashier
-                ? "Sales Dashboard – Process transactions and view analytics."
-                : `Dashboard for ${session?.user?.shopName || "your shop"}`}
-            </p>
-          </div>
-        </div>
+    <div className="-m-6 p-5 sm:p-6 bg-[#0f0f17] min-h-[calc(100vh-4rem)] text-slate-200">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-white">
+          Welcome back, {session?.user?.name?.split(" ")[0]}
+        </h1>
+        <p className="text-slate-400 text-sm mt-1">
+          {isSuperAdmin ? "Platform overview across all shops." : isCashier ? "Sales dashboard — process and track transactions." : `Overview for ${session?.user?.shopName || "your shop"}`}
+        </p>
       </div>
 
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {stats.map((stat) => (
-          <Link key={stat.title} href={stat.href}>
-            <Card className={`bg-gradient-to-br ${stat.color} text-white shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-pointer h-full border-0 overflow-hidden`}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex items-center gap-1 text-xs font-semibold text-white/90 bg-white/15 rounded-full px-2 py-0.5">
-                    <ArrowUpRight className="w-3 h-3" />
-                    {stat.trend}
-                  </div>
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        {shown.map((s) => {
+          const up = (s.d ?? 0) >= 0
+          return (
+            <Link key={s.title} href={s.href} className={`${CARD} block hover:border-violet-500/40 transition-colors`}>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400 text-xs font-medium">{s.title}</span>
+                <span className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center">
+                  <s.icon className="w-4 h-4 text-violet-300" />
+                </span>
+              </div>
+              <div className="mt-3 flex items-end justify-between gap-2">
+                <div>
+                  <p className="text-2xl font-bold text-white tabular-nums leading-none">{s.value}</p>
+                  {s.d !== null && (
+                    <span className={`inline-flex items-center gap-0.5 mt-2 text-xs font-semibold ${up ? "text-emerald-400" : "text-rose-400"}`}>
+                      {up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      {Math.abs(s.d).toFixed(1)}%
+                    </span>
+                  )}
                 </div>
-                <h3 className="text-white/80 text-sm font-medium mb-2">{stat.title}</h3>
-                <p className="text-3xl font-bold text-white">{stat.value}</p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+                {s.spark && <Spark series={series} />}
+              </div>
+            </Link>
+          )
+        })}
       </div>
 
-
-      {/* Charts and Summaries */}
       {!isCashier && (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="border-0 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-lg">Revenue vs Expenses</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <RevenueChart />
-              </CardContent>
-            </Card>
+          {/* Sales chart + collection gauge */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+            <div className={`${CARD} lg:col-span-2`}>
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="text-white font-semibold">Sales — Last 7 Days</h2>
+                  <p className="text-slate-500 text-xs mt-0.5">Daily total across {d.days.length} days</p>
+                </div>
+                <span className="text-lg font-bold text-white tabular-nums">{formatCurrency(series.reduce((a, b) => a + b, 0))}</span>
+              </div>
+              <div className="flex items-end justify-between gap-3 h-40">
+                {d.days.map((day, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+                    <div className="w-full max-w-[36px] rounded-md bg-gradient-to-t from-violet-600 to-violet-400 transition-all" style={{ height: `${Math.max((day.total / maxDay) * 100, 3)}%` }} title={formatCurrency(day.total)} />
+                    <span className="text-[11px] text-slate-500">{day.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-            <Card className="border-0 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-lg">Product Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="flex items-center justify-center">
-                <ProductDistribution />
-              </CardContent>
-            </Card>
+            {/* Collection gauge */}
+            <div className={CARD}>
+              <h2 className="text-white font-semibold mb-1">Collections</h2>
+              <p className="text-slate-500 text-xs">Paid vs outstanding</p>
+              <div className="flex items-center justify-center my-4">
+                <div className="relative w-32 h-32">
+                  <svg className="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r={R} fill="none" stroke="#2a2a3a" strokeWidth="12" />
+                    <circle cx="60" cy="60" r={R} fill="none" stroke="url(#g)" strokeWidth="12" strokeLinecap="round" strokeDasharray={`${dash} ${C}`} />
+                    <defs>
+                      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#a78bfa" />
+                        <stop offset="100%" stopColor="#7c3aed" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-2xl font-bold text-white tabular-nums">{collectionRate.toFixed(0)}%</span>
+                    <span className="text-[10px] text-slate-500">collected</span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2 text-slate-400"><span className="w-2.5 h-2.5 rounded-full bg-violet-400" /> Collected</span>
+                  <span className="text-white font-medium tabular-nums">{formatCurrency(d.collected)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2 text-slate-400"><span className="w-2.5 h-2.5 rounded-full bg-[#2a2a3a]" /> Outstanding</span>
+                  <span className="text-white font-medium tabular-nums">{formatCurrency(outstanding)}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <RecentSales sales={data.recentSales} />
+          {/* Tasks + recent sales */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={CARD}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-white font-semibold flex items-center gap-2"><CheckSquare className="w-4 h-4 text-violet-300" /> Pending Tasks</h2>
+                <Link href="/tasks" className="text-xs text-violet-300 hover:text-violet-200">View all</Link>
+              </div>
+              {d.taskList.length === 0 ? (
+                <p className="text-slate-500 text-sm py-6 text-center">No pending tasks 🎉</p>
+              ) : (
+                <div className="space-y-3">
+                  {d.taskList.map((t) => (
+                    <div key={t.id} className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-violet-500/15 text-violet-200 flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                        {initials(t.assignedTo?.name)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-slate-100 truncate">{t.title}</p>
+                        <p className="text-xs text-slate-500 truncate">{t.assignedTo?.name || "Unassigned"} · {t.priority}</p>
+                      </div>
+                      <span className="text-xs text-slate-500 flex items-center gap-1 flex-shrink-0">
+                        <Clock className="w-3 h-3" />{t.dueDate ? new Date(t.dueDate).toLocaleDateString("en-PK", { day: "numeric", month: "short" }) : "—"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className={CARD}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-white font-semibold">Recent Sales</h2>
+                <Link href="/sales" className="text-xs text-violet-300 hover:text-violet-200">View all</Link>
+              </div>
+              {d.recentSales.length === 0 ? (
+                <p className="text-slate-500 text-sm py-6 text-center">No sales yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {d.recentSales.map((s: any) => (
+                    <div key={s.id} className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-slate-700/40 text-slate-200 flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                        {initials(s.customer?.name || "Walk-in")}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-slate-100 truncate">{s.customer?.name || "Walk-in customer"}</p>
+                        <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                          <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[s.status] || "bg-slate-500"}`} />
+                          {s.status} · {new Date(s.createdAt).toLocaleDateString("en-PK", { day: "numeric", month: "short" })}
+                        </p>
+                      </div>
+                      <span className="text-sm font-semibold text-white tabular-nums flex-shrink-0">{formatCurrency(s.totalAmount)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </>
       )}
