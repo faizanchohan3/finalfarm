@@ -9,7 +9,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const { id } = await params
 
-  const [customer, sales, commissions, pesticideSales, customerPayments, traderPurchases] = await Promise.all([
+  const [customer, sales, commissions, pesticideSales, customerPayments, traderPurchases, soldLots] = await Promise.all([
     db.customer.findUnique({ where: { id } }),
     db.sale.findMany({
       where: { customerId: id },
@@ -39,6 +39,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       orderBy: { createdAt: "asc" },
       include: { items: { include: { product: { select: { name: true, unit: true } } } } },
     }),
+    // Lots sold to this buyer but not yet settled (settled lots show via their commission)
+    db.lot.findMany({
+      where: { buyerId: id, commissionId: null, status: { in: ["SOLD", "DISPATCHED"] } },
+      orderBy: { soldAt: "asc" },
+      include: { category: { select: { name: true } } },
+    }),
   ])
 
   if (!customer) return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -46,7 +52,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const totalBusiness =
     sales.reduce((s, sale) => s + sale.totalAmount, 0) +
     commissions.reduce((s, c) => s + c.totalValue, 0) +
-    pesticideSales.reduce((s, ps) => s + ps.totalAmount, 0)
+    pesticideSales.reduce((s, ps) => s + ps.totalAmount, 0) +
+    soldLots.reduce((s, l) => s + (l.saleAmount || 0), 0)
 
   // Initial paid at sale/commission creation + standalone CustomerPayment records
   const initialPaid =
@@ -65,11 +72,21 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const ledgerEvents: {
     id?: string
     date: Date
-    type: "SALE" | "COMMISSION" | "PESTICIDE" | "PAYMENT" | "TRADER_PURCHASE"
+    type: "SALE" | "COMMISSION" | "PESTICIDE" | "PAYMENT" | "TRADER_PURCHASE" | "LOT_SALE"
     description: string
     debit: number
     credit: number
   }[] = []
+
+  for (const lot of soldLots) {
+    ledgerEvents.push({
+      date: lot.soldAt || lot.createdAt,
+      type: "LOT_SALE",
+      description: `Lot ${lot.lotNo} — ${lot.category?.name || "goods"}${lot.bags ? ` (${lot.bags} bags)` : ""}`,
+      debit: lot.saleAmount || 0,
+      credit: 0,
+    })
+  }
 
   for (const sale of sales) {
     ledgerEvents.push({
