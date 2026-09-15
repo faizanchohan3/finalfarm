@@ -56,13 +56,8 @@ export async function POST(req: Request) {
   if (net == null && gross != null) net = gross - (tare || 0)
 
   const toInt = (v: any) => (v !== "" && v != null ? parseInt(v) : null)
-  const bori = toInt(body.bori)
-  const jali = toInt(body.jali)
-  const tora = toInt(body.tora)
-  // Keep the total `bags` in sync so existing displays/reports still work.
-  const bagsTotal = bori != null || jali != null || tora != null
-    ? (bori || 0) + (jali || 0) + (tora || 0)
-    : toInt(body.bags)
+  const bags = toInt(body.bags)
+  const bagType = ["bori", "jali", "tora"].includes(body.bagType) ? body.bagType : "bori"
 
   const lotNo = await nextLotNo(session.user.shopId || null)
 
@@ -73,10 +68,8 @@ export async function POST(req: Request) {
       farmerId: body.farmerId || null,
       categoryId: body.categoryId,
       warehouseId: body.warehouseId || null,
-      bags: bagsTotal,
-      bori,
-      jali,
-      tora,
+      bags,
+      bagType,
       markha1: body.markha1?.trim() || null,
       markha2: body.markha2?.trim() || null,
       billNo: body.billNo?.trim() || null,

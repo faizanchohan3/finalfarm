@@ -530,6 +530,7 @@ model Lot {
   warehouseId   String?
   buyerId       String?
   bags          Int?
+  bagType       String?    @default("bori") // bori | jali | tora
   bori          Int?
   jali          Int?
   tora          Int?

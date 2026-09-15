@@ -31,9 +31,12 @@ const PAY_COLORS: Record<string, string> = {
 const EMPTY = {
   farmerId: "", categoryId: "", warehouseId: "",
   markha1: "", markha2: "", billNo: "", vehicleNo: "",
-  bori: "", jali: "", tora: "",
+  bagType: "bori", bags: "",
   grossWeight: "", tareWeight: "", grade: "", notes: "",
 }
+
+// Maps stored bagType to a translatable label; used for the card display.
+const BAG_TYPE_LABEL: Record<string, string> = { bori: "Bori", jali: "Jali", tora: "Tora" }
 
 export default function LotsPage() {
   const { t } = useLang()
@@ -233,12 +236,9 @@ export default function LotsPage() {
                       {lot.vehicleNo && <span className="flex items-center gap-1"><Truck className="w-3.5 h-3.5" />{lot.vehicleNo}</span>}
                       {lot.billNo && <span className="flex items-center gap-1"><Receipt className="w-3.5 h-3.5" />{t("Bill")} #{lot.billNo}</span>}
                       {lot.netWeight != null && <span>{lot.netWeight} KG</span>}
-                      {(lot.bori || lot.jali || lot.tora) ? (
-                        <span>
-                          {[lot.bori && `${t("Bori")} ${lot.bori}`, lot.jali && `${t("Jali")} ${lot.jali}`, lot.tora && `${t("Tora")} ${lot.tora}`].filter(Boolean).join(" · ")}
-                          {lot.bags ? ` (${lot.bags} ${t("bags")})` : ""}
-                        </span>
-                      ) : lot.bags ? <span>{lot.bags} {t("bags")}</span> : null}
+                      {lot.bags ? (
+                        <span>{lot.bags} {t(BAG_TYPE_LABEL[lot.bagType] || "bags")}</span>
+                      ) : null}
                     </div>
                     {(lot.markha1 || lot.markha2) && (
                       <p className="text-xs text-gray-500">{t("Markha")}: {[lot.markha1, lot.markha2].filter(Boolean).join(", ")}</p>
@@ -323,10 +323,19 @@ export default function LotsPage() {
               <div><Label>{t("Markha 1")}</Label><Input value={form.markha1} onChange={(e) => set("markha1", e.target.value)} placeholder={t("Optional")} /></div>
               <div><Label>{t("Markha 2")}</Label><Input value={form.markha2} onChange={(e) => set("markha2", e.target.value)} placeholder={t("Optional")} /></div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div><Label>{t("Bori")}</Label><Input type="number" value={form.bori} onChange={(e) => set("bori", e.target.value)} placeholder="0" /></div>
-              <div><Label>{t("Jali")}</Label><Input type="number" value={form.jali} onChange={(e) => set("jali", e.target.value)} placeholder="0" /></div>
-              <div><Label>{t("Tora")}</Label><Input type="number" value={form.tora} onChange={(e) => set("tora", e.target.value)} placeholder="0" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{t("Bag Type")}</Label>
+                <Select value={form.bagType} onValueChange={(v) => set("bagType", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bori">{t("Bori")}</SelectItem>
+                    <SelectItem value="jali">{t("Jali")}</SelectItem>
+                    <SelectItem value="tora">{t("Tora")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>{t("Bags")}</Label><Input type="number" value={form.bags} onChange={(e) => set("bags", e.target.value)} placeholder="0" /></div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div><Label>{t("Gross wt")}</Label><Input type="number" value={form.grossWeight} onChange={(e) => set("grossWeight", e.target.value)} placeholder="0" /></div>
