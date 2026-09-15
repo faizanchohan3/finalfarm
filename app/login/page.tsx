@@ -166,7 +166,7 @@ export default function LoginPage() {
                   </div>
                 )}
 
-                <Button type="submit" className="w-full bg-blue-100 hover:bg-white" disabled={loginLoading}>
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loginLoading}>
                   {loginLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</> : "Sign In"}
                 </Button>
               </form>
@@ -193,7 +193,7 @@ export default function LoginPage() {
                   </p>
                   <Button
                     onClick={() => { setTab("login"); setRegSuccess(false) }}
-                    className="bg-blue-100 hover:bg-white"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     Back to Sign In
                   </Button>
@@ -285,7 +285,7 @@ export default function LoginPage() {
                       </div>
                     )}
 
-                    <Button type="submit" className="w-full bg-blue-100 hover:bg-white mt-2" disabled={regLoading}>
+                    <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2" disabled={regLoading}>
                       {regLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</> : "Submit Registration"}
                     </Button>
                   </form>

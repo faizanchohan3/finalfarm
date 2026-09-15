@@ -1,8 +1,9 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { formatCurrency } from "@/lib/utils"
-import { ShoppingCart, TrendingUp, Users, Wheat, ArrowUpRight, ArrowDownRight, Clock, CheckSquare, Sparkles } from "lucide-react"
+import { ShoppingCart, TrendingUp, Users, Wheat, ArrowUpRight, ArrowDownRight, Clock, CheckSquare, Sparkles, Database } from "lucide-react"
 import Link from "next/link"
+import { ShopDataActions } from "@/components/shop-data-actions"
 
 function initials(name?: string | null) {
   if (!name) return "—"
@@ -71,7 +72,8 @@ function delta(curr: number, prev: number) {
   return ((curr - prev) / prev) * 100
 }
 
-// Sample dataset shown for a brand-new shop that has no activity yet.
+// Sample dataset shown by default so the dashboard looks populated.
+// Owners flip to their real figures with the header toggle (?data=real).
 const DEMO = {
   today: 45200, todayDelta: 12.5,
   month: 842000, monthDelta: 8.3,
@@ -114,15 +116,17 @@ function Spark({ series }: { series: number[] }) {
   )
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ data?: string }> }) {
   const session = await auth()
   const shopId = session?.user?.shopId ?? null
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN"
   const isCashier = session?.user?.role === "CASHIER"
   const d = await getDashboardData(shopId)
 
-  // No real activity yet → show a full sample dashboard (clearly badged).
-  const demo = d.totalSales === 0 && d.recentSales.length === 0 && d.taskList.length === 0
+  // Sample data is shown by default; ?data=real reveals this shop's real figures.
+  const sp = await searchParams
+  const showReal = sp?.data === "real"
+  const demo = !showReal
 
   const daysVM = demo ? DEMO.days : d.days
   const series = daysVM.map((x) => x.total)
@@ -164,13 +168,33 @@ export default async function DashboardPage() {
             {isSuperAdmin ? "Platform overview across all shops." : isCashier ? "Sales dashboard — process and track transactions." : `Overview for ${session?.user?.shopName || "your shop"}`}
           </p>
         </div>
-        {demo && (
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-200 bg-violet-500/15 border border-violet-500/30 rounded-full px-3 py-1.5">
-            <Sparkles className="w-3.5 h-3.5" />
-            Sample data — your figures appear here as you record sales
-          </span>
-        )}
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          <ShopDataActions />
+          {demo ? (
+            <Link
+              href="/dashboard?data=real"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-violet-600 hover:bg-violet-500 rounded-lg px-3 py-1.5 transition-colors"
+            >
+              <Database className="w-3.5 h-3.5" />
+              Show Original Shop Data
+            </Link>
+          ) : (
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-200 bg-violet-500/15 border border-violet-500/30 hover:bg-violet-500/25 rounded-lg px-3 py-1.5 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Show Sample Data
+            </Link>
+          )}
+        </div>
       </div>
+      {demo && (
+        <div className="mb-4 -mt-2 flex items-center gap-1.5 text-xs text-violet-300">
+          <Sparkles className="w-3.5 h-3.5" />
+          Showing sample data — click "Show Original Shop Data" to see your real figures.
+        </div>
+      )}
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
@@ -266,7 +290,9 @@ export default async function DashboardPage() {
                 <Link href="/tasks" className="text-xs text-violet-300 hover:text-violet-200">View all</Link>
               </div>
               <div className="space-y-3">
-                {tasksVM.map((t, i) => (
+                {tasksVM.length === 0 ? (
+                  <p className="text-sm text-slate-500 py-6 text-center">No pending tasks.</p>
+                ) : tasksVM.map((t, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-violet-500/15 text-violet-200 flex items-center justify-center text-xs font-semibold flex-shrink-0">
                       {initials(t.who)}
@@ -289,7 +315,9 @@ export default async function DashboardPage() {
                 <Link href="/sales" className="text-xs text-violet-300 hover:text-violet-200">View all</Link>
               </div>
               <div className="space-y-3">
-                {salesVM.map((s, i) => (
+                {salesVM.length === 0 ? (
+                  <p className="text-sm text-slate-500 py-6 text-center">No sales recorded yet.</p>
+                ) : salesVM.map((s, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-slate-700/40 text-slate-200 flex items-center justify-center text-xs font-semibold flex-shrink-0">
                       {initials(s.name)}

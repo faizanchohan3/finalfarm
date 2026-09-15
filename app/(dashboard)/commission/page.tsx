@@ -12,6 +12,9 @@ import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
 import { buildPrintHeader, receiptCSS, reportCSS } from "@/lib/print-utils"
 import { Plus, Search, Percent, CreditCard, Printer, Trash2, X } from "lucide-react"
 
+const BAG_LABELS: Record<string, string> = { bori: "Bori", jali: "Jali", bag: "Bag" }
+const bagUnit = (c: any) => BAG_LABELS[c?.bagType] || "Bags"
+
 export default function CommissionPage() {
   const [commissions, setCommissions] = useState<any[]>([])
   const [customers, setCustomers] = useState<any[]>([])
@@ -29,6 +32,7 @@ export default function CommissionPage() {
   const [walkInSeller, setWalkInSeller] = useState("")
   const [commodity, setCommodity] = useState("")
   const [bags, setBags] = useState("")
+  const [bagType, setBagType] = useState("bag")
   const [weight, setWeight] = useState("")
   const [mound, setMound] = useState("")
   const [rate, setRate] = useState("")
@@ -112,7 +116,7 @@ export default function CommissionPage() {
   function resetNewForm() {
     setCustomerId(""); setWalkInCustomer("")
     setPartyId(""); setWalkInSeller("")
-    setCommodity(""); setBags(""); setWeight(""); setMound("")
+    setCommodity(""); setBags(""); setBagType("bag"); setWeight(""); setMound("")
     setRate(""); setTotalValue(""); setCommissionRate("2.5"); setLabourAmount("0"); setPaidAmount("0"); setNotes("")
   }
 
@@ -140,6 +144,7 @@ export default function CommissionPage() {
           walkInSeller: isWalkInSeller ? walkInSeller.trim() || null : null,
           commodity,
           bags,
+          bagType,
           weight,
           rate,
           totalValue,
@@ -220,14 +225,14 @@ ${buildPrintHeader(shop)}
     <div><div class="lbl">Buyer</div><div class="val">${buyer}</div></div>
     ${c.commodity ? `<div><div class="lbl">Commodity</div><div class="val">${c.commodity}</div></div>` : ""}
     ${c.rate ? `<div><div class="lbl">Rate</div><div class="val">PKR ${c.rate}/kg</div></div>` : ""}
-    ${c.bags ? `<div><div class="lbl">Bags</div><div class="val">${c.bags}</div></div>` : ""}
+    ${c.bags ? `<div><div class="lbl">${bagUnit(c)}</div><div class="val">${c.bags}</div></div>` : ""}
     ${c.weight ? `<div><div class="lbl">Weight</div><div class="val">${c.weight} KG</div></div>` : ""}
   </div>
   <table>
     <thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead>
     <tbody>
       ${c.weight ? `<tr><td>Weight</td><td style="text-align:right">${c.weight} KG</td></tr>` : ""}
-      ${c.bags ? `<tr><td>Bags</td><td style="text-align:right">${c.bags} bags</td></tr>` : ""}
+      ${c.bags ? `<tr><td>${bagUnit(c)}</td><td style="text-align:right">${c.bags} ${bagUnit(c)}</td></tr>` : ""}
     </tbody>
     <tfoot>
       <tr><td><strong>Amount Payable to You</strong></td><td style="text-align:right;color:#1d4ed8" class="amount-big">PKR ${(c.sellerPayable || 0).toLocaleString()}</td></tr>
@@ -267,14 +272,14 @@ ${buildPrintHeader(shop)}
     <div><div class="lbl">Seller</div><div class="val">${seller}</div></div>
     ${c.commodity ? `<div><div class="lbl">Commodity</div><div class="val">${c.commodity}</div></div>` : ""}
     ${c.rate ? `<div><div class="lbl">Rate</div><div class="val">PKR ${c.rate}/kg</div></div>` : ""}
-    ${c.bags ? `<div><div class="lbl">Bags</div><div class="val">${c.bags}</div></div>` : ""}
+    ${c.bags ? `<div><div class="lbl">${bagUnit(c)}</div><div class="val">${c.bags}</div></div>` : ""}
     ${c.weight ? `<div><div class="lbl">Weight</div><div class="val">${c.weight} KG</div></div>` : ""}
   </div>
   <table>
     <thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead>
     <tbody>
       ${c.weight ? `<tr><td>Weight</td><td style="text-align:right">${c.weight} KG</td></tr>` : ""}
-      ${c.bags ? `<tr><td>Bags</td><td style="text-align:right">${c.bags} bags</td></tr>` : ""}
+      ${c.bags ? `<tr><td>${bagUnit(c)}</td><td style="text-align:right">${c.bags} ${bagUnit(c)}</td></tr>` : ""}
       <tr><td>Total Amount</td><td style="text-align:right">PKR ${(c.totalValue || 0).toLocaleString()}</td></tr>
       <tr><td>Paid</td><td style="text-align:right;color:#15803d">PKR ${(c.paidAmount || 0).toLocaleString()}</td></tr>
     </tbody>
@@ -296,7 +301,7 @@ ${buildPrintHeader(shop)}
     const rows = list.map((c, i) => {
       const seller = c.farmer?.name || c.supplier?.name || c.walkInSeller || "â€”"
       const buyer = c.customer?.name || c.walkInCustomer || "â€”"
-      const commodity = [c.commodity, c.bags ? `${c.bags} bags` : null, c.weight ? `${c.weight} kg` : null].filter(Boolean).join(", ")
+      const commodity = [c.commodity, c.bags ? `${c.bags} ${bagUnit(c)}` : null, c.weight ? `${c.weight} kg` : null].filter(Boolean).join(", ")
       const statusCls = c.status === "PAID" ? "PAID" : c.status === "PARTIAL" ? "PARTIAL" : "PENDING"
       return `<tr>
         <td>${i + 1}</td>
@@ -424,7 +429,7 @@ ${buildPrintHeader(shop)}
                       </td>
                       <td className="py-3 px-2 text-gray-600">
                         {c.commodity || "â€”"}
-                        {c.bags ? <span className="ml-1 text-xs text-gray-400">{c.bags} bags</span> : null}
+                        {c.bags ? <span className="ml-1 text-xs text-gray-400">{c.bags} {bagUnit(c)}</span> : null}
                         {c.weight ? <span className="ml-1 text-xs text-gray-400">{c.weight} kg</span> : null}
                       </td>
                       <td className="py-3 px-2 text-gray-700">{formatCurrency(c.totalValue)}</td>
@@ -551,6 +556,18 @@ ${buildPrintHeader(shop)}
                   <Label className="text-xs font-semibold text-gray-600">Bags</Label>
                   <Input type="number" className="mt-1" placeholder="0" value={bags}
                     onChange={(e) => setBags(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold text-gray-600">Bag Type</Label>
+                  <select
+                    className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={bagType}
+                    onChange={(e) => setBagType(e.target.value)}
+                  >
+                    <option value="bori">Bori</option>
+                    <option value="jali">Jali</option>
+                    <option value="bag">Bag</option>
+                  </select>
                 </div>
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">Filling/Bag</Label>

@@ -913,6 +913,7 @@ model Commission {
   walkInCustomer   String?
   commodity        String?
   bags             Int?
+  bagType          String?    @default("bag") // bori | jali | bag
   weight           Float?
   rate             Float      @default(0)
   totalValue       Float
