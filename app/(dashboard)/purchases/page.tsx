@@ -93,7 +93,7 @@ export default function PurchasesPage() {
 
   useEffect(() => { loadData() }, [])
 
-  // Auto-compute commission total from weight Ã— rate
+  // Auto-compute commission total from weight × rate
   useEffect(() => {
     const w = parseFloat(cWeight)
     const r = parseFloat(cRate)
@@ -226,19 +226,19 @@ export default function PurchasesPage() {
     const statusCls = p.status === "PAID" ? "PAID" : p.status === "PARTIAL" ? "PARTIAL" : "PENDING"
     const itemRows = (p.items || []).map((i: any) => `
       <tr>
-        <td>${i.product?.name || "â€”"}</td>
+        <td>${i.product?.name || "—"}</td>
         <td style="text-align:center">${i.quantity} ${i.product?.unit || ""}</td>
         <td style="text-align:right">PKR ${(i.price || 0).toLocaleString()}</td>
         <td style="text-align:right">PKR ${(i.total || 0).toLocaleString()}</td>
       </tr>`).join("")
     const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Purchase â€” ${ref}</title>
+    w.document.write(`<html><head><title>Purchase — ${ref}</title>
 <style>${receiptCSS}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
   <div>
     <div class="doc-title">Purchase Receipt</div>
-    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; By: ${p.createdBy?.name || "â€”"}</div>
+    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; By: ${p.createdBy?.name || "—"}</div>
   </div>
   <div class="doc-meta"><div>${date}</div><span class="badge badge-${statusCls}">${p.status}</span></div>
 </div>
@@ -279,13 +279,13 @@ ${buildPrintHeader(shop)}
       const statusCls = p.status === "PAID" ? "PAID" : p.status === "PARTIAL" ? "PARTIAL" : "PENDING"
       return `<tr>
         <td>${i + 1}</td><td>${from}</td><td>${type}</td>
-        <td style="font-size:9px;color:#555">${its || "â€”"}</td>
+        <td style="font-size:9px;color:#555">${its || "—"}</td>
         <td style="text-align:right">PKR ${(p.totalAmount || 0).toLocaleString()}</td>
         <td style="text-align:right;color:#15803d">PKR ${(p.paidAmount || 0).toLocaleString()}</td>
         <td style="text-align:right;color:${p.balance > 0 ? "#b91c1c" : "#15803d"}">PKR ${(p.balance || 0).toLocaleString()}</td>
         <td><span class="badge badge-${statusCls}">${p.status}</span></td>
         <td>${new Date(p.createdAt).toLocaleDateString("en-PK")}</td>
-        <td>${p.createdBy?.name || "â€”"}</td>
+        <td>${p.createdBy?.name || "—"}</td>
       </tr>`
     }).join("")
     const totalAmt = list.reduce((s, p) => s + (p.totalAmount || 0), 0)
@@ -597,7 +597,7 @@ ${buildPrintHeader(shop)}
               )}
 
               <div>
-                <Label>Seller (Farmer / Supplier) <span className="text-gray-400 font-normal">â€” optional</span></Label>
+                <Label>Seller (Farmer / Supplier) <span className="text-gray-400 font-normal">— optional</span></Label>
                 <SearchableSelect
                   value={cPartyId}
                   onValueChange={(v) => { setCPartyId(v); if (v !== "walkin") setCWalkInSeller("") }}
@@ -638,7 +638,7 @@ ${buildPrintHeader(shop)}
                 <div>
                   <Label>Total Value <span className="text-red-500">*</span></Label>
                   <Input type="number" placeholder="0" value={cTotalValue} onChange={(e) => setCTotalValue(e.target.value)} />
-                  <p className="text-xs text-gray-400 mt-1">Auto-filled from weight Ã— rate</p>
+                  <p className="text-xs text-gray-400 mt-1">Auto-filled from weight × rate</p>
                 </div>
                 <div><Label>Commission %</Label><Input type="number" placeholder="2.5" value={cCommissionRate} onChange={(e) => setCCommissionRate(e.target.value)} /></div>
               </div>
@@ -705,8 +705,8 @@ ${buildPrintHeader(shop)}
             </div>
             <div className="bg-blue-50 border border-blue-300 rounded-xl p-3 text-xs text-blue-800 space-y-1">
               <p className="font-semibold">What happens when deleted:</p>
-              <p>âœ“ Purchase removed from supplier/farmer ledger</p>
-              <p>âœ“ Stock quantities reversed</p>
+              <p>✓ Purchase removed from supplier/farmer ledger</p>
+              <p>✓ Stock quantities reversed</p>
               <p>âœ— This cannot be undone</p>
             </div>
             <div className="flex gap-3">

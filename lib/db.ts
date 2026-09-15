@@ -10,6 +10,6 @@ export const db =
     log: ["error"],
   })
 
-// Always persist singleton â€” reuses connection on Vercel warm invocations
+// Always persist singleton — reuses connection on Vercel warm invocations
 globalForPrisma.prisma = db
 

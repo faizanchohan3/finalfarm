@@ -88,7 +88,7 @@ export async function POST(req: Request) {
     userId: session.user.id,
     action: "CREATE",
     module: "EXPENSES",
-    details: `Expense: PKR ${amount} â€” ${description}`,
+    details: `Expense: PKR ${amount} — ${description}`,
   })
 
   return NextResponse.json({ expense }, { status: 201 })

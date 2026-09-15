@@ -299,14 +299,14 @@ export default function SuppliersPage() {
                       <td className="py-3 px-3 text-gray-600">
                         {s.phone ? (
                           <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{s.phone}</span>
-                        ) : "â€”"}
+                        ) : "—"}
                       </td>
                       <td className="py-3 px-3 text-gray-600">
                         {s.address ? (
                           <span className="flex items-center gap-1 max-w-xs truncate">
                             <MapPin className="w-3 h-3 flex-shrink-0" />{s.address}
                           </span>
-                        ) : "â€”"}
+                        ) : "—"}
                       </td>
                       <td className={`py-3 px-3 text-right font-semibold ${(s.ledgerBalance || 0) > 0 ? "text-purple-600" : (s.ledgerBalance || 0) < 0 ? "text-red-600" : "text-gray-600"}`}>
                         {formatCurrency(s.ledgerBalance || 0)}
@@ -524,8 +524,8 @@ export default function SuppliersPage() {
                                   </span>
                                 </td>
                                 <td className="py-2 px-3 text-gray-700 text-xs max-w-xs truncate">{entry.description}</td>
-                                <td className="py-2 px-3 text-right font-medium text-gray-900">{entry.debit > 0 ? formatCurrency(entry.debit) : "â€”"}</td>
-                                <td className="py-2 px-3 text-right text-purple-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "â€”"}</td>
+                                <td className="py-2 px-3 text-right font-medium text-gray-900">{entry.debit > 0 ? formatCurrency(entry.debit) : "—"}</td>
+                                <td className="py-2 px-3 text-right text-purple-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "—"}</td>
                                 <td className={`py-2 px-3 text-right font-semibold ${entry.balance > 0 ? "text-red-600" : "text-purple-700"}`}>
                                   {formatCurrency(Math.abs(entry.balance))}
                                   {entry.balance !== 0 && <span className="text-xs ml-1 font-normal">{entry.balance > 0 ? "Dr" : "Cr"}</span>}
@@ -571,7 +571,7 @@ export default function SuppliersPage() {
                           <tr key={p.id} className="border-b border-gray-50 hover:bg-blue-50">
                             <td className="py-2 px-3 text-gray-500">{formatDate(p.createdAt)}</td>
                             <td className="py-2 px-3 text-gray-600 text-xs">
-                              {p.items.map((i: any) => `${i.product?.name} Ã—${i.quantity}`).join(", ")}
+                              {p.items.map((i: any) => `${i.product?.name} ×${i.quantity}`).join(", ")}
                             </td>
                             <td className="py-2 px-3 font-medium">{formatCurrency(p.totalAmount)}</td>
                             <td className="py-2 px-3 text-purple-600">{formatCurrency(p.paidAmount)}</td>
@@ -615,7 +615,7 @@ export default function SuppliersPage() {
                 <span className={lastPayment.balance > 0 ? "text-red-700" : "text-purple-700"}>{formatCurrency(Math.abs(lastPayment.balance))}</span>
               </div>
             </div>
-            <p className="mt-8 text-center text-xs text-gray-400 border-t pt-4">Payment receipt â€” Argo-Firn</p>
+            <p className="mt-8 text-center text-xs text-gray-400 border-t pt-4">Payment receipt — Argo-Firn</p>
           </div>
         </div>
       )}
@@ -715,7 +715,7 @@ export default function SuppliersPage() {
                   <Select value={paymentForm.bankId || "none"} onValueChange={(v) => setPaymentForm({ ...paymentForm, bankId: v === "none" ? "" : v })}>
                     <SelectTrigger><SelectValue placeholder="Select bank..." /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">â€” Not specified â€”</SelectItem>
+                      <SelectItem value="none">— Not specified —</SelectItem>
                       {banks.map((b) => (
                         <SelectItem key={b.id} value={b.id}>{b.name}{b.accountNumber ? ` (${b.accountNumber})` : ""}</SelectItem>
                       ))}
@@ -761,7 +761,7 @@ export default function SuppliersPage() {
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-xs text-blue-900">
-                âš ï¸ <strong>Warning:</strong> This action cannot be undone.
+                ⚠️ <strong>Warning:</strong> This action cannot be undone.
               </p>
             </div>
           </div>

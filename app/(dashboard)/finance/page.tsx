@@ -300,7 +300,7 @@ export default function FinancePage() {
         </CardContent>
       </Card>
 
-      {/* Add Transaction Modal â€” Redesigned */}
+      {/* Add Transaction Modal — Redesigned */}
       <Dialog open={showModal} onOpenChange={(o) => { setShowModal(o); if (!o) setShowMoreCats(false) }}>
         <DialogContent className="w-[95vw] max-w-lg sm:w-full max-h-[92vh] overflow-y-auto">
           <DialogHeader>
@@ -461,13 +461,13 @@ export default function FinancePage() {
                   <SelectTrigger className="mt-2"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {banks.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>{b.name}{b.accountNumber ? ` â€” ${b.accountNumber}` : ""}</SelectItem>
+                      <SelectItem key={b.id} value={b.id}>{b.name}{b.accountNumber ? ` — ${b.accountNumber}` : ""}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
               {form.bankId && banks.length === 0 && (
-                <p className="text-xs text-blue-600 mt-1.5">No banks added yet â€” <Link href="/banks" className="underline">add a bank</Link></p>
+                <p className="text-xs text-blue-600 mt-1.5">No banks added yet — <Link href="/banks" className="underline">add a bank</Link></p>
               )}
             </div>
 
@@ -475,12 +475,12 @@ export default function FinancePage() {
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Chart of Account <span className="font-normal normal-case text-gray-400">(optional)</span></Label>
               {accounts.length === 0 ? (
-                <p className="text-xs text-gray-400 mt-1">No accounts â€” <Link href="/accounts" className="underline text-blue-600">load default accounts</Link></p>
+                <p className="text-xs text-gray-400 mt-1">No accounts — <Link href="/accounts" className="underline text-blue-600">load default accounts</Link></p>
               ) : (
                 <Select value={form.accountId || "none"} onValueChange={(v) => setForm({ ...form, accountId: v === "none" ? "" : v })}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select account..." /></SelectTrigger>
                   <SelectContent position="popper" side="bottom" className="max-h-56 overflow-y-auto">
-                    <SelectItem value="none">â€” No account â€”</SelectItem>
+                    <SelectItem value="none">— No account —</SelectItem>
                     {(() => {
                       const relevantTypes = form.type === "CREDIT"
                         ? ["INCOME", "ASSET", "EQUITY"]
@@ -494,7 +494,7 @@ export default function FinancePage() {
                         <SelectGroup key={g.type}>
                           <SelectLabel>{g.type}</SelectLabel>
                           {g.items.map((a: any) => (
-                            <SelectItem key={a.id} value={a.id}>{a.code} â€” {a.name}</SelectItem>
+                            <SelectItem key={a.id} value={a.id}>{a.code} — {a.name}</SelectItem>
                           ))}
                         </SelectGroup>
                       ))
@@ -612,7 +612,7 @@ export default function FinancePage() {
                       <tr key={i} className="hover:bg-blue-50">
                         <td className="py-3 px-4 text-gray-500 text-xs whitespace-nowrap">{formatDate(t.createdAt)}</td>
                         <td className="py-3 px-4 text-gray-700">{t.description}</td>
-                        <td className="py-3 px-4 text-gray-600 text-xs">{t.category || "â€”"}</td>
+                        <td className="py-3 px-4 text-gray-600 text-xs">{t.category || "—"}</td>
                         <td className="py-3 px-4">
                           <span className={`text-xs font-medium px-2 py-1 rounded-full ${t.type === "CREDIT" ? "bg-green-100 text-purple-700" : "bg-red-100 text-red-700"}`}>
                             {t.type === "CREDIT" ? "Income" : "Expense"}

@@ -158,7 +158,7 @@ export default function TasksPage() {
                   <span>{task.assignedTo?.name || "Unassigned"}</span>
                   {task.dueDate && (
                     <>
-                      <span>â€¢</span>
+                      <span>•</span>
                       <Clock className="w-3 h-3" />
                       <span className={new Date(task.dueDate) < new Date() && task.status !== "COMPLETED" ? "text-red-500" : ""}>
                         Due {formatDate(task.dueDate)}

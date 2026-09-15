@@ -30,7 +30,7 @@ export default function ProfitLossPage() {
   }
 
   const dateLabel = dateFrom || dateTo
-    ? `${dateFrom ? formatDate(dateFrom) : "Start"} â€” ${dateTo ? formatDate(dateTo) : "Today"}`
+    ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
     : "All Time"
 
   return (
@@ -278,7 +278,7 @@ export default function ProfitLossPage() {
                     {data.transactions.map((t: any) => (
                       <tr key={t.id} className="hover:bg-blue-50">
                         <td className="px-4 py-2 text-gray-500 text-xs">{formatDate(t.createdAt)}</td>
-                        <td className="px-4 py-2 text-gray-700">{t.description || "â€”"}</td>
+                        <td className="px-4 py-2 text-gray-700">{t.description || "—"}</td>
                         <td className="px-4 py-2">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded ${t.type === "CREDIT" ? "bg-green-100 text-purple-700" : "bg-red-100 text-red-700"}`}>
                             {t.type}

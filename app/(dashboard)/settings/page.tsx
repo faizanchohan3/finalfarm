@@ -163,7 +163,7 @@ export default function SettingsPage() {
     const reader = new FileReader()
     reader.onload = (ev) => {
       const base64 = ev.target?.result as string
-      // Resize to max 300Ã—300 using canvas
+      // Resize to max 300×300 using canvas
       const img = new window.Image()
       img.onload = () => {
         const canvas = document.createElement("canvas")
@@ -304,7 +304,7 @@ export default function SettingsPage() {
               {savingModules ? "Saving..." : "Save Modules"}
             </Button>
             {moduleSavedKey === "saved" && (
-              <span className="text-sm text-purple-600 font-medium">âœ“ Modules saved successfully</span>
+              <span className="text-sm text-purple-600 font-medium">✓ Modules saved successfully</span>
             )}
           </div>
         </CardContent>
@@ -339,7 +339,7 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <p className="text-sm text-gray-600">
                 Upload your shop logo. It will appear in the sidebar navigation.<br />
-                <span className="text-xs text-gray-400">Accepted: JPG, PNG, WEBP â€” max 2 MB. Auto-resized to 300Ã—300.</span>
+                <span className="text-xs text-gray-400">Accepted: JPG, PNG, WEBP — max 2 MB. Auto-resized to 300×300.</span>
               </p>
               <div className="flex gap-2 flex-wrap">
                 <input

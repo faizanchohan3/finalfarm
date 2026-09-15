@@ -113,7 +113,7 @@ export default function ShopsPage() {
         <div className="bg-blue-50 border border-blue-300 rounded-xl px-5 py-4 flex items-center gap-3">
           <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
           <p className="text-blue-800 font-medium">
-            {pending} shop{pending > 1 ? "s" : ""} pending approval â€” review and approve below.
+            {pending} shop{pending > 1 ? "s" : ""} pending approval — review and approve below.
           </p>
         </div>
       )}

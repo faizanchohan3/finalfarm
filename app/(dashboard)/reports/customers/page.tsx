@@ -76,7 +76,7 @@ export default function CustomersReportPage() {
         <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb",marginBottom:"8px"}}>
           <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Trader Report</h2>
-          <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>All active traders â€” business summary with outstanding balances</div>
+          <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>All active traders — business summary with outstanding balances</div>
           <div style={{display:"flex",gap:"24px",marginTop:"8px",fontSize:"11px"}}>
             <span><strong>{customers.length}</strong> Traders</span>
             <span>Total Business: <strong>{formatCurrency(totals.totalBusiness)}</strong></span>
@@ -186,13 +186,13 @@ export default function CustomersReportPage() {
                       </td>
                       <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                       <td className="px-4 py-3 font-semibold text-gray-900">{c.name}</td>
-                      <td className="px-4 py-3 text-gray-600">{c.phone || "â€”"}</td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">{c.address || "â€”"}</td>
+                      <td className="px-4 py-3 text-gray-600">{c.phone || "—"}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs">{c.address || "—"}</td>
                       <td className="px-4 py-3 text-center text-gray-700 font-medium">{c.saleCount}</td>
                       <td className="px-4 py-3 text-right font-medium text-gray-900">{formatCurrency(c.totalBusiness)}</td>
                       <td className="px-4 py-3 text-right text-purple-700 font-medium">{formatCurrency(c.totalPaid)}</td>
                       <td className={`px-4 py-3 text-right font-bold ${c.totalBalance > 0 ? "text-red-600" : "text-gray-400"}`}>
-                        {c.totalBalance > 0 ? formatCurrency(c.totalBalance) : "â€”"}
+                        {c.totalBalance > 0 ? formatCurrency(c.totalBalance) : "—"}
                       </td>
                       <td className="px-4 py-3 print:hidden" onClick={(e) => e.stopPropagation()}>
                         <Link
@@ -236,7 +236,7 @@ export default function CustomersReportPage() {
                                       <td className="px-3 py-2 text-right font-medium">{formatCurrency(s.totalAmount)}</td>
                                       <td className="px-3 py-2 text-right text-purple-700">{formatCurrency(s.paidAmount)}</td>
                                       <td className={`px-3 py-2 text-right font-medium ${s.balance > 0 ? "text-red-600" : "text-gray-400"}`}>
-                                        {s.balance > 0 ? formatCurrency(s.balance) : "â€”"}
+                                        {s.balance > 0 ? formatCurrency(s.balance) : "—"}
                                       </td>
                                       <td className="px-3 py-2 text-center">
                                         <span className={`px-2 py-0.5 rounded-full text-xs ${
@@ -266,7 +266,7 @@ export default function CustomersReportPage() {
               <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                 <tr>
                   <td colSpan={5} className="px-4 py-3 font-bold text-gray-700">
-                    Total â€” {filtered.length} customers, {totals.saleCount} sales
+                    Total — {filtered.length} customers, {totals.saleCount} sales
                   </td>
                   <td className="px-4 py-3 text-center font-bold text-gray-700">{totals.saleCount}</td>
                   <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCurrency(totals.totalBusiness)}</td>

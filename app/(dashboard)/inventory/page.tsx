@@ -113,7 +113,7 @@ export default function InventoryPage() {
       return `<tr style="${isLow ? "background:#fef2f2;" : i % 2 === 0 ? "background:#f9fdf9;" : ""}">
         <td>${i + 1}</td>
         <td><strong>${p.name}</strong></td>
-        <td>${p.category?.name || "â€”"}</td>
+        <td>${p.category?.name || "—"}</td>
         <td style="text-align:right;${isLow ? "color:#b91c1c;font-weight:700;" : ""}">${p.currentStock}</td>
         <td>${p.unit}</td>
         <td style="text-align:right">${p.minStock}</td>
@@ -241,10 +241,10 @@ ${buildPrintHeader(shop)}
           <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-red-800 font-semibold text-sm">
-              Critical Stock Alert â€” {criticalStock.length} product{criticalStock.length > 1 ? "s" : ""} almost out of stock!
+              Critical Stock Alert — {criticalStock.length} product{criticalStock.length > 1 ? "s" : ""} almost out of stock!
             </p>
             <p className="text-red-600 text-xs mt-0.5">
-              {criticalStock.map((p) => `${p.name} (${p.currentStock} ${p.unit} left)`).join(" Â· ")}
+              {criticalStock.map((p) => `${p.name} (${p.currentStock} ${p.unit} left)`).join(" · ")}
             </p>
           </div>
         </div>

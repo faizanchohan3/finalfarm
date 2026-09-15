@@ -85,7 +85,7 @@ export default function AuditPage() {
                       <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
                         <User className="w-3 h-3" />
                         <span>{log.user?.name}</span>
-                        <span>â€¢</span>
+                        <span>•</span>
                         <span>{formatDateTime(log.createdAt)}</span>
                       </div>
                     </div>

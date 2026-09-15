@@ -51,7 +51,7 @@ export default function BankTransactionsPage() {
   const selectedBankName = bankId === "ALL" ? "All Banks" : (banks.find((b) => b.id === bankId)?.name || "")
   const dateLabel =
     dateFrom || dateTo
-      ? `${dateFrom ? formatDate(dateFrom) : "Start"} â€” ${dateTo ? formatDate(dateTo) : "Today"}`
+      ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
       : "All Time"
 
   return (
@@ -205,7 +205,7 @@ export default function BankTransactionsPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Building2 className="w-4 h-4" />
-                {selectedBankName} â€” {dateLabel}
+                {selectedBankName} — {dateLabel}
                 <span className="text-gray-400 font-normal text-sm">({summary.count} entries)</span>
               </CardTitle>
             </CardHeader>
@@ -242,10 +242,10 @@ export default function BankTransactionsPage() {
                         <td className="px-4 py-3 text-gray-500 text-xs">{e.description}</td>
                         <td className="px-4 py-3 text-gray-500 text-xs capitalize">{e.method?.replace("_", " ") || "-"}</td>
                         <td className="px-4 py-3 text-right font-semibold text-purple-700">
-                          {isInflow(e.type) ? formatCurrency(e.amount) : "â€”"}
+                          {isInflow(e.type) ? formatCurrency(e.amount) : "—"}
                         </td>
                         <td className="px-4 py-3 text-right font-semibold text-red-600">
-                          {!isInflow(e.type) ? formatCurrency(e.amount) : "â€”"}
+                          {!isInflow(e.type) ? formatCurrency(e.amount) : "—"}
                         </td>
                       </tr>
                     ))}

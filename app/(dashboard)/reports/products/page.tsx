@@ -71,7 +71,7 @@ export default function ProductReportPage() {
         <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb",marginBottom:"8px"}}>
           <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Store Product Report</h2>
-          <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>All active products â€” stock levels, valuations and sales performance</div>
+          <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>All active products — stock levels, valuations and sales performance</div>
           <div style={{display:"flex",gap:"24px",marginTop:"8px",fontSize:"11px"}}>
             <span><strong>{totals.totalProducts}</strong> Products</span>
             <span>Stock Value: <strong>{formatCurrency(totals.totalStockValue)}</strong></span>
@@ -97,7 +97,7 @@ export default function ProductReportPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-gray-500 uppercase font-medium tracking-wide">Total Products</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{totals.totalProducts ?? "â€”"}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">{totals.totalProducts ?? "—"}</p>
           </CardContent>
         </Card>
         <Card>
@@ -127,7 +127,7 @@ export default function ProductReportPage() {
               Low Stock Items
             </p>
             <p className={`text-2xl font-bold mt-1 ${totals.lowStockCount > 0 ? "text-red-600" : "text-gray-900"}`}>
-              {totals.lowStockCount ?? "â€”"}
+              {totals.lowStockCount ?? "—"}
             </p>
           </CardContent>
         </Card>
@@ -161,7 +161,7 @@ export default function ProductReportPage() {
         </Button>
         {(from || to) && (
           <span className="text-xs text-purple-700 font-medium bg-green-50 border border-green-200 px-3 py-2 rounded-lg">
-            Sales filtered: {from || "start"} â†’ {to || "today"}
+            Sales filtered: {from || "start"} → {to || "today"}
           </span>
         )}
       </div>
@@ -270,7 +270,7 @@ export default function ProductReportPage() {
               <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                 <tr>
                   <td colSpan={9} className="px-4 py-3 font-bold text-gray-700">
-                    Total â€” {filtered.length} products
+                    Total — {filtered.length} products
                   </td>
                   <td className="px-4 py-3 text-right font-bold text-blue-700">
                     {formatCurrency(filtered.reduce((s, p) => s + p.stockValue, 0))}

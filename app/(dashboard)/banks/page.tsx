@@ -32,7 +32,7 @@ export default function BanksPage() {
       const data = await fetch("/api/banks").then((r) => r.json())
       setBanks(data.banks || [])
     } catch {
-      // silent â€” keep existing data
+      // silent — keep existing data
     } finally {
       setFirstLoad(false)
     }
@@ -67,7 +67,7 @@ export default function BanksPage() {
         body: JSON.stringify(form),
       })
     } else {
-      // Optimistic add â€” show immediately in list
+      // Optimistic add — show immediately in list
       const tempId = `temp-${Date.now()}`
       const tempBank = { id: tempId, ...form, createdAt: new Date().toISOString() }
       setBanks((prev) => [...prev, tempBank])
@@ -188,7 +188,7 @@ export default function BanksPage() {
                         {bank.accountNumber || <span className="text-gray-400 italic">Not provided</span>}
                       </td>
                       <td className="py-3 px-4 text-gray-500 text-xs">
-                        {bank.id.startsWith("temp-") ? "Savingâ€¦" : new Date(bank.createdAt).toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })}
+                        {bank.id.startsWith("temp-") ? "Saving…" : new Date(bank.createdAt).toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })}
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">

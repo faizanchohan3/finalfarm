@@ -38,7 +38,7 @@ export default function PurchasesReportPage() {
   }
 
   const dateLabel = dateFrom || dateTo
-    ? `${dateFrom ? formatDate(dateFrom) : "Start"} â€” ${dateTo ? formatDate(dateTo) : "Today"}`
+    ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
     : "All Time"
 
   return (
@@ -186,7 +186,7 @@ export default function PurchasesReportPage() {
               </tbody>
               <tfoot className="bg-blue-50 border-t-2 border-blue-300">
                 <tr>
-                  <td colSpan={3} className="px-4 py-3 font-bold text-gray-700">Total â€” {purchases.length} purchases</td>
+                  <td colSpan={3} className="px-4 py-3 font-bold text-gray-700">Total — {purchases.length} purchases</td>
                   <td className="px-4 py-3 text-right font-bold text-gray-900">{formatCurrency(totals.totalAmount)}</td>
                   <td className="px-4 py-3 text-right font-bold text-purple-700">{formatCurrency(totals.totalPaid)}</td>
                   <td className="px-4 py-3 text-right font-bold text-red-600">{formatCurrency(totals.totalBalance)}</td>

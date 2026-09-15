@@ -31,7 +31,7 @@ export default function BalanceSheetPage() {
   }
 
   const dateLabel = dateFrom || dateTo
-    ? `${dateFrom ? formatDate(dateFrom) : "Start"} â€” ${dateTo ? formatDate(dateTo) : "Today"}`
+    ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
     : "All Time"
 
   return (
@@ -239,7 +239,7 @@ export default function BalanceSheetPage() {
               <div className={`mt-6 p-4 rounded-lg border-2 ${data.accountingEquation ? "bg-green-50 border-green-300" : "bg-red-50 border-red-300"}`}>
                 <div className="flex items-center gap-2 mb-2">
                   {data.accountingEquation ? (
-                    <div className="text-purple-700 text-sm font-bold">âœ“ Accounting Equation Balanced</div>
+                    <div className="text-purple-700 text-sm font-bold">✓ Accounting Equation Balanced</div>
                   ) : (
                     <div className="text-red-700 text-sm font-bold flex items-center gap-1"><AlertCircle className="w-4 h-4" /> Equation Imbalanced</div>
                   )}
@@ -289,7 +289,7 @@ export default function BalanceSheetPage() {
                   </div>
                 </div>
                 <div className={`p-3 rounded-lg text-center font-bold ${data.accountingEquation ? "bg-green-100 text-purple-800 border-2 border-green-500" : "bg-red-100 text-red-800 border-2 border-red-500"}`}>
-                  {data.accountingEquation ? "âœ“ EQUATION BALANCED" : "âš  EQUATION IMBALANCED"}
+                  {data.accountingEquation ? "✓ EQUATION BALANCED" : "⚠️ EQUATION IMBALANCED"}
                 </div>
               </CardContent>
             </Card>

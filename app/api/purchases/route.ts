@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       })
     }
 
-    // Update trader/customer ledger â€” we owe them the unpaid balance
+    // Update trader/customer ledger — we owe them the unpaid balance
     if (sellerCustomerId && balance > 0) {
       await tx.customer.update({
         where: { id: sellerCustomerId },

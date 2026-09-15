@@ -68,7 +68,7 @@ export async function POST(req: Request) {
   const total = parseFloat(totalValue)
   const commAmount = parseFloat(((total * commRate) / 100).toFixed(2))
   const labourAmt = parseFloat(labourAmount || "0")
-  // Seller gets total minus commission only â€” labour is a cost deducted from commission, not from seller
+  // Seller gets total minus commission only — labour is a cost deducted from commission, not from seller
   const sellerPayable = parseFloat((total - commAmount).toFixed(2))
   const paid = parseFloat(initialPaid || "0")
   const balance = total - paid
@@ -141,7 +141,7 @@ export async function POST(req: Request) {
         shopId: session.user.shopId || null,
         type: "CREDIT",
         amount: commAmount,
-        description: `Commission â€” ${commodity || "goods"}${sellerName ? ` from ${sellerName}` : ""} to ${buyerName}`,
+        description: `Commission — ${commodity || "goods"}${sellerName ? ` from ${sellerName}` : ""} to ${buyerName}`,
         reference: c.id,
         category: "Commission Income",
         accountId: commissionAccount?.id || null,
@@ -163,7 +163,7 @@ export async function POST(req: Request) {
           shopId: session.user.shopId || null,
           type: "DEBIT",
           amount: labourAmt,
-          description: `Labour â€” ${commodity || "goods"} (${buyerName})`,
+          description: `Labour — ${commodity || "goods"} (${buyerName})`,
           reference: c.id,
           category: "Labour",
           accountId: labourAccount?.id || null,

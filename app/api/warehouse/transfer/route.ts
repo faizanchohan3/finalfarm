@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const body = await req.json()
     const transferNo = `TRF-${Date.now()}`
 
-    // Create as PENDING â€” stock is NOT moved until approved
+    // Create as PENDING — stock is NOT moved until approved
     const transfer = await db.stockTransfer.create({
       data: {
         transferNo,

@@ -206,7 +206,7 @@ export default function SalesPage() {
     const rows = (s.items || []).map((item: any, i: number) =>
       `<tr style="background:${i%2===0?"#f9fafb":"#fff"}">
         <td>${i+1}</td>
-        <td>${item.product?.name || "â€”"}</td>
+        <td>${item.product?.name || "—"}</td>
         <td style="text-align:center">${item.quantity}</td>
         <td style="text-align:center">${item.product?.unit || ""}</td>
         <td style="text-align:right">PKR ${(item.price || 0).toLocaleString()}</td>
@@ -214,13 +214,13 @@ export default function SalesPage() {
       </tr>`
     ).join("")
     const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Sale Invoice â€” ${ref}</title>
+    w.document.write(`<html><head><title>Sale Invoice — ${ref}</title>
 <style>${receiptCSS}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
   <div>
     <div class="doc-title">Sales Invoice</div>
-    <div class="doc-sub">Invoice #: ${ref} &nbsp;|&nbsp; By: ${s.createdBy?.name || "â€”"}</div>
+    <div class="doc-sub">Invoice #: ${ref} &nbsp;|&nbsp; By: ${s.createdBy?.name || "—"}</div>
   </div>
   <div class="doc-meta"><div>${date}</div><span class="badge badge-${statusCls}">${statusCls}</span></div>
 </div>
@@ -262,13 +262,13 @@ ${buildPrintHeader(shop)}
     const bal = s.balance ?? (s.totalAmount - s.paidAmount)
     const statusCls = bal <= 0 ? "PAID" : s.paidAmount > 0 ? "PARTIAL" : "PENDING"
     const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Pesticide Sale â€” ${ref}</title>
+    w.document.write(`<html><head><title>Pesticide Sale — ${ref}</title>
 <style>${receiptCSS}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
   <div>
     <div class="doc-title">Pesticide Sale Receipt</div>
-    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; By: ${s.soldBy?.name || "â€”"}</div>
+    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; By: ${s.soldBy?.name || "—"}</div>
   </div>
   <div class="doc-meta"><div>${date}</div><span class="badge badge-${statusCls}">${statusCls}</span></div>
 </div>
@@ -282,7 +282,7 @@ ${buildPrintHeader(shop)}
     <thead><tr><th>Pesticide</th><th style="text-align:center">Qty</th><th style="text-align:center">Unit</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Total</th></tr></thead>
     <tbody>
       <tr>
-        <td>${s.pesticide?.name || "â€”"}</td>
+        <td>${s.pesticide?.name || "—"}</td>
         <td style="text-align:center">${s.quantity}</td>
         <td style="text-align:center">${s.pesticide?.unit || ""}</td>
         <td style="text-align:right">PKR ${(s.unitPrice || 0).toLocaleString()}</td>
@@ -841,7 +841,7 @@ ${buildPrintHeader(shop)}
                   <SelectTrigger><SelectValue placeholder="Select pesticide" /></SelectTrigger>
                   <SelectContent>
                     {pesticides.map((p: any) => (
-                      <SelectItem key={p.id} value={p.id}>{p.name} â€” {p.quantity} {p.unit} available</SelectItem>
+                      <SelectItem key={p.id} value={p.id}>{p.name} — {p.quantity} {p.unit} available</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1108,8 +1108,8 @@ ${buildPrintHeader(shop)}
             </div>
             <div className="bg-blue-50 border border-blue-300 rounded-xl p-3 text-xs text-blue-800 space-y-1">
               <p className="font-semibold">What happens when deleted:</p>
-              <p>âœ“ Sale removed from customer ledger</p>
-              <p>âœ“ Stock quantities restored</p>
+              <p>✓ Sale removed from customer ledger</p>
+              <p>✓ Stock quantities restored</p>
               <p>âœ— This cannot be undone</p>
             </div>
             <div className="flex gap-3">

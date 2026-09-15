@@ -49,7 +49,7 @@ export async function POST(req: Request) {
         shopId: session.user.shopId || null,
         type: "CREDIT",
         amount: incentiveAmt,
-        description: `Pesticide incentive â€” ${name}`,
+        description: `Pesticide incentive — ${name}`,
         reference: pesticide.id,
         category: "Pesticide Incentive",
         accountId: incomeAccount?.id || null,
