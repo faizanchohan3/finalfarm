@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button"
 import { getRoleColor } from "@/lib/utils"
 import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
+import { useLang } from "@/lib/i18n"
 
 export function Header({ title }: { title: string }) {
   const { data: session } = useSession()
+  const { t } = useLang()
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN"
   const [pendingShops, setPendingShops] = useState(0)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -82,7 +84,7 @@ export function Header({ title }: { title: string }) {
           {dropdownOpen && (
             <div className="absolute right-0 top-full mt-2 w-52 bg-blue-50 border border-blue-300 rounded-xl shadow-lg z-50 overflow-hidden">
               <div className="px-4 py-3 border-b border-blue-300 bg-blue-50">
-                <p className="text-xs text-gray-500">Signed in as</p>
+                <p className="text-xs text-gray-500">{t("Signed in as")}</p>
                 <p className="text-sm font-semibold text-gray-800 truncate">{session?.user?.email}</p>
               </div>
               <div className="py-1">
@@ -92,14 +94,14 @@ export function Header({ title }: { title: string }) {
                   className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-colors"
                 >
                   <Settings className="w-4 h-4 text-gray-400" />
-                  My Profile & Password
+                  {t("My Profile & Password")}
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/login" })}
                   className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
-                  Sign Out
+                  {t("Sign Out")}
                 </button>
               </div>
             </div>

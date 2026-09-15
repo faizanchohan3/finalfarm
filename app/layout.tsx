@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { SessionProvider } from "next-auth/react"
 import { auth } from "@/auth"
+import { LanguageProvider } from "@/lib/i18n"
 
 export const metadata: Metadata = {
   title: "ArgoFirm - Farm Management",
@@ -22,7 +23,9 @@ export default async function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className="min-h-full bg-blue-50">
-        <SessionProvider session={session}>{children}</SessionProvider>
+        <SessionProvider session={session}>
+          <LanguageProvider>{children}</LanguageProvider>
+        </SessionProvider>
       </body>
     </html>
   )

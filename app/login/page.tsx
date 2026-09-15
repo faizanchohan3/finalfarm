@@ -7,11 +7,14 @@ import { Eye, EyeOff, Loader2, CheckCircle, Zap, CheckCircle2, BarChart3, Lock, 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useLang } from "@/lib/i18n"
+import { LanguageToggle } from "@/components/language-toggle"
 
 type Tab = "login" | "register"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { t } = useLang()
   const [tab, setTab] = useState<Tab>("login")
 
   const [email, setEmail] = useState("")
@@ -122,12 +125,15 @@ export default function LoginPage() {
 
       <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-8">
         <div className="w-full max-w-md">
+          <div className="flex justify-end mb-4">
+            <div className="w-32"><LanguageToggle /></div>
+          </div>
           {tab === "login" && (
             <>
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">Sign In</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-8">{t("Sign In")}</h2>
               <form onSubmit={handleLogin} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email">{t("Email Address")}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -139,7 +145,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t("Password")}</Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -167,14 +173,14 @@ export default function LoginPage() {
                 )}
 
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loginLoading}>
-                  {loginLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</> : "Sign In"}
+                  {loginLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> {t("Signing in...")}</> : t("Sign In")}
                 </Button>
               </form>
 
               <p className="mt-6 text-center text-sm text-gray-500">
-                Want to register your shop?{" "}
+                {t("Want to register your shop?")}{" "}
                 <button onClick={() => setTab("register")} className="text-blue-600 font-medium hover:underline">
-                  Register here
+                  {t("Register here")}
                 </button>
               </p>
             </>
@@ -195,19 +201,19 @@ export default function LoginPage() {
                     onClick={() => { setTab("login"); setRegSuccess(false) }}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
-                    Back to Sign In
+                    {t("Back to Sign In")}
                   </Button>
                 </div>
               ) : (
                 <>
                   <div className="flex items-center gap-2 mb-6">
                     <ShoppingBag className="w-5 h-5 text-blue-600" />
-                    <h2 className="text-xl font-semibold text-gray-800">Register Your Shop</h2>
+                    <h2 className="text-xl font-semibold text-gray-800">{t("Register Your Shop")}</h2>
                   </div>
                   <form onSubmit={handleRegister} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="col-span-2 space-y-1">
-                        <Label htmlFor="shopName">Shop Name *</Label>
+                        <Label htmlFor="shopName">{t("Shop Name *")}</Label>
                         <Input
                           id="shopName"
                           placeholder="e.g. Ahmad Traders"
@@ -217,7 +223,7 @@ export default function LoginPage() {
                         />
                       </div>
                       <div className="col-span-2 space-y-1">
-                        <Label htmlFor="ownerName">Your Name (Owner) *</Label>
+                        <Label htmlFor="ownerName">{t("Your Name (Owner) *")}</Label>
                         <Input
                           id="ownerName"
                           placeholder="Full name"
@@ -227,7 +233,7 @@ export default function LoginPage() {
                         />
                       </div>
                       <div className="col-span-2 space-y-1">
-                        <Label htmlFor="regEmail">Email Address *</Label>
+                        <Label htmlFor="regEmail">{t("Email Address *")}</Label>
                         <Input
                           id="regEmail"
                           type="email"
@@ -238,7 +244,7 @@ export default function LoginPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="regPassword">Password *</Label>
+                        <Label htmlFor="regPassword">{t("Password *")}</Label>
                         <Input
                           id="regPassword"
                           type="password"
@@ -249,7 +255,7 @@ export default function LoginPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                        <Label htmlFor="confirmPassword">{t("Confirm Password *")}</Label>
                         <Input
                           id="confirmPassword"
                           type="password"
@@ -260,7 +266,7 @@ export default function LoginPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="phone">Phone</Label>
+                        <Label htmlFor="phone">{t("Phone")}</Label>
                         <Input
                           id="phone"
                           placeholder="03XX-XXXXXXX"
@@ -269,7 +275,7 @@ export default function LoginPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="city">City</Label>
+                        <Label htmlFor="city">{t("City")}</Label>
                         <Input
                           id="city"
                           placeholder="e.g. Lahore"
@@ -286,14 +292,14 @@ export default function LoginPage() {
                     )}
 
                     <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2" disabled={regLoading}>
-                      {regLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</> : "Submit Registration"}
+                      {regLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> {t("Signing in...")}</> : t("Submit Registration")}
                     </Button>
                   </form>
 
                   <p className="mt-4 text-center text-xs text-gray-400">
-                    Already have an account?{" "}
+                    {t("Already have an account?")}{" "}
                     <button onClick={() => setTab("login")} className="text-blue-600 font-medium hover:underline">
-                      Sign In
+                      {t("Sign In")}
                     </button>
                   </p>
                 </>

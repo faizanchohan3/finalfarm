@@ -14,6 +14,8 @@ import {
   CreditCard, Building, Banknote,
 } from "lucide-react"
 import { useState, useEffect } from "react"
+import { useLang } from "@/lib/i18n"
+import { LanguageToggle } from "@/components/language-toggle"
 
 const MillIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 text-green-600">
@@ -122,6 +124,7 @@ const superAdminNavItems: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
+  const { t } = useLang()
   const [collapsed, setCollapsed] = useState(false)
   const [reportsOpen, setReportsOpen] = useState(false)
   const [shopLogo, setShopLogo] = useState<string | null>(null)
@@ -203,7 +206,7 @@ export function Sidebar() {
               {isSuperAdmin ? "Argo-Firn" : (shopName || "Argo-Firn")}
             </p>
             <p className="text-gray-600 text-xs font-medium">
-              {isSuperAdmin ? "Platform Head" : "Shop Management"}
+              {isSuperAdmin ? t("Platform Head") : t("Shop Management")}
             </p>
           </div>
         )}
@@ -238,7 +241,7 @@ export function Sidebar() {
                     className="flex items-center gap-3 px-3 py-2.5 flex-1 text-sm font-bold"
                   >
                     <Icon className={cn("w-5 h-5 flex-shrink-0", iconColor)} />
-                    {!collapsed && <span className="text-gray-900 font-bold">{label}</span>}
+                    {!collapsed && <span className="text-gray-900 font-bold">{t(label)}</span>}
                   </Link>
                   {!collapsed && (
                     <div
@@ -277,7 +280,7 @@ export function Sidebar() {
                             )}
                           >
                             {Icon && <Icon className={cn("w-3.5 h-3.5 flex-shrink-0", subActive ? sub.color : "text-gray-400")} />}
-                            {sub.label}
+                            {t(sub.label)}
                           </Link>
                         )
                       })}
@@ -300,11 +303,16 @@ export function Sidebar() {
               )}
             >
               <Icon className={cn("w-5 h-5 flex-shrink-0", iconColor)} />
-              {!collapsed && <span className="text-gray-900">{label}</span>}
+              {!collapsed && <span className="text-gray-900">{t(label)}</span>}
             </Link>
           )
         })}
       </nav>
+
+      {/* Language toggle */}
+      <div className="px-2 py-3 border-t border-gray-100 flex-shrink-0">
+        <LanguageToggle collapsed={collapsed} />
+      </div>
 
       {/* Collapse toggle */}
       <button
