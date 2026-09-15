@@ -179,6 +179,7 @@ export const UR: Record<string, string> = {
   "New Commission": "نیا کمیشن",
   "total transactions": "کل لین دین",
   "Print All": "سب پرنٹ کریں",
+  "Print": "پرنٹ",
   "Total Commission Earned": "کل کمیشن آمدنی",
   "Pending from Customers": "گاہکوں سے بقایا",
   "Search by customer, seller, commodity...": "گاہک، بیچنے والا، جنس سے تلاش کریں...",

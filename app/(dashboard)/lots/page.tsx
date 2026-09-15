@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt } from "lucide-react"
+import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt, Printer } from "lucide-react"
 import { useLang } from "@/lib/i18n"
+import { buildPrintHeader, receiptCSS, reportCSS } from "@/lib/print-utils"
 
 const STATUSES = ["ARRIVED", "WEIGHED", "STORED", "AVAILABLE", "IN_AUCTION", "SOLD", "DISPATCHED", "SETTLED", "CANCELLED"] as const
 
@@ -41,6 +42,7 @@ const BAG_TYPE_LABEL: Record<string, string> = { bori: "Bori", jali: "Jali", tor
 export default function LotsPage() {
   const { t } = useLang()
   const [lots, setLots] = useState<any[]>([])
+  const [shop, setShop] = useState<any>(null)
   const [farmers, setFarmers] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [warehouses, setWarehouses] = useState<any[]>([])
@@ -76,16 +78,18 @@ export default function LotsPage() {
   }
 
   async function loadRefs() {
-    const [f, c, w, b] = await Promise.all([
+    const [f, c, w, b, s] = await Promise.all([
       fetch("/api/farmers").then((r) => r.json()).catch(() => ({})),
       fetch("/api/categories").then((r) => r.json()).catch(() => ({})),
       fetch("/api/warehouse").then((r) => r.json()).catch(() => ({})),
       fetch("/api/customers").then((r) => r.json()).catch(() => ({})),
+      fetch("/api/settings").then((r) => r.json()).catch(() => ({})),
     ])
     setFarmers(f.farmers || [])
     setCategories(c.categories || [])
     setWarehouses(w.warehouses || [])
     setBuyers(b.customers || [])
+    setShop(s.shop || null)
   }
 
   useEffect(() => { loadRefs() }, [])
@@ -148,6 +152,77 @@ export default function LotsPage() {
     loadLots()
   }
 
+  const money = (n: number) => "PKR " + (n || 0).toLocaleString()
+  const bagLabel = (lot: any) => t(BAG_TYPE_LABEL[lot.bagType] || "bags")
+
+  // Print a single lot slip. For sold lots it also shows the sale/buyer block.
+  function printLot(lot: any) {
+    const w = window.open("", "_blank")
+    if (!w) return
+    const sold = ["SOLD", "DISPATCHED", "SETTLED"].includes(lot.status)
+    const info: [string, string][] = [
+      ["Lot No", lot.lotNo],
+      ["Date", new Date(lot.createdAt).toLocaleDateString("en-PK")],
+      ["Status", String(lot.status).replace("_", " ")],
+      ["Category", `${lot.category?.name || "—"}${lot.grade ? ` · ${lot.grade}` : ""}`],
+      ["Farmer", lot.farmer?.name || "—"],
+      ["Godown", lot.warehouse?.name || "—"],
+      ["Vehicle No", lot.vehicleNo || "—"],
+      ["Bill No", lot.billNo || "—"],
+      ["Markha", [lot.markha1, lot.markha2].filter(Boolean).join(", ") || "—"],
+      ["Bags", lot.bags != null ? `${lot.bags} ${bagLabel(lot)}` : "—"],
+      ["Gross / Tare / Net", `${lot.grossWeight ?? "—"} / ${lot.tareWeight ?? "—"} / ${lot.netWeight ?? "—"} KG`],
+    ]
+    if (sold) {
+      info.push(
+        ["Buyer (Trader)", lot.buyer?.name || "—"],
+        ["Sale Rate", lot.saleRate != null ? money(lot.saleRate) : "—"],
+        ["Payment", lot.paymentStatus || "—"],
+      )
+    }
+    const infoHtml = info.map(([l, v]) => `<div><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join("")
+    w.document.write(`<html><head><title>${lot.lotNo}</title><style>${receiptCSS}</style></head><body>
+      ${buildPrintHeader(shop)}
+      <div class="doc-header"><div><div class="doc-title">Lot Slip — ${lot.lotNo}</div><div class="doc-sub">${sold ? "Sold lot" : "Lot record"}</div></div>
+      <div class="doc-meta">${new Date().toLocaleString("en-PK")}</div></div>
+      <div class="body-pad"><div class="info-grid">${infoHtml}</div>
+      ${sold && lot.saleAmount ? `<div class="totals-box"><table><tr><td>Sale Amount</td><td style="text-align:right" class="grand">${money(lot.saleAmount)}</td></tr></table></div>` : ""}
+      <div class="sig-row"><span>Received by ______________</span><span>${shop?.name || ""}</span></div>
+      </div>
+      <script>window.onload=()=>window.print()<\/script></body></html>`)
+    w.document.close()
+  }
+
+  // Print the current (filtered) list of lots as a report.
+  function printAllLots(list: any[]) {
+    const w = window.open("", "_blank")
+    if (!w) return
+    const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
+    const rows = list.map((lot, i) => `<tr>
+      <td>${i + 1}</td>
+      <td>${lot.lotNo}</td>
+      <td>${new Date(lot.createdAt).toLocaleDateString("en-PK")}</td>
+      <td>${lot.category?.name || "—"}</td>
+      <td>${lot.farmer?.name || "—"}</td>
+      <td>${lot.bags != null ? `${lot.bags} ${bagLabel(lot)}` : "—"}</td>
+      <td style="text-align:right">${lot.netWeight != null ? lot.netWeight : "—"}</td>
+      <td>${String(lot.status).replace("_", " ")}</td>
+      <td>${lot.buyer?.name || "—"}</td>
+      <td style="text-align:right">${lot.saleAmount ? money(lot.saleAmount) : "—"}</td>
+    </tr>`).join("")
+    const totalSale = list.reduce((s, l) => s + (l.saleAmount || 0), 0)
+    w.document.write(`<html><head><title>Lots Report</title><style>${reportCSS} body{max-width:1000px;margin:0 auto}</style></head><body>
+      ${buildPrintHeader(shop)}
+      <div class="doc-header"><div><div class="doc-title">Lots Report</div><div class="doc-sub">${list.length} lots · ${filter === "ALL" ? "All statuses" : String(filter).replace("_", " ")} · ${date}</div></div></div>
+      <div class="body-pad"><table>
+        <thead><tr><th>#</th><th>Lot No</th><th>Date</th><th>Category</th><th>Farmer</th><th>Bags</th><th style="text-align:right">Net (KG)</th><th>Status</th><th>Buyer</th><th style="text-align:right">Sale Amount</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr><td colspan="9">Total Sale Value</td><td style="text-align:right">${money(totalSale)}</td></tr></tfoot>
+      </table></div>
+      <script>window.onload=()=>window.print()<\/script></body></html>`)
+    w.document.close()
+  }
+
   function openSettle(lot: any) {
     setSettle(lot)
     setSCommRate("2.5")
@@ -188,9 +263,14 @@ export default function LotsPage() {
           </h2>
           <p className="text-gray-500 text-sm">{t("Track each lot from arrival through sale and settlement")}</p>
         </div>
-        <Button className="gap-2" onClick={() => { setForm({ ...EMPTY }); setError(null); setShowCreate(true) }}>
-          <Plus className="w-4 h-4" /> {t("New Lot")}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => printAllLots(lots)} disabled={lots.length === 0}>
+            <Printer className="w-4 h-4" /> {t("Print All")}
+          </Button>
+          <Button className="gap-2" onClick={() => { setForm({ ...EMPTY }); setError(null); setShowCreate(true) }}>
+            <Plus className="w-4 h-4" /> {t("New Lot")}
+          </Button>
+        </div>
       </div>
 
       {/* Status filter */}
@@ -253,6 +333,9 @@ export default function LotsPage() {
                   <div className="text-right flex-shrink-0">
                     <p className="text-xs text-gray-400">{formatDate(lot.createdAt)}</p>
                     <div className="flex gap-1 justify-end mt-2 items-center">
+                      <button onClick={() => printLot(lot)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500" title={t("Print")}>
+                        <Printer className="w-4 h-4" />
+                      </button>
                       {["SOLD", "DISPATCHED"].includes(lot.status) && (
                         <button
                           onClick={() => openSettle(lot)}
