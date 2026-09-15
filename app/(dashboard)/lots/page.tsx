@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle } from "lucide-react"
+import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 const STATUSES = ["ARRIVED", "WEIGHED", "STORED", "AVAILABLE", "IN_AUCTION", "SOLD", "DISPATCHED", "SETTLED", "CANCELLED"] as const
 
@@ -35,6 +36,7 @@ const EMPTY = {
 }
 
 export default function LotsPage() {
+  const { t } = useLang()
   const [lots, setLots] = useState<any[]>([])
   const [farmers, setFarmers] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
@@ -91,8 +93,8 @@ export default function LotsPage() {
   }
 
   const netPreview = (() => {
-    const g = parseFloat(form.grossWeight); const t = parseFloat(form.tareWeight) || 0
-    return isNaN(g) ? null : g - t
+    const g = parseFloat(form.grossWeight); const tare = parseFloat(form.tareWeight) || 0
+    return isNaN(g) ? null : g - tare
   })()
 
   async function handleCreate() {
@@ -179,12 +181,12 @@ export default function LotsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Boxes className="w-6 h-6 text-purple-600" /> Lots
+            <Boxes className="w-6 h-6 text-purple-600" /> {t("Lots")}
           </h2>
-          <p className="text-gray-500 text-sm">Track each lot from arrival through sale and settlement</p>
+          <p className="text-gray-500 text-sm">{t("Track each lot from arrival through sale and settlement")}</p>
         </div>
         <Button className="gap-2" onClick={() => { setForm({ ...EMPTY }); setError(null); setShowCreate(true) }}>
-          <Plus className="w-4 h-4" /> New Lot
+          <Plus className="w-4 h-4" /> {t("New Lot")}
         </Button>
       </div>
 
@@ -226,11 +228,21 @@ export default function LotsPage() {
                     </div>
                     <p className="font-semibold text-gray-900">{lot.category?.name || "—"}{lot.grade ? ` · ${lot.grade}` : ""}</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
-                      <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{lot.farmer?.name || "No farmer"}</span>
+                      <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{lot.farmer?.name || t("No farmer")}</span>
                       {lot.warehouse && <span className="flex items-center gap-1"><WarehouseIcon className="w-3.5 h-3.5" />{lot.warehouse.name}</span>}
+                      {lot.vehicleNo && <span className="flex items-center gap-1"><Truck className="w-3.5 h-3.5" />{lot.vehicleNo}</span>}
+                      {lot.billNo && <span className="flex items-center gap-1"><Receipt className="w-3.5 h-3.5" />{t("Bill")} #{lot.billNo}</span>}
                       {lot.netWeight != null && <span>{lot.netWeight} KG</span>}
-                      {lot.bags ? <span>{lot.bags} bags</span> : null}
+                      {(lot.bori || lot.jali || lot.tora) ? (
+                        <span>
+                          {[lot.bori && `${t("Bori")} ${lot.bori}`, lot.jali && `${t("Jali")} ${lot.jali}`, lot.tora && `${t("Tora")} ${lot.tora}`].filter(Boolean).join(" · ")}
+                          {lot.bags ? ` (${lot.bags} ${t("bags")})` : ""}
+                        </span>
+                      ) : lot.bags ? <span>{lot.bags} {t("bags")}</span> : null}
                     </div>
+                    {(lot.markha1 || lot.markha2) && (
+                      <p className="text-xs text-gray-500">{t("Markha")}: {[lot.markha1, lot.markha2].filter(Boolean).join(", ")}</p>
+                    )}
                     {["SOLD", "DISPATCHED", "SETTLED"].includes(lot.status) && (
                       <p className="text-xs text-gray-600 pt-1">
                         Sold to <b>{lot.buyer?.name || "—"}</b> · {formatCurrency(lot.saleAmount || 0)} ·{" "}
@@ -272,22 +284,22 @@ export default function LotsPage() {
       {/* Create dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>New Lot</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("New Lot")}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Category *</Label>
+                <Label>{t("Category")} *</Label>
                 <Select value={form.categoryId} onValueChange={(v) => set("categoryId", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("Select category")} /></SelectTrigger>
                   <SelectContent>
                     {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>Farmer</Label>
+                <Label>{t("Farmer")}</Label>
                 <Select value={form.farmerId} onValueChange={(v) => set("farmerId", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select farmer" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("Select farmer")} /></SelectTrigger>
                   <SelectContent>
                     {farmers.map((f) => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}
                   </SelectContent>
@@ -296,40 +308,40 @@ export default function LotsPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Godown</Label>
+                <Label>{t("Godown")}</Label>
                 <Select value={form.warehouseId} onValueChange={(v) => set("warehouseId", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select godown" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("Select godown")} /></SelectTrigger>
                   <SelectContent>
                     {warehouses.map((w) => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>Vehicle No</Label><Input value={form.vehicleNo} onChange={(e) => set("vehicleNo", e.target.value)} placeholder="e.g. LES-1234" /></div>
+              <div><Label>{t("Vehicle No")}</Label><Input value={form.vehicleNo} onChange={(e) => set("vehicleNo", e.target.value)} placeholder="e.g. LES-1234" /></div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label>Bill No</Label><Input value={form.billNo} onChange={(e) => set("billNo", e.target.value)} placeholder="Optional" /></div>
-              <div><Label>Markha 1</Label><Input value={form.markha1} onChange={(e) => set("markha1", e.target.value)} placeholder="Optional" /></div>
-              <div><Label>Markha 2</Label><Input value={form.markha2} onChange={(e) => set("markha2", e.target.value)} placeholder="Optional" /></div>
+              <div><Label>{t("Bill No")}</Label><Input value={form.billNo} onChange={(e) => set("billNo", e.target.value)} placeholder={t("Optional")} /></div>
+              <div><Label>{t("Markha 1")}</Label><Input value={form.markha1} onChange={(e) => set("markha1", e.target.value)} placeholder={t("Optional")} /></div>
+              <div><Label>{t("Markha 2")}</Label><Input value={form.markha2} onChange={(e) => set("markha2", e.target.value)} placeholder={t("Optional")} /></div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label>Bori</Label><Input type="number" value={form.bori} onChange={(e) => set("bori", e.target.value)} placeholder="0" /></div>
-              <div><Label>Jali</Label><Input type="number" value={form.jali} onChange={(e) => set("jali", e.target.value)} placeholder="0" /></div>
-              <div><Label>Tora</Label><Input type="number" value={form.tora} onChange={(e) => set("tora", e.target.value)} placeholder="0" /></div>
+              <div><Label>{t("Bori")}</Label><Input type="number" value={form.bori} onChange={(e) => set("bori", e.target.value)} placeholder="0" /></div>
+              <div><Label>{t("Jali")}</Label><Input type="number" value={form.jali} onChange={(e) => set("jali", e.target.value)} placeholder="0" /></div>
+              <div><Label>{t("Tora")}</Label><Input type="number" value={form.tora} onChange={(e) => set("tora", e.target.value)} placeholder="0" /></div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label>Gross wt</Label><Input type="number" value={form.grossWeight} onChange={(e) => set("grossWeight", e.target.value)} placeholder="0" /></div>
-              <div><Label>Tare wt</Label><Input type="number" value={form.tareWeight} onChange={(e) => set("tareWeight", e.target.value)} placeholder="0" /></div>
+              <div><Label>{t("Gross wt")}</Label><Input type="number" value={form.grossWeight} onChange={(e) => set("grossWeight", e.target.value)} placeholder="0" /></div>
+              <div><Label>{t("Tare wt")}</Label><Input type="number" value={form.tareWeight} onChange={(e) => set("tareWeight", e.target.value)} placeholder="0" /></div>
               <div>
-                <Label>Net wt</Label>
-                <Input value={netPreview != null ? String(netPreview) : ""} readOnly placeholder="auto" className="bg-gray-50" />
+                <Label>{t("Net wt")}</Label>
+                <Input value={netPreview != null ? String(netPreview) : ""} readOnly placeholder={t("auto")} className="bg-gray-50" />
               </div>
             </div>
-            <div><Label>Grade / quality</Label><Input value={form.grade} onChange={(e) => set("grade", e.target.value)} placeholder="e.g. A / Fine (optional)" /></div>
-            <div><Label>Notes</Label><Input value={form.notes} onChange={(e) => set("notes", e.target.value)} placeholder="Optional" /></div>
+            <div><Label>{t("Grade / quality")}</Label><Input value={form.grade} onChange={(e) => set("grade", e.target.value)} placeholder={t("e.g. A / Fine (optional)")} /></div>
+            <div><Label>{t("Notes")}</Label><Input value={form.notes} onChange={(e) => set("notes", e.target.value)} placeholder={t("Optional")} /></div>
             {error && <p className="text-sm text-red-600">{error}</p>}
             <div className="flex gap-3 pt-1">
-              <Button variant="outline" onClick={() => setShowCreate(false)} className="flex-1" disabled={saving}>Cancel</Button>
-              <Button onClick={handleCreate} className="flex-1" disabled={saving}>{saving ? "Saving..." : "Create Lot"}</Button>
+              <Button variant="outline" onClick={() => setShowCreate(false)} className="flex-1" disabled={saving}>{t("Cancel")}</Button>
+              <Button onClick={handleCreate} className="flex-1" disabled={saving}>{saving ? t("Saving...") : t("Create Lot")}</Button>
             </div>
           </div>
         </DialogContent>
