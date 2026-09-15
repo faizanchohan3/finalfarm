@@ -530,6 +530,13 @@ model Lot {
   warehouseId   String?
   buyerId       String?
   bags          Int?
+  bori          Int?
+  jali          Int?
+  tora          Int?
+  markha1       String?
+  markha2       String?
+  billNo        String?
+  vehicleNo     String?
   grossWeight   Float?
   tareWeight    Float?
   netWeight     Float?

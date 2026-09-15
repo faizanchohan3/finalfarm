@@ -27,7 +27,12 @@ const PAY_COLORS: Record<string, string> = {
   PENDING: "text-amber-600", PARTIAL: "text-blue-600", PAID: "text-green-600", CANCELLED: "text-red-500",
 }
 
-const EMPTY = { farmerId: "", categoryId: "", warehouseId: "", bags: "", grossWeight: "", tareWeight: "", grade: "", notes: "" }
+const EMPTY = {
+  farmerId: "", categoryId: "", warehouseId: "",
+  markha1: "", markha2: "", billNo: "", vehicleNo: "",
+  bori: "", jali: "", tora: "",
+  grossWeight: "", tareWeight: "", grade: "", notes: "",
+}
 
 export default function LotsPage() {
   const [lots, setLots] = useState<any[]>([])
@@ -299,7 +304,17 @@ export default function LotsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>Bags</Label><Input type="number" value={form.bags} onChange={(e) => set("bags", e.target.value)} placeholder="0" /></div>
+              <div><Label>Vehicle No</Label><Input value={form.vehicleNo} onChange={(e) => set("vehicleNo", e.target.value)} placeholder="e.g. LES-1234" /></div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div><Label>Bill No</Label><Input value={form.billNo} onChange={(e) => set("billNo", e.target.value)} placeholder="Optional" /></div>
+              <div><Label>Markha 1</Label><Input value={form.markha1} onChange={(e) => set("markha1", e.target.value)} placeholder="Optional" /></div>
+              <div><Label>Markha 2</Label><Input value={form.markha2} onChange={(e) => set("markha2", e.target.value)} placeholder="Optional" /></div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div><Label>Bori</Label><Input type="number" value={form.bori} onChange={(e) => set("bori", e.target.value)} placeholder="0" /></div>
+              <div><Label>Jali</Label><Input type="number" value={form.jali} onChange={(e) => set("jali", e.target.value)} placeholder="0" /></div>
+              <div><Label>Tora</Label><Input type="number" value={form.tora} onChange={(e) => set("tora", e.target.value)} placeholder="0" /></div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div><Label>Gross wt</Label><Input type="number" value={form.grossWeight} onChange={(e) => set("grossWeight", e.target.value)} placeholder="0" /></div>
