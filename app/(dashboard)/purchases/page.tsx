@@ -11,8 +11,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
 import { buildPrintHeader, receiptCSS, reportCSS } from "@/lib/print-utils"
 import { Plus, Search, Trash2, ShoppingBag, Printer, Percent, Package } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 export default function PurchasesPage() {
+  const { t } = useLang()
   const [purchases, setPurchases] = useState<any[]>([])
   const [products, setProducts] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
@@ -343,15 +345,15 @@ ${buildPrintHeader(shop)}
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Purchases</h2>
-          <p className="text-gray-500 text-sm">{purchases.length} total purchases</p>
+          <h2 className="text-2xl font-bold text-gray-900">{t("Purchases")}</h2>
+          <p className="text-gray-500 text-sm">{purchases.length} {t("total purchases")}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => printAllPurchases(filtered)}>
-            <Printer className="w-4 h-4" /> Print All
+            <Printer className="w-4 h-4" /> {t("Print All")}
           </Button>
           <Button onClick={() => { resetModal(); setShowModal(true) }}>
-            <Plus className="w-4 h-4" /> New Purchase
+            <Plus className="w-4 h-4" /> {t("New Purchase")}
           </Button>
         </div>
       </div>
@@ -360,19 +362,19 @@ ${buildPrintHeader(shop)}
         <CardHeader>
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input placeholder="Search purchases..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+            <Input placeholder={t("Search purchases...")} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
           </div>
         </CardHeader>
         <CardContent>
           {loading && !purchases.length ? (
-            <div className="text-center py-8 text-gray-400">Loading...</div>
+            <div className="text-center py-8 text-gray-400">{t("Loading...")}</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-blue-300">
                     {["#", "From", "Type", "Total", "Paid", "Balance", "Status", "Date", "By", ""].map((h) => (
-                      <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
+                      <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{t(h)}</th>
                     ))}
                   </tr>
                 </thead>

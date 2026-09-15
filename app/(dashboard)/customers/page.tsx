@@ -15,6 +15,7 @@ import {
   CreditCard, Shield, Printer, Check, Trash2,
 } from "lucide-react"
 import Link from "next/link"
+import { useLang } from "@/lib/i18n"
 
 type Tab = "sales" | "ledger"
 type StatusTab = "active" | "inactive"
@@ -25,6 +26,7 @@ const DEFAULT_FORM = {
 }
 
 export default function CustomersPage() {
+  const { t } = useLang()
   const [customers, setCustomers] = useState<any[]>([])
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(true)
@@ -253,11 +255,11 @@ export default function CustomersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Traders</h2>
-          <p className="text-gray-500 text-sm">{activeCustomers.length} active · {inactiveCustomers.length} inactive</p>
+          <h2 className="text-2xl font-bold text-gray-900">{t("Traders")}</h2>
+          <p className="text-gray-500 text-sm">{activeCustomers.length} {t("active")} · {inactiveCustomers.length} {t("inactive")}</p>
         </div>
         <Button onClick={openAdd} className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300 gap-2">
-          <Plus className="w-4 h-4" /> Add Traders
+          <Plus className="w-4 h-4" /> {t("Add Traders")}
         </Button>
       </div>
 
@@ -268,7 +270,7 @@ export default function CustomersPage() {
             <div className="p-2 bg-blue-50 rounded-lg"><Users className="w-5 h-5 text-blue-600" /></div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{customers.length}</p>
-              <p className="text-sm text-gray-500">Total Registered</p>
+              <p className="text-sm text-gray-500">{t("Total Registered")}</p>
             </div>
           </CardContent>
         </Card>
@@ -277,7 +279,7 @@ export default function CustomersPage() {
             <div className="p-2 bg-green-50 rounded-lg"><TrendingUp className="w-5 h-5 text-purple-600" /></div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{activeCustomers.length}</p>
-              <p className="text-sm text-gray-500">Active Traders</p>
+              <p className="text-sm text-gray-500">{t("Active Traders")}</p>
             </div>
           </CardContent>
         </Card>
@@ -286,7 +288,7 @@ export default function CustomersPage() {
             <div className="p-2 bg-emerald-50 rounded-lg"><ArrowDownCircle className="w-5 h-5 text-emerald-600" /></div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalReceived)}</p>
-              <p className="text-sm text-gray-500">Total Received</p>
+              <p className="text-sm text-gray-500">{t("Total Received")}</p>
             </div>
           </CardContent>
         </Card>
@@ -295,7 +297,7 @@ export default function CustomersPage() {
             <div className="p-2 bg-orange-50 rounded-lg"><TrendingUp className="w-5 h-5 text-orange-600" /></div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalPaid)}</p>
-              <p className="text-sm text-gray-500">Total Paid</p>
+              <p className="text-sm text-gray-500">{t("Total Paid")}</p>
             </div>
           </CardContent>
         </Card>
@@ -306,7 +308,7 @@ export default function CustomersPage() {
         {([["active", "Active", activeCustomers.length], ["inactive", "Inactive", inactiveCustomers.length]] as const).map(([key, label, count]) => (
           <button key={key} onClick={() => { setStatusTab(key); setSearch("") }}
             className={`pb-2 px-4 text-sm font-medium transition-colors border-b-2 ${statusTab === key ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
-            {label} <span className="text-xs text-gray-400 ml-1">({count})</span>
+            {t(label)} <span className="text-xs text-gray-400 ml-1">({count})</span>
           </button>
         ))}
       </div>
@@ -317,7 +319,7 @@ export default function CustomersPage() {
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
-              placeholder="Search name, phone, reference..."
+              placeholder={t("Search name, phone, reference...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -326,14 +328,14 @@ export default function CustomersPage() {
         </CardHeader>
         <CardContent className="p-0">
           {loading && !customers.length ? (
-            <div className="text-center py-10 text-gray-400">Loading...</div>
+            <div className="text-center py-10 text-gray-400">{t("Loading...")}</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-blue-300 bg-blue-50">
                     {["#", "Trader", "Phone", "Reference", "Credit Limit", "Balance", "Status", "Actions"].map((h) => (
-                      <th key={h} className="text-left py-3 px-3 text-gray-500 font-semibold text-xs uppercase">{h}</th>
+                      <th key={h} className="text-left py-3 px-3 text-gray-500 font-semibold text-xs uppercase">{t(h)}</th>
                     ))}
                   </tr>
                 </thead>
@@ -421,7 +423,7 @@ export default function CustomersPage() {
                     </tr>
                   ))}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={8} className="text-center py-10 text-gray-400">No customers found</td></tr>
+                    <tr><td colSpan={8} className="text-center py-10 text-gray-400">{t("No customers found")}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -642,7 +644,7 @@ export default function CustomersPage() {
               <div className="flex gap-2 justify-end">
                 <Button size="sm" className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300"
                   onClick={() => { setShowDetailModal(false); setSelectedPayments(new Set()); openPayment(selected) }}>
-                  <ArrowDownCircle className="w-4 h-4" /> Record Payment
+                  <ArrowDownCircle className="w-4 h-4" /> {t("Record Payment")}
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => { setShowDetailModal(false); setSelectedPayments(new Set()); openEdit(selected) }}>
                   <Edit className="w-4 h-4" /> Edit
@@ -652,15 +654,15 @@ export default function CustomersPage() {
               {/* Tabs */}
               <div className="border-b border-blue-300">
                 <div className="flex gap-0">
-                  {(["ledger", "sales"] as Tab[]).map((t) => (
-                    <button key={t} onClick={() => setActiveTab(t)}
+                  {(["ledger", "sales"] as Tab[]).map((tab) => (
+                    <button key={tab} onClick={() => setActiveTab(tab)}
                       className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-                        activeTab === t ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"
+                        activeTab === tab ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"
                       }`}>
-                      {t === "ledger" ? <BookOpen className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
-                      {t === "ledger" ? "Account Ledger" : "Sales History"}
+                      {tab === "ledger" ? <BookOpen className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                      {tab === "ledger" ? t("Account Ledger") : t("Sales History")}
                       <span className="text-xs bg-blue-100 text-gray-500 px-1.5 py-0.5 rounded">
-                        {t === "ledger" ? detail.ledger?.length || 0 : detail.sales?.length || 0}
+                        {tab === "ledger" ? detail.ledger?.length || 0 : detail.sales?.length || 0}
                       </span>
                     </button>
                   ))}

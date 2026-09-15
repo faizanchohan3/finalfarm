@@ -264,7 +264,7 @@ export function Sidebar() {
                       reportsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                     )}
                   >
-                    <div className="ml-4 mt-1 border-l-2 border-gray-300 pl-3 pb-1 space-y-1">
+                    <div className="ml-4 rtl:ml-0 rtl:mr-4 mt-1 border-l-2 rtl:border-l-0 rtl:border-r-2 border-gray-300 pl-3 rtl:pl-0 rtl:pr-3 pb-1 space-y-1">
                       {reportSubItems.map((sub: any) => {
                         const subActive = pathname === sub.href
                         const Icon = sub.icon
@@ -317,12 +317,12 @@ export function Sidebar() {
       {/* Collapse toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 w-6 h-6 bg-white border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md"
+        className="absolute -right-3 rtl:-left-3 rtl:right-auto top-20 w-6 h-6 bg-white border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md"
       >
         {collapsed ? (
-          <ChevronRight className="w-3 h-3 text-gray-700" />
+          <ChevronRight className="w-3 h-3 text-gray-700 rtl:rotate-180" />
         ) : (
-          <ChevronLeft className="w-3 h-3 text-gray-700" />
+          <ChevronLeft className="w-3 h-3 text-gray-700 rtl:rotate-180" />
         )}
       </button>
     </aside>

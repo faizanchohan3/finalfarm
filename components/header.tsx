@@ -82,7 +82,7 @@ export function Header({ title }: { title: string }) {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-52 bg-blue-50 border border-blue-300 rounded-xl shadow-lg z-50 overflow-hidden">
+            <div className="absolute right-0 rtl:left-0 rtl:right-auto top-full mt-2 w-52 bg-blue-50 border border-blue-300 rounded-xl shadow-lg z-50 overflow-hidden">
               <div className="px-4 py-3 border-b border-blue-300 bg-blue-50">
                 <p className="text-xs text-gray-500">{t("Signed in as")}</p>
                 <p className="text-sm font-semibold text-gray-800 truncate">{session?.user?.email}</p>

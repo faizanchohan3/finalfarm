@@ -11,11 +11,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
 import { buildPrintHeader, receiptCSS, reportCSS } from "@/lib/print-utils"
 import { Plus, Search, Percent, CreditCard, Printer, Trash2, X } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 const BAG_LABELS: Record<string, string> = { bori: "Bori", jali: "Jali", bag: "Bag" }
 const bagUnit = (c: any) => BAG_LABELS[c?.bagType] || "Bags"
 
 export default function CommissionPage() {
+  const { t } = useLang()
   const [commissions, setCommissions] = useState<any[]>([])
   const [customers, setCustomers] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
@@ -367,15 +369,15 @@ ${buildPrintHeader(shop)}
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Commission</h2>
-          <p className="text-gray-500 text-sm">{commissions.length} total transactions</p>
+          <h2 className="text-2xl font-bold text-gray-900">{t("Commission (Aadat)")}</h2>
+          <p className="text-gray-500 text-sm">{commissions.length} {t("total transactions")}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => printAllCommissions(filtered)}>
-            <Printer className="w-4 h-4" /> Print All
+            <Printer className="w-4 h-4" /> {t("Print All")}
           </Button>
           <Button onClick={() => { resetNewForm(); setShowNew(true) }}>
-            <Plus className="w-4 h-4" /> New Commission
+            <Plus className="w-4 h-4" /> {t("New Commission")}
           </Button>
         </div>
       </div>
@@ -383,13 +385,13 @@ ${buildPrintHeader(shop)}
       <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="pt-4">
-            <p className="text-sm text-gray-500">Total Commission Earned</p>
+            <p className="text-sm text-gray-500">{t("Total Commission Earned")}</p>
             <p className="text-2xl font-bold text-purple-600">{formatCurrency(totalCommEarned)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <p className="text-sm text-gray-500">Pending from Customers</p>
+            <p className="text-sm text-gray-500">{t("Pending from Customers")}</p>
             <p className="text-2xl font-bold text-red-600">{formatCurrency(totalPending)}</p>
           </CardContent>
         </Card>
@@ -399,7 +401,7 @@ ${buildPrintHeader(shop)}
         <CardHeader>
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input placeholder="Search by customer, seller, commodity..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+            <Input placeholder={t("Search by customer, seller, commodity...")} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
           </div>
         </CardHeader>
         <CardContent>
@@ -487,8 +489,8 @@ ${buildPrintHeader(shop)}
                 <Percent className="w-5 h-5 text-blue-900" />
               </div>
               <div>
-                <h2 className="text-lg font-bold">New Commission</h2>
-                <p className="text-orange-100 text-xs">Fill seller, buyer, and transaction details</p>
+                <h2 className="text-lg font-bold">{t("New Commission")}</h2>
+                <p className="text-orange-100 text-xs">{t("Fill seller, buyer, and transaction details")}</p>
               </div>
             </div>
             <button
@@ -544,33 +546,33 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Commodity Details</h3>
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">{t("Commodity Details")}</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
               <div>
-                <Label className="text-xs font-semibold text-gray-600">Commodity / Product</Label>
+                <Label className="text-xs font-semibold text-gray-600">{t("Commodity / Product")}</Label>
                 <Input className="mt-1" placeholder="e.g. Wheat, Rice, Cotton, Sugar..." value={commodity}
                   onChange={(e) => setCommodity(e.target.value)} />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-                  <Label className="text-xs font-semibold text-gray-600">Bags</Label>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Bags")}</Label>
                   <Input type="number" className="mt-1" placeholder="0" value={bags}
                     onChange={(e) => setBags(e.target.value)} />
                 </div>
                 <div>
-                  <Label className="text-xs font-semibold text-gray-600">Bag Type</Label>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Bag Type")}</Label>
                   <select
                     className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     value={bagType}
                     onChange={(e) => setBagType(e.target.value)}
                   >
-                    <option value="bori">Bori</option>
-                    <option value="jali">Jali</option>
-                    <option value="bag">Bag</option>
+                    <option value="bori">{t("Bori")}</option>
+                    <option value="jali">{t("Jali")}</option>
+                    <option value="bag">{t("Bag")}</option>
                   </select>
                 </div>
                 <div>
-                  <Label className="text-xs font-semibold text-gray-600">Filling/Bag</Label>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Filling/Bag")}</Label>
                   <Input type="number" className="mt-1" placeholder="0" value={weight}
                     onChange={(e) => setWeight(e.target.value)} />
                 </div>
@@ -580,7 +582,7 @@ ${buildPrintHeader(shop)}
                     onChange={(e) => setMound(e.target.value)} />
                 </div>
                 <div>
-                  <Label className="text-xs font-semibold text-gray-600">Rate / Bag</Label>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Rate / Bag")}</Label>
                   <Input type="number" className="mt-1" placeholder="0" value={rate}
                     onChange={(e) => setRate(e.target.value)} />
                 </div>

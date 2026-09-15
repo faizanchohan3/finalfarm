@@ -4,6 +4,7 @@ import { formatCurrency } from "@/lib/utils"
 import { ShoppingCart, TrendingUp, Users, Wheat, ArrowUpRight, ArrowDownRight, Clock, CheckSquare, Sparkles, Database } from "lucide-react"
 import Link from "next/link"
 import { ShopDataActions } from "@/components/shop-data-actions"
+import { getT } from "@/lib/i18n-server"
 
 function initials(name?: string | null) {
   if (!name) return "—"
@@ -127,6 +128,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const sp = await searchParams
   const showReal = sp?.data === "real"
   const demo = !showReal
+  const { t } = await getT()
 
   const daysVM = demo ? DEMO.days : d.days
   const series = daysVM.map((x) => x.total)
@@ -146,10 +148,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const salesVM = demo ? DEMO.sales : d.recentSales.map((s: any) => ({ name: s.customer?.name || "Walk-in customer", status: s.status, date: shortDate(s.createdAt), amount: s.totalAmount }))
 
   const stats = [
-    { title: "Today's Sales", value: formatCurrency(today), icon: ShoppingCart, href: "/sales", d: todayDelta, spark: true },
-    { title: "This Month", value: formatCurrency(month), icon: TrendingUp, href: "/sales", d: monthDelta, spark: true },
-    { title: "Total Traders", value: String(traders), icon: Users, href: "/customers", d: null, spark: false },
-    { title: "Total Farmers", value: String(farmers), icon: Wheat, href: "/farmers", d: null, spark: false },
+    { title: t("Today's Sales"), value: formatCurrency(today), icon: ShoppingCart, href: "/sales", d: todayDelta, spark: true },
+    { title: t("This Month"), value: formatCurrency(month), icon: TrendingUp, href: "/sales", d: monthDelta, spark: true },
+    { title: t("Total Traders"), value: String(traders), icon: Users, href: "/customers", d: null, spark: false },
+    { title: t("Total Farmers"), value: String(farmers), icon: Wheat, href: "/farmers", d: null, spark: false },
   ]
   const shown = isCashier ? stats.slice(0, 2) : stats
 
@@ -162,10 +164,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       <div className="mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-white">
-            Welcome back, {session?.user?.name?.split(" ")[0]}
+            {t("Welcome back")}, {session?.user?.name?.split(" ")[0]}
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            {isSuperAdmin ? "Platform overview across all shops." : isCashier ? "Sales dashboard — process and track transactions." : `Overview for ${session?.user?.shopName || "your shop"}`}
+            {isSuperAdmin ? t("Platform overview across all shops.") : isCashier ? t("Sales dashboard — process and track transactions.") : `${t("Overview for")} ${session?.user?.shopName || t("your shop")}`}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -176,7 +178,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-violet-600 hover:bg-violet-500 rounded-lg px-3 py-1.5 transition-colors"
             >
               <Database className="w-3.5 h-3.5" />
-              Show Original Shop Data
+              {t("Show Original Shop Data")}
             </Link>
           ) : (
             <Link
@@ -184,7 +186,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-200 bg-violet-500/15 border border-violet-500/30 hover:bg-violet-500/25 rounded-lg px-3 py-1.5 transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              Show Sample Data
+              {t("Show Sample Data")}
             </Link>
           )}
         </div>
@@ -192,7 +194,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       {demo && (
         <div className="mb-4 -mt-2 flex items-center gap-1.5 text-xs text-violet-300">
           <Sparkles className="w-3.5 h-3.5" />
-          Showing sample data — click "Show Original Shop Data" to see your real figures.
+          {t("Showing sample data — click \"Show Original Shop Data\" to see your real figures.")}
         </div>
       )}
 
@@ -232,8 +234,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             <div className={`${CARD} lg:col-span-2`}>
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h2 className="text-white font-semibold">Sales — Last 7 Days</h2>
-                  <p className="text-slate-500 text-xs mt-0.5">Daily total</p>
+                  <h2 className="text-white font-semibold">{t("Sales — Last 7 Days")}</h2>
+                  <p className="text-slate-500 text-xs mt-0.5">{t("Daily total")}</p>
                 </div>
                 <span className="text-lg font-bold text-white tabular-nums">{formatCurrency(series.reduce((a, b) => a + b, 0))}</span>
               </div>
@@ -249,8 +251,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
             {/* Collection gauge */}
             <div className={CARD}>
-              <h2 className="text-white font-semibold mb-1">Collections</h2>
-              <p className="text-slate-500 text-xs">Paid vs outstanding</p>
+              <h2 className="text-white font-semibold mb-1">{t("Collections")}</h2>
+              <p className="text-slate-500 text-xs">{t("Paid vs outstanding")}</p>
               <div className="flex items-center justify-center my-4">
                 <div className="relative w-32 h-32">
                   <svg className="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
@@ -265,17 +267,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-white tabular-nums">{collectionRate.toFixed(0)}%</span>
-                    <span className="text-[10px] text-slate-500">collected</span>
+                    <span className="text-[10px] text-slate-500">{t("collected")}</span>
                   </div>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2 text-slate-400"><span className="w-2.5 h-2.5 rounded-full bg-violet-400" /> Collected</span>
+                  <span className="flex items-center gap-2 text-slate-400"><span className="w-2.5 h-2.5 rounded-full bg-violet-400" /> {t("Collected")}</span>
                   <span className="text-white font-medium tabular-nums">{formatCurrency(collected)}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2 text-slate-400"><span className="w-2.5 h-2.5 rounded-full bg-[#2a2a3a]" /> Outstanding</span>
+                  <span className="flex items-center gap-2 text-slate-400"><span className="w-2.5 h-2.5 rounded-full bg-[#2a2a3a]" /> {t("Outstanding")}</span>
                   <span className="text-white font-medium tabular-nums">{formatCurrency(outstanding)}</span>
                 </div>
               </div>
@@ -286,23 +288,23 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className={CARD}>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-white font-semibold flex items-center gap-2"><CheckSquare className="w-4 h-4 text-violet-300" /> Pending Tasks</h2>
-                <Link href="/tasks" className="text-xs text-violet-300 hover:text-violet-200">View all</Link>
+                <h2 className="text-white font-semibold flex items-center gap-2"><CheckSquare className="w-4 h-4 text-violet-300" /> {t("Pending Tasks")}</h2>
+                <Link href="/tasks" className="text-xs text-violet-300 hover:text-violet-200">{t("View all")}</Link>
               </div>
               <div className="space-y-3">
                 {tasksVM.length === 0 ? (
-                  <p className="text-sm text-slate-500 py-6 text-center">No pending tasks.</p>
-                ) : tasksVM.map((t, i) => (
+                  <p className="text-sm text-slate-500 py-6 text-center">{t("No pending tasks.")}</p>
+                ) : tasksVM.map((task, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-violet-500/15 text-violet-200 flex items-center justify-center text-xs font-semibold flex-shrink-0">
-                      {initials(t.who)}
+                      {initials(task.who)}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm text-slate-100 truncate">{t.title}</p>
-                      <p className="text-xs text-slate-500 truncate">{t.who} · {t.priority}</p>
+                      <p className="text-sm text-slate-100 truncate">{task.title}</p>
+                      <p className="text-xs text-slate-500 truncate">{task.who} · {task.priority}</p>
                     </div>
                     <span className="text-xs text-slate-500 flex items-center gap-1 flex-shrink-0">
-                      <Clock className="w-3 h-3" />{t.due}
+                      <Clock className="w-3 h-3" />{task.due}
                     </span>
                   </div>
                 ))}
@@ -311,12 +313,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
             <div className={CARD}>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-white font-semibold">Recent Sales</h2>
-                <Link href="/sales" className="text-xs text-violet-300 hover:text-violet-200">View all</Link>
+                <h2 className="text-white font-semibold">{t("Recent Sales")}</h2>
+                <Link href="/sales" className="text-xs text-violet-300 hover:text-violet-200">{t("View all")}</Link>
               </div>
               <div className="space-y-3">
                 {salesVM.length === 0 ? (
-                  <p className="text-sm text-slate-500 py-6 text-center">No sales recorded yet.</p>
+                  <p className="text-sm text-slate-500 py-6 text-center">{t("No sales recorded yet.")}</p>
                 ) : salesVM.map((s, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-slate-700/40 text-slate-200 flex items-center justify-center text-xs font-semibold flex-shrink-0">

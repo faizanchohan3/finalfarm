@@ -13,8 +13,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
 import { buildPrintHeader, receiptCSS } from "@/lib/print-utils"
 import { Plus, Search, Trash2, ShoppingCart, Eye, Printer, Sprout } from "lucide-react"
+import { useLang } from "@/lib/i18n"
 
 export default function SalesPage() {
+  const { t } = useLang()
   const { data: session } = useSession()
   const [sales, setSales] = useState<any[]>([])
   const [pesticideSales, setPesticideSales] = useState<any[]>([])
@@ -514,17 +516,17 @@ ${buildPrintHeader(shop)}
       <div className="space-y-6 print:hidden">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Sales</h2>
-            <p className="text-gray-500 text-sm">Today: {formatCurrency(todayTotal)}</p>
+            <h2 className="text-2xl font-bold text-gray-900">{t("Sales")}</h2>
+            <p className="text-gray-500 text-sm">{t("Today")}: {formatCurrency(todayTotal)}</p>
           </div>
           <div className="flex gap-2">
             {activeTab === "products" ? (
               <Button onClick={() => setShowModal(true)}>
-                <Plus className="w-4 h-4" /> New Sale
+                <Plus className="w-4 h-4" /> {t("New Sale")}
               </Button>
             ) : (
               <Button onClick={() => { setPesticideSaleForm({ pesticideId: "", quantity: "1", customerId: "", customerName: "", paidAmount: "0" }); setShowPesticideSaleModal(true) }} className="gap-2">
-                <Plus className="w-4 h-4" /> New Pesticide Sale
+                <Plus className="w-4 h-4" /> {t("New Pesticide Sale")}
               </Button>
             )}
           </div>
@@ -536,13 +538,13 @@ ${buildPrintHeader(shop)}
             onClick={() => setActiveTab("products")}
             className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "products" ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
           >
-            <ShoppingCart className="w-4 h-4" /> Product Sales
+            <ShoppingCart className="w-4 h-4" /> {t("Product Sales")}
           </button>
           <button
             onClick={() => setActiveTab("pesticides")}
             className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "pesticides" ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
           >
-            <Sprout className="w-4 h-4" /> Pesticide Sales
+            <Sprout className="w-4 h-4" /> {t("Pesticide Sales")}
           </button>
         </div>
 
@@ -552,19 +554,19 @@ ${buildPrintHeader(shop)}
             <CardHeader>
               <div className="relative max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input placeholder="Search sales..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+                <Input placeholder={t("Search sales...")} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
               </div>
             </CardHeader>
             <CardContent>
               {loading && !sales.length ? (
-                <div className="text-center py-8 text-gray-400">Loading...</div>
+                <div className="text-center py-8 text-gray-400">{t("Loading...")}</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-blue-300">
                         {["#", "Customer", "Total", "Paid", "Balance", "Status", "Date", "By", ""].map((h) => (
-                          <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
+                          <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{t(h)}</th>
                         ))}
                       </tr>
                     </thead>
@@ -819,8 +821,8 @@ ${buildPrintHeader(shop)}
                 <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional notes..." rows={2} />
               </div>
               <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
-                <Button onClick={handleSave} className="flex-1">Create Sale</Button>
+                <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">{t("Cancel")}</Button>
+                <Button onClick={handleSave} className="flex-1">{t("Create Sale")}</Button>
               </div>
             </div>
           </DialogContent>
