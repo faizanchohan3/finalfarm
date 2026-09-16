@@ -223,6 +223,56 @@ export default function LotsPage() {
     w.document.close()
   }
 
+  // Complete report grouped by godown: which lots are stored where, and when sold.
+  async function printGodownReport() {
+    const data = await fetch("/api/lots?status=ALL").then((r) => r.json()).catch(() => ({ lots: [] }))
+    const all: any[] = data.lots || []
+    const w = window.open("", "_blank")
+    if (!w) return
+    const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
+
+    const groups = new Map<string, any[]>()
+    for (const lot of all) {
+      const key = lot.warehouse?.name || "— No godown —"
+      if (!groups.has(key)) groups.set(key, [])
+      groups.get(key)!.push(lot)
+    }
+
+    const sections = [...groups.entries()].map(([name, list]) => {
+      const rows = list.map((lot, i) => `<tr>
+        <td>${i + 1}</td>
+        <td>${lot.lotNo}</td>
+        <td>${lot.category?.name || "—"}</td>
+        <td>${lot.farmer?.name || "—"}</td>
+        <td>${lot.bags != null ? `${lot.bags} ${bagLabel(lot)}` : "—"}</td>
+        <td style="text-align:right">${lot.netWeight != null ? lot.netWeight : "—"}</td>
+        <td>${String(lot.status).replace("_", " ")}</td>
+        <td>${lot.soldAt ? new Date(lot.soldAt).toLocaleDateString("en-PK") : "—"}</td>
+        <td>${lot.buyer?.name || "—"}</td>
+        <td style="text-align:right">${lot.saleAmount ? money(lot.saleAmount) : "—"}</td>
+      </tr>`).join("")
+      const stored = list.filter((l) => !["SOLD", "DISPATCHED", "SETTLED", "CANCELLED"].includes(l.status)).length
+      const netTotal = list.reduce((s, l) => s + (l.netWeight || 0), 0)
+      const saleTotal = list.reduce((s, l) => s + (l.saleAmount || 0), 0)
+      return `<div style="margin-bottom:22px">
+        <div style="font-weight:800;color:#14532d;font-size:13px;margin-bottom:5px">🏬 ${name}
+          <span style="font-weight:500;color:#6b7280;font-size:11px">— ${list.length} lots · ${stored} in stock</span></div>
+        <table>
+          <thead><tr><th>#</th><th>Lot No</th><th>Category</th><th>Farmer</th><th>Bags</th><th style="text-align:right">Net (KG)</th><th>Status</th><th>Sold On</th><th>Buyer</th><th style="text-align:right">Sale</th></tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot><tr><td colspan="5">Subtotal</td><td style="text-align:right">${netTotal.toLocaleString()} KG</td><td colspan="3"></td><td style="text-align:right">${money(saleTotal)}</td></tr></tfoot>
+        </table>
+      </div>`
+    }).join("")
+
+    w.document.write(`<html><head><title>Godown Report</title><style>${reportCSS} body{max-width:1000px;margin:0 auto}</style></head><body>
+      ${buildPrintHeader(shop)}
+      <div class="doc-header"><div><div class="doc-title">Godown Report</div><div class="doc-sub">${groups.size} godowns · ${all.length} lots · ${date}</div></div></div>
+      <div class="body-pad">${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">No lots yet.</p>'}</div>
+      <script>window.onload=()=>window.print()<\/script></body></html>`)
+    w.document.close()
+  }
+
   function openSettle(lot: any) {
     setSettle(lot)
     setSCommRate("2.5")
@@ -259,11 +309,14 @@ export default function LotsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Boxes className="w-6 h-6 text-purple-600" /> {t("Lots")}
+            <Boxes className="w-6 h-6 text-purple-600" /> {t("Potato Store")}
           </h2>
           <p className="text-gray-500 text-sm">{t("Track each lot from arrival through sale and settlement")}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-end">
+          <Button variant="outline" className="gap-2" onClick={printGodownReport}>
+            <WarehouseIcon className="w-4 h-4" /> {t("Godown Report")}
+          </Button>
           <Button variant="outline" className="gap-2" onClick={() => printAllLots(lots)} disabled={lots.length === 0}>
             <Printer className="w-4 h-4" /> {t("Print All")}
           </Button>
@@ -366,7 +419,11 @@ export default function LotsPage() {
 
       {/* Create dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent className="max-w-lg">
+        <DialogContent
+          className="max-w-lg max-h-[90vh] overflow-y-auto"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
           <DialogHeader><DialogTitle>{t("New Lot")}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">

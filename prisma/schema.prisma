@@ -922,10 +922,14 @@ model Commission {
   commodity        String?
   bags             Int?
   bagType          String?    @default("bag") // bori | jali | bag
-  weight           Float?
-  rate             Float      @default(0)
+  weight           Float?     // net weight (kg)
+  grossWeight      Float?
+  tareWeight       Float?
+  bardanaWeight    Float?
+  rate             Float      @default(0) // rate per kg
   totalValue       Float
   commissionRate   Float      @default(2.5)
+  commissionDirection String? @default("RECEIVE") // RECEIVE = we earn it, PAY = we pay it
   commissionAmount Float
   labourAmount     Float      @default(0)
   sellerPayable    Float      @default(0)

@@ -35,11 +35,13 @@ export default function CommissionPage() {
   const [commodity, setCommodity] = useState("")
   const [bags, setBags] = useState("")
   const [bagType, setBagType] = useState("bag")
-  const [weight, setWeight] = useState("")
-  const [mound, setMound] = useState("")
-  const [rate, setRate] = useState("")
+  const [grossWeight, setGrossWeight] = useState("")
+  const [tareWeight, setTareWeight] = useState("")
+  const [bardanaWeight, setBardanaWeight] = useState("")
+  const [rate, setRate] = useState("")             // rate per kg
   const [totalValue, setTotalValue] = useState("")
   const [commissionRate, setCommissionRate] = useState("2.5")
+  const [direction, setDirection] = useState("RECEIVE") // RECEIVE = we get commission, PAY = we pay it
   const [labourAmount, setLabourAmount] = useState("0")
   const [paidAmount, setPaidAmount] = useState("0")
   const [notes, setNotes] = useState("")
@@ -93,18 +95,21 @@ export default function CommissionPage() {
 
   useEffect(() => { loadData() }, [])
 
-  useEffect(() => {
-    const f = parseFloat(weight)
-    const b = parseFloat(bags)
-    if (f > 0 && b > 0) setMound(((f * b) / 40).toFixed(2))
-    else setMound("")
-  }, [weight, bags])
+  // Net weight (kg) = gross − tare − bardana (sacks)
+  const netWeight = (() => {
+    const g = parseFloat(grossWeight) || 0
+    const t2 = parseFloat(tareWeight) || 0
+    const b = parseFloat(bardanaWeight) || 0
+    const n = g - t2 - b
+    return n > 0 ? n : 0
+  })()
 
+  // Total = rate per kg × net weight
   useEffect(() => {
-    const m = parseFloat(mound)
     const r = parseFloat(rate)
-    if (m > 0 && r > 0) setTotalValue((m * r).toFixed(2))
-  }, [mound, rate])
+    if (netWeight > 0 && r > 0) setTotalValue((netWeight * r).toFixed(2))
+    else setTotalValue("")
+  }, [netWeight, rate])
 
   const total = parseFloat(totalValue || "0")
   const commRate = commissionRate !== "" ? parseFloat(commissionRate) : 0
@@ -118,8 +123,9 @@ export default function CommissionPage() {
   function resetNewForm() {
     setCustomerId(""); setWalkInCustomer("")
     setPartyId(""); setWalkInSeller("")
-    setCommodity(""); setBags(""); setBagType("bag"); setWeight(""); setMound("")
-    setRate(""); setTotalValue(""); setCommissionRate("2.5"); setLabourAmount("0"); setPaidAmount("0"); setNotes("")
+    setCommodity(""); setBags(""); setBagType("bag")
+    setGrossWeight(""); setTareWeight(""); setBardanaWeight("")
+    setRate(""); setTotalValue(""); setCommissionRate("2.5"); setDirection("RECEIVE"); setLabourAmount("0"); setPaidAmount("0"); setNotes("")
   }
 
   async function handleSave() {
@@ -147,10 +153,14 @@ export default function CommissionPage() {
           commodity,
           bags,
           bagType,
-          weight,
+          grossWeight,
+          tareWeight,
+          bardanaWeight,
+          weight: String(netWeight),
           rate,
           totalValue,
           commissionRate,
+          direction,
           labourAmount,
           paidAmount,
           notes,
@@ -553,7 +563,7 @@ ${buildPrintHeader(shop)}
                 <Input className="mt-1" placeholder="e.g. Wheat, Rice, Cotton, Sugar..." value={commodity}
                   onChange={(e) => setCommodity(e.target.value)} />
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">{t("Bags")}</Label>
                   <Input type="number" className="mt-1" placeholder="0" value={bags}
@@ -572,19 +582,30 @@ ${buildPrintHeader(shop)}
                   </select>
                 </div>
                 <div>
-                  <Label className="text-xs font-semibold text-gray-600">{t("Filling/Bag")}</Label>
-                  <Input type="number" className="mt-1" placeholder="0" value={weight}
-                    onChange={(e) => setWeight(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-gray-600">Mound <span className="font-normal text-gray-400">(auto)</span></Label>
-                  <Input type="number" className="mt-1 bg-blue-50" placeholder="0" value={mound}
-                    onChange={(e) => setMound(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-gray-600">{t("Rate / Bag")}</Label>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Rate / kg")} (PKR)</Label>
                   <Input type="number" className="mt-1" placeholder="0" value={rate}
                     onChange={(e) => setRate(e.target.value)} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Gross wt")} (kg)</Label>
+                  <Input type="number" className="mt-1" placeholder="0" value={grossWeight}
+                    onChange={(e) => setGrossWeight(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Tare wt")} (kg)</Label>
+                  <Input type="number" className="mt-1" placeholder="0" value={tareWeight}
+                    onChange={(e) => setTareWeight(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Bardana wt")} (kg)</Label>
+                  <Input type="number" className="mt-1" placeholder="0" value={bardanaWeight}
+                    onChange={(e) => setBardanaWeight(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Net wt")} <span className="font-normal text-gray-400">({t("auto")})</span></Label>
+                  <Input readOnly className="mt-1 bg-blue-100 font-semibold" placeholder="0" value={netWeight ? String(netWeight) : ""} />
                 </div>
               </div>
             </div>
@@ -601,7 +622,7 @@ ${buildPrintHeader(shop)}
                     <Input type="number" className="pl-9 font-bold" placeholder="0" value={totalValue}
                       onChange={(e) => setTotalValue(e.target.value)} />
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">Mound × Rate</p>
+                  <p className="text-xs text-gray-400 mt-1">{t("Net kg × Rate/kg")}</p>
                 </div>
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">Commission %</Label>
@@ -620,6 +641,34 @@ ${buildPrintHeader(shop)}
                   </div>
                   <p className="text-xs text-gray-400 mt-1">Deducted from commission</p>
                 </div>
+              </div>
+
+              {/* Commission direction: do we receive it or pay it? */}
+              <div>
+                <Label className="text-xs font-semibold text-gray-600">{t("Commission")}</Label>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setDirection("RECEIVE")}
+                    className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition-colors ${
+                      direction === "RECEIVE" ? "border-emerald-600 bg-emerald-50 text-emerald-700" : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
+                  >
+                    {t("Commission Received")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDirection("PAY")}
+                    className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition-colors ${
+                      direction === "PAY" ? "border-red-600 bg-red-50 text-red-700" : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
+                  >
+                    {t("Commission Paid")}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  {direction === "RECEIVE" ? t("You earn this commission (income).") : t("You pay this commission (expense).")}
+                </p>
               </div>
 
               {/* Live Summary */}

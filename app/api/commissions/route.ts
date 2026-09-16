@@ -47,15 +47,22 @@ export async function POST(req: Request) {
     bags,
     bagType,
     weight,
+    grossWeight,
+    tareWeight,
+    bardanaWeight,
     rate,
     totalValue,
     commissionRate,
+    direction,
     labourAmount,
     notes,
     paidAmount: initialPaid,
     paymentMethod,
     commissionDate,
   } = body
+
+  const num = (v: any) => (v !== "" && v != null ? parseFloat(v) : null)
+  const isPay = direction === "PAY"
 
   if (!customerId && !walkInCustomer) {
     return NextResponse.json({ error: "Buyer (customer) is required" }, { status: 400 })
@@ -91,10 +98,14 @@ export async function POST(req: Request) {
         commodity: commodity || null,
         bags: bags ? parseInt(bags) : null,
         bagType: bagType || "bag",
-        weight: weight ? parseFloat(weight) : null,
+        weight: num(weight),
+        grossWeight: num(grossWeight),
+        tareWeight: num(tareWeight),
+        bardanaWeight: num(bardanaWeight),
         rate: parseFloat(rate || "0"),
         totalValue: total,
         commissionRate: commRate,
+        commissionDirection: isPay ? "PAY" : "RECEIVE",
         commissionAmount: commAmount,
         labourAmount: labourAmt,
         sellerPayable,
@@ -130,20 +141,21 @@ export async function POST(req: Request) {
       })
     }
 
-    // Record commission as income in finance/transactions
+    // Record the commission in finance/transactions.
+    // RECEIVE → income (CREDIT); PAY → expense (DEBIT).
     const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
     const commissionAccount = await tx.account.findFirst({
-      where: { ...shopFilter, type: "INCOME", name: { contains: "Commission" }, isActive: true },
+      where: { ...shopFilter, type: isPay ? "EXPENSE" : "INCOME", name: { contains: "Commission" }, isActive: true },
       orderBy: { code: "asc" },
     })
     await tx.transaction.create({
       data: {
         shopId: session.user.shopId || null,
-        type: "CREDIT",
+        type: isPay ? "DEBIT" : "CREDIT",
         amount: commAmount,
-        description: `Commission — ${commodity || "goods"}${sellerName ? ` from ${sellerName}` : ""} to ${buyerName}`,
+        description: `Commission ${isPay ? "paid" : "earned"} — ${commodity || "goods"}${sellerName ? ` from ${sellerName}` : ""} to ${buyerName}`,
         reference: c.id,
-        category: "Commission Income",
+        category: isPay ? "Commission Paid" : "Commission Income",
         accountId: commissionAccount?.id || null,
         createdById: session.user.id,
       },
