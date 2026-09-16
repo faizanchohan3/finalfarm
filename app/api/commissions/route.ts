@@ -75,8 +75,9 @@ export async function POST(req: Request) {
   const total = parseFloat(totalValue)
   const commAmount = parseFloat(((total * commRate) / 100).toFixed(2))
   const labourAmt = parseFloat(labourAmount || "0")
-  // Seller gets total minus commission only — labour is a cost deducted from commission, not from seller
-  const sellerPayable = parseFloat((total - commAmount).toFixed(2))
+  // RECEIVE: commission is deducted from the seller (they get total − commission).
+  // PAY: we pay the commission ourselves, so the seller gets the full total.
+  const sellerPayable = isPay ? total : parseFloat((total - commAmount).toFixed(2))
   const paid = parseFloat(initialPaid || "0")
   const balance = total - paid
   const status = balance <= 0 ? "PAID" : paid > 0 ? "PARTIAL" : "PENDING"

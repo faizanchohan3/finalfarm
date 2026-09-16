@@ -115,9 +115,12 @@ export default function CommissionPage() {
   const commRate = commissionRate !== "" ? parseFloat(commissionRate) : 0
   const commAmount = total > 0 ? parseFloat(((total * commRate) / 100).toFixed(2)) : 0
   const labourAmt = parseFloat(labourAmount || "0")
-  // Seller payable = total minus commission only (labour is deducted from commission, not from seller)
-  const sellerPayable = total > 0 ? parseFloat((total - commAmount).toFixed(2)) : 0
-  const netCommission = commAmount - labourAmt
+  // RECEIVE: we deduct commission from the seller (seller gets total − commission).
+  // PAY: we pay the commission ourselves, so the seller gets the full total.
+  const isPayDir = direction === "PAY"
+  const sellerPayable = total > 0 ? (isPayDir ? total : parseFloat((total - commAmount).toFixed(2))) : 0
+  // Net effect of the commission on us: +earned (minus labour) when received, −cost when paid.
+  const netCommission = isPayDir ? -commAmount : commAmount - labourAmt
   const balance = total - parseFloat(paidAmount || "0")
 
   function resetNewForm() {
@@ -679,9 +682,9 @@ ${buildPrintHeader(shop)}
                       <p className="text-xs text-blue-500 font-medium">Buyer Owes</p>
                       <p className="font-bold text-blue-700 text-sm mt-0.5">{formatCurrency(total)}</p>
                     </div>
-                    <div className="bg-green-50 rounded-lg p-2.5">
-                      <p className="text-xs text-green-500 font-medium">Net Commission</p>
-                      <p className="font-bold text-purple-700 text-sm mt-0.5">{formatCurrency(netCommission)}</p>
+                    <div className={`rounded-lg p-2.5 ${isPayDir ? "bg-red-50" : "bg-green-50"}`}>
+                      <p className={`text-xs font-medium ${isPayDir ? "text-red-500" : "text-green-500"}`}>{isPayDir ? t("Commission Paid") : t("Commission Received")}</p>
+                      <p className={`font-bold text-sm mt-0.5 ${isPayDir ? "text-red-700" : "text-purple-700"}`}>{formatCurrency(Math.abs(netCommission))}</p>
                     </div>
                     <div className="bg-orange-50 rounded-lg p-2.5">
                       <p className="text-xs text-orange-500 font-medium">Seller Gets</p>
