@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt, Printer, Tag } from "lucide-react"
+import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt, Printer, Tag, Search } from "lucide-react"
 import { useLang } from "@/lib/i18n"
 import { buildPrintHeader, receiptCSS, reportCSS } from "@/lib/print-utils"
 
@@ -52,6 +52,7 @@ export default function LotsPage() {
   const [filter, setFilter] = useState("ALL")
   const [markhaFilter, setMarkhaFilter] = useState("ALL")
   const [reportGodown, setReportGodown] = useState("ALL")
+  const [search, setSearch] = useState("")
 
 
   const [showCreate, setShowCreate] = useState(false)
@@ -315,10 +316,22 @@ export default function LotsPage() {
     setSaving(false)
   }
 
+  const q = search.trim().toLowerCase()
   const visibleLots = lots.filter((l) => {
     if (markhaFilter !== "ALL" && l.markha1 !== markhaFilter && l.markha2 !== markhaFilter) return false
     if (reportGodown === "NONE" && l.warehouse) return false
     if (reportGodown !== "ALL" && reportGodown !== "NONE" && l.warehouse?.id !== reportGodown) return false
+    if (q) {
+      const created = new Date(l.createdAt)
+      const haystack = [
+        l.lotNo, l.billNo, l.vehicleNo,
+        formatDate(l.createdAt),
+        created.toISOString().slice(0, 10),               // 2026-09-18
+        created.toLocaleDateString("en-PK"),              // 18/9/2026
+        l.farmer?.name, l.buyer?.name, l.markha1, l.markha2,
+      ].filter(Boolean).join(" ").toLowerCase()
+      if (!haystack.includes(q)) return false
+    }
     return true
   })
 
@@ -342,6 +355,22 @@ export default function LotsPage() {
             <Plus className="w-4 h-4" /> {t("New Lot")}
           </Button>
         </div>
+      </div>
+
+      {/* Search by bill no / vehicle no / date */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t("Search by bill no, vehicle no, date, lot no...")}
+          className="pl-9"
+        />
+        {search && (
+          <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <XCircle className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Status + markha filters */}
@@ -392,8 +421,8 @@ export default function LotsPage() {
         <Card><CardContent className="text-center py-12">
           <Boxes className="w-10 h-10 text-gray-300 mx-auto mb-2" />
           <p className="text-gray-500">
-            {markhaFilter !== "ALL" || reportGodown !== "ALL"
-              ? `No lots match the selected filters.`
+            {markhaFilter !== "ALL" || reportGodown !== "ALL" || q
+              ? `No lots match your search / filters.`
               : `No lots${filter !== "ALL" ? ` with status ${filter.replace("_", " ")}` : ""} yet.`}
           </p>
           <p className="text-gray-400 text-sm">Create a lot when goods arrive at your mandi.</p>

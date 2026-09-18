@@ -226,6 +226,7 @@ export const UR: Record<string, string> = {
   "Saved markhas appear as options in the Add Lot form and the Markha report.": "محفوظ شدہ مارکہ ایڈ لاٹ فارم اور مارکہ رپورٹ میں بطور آپشن ظاہر ہوں گی۔",
   "Report godown": "رپورٹ گودام",
   "Filter by godown": "گودام سے فلٹر کریں",
+  "Search by bill no, vehicle no, date, lot no...": "بل نمبر، گاڑی نمبر، تاریخ، لاٹ نمبر سے تلاش کریں...",
   "All Godowns": "تمام گودام",
   "No godown": "بغیر گودام",
   "Track each lot from arrival through sale and settlement": "ہر لاٹ کو آمد سے فروخت اور تصفیہ تک ٹریک کریں",
