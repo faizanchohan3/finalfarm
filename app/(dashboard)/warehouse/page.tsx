@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency } from "@/lib/utils"
-import { Plus, Warehouse, ArrowLeftRight, Settings2, Package, AlertTriangle } from "lucide-react"
+import { Plus, Warehouse, ArrowLeftRight, Settings2, Package, AlertTriangle, Boxes } from "lucide-react"
 
 export default function WarehousePage() {
   const [warehouses, setWarehouses] = useState<any[]>([])
@@ -133,22 +133,47 @@ export default function WarehousePage() {
                 <p className="text-xs text-gray-500">{w.location || "No location set"}</p>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className="bg-purple-50 rounded-lg p-3">
+                    <p className="text-xs text-purple-600 font-medium">Lots</p>
+                    <p className="text-xl font-bold text-purple-700">{w.lotCount ?? 0}</p>
+                    {w.lotBags ? <p className="text-[10px] text-purple-500">{w.lotBags} bags</p> : null}
+                  </div>
                   <div className="bg-blue-50 rounded-lg p-3">
                     <p className="text-xs text-blue-600 font-medium">Items</p>
                     <p className="text-xl font-bold text-blue-700">{w.totalItems}</p>
                   </div>
                   <div className="bg-green-50 rounded-lg p-3">
                     <p className="text-xs text-purple-600 font-medium">Value</p>
-                    <p className="text-lg font-bold text-purple-700">{formatCurrency(w.totalValue)}</p>
+                    <p className="text-sm font-bold text-purple-700">{formatCurrency(w.totalValue)}</p>
                   </div>
                 </div>
                 {w.capacity && (
                   <p className="text-xs text-gray-500">Capacity: {w.capacity} units{w.manager ? ` · Manager: ${w.manager}` : ""}</p>
                 )}
-                {/* Stock details */}
+                {/* Lots stored in this godown */}
+                {w.lots?.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <p className="text-xs font-semibold text-gray-500 mb-1.5 flex items-center gap-1">
+                      <Boxes className="w-3.5 h-3.5 text-purple-600" /> Lots stored
+                    </p>
+                    <div className="space-y-1">
+                      {w.lots.slice(0, 6).map((l: any) => (
+                        <div key={l.id} className="flex justify-between text-xs gap-2">
+                          <span className="text-gray-600 font-mono truncate">{l.lotNo}</span>
+                          <span className="text-gray-500 text-right flex-shrink-0">
+                            {l.category?.name || "—"}{l.bags ? ` · ${l.bags} bags` : ""}
+                          </span>
+                        </div>
+                      ))}
+                      {w.lots.length > 6 && <p className="text-xs text-gray-400">+{w.lots.length - 6} more lots</p>}
+                    </div>
+                  </div>
+                )}
+
+                {/* Product stock details */}
                 {w.stock?.length > 0 && (
-                  <div className="mt-3 space-y-1">
+                  <div className="mt-3 pt-3 border-t border-gray-100 space-y-1">
                     {w.stock.slice(0, 5).map((s: any) => (
                       <div key={s.id} className="flex justify-between text-xs">
                         <span className="text-gray-600">{s.product.name}</span>

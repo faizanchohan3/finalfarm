@@ -13,6 +13,15 @@ export async function GET() {
       stock: {
         include: { product: { select: { name: true, unit: true, purchasePrice: true } } },
       },
+      // Lots currently stored in this godown (not yet sold/dispatched/settled/cancelled)
+      lots: {
+        where: { status: { notIn: ["SOLD", "DISPATCHED", "SETTLED", "CANCELLED"] } },
+        orderBy: { createdAt: "desc" },
+        include: {
+          category: { select: { name: true } },
+          farmer: { select: { name: true } },
+        },
+      },
     },
   })
 
@@ -20,6 +29,8 @@ export async function GET() {
     ...w,
     totalItems: w.stock.length,
     totalValue: w.stock.reduce((s, i) => s + i.quantity * (i.purchasePrice || i.product.purchasePrice), 0),
+    lotCount: w.lots.length,
+    lotBags: w.lots.reduce((s, l) => s + (l.bags || 0), 0),
   }))
 
   return NextResponse.json({ warehouses: result })
