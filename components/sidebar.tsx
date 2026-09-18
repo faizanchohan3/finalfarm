@@ -11,7 +11,7 @@ import {
   Truck, ChevronDown, Receipt, Warehouse,
   Scale, UserCircle, Building2, BookOpen, Zap, Boxes,
   TrendingUp, PieChart, DollarSign, ShoppingCart as CartIcon, FileText,
-  CreditCard, Building, Banknote,
+  CreditCard, Building, Banknote, Tag,
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useLang } from "@/lib/i18n"
@@ -45,6 +45,8 @@ const getIconColor = (label: string): string => {
     "Dashboard": "text-blue-600",
     "Store": "text-purple-600",
     "Potato Store": "text-purple-600",
+    "Markha": "text-purple-600",
+    "Markha Report": "text-fuchsia-600",
     "Traders": "text-green-600",
     "Suppliers": "text-orange-600",
     "Purchases": "text-red-600",
@@ -94,6 +96,8 @@ const shopNavItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/inventory", label: "Store", icon: Package },
   { href: "/lots", label: "Potato Store", icon: Boxes, module: "moduleLots" },
+  { href: "/markha", label: "Markha", icon: Tag, module: "moduleLots" },
+  { href: "/markha-report", label: "Markha Report", icon: FileText, module: "moduleLots" },
   { href: "/customers", label: "Traders", icon: UserCheck },
   { href: "/suppliers", label: "Suppliers", icon: Truck },
   { href: "/farmers", label: "Farmers", icon: UserCheck, module: "moduleFarmers" },

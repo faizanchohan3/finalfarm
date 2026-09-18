@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt, Printer, Tag, Trash2 } from "lucide-react"
+import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt, Printer, Tag } from "lucide-react"
 import { useLang } from "@/lib/i18n"
 import { buildPrintHeader, receiptCSS, reportCSS } from "@/lib/print-utils"
 
@@ -53,10 +53,6 @@ export default function LotsPage() {
   const [markhaFilter, setMarkhaFilter] = useState("ALL")
   const [reportGodown, setReportGodown] = useState("ALL")
 
-  // Markha management
-  const [showMarkhas, setShowMarkhas] = useState(false)
-  const [newMarkha, setNewMarkha] = useState("")
-  const [savingMarkha, setSavingMarkha] = useState(false)
 
   const [showCreate, setShowCreate] = useState(false)
   const [form, setForm] = useState({ ...EMPTY })
@@ -100,29 +96,6 @@ export default function LotsPage() {
     setBuyers(b.customers || [])
     setShop(s.shop || null)
     setMarkhas(m.markhas || [])
-  }
-
-  async function loadMarkhas() {
-    const m = await fetch("/api/markhas").then((r) => r.json()).catch(() => ({}))
-    setMarkhas(m.markhas || [])
-  }
-
-  async function addMarkha() {
-    const name = newMarkha.trim()
-    if (!name) return
-    setSavingMarkha(true)
-    const res = await fetch("/api/markhas", {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }),
-    })
-    setSavingMarkha(false)
-    if (res.ok) { setNewMarkha(""); loadMarkhas() }
-    else { const d = await res.json().catch(() => ({})); alert(d?.error || "Failed to add markha") }
-  }
-
-  async function deleteMarkha(id: string, name: string) {
-    if (!confirm(`Remove markha "${name}"? Existing lots keep their markha.`)) return
-    setMarkhas((prev) => prev.filter((m) => m.id !== id))
-    await fetch(`/api/markhas/${id}`, { method: "DELETE" })
   }
 
   useEffect(() => { loadRefs() }, [])
@@ -311,50 +284,6 @@ export default function LotsPage() {
     w.document.close()
   }
 
-  // Markha-wise stock report: how many lots / bags sit under each markha.
-  async function printMarkhaReport() {
-    const data = await fetch("/api/lots?status=ALL").then((r) => r.json()).catch(() => ({ lots: [] }))
-    const all: any[] = data.lots || []
-    const names = new Set<string>()
-    markhas.forEach((m) => names.add(m.name))
-    all.forEach((l) => { if (l.markha1) names.add(l.markha1); if (l.markha2) names.add(l.markha2) })
-
-    const w = window.open("", "_blank")
-    if (!w) return
-    const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
-    const inStockOf = (l: any) => !["SOLD", "DISPATCHED", "SETTLED", "CANCELLED"].includes(l.status)
-
-    const list = [...names].sort()
-    const rows = list.map((name, idx) => {
-      const lots = all.filter((l) => l.markha1 === name || l.markha2 === name)
-      const inStock = lots.filter(inStockOf)
-      const bags = lots.reduce((s, l) => s + (l.bags || 0), 0)
-      const inStockBags = inStock.reduce((s, l) => s + (l.bags || 0), 0)
-      const net = lots.reduce((s, l) => s + (l.netWeight || 0), 0)
-      return `<tr>
-        <td>${idx + 1}</td>
-        <td style="font-weight:700">${name}</td>
-        <td style="text-align:right">${lots.length}</td>
-        <td style="text-align:right;color:#15803d;font-weight:700">${inStock.length}</td>
-        <td style="text-align:right">${bags.toLocaleString()}</td>
-        <td style="text-align:right;color:#15803d">${inStockBags.toLocaleString()}</td>
-        <td style="text-align:right">${net.toLocaleString()} KG</td>
-      </tr>`
-    }).join("")
-    const totalLots = all.length
-    const totalInStock = all.filter(inStockOf).length
-
-    w.document.write(`<html><head><title>Markha Report</title><style>${reportCSS} body{max-width:820px;margin:0 auto}</style></head><body>
-      ${buildPrintHeader(shop)}
-      <div class="doc-header"><div><div class="doc-title">Markha Report</div><div class="doc-sub">${list.length} markhas · ${totalLots} lots (${totalInStock} in stock) · ${date}</div></div></div>
-      <div class="body-pad"><table>
-        <thead><tr><th>#</th><th>Markha</th><th style="text-align:right">Total Lots</th><th style="text-align:right">In Stock</th><th style="text-align:right">Total Bags</th><th style="text-align:right">In-Stock Bags</th><th style="text-align:right">Net Wt</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:16px">No markhas yet.</td></tr>'}</tbody>
-      </table></div>
-      <script>window.onload=()=>window.print()<\/script></body></html>`)
-    w.document.close()
-  }
-
   function openSettle(lot: any) {
     setSettle(lot)
     setSCommRate("2.5")
@@ -405,12 +334,6 @@ export default function LotsPage() {
         <div className="flex gap-2 flex-wrap justify-end items-center">
           <Button variant="outline" className="gap-2" onClick={printGodownReport}>
             <WarehouseIcon className="w-4 h-4" /> {t("Godown Report")}
-          </Button>
-          <Button variant="outline" className="gap-2" onClick={printMarkhaReport}>
-            <Tag className="w-4 h-4" /> {t("Markha Report")}
-          </Button>
-          <Button variant="outline" className="gap-2" onClick={() => setShowMarkhas(true)}>
-            <Tag className="w-4 h-4" /> {t("Markhas")}
           </Button>
           <Button variant="outline" className="gap-2" onClick={() => printAllLots(visibleLots)} disabled={visibleLots.length === 0}>
             <Printer className="w-4 h-4" /> {t("Print All")}
@@ -594,10 +517,7 @@ export default function LotsPage() {
             <div className="grid grid-cols-3 gap-3">
               <div><Label>{t("Bill No")}</Label><Input value={form.billNo} onChange={(e) => set("billNo", e.target.value)} placeholder={t("Optional")} /></div>
               <div>
-                <div className="flex items-center justify-between">
-                  <Label>{t("Markha 1")}</Label>
-                  <button type="button" onClick={() => setShowMarkhas(true)} className="text-[11px] text-purple-600 hover:underline">+ {t("Manage")}</button>
-                </div>
+                <Label>{t("Markha 1")}</Label>
                 <select value={form.markha1} onChange={(e) => set("markha1", e.target.value)}
                   className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
                   <option value="">— {t("None")} —</option>
@@ -642,40 +562,6 @@ export default function LotsPage() {
               <Button variant="outline" onClick={() => setShowCreate(false)} className="flex-1" disabled={saving}>{t("Cancel")}</Button>
               <Button onClick={handleCreate} className="flex-1" disabled={saving}>{saving ? t("Saving...") : t("Create Lot")}</Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Markhas management dialog */}
-      <Dialog open={showMarkhas} onOpenChange={setShowMarkhas}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle className="flex items-center gap-2"><Tag className="w-5 h-5 text-purple-600" /> {t("Markhas")}</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div className="flex gap-2">
-              <Input
-                placeholder={t("New markha name (e.g. A, B, Lal Sona)")}
-                value={newMarkha}
-                onChange={(e) => setNewMarkha(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addMarkha()}
-                autoFocus
-              />
-              <Button onClick={addMarkha} disabled={savingMarkha} className="gap-1">
-                <Plus className="w-4 h-4" /> {t("Add")}
-              </Button>
-            </div>
-            <div className="max-h-72 overflow-y-auto rounded-lg border border-gray-200 divide-y">
-              {markhas.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-6">{t("No markhas yet. Add your first above.")}</p>
-              ) : markhas.map((m, i) => (
-                <div key={m.id} className="flex items-center justify-between px-3 py-2">
-                  <span className="text-sm text-gray-800"><span className="text-gray-400 text-xs mr-2">{i + 1}</span>{m.name}</span>
-                  <button onClick={() => deleteMarkha(m.id, m.name)} className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded" title={t("Delete")}>
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-gray-400">{t("Saved markhas appear as options in the Add Lot form and the Markha report.")}</p>
           </div>
         </DialogContent>
       </Dialog>
