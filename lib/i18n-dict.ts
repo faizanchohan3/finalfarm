@@ -217,6 +217,8 @@ export const UR: Record<string, string> = {
   "Godown Report": "گودام رپورٹ",
   "Markha Report": "مارکہ رپورٹ",
   "Markhas": "مارکہ جات",
+  "Filter by markha": "مارکہ سے فلٹر کریں",
+  "All markhas": "تمام مارکہ",
   "Manage": "منظم کریں",
   "None": "کوئی نہیں",
   "New markha name (e.g. A, B, Lal Sona)": "نئی مارکہ کا نام (مثلاً A، B، لال سونا)",

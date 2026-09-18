@@ -50,6 +50,7 @@ export default function LotsPage() {
   const [markhas, setMarkhas] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("ALL")
+  const [markhaFilter, setMarkhaFilter] = useState("ALL")
   const [reportGodown, setReportGodown] = useState("ALL")
 
   // Markha management
@@ -385,6 +386,10 @@ export default function LotsPage() {
     setSaving(false)
   }
 
+  const visibleLots = markhaFilter === "ALL"
+    ? lots
+    : lots.filter((l) => l.markha1 === markhaFilter || l.markha2 === markhaFilter)
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -414,7 +419,7 @@ export default function LotsPage() {
           <Button variant="outline" className="gap-2" onClick={() => setShowMarkhas(true)}>
             <Tag className="w-4 h-4" /> {t("Markhas")}
           </Button>
-          <Button variant="outline" className="gap-2" onClick={() => printAllLots(lots)} disabled={lots.length === 0}>
+          <Button variant="outline" className="gap-2" onClick={() => printAllLots(visibleLots)} disabled={visibleLots.length === 0}>
             <Printer className="w-4 h-4" /> {t("Print All")}
           </Button>
           <Button className="gap-2" onClick={() => { setForm({ ...EMPTY }); setError(null); setShowCreate(true) }}>
@@ -423,32 +428,50 @@ export default function LotsPage() {
         </div>
       </div>
 
-      {/* Status filter */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {["ALL", ...STATUSES].map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilter(s)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${
-              filter === s ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
+      {/* Status + markha filters */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex gap-2 overflow-x-auto pb-1 flex-1 min-w-0">
+          {["ALL", ...STATUSES].map((s) => (
+            <button
+              key={s}
+              onClick={() => setFilter(s)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${
+                filter === s ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {s === "ALL" ? "All" : s.replace("_", " ")}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <Tag className="w-4 h-4 text-gray-400" />
+          <select
+            value={markhaFilter}
+            onChange={(e) => setMarkhaFilter(e.target.value)}
+            className="h-8 rounded-md border border-gray-300 bg-white px-2 text-xs text-gray-700"
+            title={t("Filter by markha")}
           >
-            {s === "ALL" ? "All" : s.replace("_", " ")}
-          </button>
-        ))}
+            <option value="ALL">{t("All markhas")}</option>
+            {markhas.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
+          </select>
+        </div>
       </div>
 
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading lots...</div>
-      ) : lots.length === 0 ? (
+      ) : visibleLots.length === 0 ? (
         <Card><CardContent className="text-center py-12">
           <Boxes className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-          <p className="text-gray-500">No lots{filter !== "ALL" ? ` with status ${filter.replace("_", " ")}` : ""} yet.</p>
+          <p className="text-gray-500">
+            {markhaFilter !== "ALL"
+              ? `No lots in markha "${markhaFilter}"${filter !== "ALL" ? ` with status ${filter.replace("_", " ")}` : ""}.`
+              : `No lots${filter !== "ALL" ? ` with status ${filter.replace("_", " ")}` : ""} yet.`}
+          </p>
           <p className="text-gray-400 text-sm">Create a lot when goods arrive at your mandi.</p>
         </CardContent></Card>
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
-          {lots.map((lot) => (
+          {visibleLots.map((lot) => (
             <Card key={lot.id}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
@@ -471,7 +494,14 @@ export default function LotsPage() {
                       ) : null}
                     </div>
                     {(lot.markha1 || lot.markha2) && (
-                      <p className="text-xs text-gray-500">{t("Markha")}: {[lot.markha1, lot.markha2].filter(Boolean).join(", ")}</p>
+                      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                        <span className="text-xs text-gray-400">{t("Markha")}:</span>
+                        {[lot.markha1, lot.markha2].filter(Boolean).map((mk: string, i: number) => (
+                          <span key={i} className="inline-flex items-center gap-1 text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200 rounded-full px-2 py-0.5">
+                            <Tag className="w-3 h-3" /> {mk}
+                          </span>
+                        ))}
+                      </div>
                     )}
                     {["SOLD", "DISPATCHED", "SETTLED"].includes(lot.status) && (
                       <p className="text-xs text-gray-600 pt-1">
