@@ -386,9 +386,12 @@ export default function LotsPage() {
     setSaving(false)
   }
 
-  const visibleLots = markhaFilter === "ALL"
-    ? lots
-    : lots.filter((l) => l.markha1 === markhaFilter || l.markha2 === markhaFilter)
+  const visibleLots = lots.filter((l) => {
+    if (markhaFilter !== "ALL" && l.markha1 !== markhaFilter && l.markha2 !== markhaFilter) return false
+    if (reportGodown === "NONE" && l.warehouse) return false
+    if (reportGodown !== "ALL" && reportGodown !== "NONE" && l.warehouse?.id !== reportGodown) return false
+    return true
+  })
 
   return (
     <div className="space-y-6">
@@ -400,16 +403,6 @@ export default function LotsPage() {
           <p className="text-gray-500 text-sm">{t("Track each lot from arrival through sale and settlement")}</p>
         </div>
         <div className="flex gap-2 flex-wrap justify-end items-center">
-          <select
-            value={reportGodown}
-            onChange={(e) => setReportGodown(e.target.value)}
-            className="h-9 rounded-md border border-gray-300 bg-white px-2 text-sm text-gray-700"
-            title={t("Report godown")}
-          >
-            <option value="ALL">{t("All Godowns")}</option>
-            {warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-            <option value="NONE">{t("No godown")}</option>
-          </select>
           <Button variant="outline" className="gap-2" onClick={printGodownReport}>
             <WarehouseIcon className="w-4 h-4" /> {t("Godown Report")}
           </Button>
@@ -444,6 +437,19 @@ export default function LotsPage() {
           ))}
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
+          <WarehouseIcon className="w-4 h-4 text-gray-400" />
+          <select
+            value={reportGodown}
+            onChange={(e) => setReportGodown(e.target.value)}
+            className="h-8 rounded-md border border-gray-300 bg-white px-2 text-xs text-gray-700"
+            title={t("Filter by godown")}
+          >
+            <option value="ALL">{t("All Godowns")}</option>
+            {warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+            <option value="NONE">{t("No godown")}</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           <Tag className="w-4 h-4 text-gray-400" />
           <select
             value={markhaFilter}
@@ -463,8 +469,8 @@ export default function LotsPage() {
         <Card><CardContent className="text-center py-12">
           <Boxes className="w-10 h-10 text-gray-300 mx-auto mb-2" />
           <p className="text-gray-500">
-            {markhaFilter !== "ALL"
-              ? `No lots in markha "${markhaFilter}"${filter !== "ALL" ? ` with status ${filter.replace("_", " ")}` : ""}.`
+            {markhaFilter !== "ALL" || reportGodown !== "ALL"
+              ? `No lots match the selected filters.`
               : `No lots${filter !== "ALL" ? ` with status ${filter.replace("_", " ")}` : ""} yet.`}
           </p>
           <p className="text-gray-400 text-sm">Create a lot when goods arrive at your mandi.</p>

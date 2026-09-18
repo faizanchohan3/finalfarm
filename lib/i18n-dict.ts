@@ -225,6 +225,7 @@ export const UR: Record<string, string> = {
   "No markhas yet. Add your first above.": "ابھی کوئی مارکہ نہیں۔ اوپر پہلی مارکہ شامل کریں۔",
   "Saved markhas appear as options in the Add Lot form and the Markha report.": "محفوظ شدہ مارکہ ایڈ لاٹ فارم اور مارکہ رپورٹ میں بطور آپشن ظاہر ہوں گی۔",
   "Report godown": "رپورٹ گودام",
+  "Filter by godown": "گودام سے فلٹر کریں",
   "All Godowns": "تمام گودام",
   "No godown": "بغیر گودام",
   "Track each lot from arrival through sale and settlement": "ہر لاٹ کو آمد سے فروخت اور تصفیہ تک ٹریک کریں",
