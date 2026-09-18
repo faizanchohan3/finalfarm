@@ -124,6 +124,19 @@ model Shop {
   commissions         Commission[]
   accounts            Account[]
   lots                Lot[]
+  markhas             Markha[]
+}
+
+// ── MARKHA (lot brand / mark) ────────────────────────────────────────────────
+
+model Markha {
+  id        String   @id @default(cuid())
+  shopId    String?
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  shop Shop? @relation(fields: [shopId], references: [id])
 }
 
 // ── BANKS ─────────────────────────────────────────────────────────────────────
