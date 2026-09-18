@@ -43,6 +43,7 @@ export default function CommissionPage() {
   const [commissionRate, setCommissionRate] = useState("2.5")
   const [direction, setDirection] = useState("RECEIVE") // RECEIVE = we get commission, PAY = we pay it
   const [labourAmount, setLabourAmount] = useState("0")
+  const [labourMode, setLabourMode] = useState("ADD") // ADD = add labour to buyer total, DEDUCT = take from seller
   const [paidAmount, setPaidAmount] = useState("0")
   const [notes, setNotes] = useState("")
   const [saving, setSaving] = useState(false)
@@ -118,17 +119,20 @@ export default function CommissionPage() {
   // RECEIVE: we deduct commission from the seller (seller gets total − commission).
   // PAY: we pay the commission ourselves, so the seller gets the full total.
   const isPayDir = direction === "PAY"
-  const sellerPayable = total > 0 ? (isPayDir ? total : parseFloat((total - commAmount).toFixed(2))) : 0
-  // Net effect of the commission on us: +earned (minus labour) when received, −cost when paid.
-  const netCommission = isPayDir ? -commAmount : commAmount - labourAmt
-  const balance = total - parseFloat(paidAmount || "0")
+  // Labour: ADD = charged on top of the buyer's total; DEDUCT = taken out of the seller's amount.
+  const isAddLabour = labourMode === "ADD"
+  const buyerOwes = total > 0 ? total + (isAddLabour ? labourAmt : 0) : 0
+  const baseSeller = isPayDir ? total : parseFloat((total - commAmount).toFixed(2))
+  const sellerPayable = total > 0 ? Math.max(baseSeller - (isAddLabour ? 0 : labourAmt), 0) : 0
+  const netCommission = isPayDir ? -commAmount : commAmount
+  const balance = buyerOwes - parseFloat(paidAmount || "0")
 
   function resetNewForm() {
     setCustomerId(""); setWalkInCustomer("")
     setPartyId(""); setWalkInSeller("")
     setCommodity(""); setBags(""); setBagType("bag")
     setGrossWeight(""); setTareWeight(""); setBardanaWeight("")
-    setRate(""); setTotalValue(""); setCommissionRate("2.5"); setDirection("RECEIVE"); setLabourAmount("0"); setPaidAmount("0"); setNotes("")
+    setRate(""); setTotalValue(""); setCommissionRate("2.5"); setDirection("RECEIVE"); setLabourAmount("0"); setLabourMode("ADD"); setPaidAmount("0"); setNotes("")
   }
 
   async function handleSave() {
@@ -165,6 +169,7 @@ export default function CommissionPage() {
           commissionRate,
           direction,
           labourAmount,
+          labourMode,
           paidAmount,
           notes,
         }),
@@ -636,13 +641,32 @@ ${buildPrintHeader(shop)}
                   </div>
                 </div>
                 <div>
-                  <Label className="text-xs font-semibold text-gray-600">Labour (PKR)</Label>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Labour")} (PKR)</Label>
                   <div className="relative mt-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">PKR</span>
                     <Input type="number" className="pl-9" placeholder="0" value={labourAmount}
                       onChange={(e) => setLabourAmount(e.target.value)} />
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">Deducted from commission</p>
+                  <div className="grid grid-cols-2 gap-1 mt-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setLabourMode("ADD")}
+                      className={`py-1 px-2 rounded-md border text-xs font-medium transition-colors ${
+                        labourMode === "ADD" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-500 hover:border-gray-300"
+                      }`}
+                    >
+                      + {t("Add to total")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLabourMode("DEDUCT")}
+                      className={`py-1 px-2 rounded-md border text-xs font-medium transition-colors ${
+                        labourMode === "DEDUCT" ? "border-orange-600 bg-orange-50 text-orange-700" : "border-gray-200 text-gray-500 hover:border-gray-300"
+                      }`}
+                    >
+                      − {t("Deduct from total")}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -680,7 +704,8 @@ ${buildPrintHeader(shop)}
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="bg-blue-50 rounded-lg p-2.5">
                       <p className="text-xs text-blue-500 font-medium">Buyer Owes</p>
-                      <p className="font-bold text-blue-700 text-sm mt-0.5">{formatCurrency(total)}</p>
+                      <p className="font-bold text-blue-700 text-sm mt-0.5">{formatCurrency(buyerOwes)}</p>
+                      {labourAmt > 0 && <p className="text-[10px] text-gray-400 mt-0.5">{isAddLabour ? `+ ${formatCurrency(labourAmt)} labour` : "goods only"}</p>}
                     </div>
                     <div className={`rounded-lg p-2.5 ${isPayDir ? "bg-red-50" : "bg-green-50"}`}>
                       <p className={`text-xs font-medium ${isPayDir ? "text-red-500" : "text-green-500"}`}>{isPayDir ? t("Commission Paid") : t("Commission Received")}</p>

@@ -49,6 +49,7 @@ export default function LotsPage() {
   const [buyers, setBuyers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("ALL")
+  const [reportGodown, setReportGodown] = useState("ALL")
 
   const [showCreate, setShowCreate] = useState(false)
   const [form, setForm] = useState({ ...EMPTY })
@@ -226,7 +227,12 @@ export default function LotsPage() {
   // Complete report grouped by godown: which lots are stored where, and when sold.
   async function printGodownReport() {
     const data = await fetch("/api/lots?status=ALL").then((r) => r.json()).catch(() => ({ lots: [] }))
-    const all: any[] = data.lots || []
+    let all: any[] = data.lots || []
+    // Separate report: limit to the chosen godown (or all).
+    if (reportGodown !== "ALL") {
+      all = all.filter((l) => (reportGodown === "NONE" ? !l.warehouse : l.warehouse?.id === reportGodown))
+    }
+    const godownName = reportGodown === "ALL" ? "All Godowns" : reportGodown === "NONE" ? "No godown" : (warehouses.find((w) => w.id === reportGodown)?.name || "Godown")
     const w = window.open("", "_blank")
     if (!w) return
     const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
@@ -265,10 +271,10 @@ export default function LotsPage() {
       </div>`
     }).join("")
 
-    w.document.write(`<html><head><title>Godown Report</title><style>${reportCSS} body{max-width:1000px;margin:0 auto}</style></head><body>
+    w.document.write(`<html><head><title>Godown Report — ${godownName}</title><style>${reportCSS} body{max-width:1000px;margin:0 auto}</style></head><body>
       ${buildPrintHeader(shop)}
-      <div class="doc-header"><div><div class="doc-title">Godown Report</div><div class="doc-sub">${groups.size} godowns · ${all.length} lots · ${date}</div></div></div>
-      <div class="body-pad">${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">No lots yet.</p>'}</div>
+      <div class="doc-header"><div><div class="doc-title">Godown Report — ${godownName}</div><div class="doc-sub">${groups.size} godown(s) · ${all.length} lots · ${date}</div></div></div>
+      <div class="body-pad">${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">No lots for this godown.</p>'}</div>
       <script>window.onload=()=>window.print()<\/script></body></html>`)
     w.document.close()
   }
@@ -313,7 +319,17 @@ export default function LotsPage() {
           </h2>
           <p className="text-gray-500 text-sm">{t("Track each lot from arrival through sale and settlement")}</p>
         </div>
-        <div className="flex gap-2 flex-wrap justify-end">
+        <div className="flex gap-2 flex-wrap justify-end items-center">
+          <select
+            value={reportGodown}
+            onChange={(e) => setReportGodown(e.target.value)}
+            className="h-9 rounded-md border border-gray-300 bg-white px-2 text-sm text-gray-700"
+            title={t("Report godown")}
+          >
+            <option value="ALL">{t("All Godowns")}</option>
+            {warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+            <option value="NONE">{t("No godown")}</option>
+          </select>
           <Button variant="outline" className="gap-2" onClick={printGodownReport}>
             <WarehouseIcon className="w-4 h-4" /> {t("Godown Report")}
           </Button>

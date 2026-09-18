@@ -55,6 +55,7 @@ export async function POST(req: Request) {
     commissionRate,
     direction,
     labourAmount,
+    labourMode,
     notes,
     paidAmount: initialPaid,
     paymentMethod,
@@ -63,6 +64,7 @@ export async function POST(req: Request) {
 
   const num = (v: any) => (v !== "" && v != null ? parseFloat(v) : null)
   const isPay = direction === "PAY"
+  const isAddLabour = labourMode !== "DEDUCT" // default: add labour on top of buyer total
 
   if (!customerId && !walkInCustomer) {
     return NextResponse.json({ error: "Buyer (customer) is required" }, { status: 400 })
@@ -72,12 +74,14 @@ export async function POST(req: Request) {
   }
 
   const commRate = commissionRate !== undefined && commissionRate !== "" ? parseFloat(commissionRate) : 2.5
-  const total = parseFloat(totalValue)
-  const commAmount = parseFloat(((total * commRate) / 100).toFixed(2))
+  const goods = parseFloat(totalValue) // goods value = net kg × rate/kg
+  const commAmount = parseFloat(((goods * commRate) / 100).toFixed(2))
   const labourAmt = parseFloat(labourAmount || "0")
-  // RECEIVE: commission is deducted from the seller (they get total − commission).
-  // PAY: we pay the commission ourselves, so the seller gets the full total.
-  const sellerPayable = isPay ? total : parseFloat((total - commAmount).toFixed(2))
+  // Labour: ADD = charged on top of the buyer's total; DEDUCT = taken from the seller's amount.
+  const total = isAddLabour ? goods + labourAmt : goods // what the buyer owes
+  // RECEIVE: commission deducted from the seller; PAY: seller gets the full goods value.
+  const baseSeller = isPay ? goods : parseFloat((goods - commAmount).toFixed(2))
+  const sellerPayable = Math.max(baseSeller - (isAddLabour ? 0 : labourAmt), 0)
   const paid = parseFloat(initialPaid || "0")
   const balance = total - paid
   const status = balance <= 0 ? "PAID" : paid > 0 ? "PARTIAL" : "PENDING"
