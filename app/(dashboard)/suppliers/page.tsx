@@ -622,7 +622,7 @@ export default function SuppliersPage() {
 
       {/* Payment Modal */}
       <Dialog open={showPaymentModal} onOpenChange={(open) => { setShowPaymentModal(open); if (!open) setLastPayment(null) }}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {lastPayment ? <Check className="w-5 h-5 text-purple-600" /> : <ArrowUpCircle className="w-5 h-5 text-blue-600" />}

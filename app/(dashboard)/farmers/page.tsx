@@ -498,7 +498,7 @@ export default function FarmersPage() {
 
       {/* Record Payment Modal */}
       <Dialog open={showPayModal} onOpenChange={(open) => { setShowPayModal(open); if (!open) setLastPayment(null) }}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {lastPayment ? <Check className="w-5 h-5 text-purple-600" /> : <Banknote className="w-5 h-5 text-purple-700" />}
