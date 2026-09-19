@@ -219,6 +219,7 @@ export const UR: Record<string, string> = {
   "Markhas": "مارکہ جات",
   "Filter by markha": "مارکہ سے فلٹر کریں",
   "All markhas": "تمام مارکہ",
+  "Lots in": "لاٹس —",
   "Manage": "منظم کریں",
   "None": "کوئی نہیں",
   "New markha name (e.g. A, B, Lal Sona)": "نئی مارکہ کا نام (مثلاً A، B، لال سونا)",

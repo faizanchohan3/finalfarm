@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tag, Printer } from "lucide-react"
 import { useLang } from "@/lib/i18n"
+import { formatDate } from "@/lib/utils"
 import { buildPrintHeader, reportCSS } from "@/lib/print-utils"
 
 const inStockOf = (l: any) => !["SOLD", "DISPATCHED", "SETTLED", "CANCELLED"].includes(l.status)
@@ -15,6 +16,7 @@ export default function MarkhaReportPage() {
   const [markhas, setMarkhas] = useState<any[]>([])
   const [shop, setShop] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [markhaFilter, setMarkhaFilter] = useState("ALL")
 
   async function load() {
     setLoading(true)
@@ -54,11 +56,19 @@ export default function MarkhaReportPage() {
   const totalLots = lots.length
   const totalInStock = lots.filter(inStockOf).length
 
+  // Filter the report to a single markha (or all)
+  const shownRows = markhaFilter === "ALL" ? rows : rows.filter((r) => r.name === markhaFilter)
+  // When a specific markha is selected, list its individual lots
+  const detailLots = markhaFilter === "ALL"
+    ? []
+    : lots.filter((l) => l.markha1 === markhaFilter || l.markha2 === markhaFilter)
+
   function printReport() {
     const w = window.open("", "_blank")
     if (!w) return
     const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
-    const body = rows.map((r, i) => `<tr>
+    const scope = markhaFilter === "ALL" ? "All markhas" : markhaFilter
+    const body = shownRows.map((r, i) => `<tr>
       <td>${i + 1}</td>
       <td style="font-weight:700">${r.name}</td>
       <td style="text-align:right">${r.total}</td>
@@ -67,13 +77,23 @@ export default function MarkhaReportPage() {
       <td style="text-align:right;color:#15803d">${r.inStockBags.toLocaleString()}</td>
       <td style="text-align:right">${r.net.toLocaleString()} KG</td>
     </tr>`).join("")
-    w.document.write(`<html><head><title>Markha Report</title><style>${reportCSS} body{max-width:820px;margin:0 auto}</style></head><body>
+    const detail = markhaFilter !== "ALL" && detailLots.length > 0 ? `
+      <div style="margin-top:18px;font-weight:800;color:#14532d;font-size:12px">Lots in ${markhaFilter}</div>
+      <table style="margin-top:6px">
+        <thead><tr><th>#</th><th>Lot No</th><th>Category</th><th>Farmer</th><th>Godown</th><th style="text-align:right">Bags</th><th style="text-align:right">Net KG</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>${detailLots.map((l, i) => `<tr>
+          <td>${i + 1}</td><td>${l.lotNo}</td><td>${l.category?.name || "—"}</td><td>${l.farmer?.name || "—"}</td>
+          <td>${l.warehouse?.name || "—"}</td><td style="text-align:right">${l.bags ?? "—"}</td>
+          <td style="text-align:right">${l.netWeight ?? "—"}</td><td>${String(l.status).replace("_", " ")}</td>
+          <td>${new Date(l.createdAt).toLocaleDateString("en-PK")}</td></tr>`).join("")}</tbody>
+      </table>` : ""
+    w.document.write(`<html><head><title>Markha Report — ${scope}</title><style>${reportCSS} body{max-width:900px;margin:0 auto}</style></head><body>
       ${buildPrintHeader(shop)}
-      <div class="doc-header"><div><div class="doc-title">Markha Report</div><div class="doc-sub">${rows.length} markhas · ${totalLots} lots (${totalInStock} in stock) · ${date}</div></div></div>
+      <div class="doc-header"><div><div class="doc-title">Markha Report — ${scope}</div><div class="doc-sub">${shownRows.length} markha(s) · ${date}</div></div></div>
       <div class="body-pad"><table>
         <thead><tr><th>#</th><th>Markha</th><th style="text-align:right">Total Lots</th><th style="text-align:right">In Stock</th><th style="text-align:right">Total Bags</th><th style="text-align:right">In-Stock Bags</th><th style="text-align:right">Net Wt</th></tr></thead>
         <tbody>${body || '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:16px">No markhas yet.</td></tr>'}</tbody>
-      </table></div>
+      </table>${detail}</div>
       <script>window.onload=()=>window.print()<\/script></body></html>`)
     w.document.close()
   }
@@ -87,9 +107,23 @@ export default function MarkhaReportPage() {
           </h2>
           <p className="text-gray-500 text-sm">{rows.length} markhas · {totalLots} lots ({totalInStock} in stock)</p>
         </div>
-        <Button variant="outline" className="gap-2" onClick={printReport} disabled={rows.length === 0}>
-          <Printer className="w-4 h-4" /> {t("Print")}
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <Tag className="w-4 h-4 text-gray-400" />
+            <select
+              value={markhaFilter}
+              onChange={(e) => setMarkhaFilter(e.target.value)}
+              className="h-9 rounded-md border border-gray-300 bg-white px-2 text-sm text-gray-700"
+              title={t("Filter by markha")}
+            >
+              <option value="ALL">{t("All markhas")}</option>
+              {names.map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+          <Button variant="outline" className="gap-2" onClick={printReport} disabled={shownRows.length === 0}>
+            <Printer className="w-4 h-4" /> {t("Print")}
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -110,9 +144,9 @@ export default function MarkhaReportPage() {
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-400">{t("Loading...")}</td></tr>
-                ) : rows.length === 0 ? (
+                ) : shownRows.length === 0 ? (
                   <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-400">{t("No markhas yet. Add your first above.")}</td></tr>
-                ) : rows.map((r, i) => (
+                ) : shownRows.map((r, i) => (
                   <tr key={r.name} className="hover:bg-blue-50">
                     <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                     <td className="px-4 py-3 font-medium text-gray-800 flex items-center gap-1.5"><Tag className="w-3.5 h-3.5 text-purple-500" />{r.name}</td>
@@ -128,6 +162,45 @@ export default function MarkhaReportPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Lots detail for the selected markha */}
+      {markhaFilter !== "ALL" && (
+        <Card>
+          <CardContent className="p-0">
+            <div className="px-4 py-3 border-b bg-purple-50 text-sm font-semibold text-purple-800 flex items-center gap-1.5">
+              <Tag className="w-4 h-4" /> {t("Lots in")} {markhaFilter} <span className="text-gray-400 font-normal">({detailLots.length})</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-blue-50 border-b">
+                  <tr>
+                    {["#", "Lot No", "Category", "Farmer", "Godown", "Bags", "Net KG", "Status", "Date"].map((h) => (
+                      <th key={h} className={`px-4 py-3 text-xs font-semibold text-gray-600 uppercase ${["Bags", "Net KG"].includes(h) ? "text-right" : "text-left"}`}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {detailLots.length === 0 ? (
+                    <tr><td colSpan={9} className="px-4 py-8 text-center text-gray-400">{t("No lots match your search / filters.")}</td></tr>
+                  ) : detailLots.map((l, i) => (
+                    <tr key={l.id} className="hover:bg-blue-50">
+                      <td className="px-4 py-2.5 text-gray-400 text-xs">{i + 1}</td>
+                      <td className="px-4 py-2.5 font-mono text-xs text-gray-700">{l.lotNo}</td>
+                      <td className="px-4 py-2.5 text-gray-700">{l.category?.name || "—"}</td>
+                      <td className="px-4 py-2.5 text-gray-600">{l.farmer?.name || "—"}</td>
+                      <td className="px-4 py-2.5 text-gray-600">{l.warehouse?.name || "—"}</td>
+                      <td className="px-4 py-2.5 text-right text-gray-700">{l.bags ?? "—"}</td>
+                      <td className="px-4 py-2.5 text-right text-gray-700">{l.netWeight ?? "—"}</td>
+                      <td className="px-4 py-2.5 text-gray-600 text-xs">{String(l.status).replace("_", " ")}</td>
+                      <td className="px-4 py-2.5 text-gray-500 text-xs whitespace-nowrap">{formatDate(l.createdAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
