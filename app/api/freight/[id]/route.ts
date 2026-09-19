@@ -1,81 +1,44 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { createAuditLog } from "@/lib/audit"
 
-export async function GET(req: Request) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const { searchParams } = new URL(req.url)
-  const page = parseInt(searchParams.get("page") || "1")
-  const limit = parseInt(searchParams.get("limit") || "20")
-  const skip = (page - 1) * limit
+  try {
+    const { id } = await params
+    const body = await req.json()
 
-  const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
-  const [transactions, total, summary] = await Promise.all([
-    db.transaction.findMany({
-      skip,
-      take: limit,
-      where: shopFilter,
-      orderBy: { createdAt: "desc" },
-      include: { createdBy: { select: { name: true } }, bank: { select: { name: true } } },
-    }),
-    db.transaction.count({ where: shopFilter }),
-    db.transaction.groupBy({
-      by: ["type"],
-      where: shopFilter,
-      _sum: { amount: true },
-    }),
-  ])
-
-  const income = summary.find((s) => s.type === "CREDIT")?._sum.amount || 0
-  const expense = summary.find((s) => s.type === "DEBIT")?._sum.amount || 0
-
-  return NextResponse.json({ transactions, total, income, expense, balance: income - expense })
-}
-
-export async function POST(req: Request) {
-  const session = await auth()
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
-  const { type, amount, description, reference, category, bankId, accountId, entryType, transactionDate } = await req.json()
-
-  const transaction = await db.$transaction(async (tx) => {
-    const t = await tx.transaction.create({
+    const slip = await db.freightSlip.update({
+      where: { id },
       data: {
-        shopId: session.user.shopId || null,
-        type,
-        amount,
-        description,
-        reference,
-        category,
-        bankId: bankId || null,
-        accountId: accountId || null,
-        createdById: session.user.id,
-        createdAt: transactionDate ? new Date(transactionDate) : new Date(),
+        status: body.status,
+        dispatchedAt: body.status === "IN_TRANSIT" ? new Date() : undefined,
+        deliveredAt: body.status === "DELIVERED" ? new Date() : undefined,
+        notes: body.notes ?? undefined,
       },
     })
 
-    if (accountId) {
-      const account = await tx.account.findUnique({ where: { id: accountId }, select: { type: true } })
-      if (account) {
-        // Use entryType (user's debit/credit choice) if provided, otherwise use type from Income/Expense
-        const directionType = entryType || type
-        // Debit increases balance, Credit decreases balance
-        const shouldIncrement = directionType === "DEBIT"
-        await tx.account.update({
-          where: { id: accountId },
-          data: { balance: { [shouldIncrement ? "increment" : "decrement"]: amount } },
-        })
-      }
+    // Create delivery challan on dispatch
+    if (body.status === "IN_TRANSIT" && body.items) {
+      const challanNo = `DC-${Date.now()}`
+      await db.deliveryChallan.create({
+        data: {
+          challanNo,
+          slipId: id,
+          items: typeof body.items === "string" ? body.items : JSON.stringify(body.items),
+          totalWeight: body.totalWeight || null,
+          totalBags: body.totalBags || null,
+          receivedBy: body.receivedBy || null,
+          notes: body.notes || null,
+        },
+      })
     }
 
-    return t
-  })
-
-  await createAuditLog({ userId: session.user.id, action: "CREATE", module: "FINANCE", details: `${type}: PKR ${amount} - ${description}` })
-
-  return NextResponse.json({ transaction }, { status: 201 })
+    return NextResponse.json({ slip })
+  } catch (err: any) {
+    console.error("Freight PUT error:", err)
+    return NextResponse.json({ error: err?.message || "Failed to update freight slip" }, { status: 500 })
+  }
 }
-

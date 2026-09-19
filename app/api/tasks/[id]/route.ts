@@ -1,47 +1,33 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { cachedJson } from "@/lib/api-cache"
+import { createAuditLog } from "@/lib/audit"
 
-export async function GET() {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
-  const suppliers = await db.supplier.findMany({ where: { ...shopFilter, isActive: true }, orderBy: { name: "asc" } })
 
-  // Calculate balance from supplier payments (ledger)
-  const supplierIds = suppliers.map((s) => s.id)
-  const [paidPayments, receivedPayments] = await Promise.all([
-    db.supplierPayment.groupBy({
-      by: ["supplierId"],
-      _sum: { amount: true },
-      where: { supplierId: { in: supplierIds }, direction: "PAY" },
-    }),
-    db.supplierPayment.groupBy({
-      by: ["supplierId"],
-      _sum: { amount: true },
-      where: { supplierId: { in: supplierIds }, direction: "RECEIVE" },
-    }),
-  ])
+  const { id } = await params
+  const body = await req.json()
+  const { title, description, assignedToId, priority, dueDate, status } = body
 
-  const paidMap = Object.fromEntries(paidPayments.map((r) => [r.supplierId, r._sum.amount || 0]))
-  const receivedMap = Object.fromEntries(receivedPayments.map((r) => [r.supplierId, r._sum.amount || 0]))
+  const data: any = { title, description, assignedToId: assignedToId || null, priority, status }
+  if (dueDate) data.dueDate = new Date(dueDate)
+  if (status === "COMPLETED") data.completedAt = new Date()
 
-  const suppliersWithBalance = suppliers.map((s) => ({
-    ...s,
-    totalDebit: (paidMap[s.id] || 0),
-    totalCredit: (receivedMap[s.id] || 0),
-    ledgerBalance: (paidMap[s.id] || 0) - (receivedMap[s.id] || 0),
-  }))
+  const task = await db.task.update({ where: { id }, data, include: { assignedTo: { select: { name: true } } } })
+  await createAuditLog({ userId: session.user.id, action: "UPDATE", module: "TASKS", details: `Updated task: ${title}` })
 
-  return cachedJson({ suppliers: suppliersWithBalance })
+  return NextResponse.json({ task })
 }
 
-export async function POST(req: Request) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  const { name, phone, address } = await req.json()
-  const supplier = await db.supplier.create({ data: { shopId: session.user.shopId || null, name, phone, address } })
-  return NextResponse.json({ supplier }, { status: 201 })
-}
 
+  const { id } = await params
+  await db.task.delete({ where: { id } })
+  await createAuditLog({ userId: session.user.id, action: "DELETE", module: "TASKS", details: `Deleted task ID: ${id}` })
+
+  return NextResponse.json({ success: true })
+}

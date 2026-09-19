@@ -1,39 +1,32 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { cachedJson } from "@/lib/api-cache"
 
-export async function GET() {
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
+  const { id } = await params
   const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
-  const banks = await db.bank.findMany({
-    where: { ...shopFilter, isActive: true },
-    orderBy: { name: "asc" },
-  })
-  return cachedJson({ banks })
+
+  const category = await db.category.findFirst({ where: { id, ...shopFilter } })
+  if (!category) return NextResponse.json({ error: "Not found" }, { status: 404 })
+
+  await db.category.delete({ where: { id } })
+  return NextResponse.json({ ok: true })
 }
 
-export async function POST(req: Request) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  try {
-    const { name, accountNumber } = await req.json()
-    if (!name?.trim()) return NextResponse.json({ error: "Bank name is required" }, { status: 400 })
+  const { id } = await params
+  const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
 
-    const bank = await db.bank.create({
-      data: {
-        shopId: session.user.shopId ?? null,
-        name: name.trim(),
-        accountNumber: accountNumber?.trim() || null,
-      },
-    })
-    return NextResponse.json({ bank }, { status: 201 })
-  } catch (err: any) {
-    console.error("Bank create error:", err)
-    return NextResponse.json({ error: err?.message || "Failed to create bank" }, { status: 500 })
-  }
+  const category = await db.category.findFirst({ where: { id, ...shopFilter } })
+  if (!category) return NextResponse.json({ error: "Not found" }, { status: 404 })
+
+  const { name, description } = await req.json()
+  const updated = await db.category.update({ where: { id }, data: { name, description } })
+  return NextResponse.json({ category: updated })
 }
-
