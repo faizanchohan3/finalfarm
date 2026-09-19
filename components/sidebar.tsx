@@ -83,6 +83,7 @@ const allReportSubItems = [
   { href: "/reports/supplier-ledger", label: "Supplier Ledger", icon: ClipboardList, color: "text-indigo-600", bgColor: "bg-indigo-50" },
   { href: "/reports/all-traders", label: "All Traders", icon: Store, color: "text-amber-600", bgColor: "bg-amber-50" },
   { href: "/reports/bank-transactions", label: "Bank Transactions", icon: Banknote, color: "text-teal-600", bgColor: "bg-teal-50" },
+  { href: "/markha-report", label: "Markha Report", icon: Tag, color: "text-purple-600", bgColor: "bg-purple-50" },
 ]
 
 const cashierReportSubItems = [
@@ -97,7 +98,6 @@ const shopNavItems: NavItem[] = [
   { href: "/inventory", label: "Store", icon: Package },
   { href: "/lots", label: "Potato Store", icon: Boxes, module: "moduleLots" },
   { href: "/markha", label: "Markha", icon: Tag, module: "moduleLots" },
-  { href: "/markha-report", label: "Markha Report", icon: FileText, module: "moduleLots" },
   { href: "/customers", label: "Traders", icon: UserCheck },
   { href: "/suppliers", label: "Suppliers", icon: Truck },
   { href: "/farmers", label: "Farmers", icon: UserCheck, module: "moduleFarmers" },
