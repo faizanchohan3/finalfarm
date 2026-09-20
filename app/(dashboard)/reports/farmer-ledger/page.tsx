@@ -107,7 +107,7 @@ function FarmerLedgerContent() {
       return `<div style="margin-bottom:28px">
         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-size:13px;font-weight:800;color:#14532d">${f.name}</div>
+            <div style="font-size:13px;font-weight:800;color:#5b21b6">${f.name}</div>
             <div style="font-size:10px;color:#6b7280;margin-top:2px">${[f.village,f.phone,f.cnic].filter(Boolean).join(" · ")||"No contact info"}</div>
           </div>
           <div style="text-align:right">
@@ -144,7 +144,7 @@ ${buildPrintHeader(shop)}
     <div className="space-y-5">
       {/* Print header (for individual ledger print) */}
       <div className="hidden print:block mb-4">
-        <div style={{background:"linear-gradient(135deg,#14532d 0%,#166534 60%,#15803d 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{background:"linear-gradient(135deg,#7c3aed 0%,#6366f1 55%,#4f46e5 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
             {shop?.logo ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
               : <div style={{width:"52px",height:"52px",borderRadius:"8px",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",fontWeight:900,border:"2px solid rgba(255,255,255,0.3)"}}>{(shop?.name||"G")[0].toUpperCase()}</div>}
@@ -158,9 +158,9 @@ ${buildPrintHeader(shop)}
             {shop?.address && <div>&#9679;&nbsp;{shop.address}</div>}
           </div>
         </div>
-        <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24,#d97706)"}}></div>
+        <div style={{height:"4px",background:"linear-gradient(90deg,#a78bfa,#818cf8)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb"}}>
-          <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Farmer Ledger — {selectedFarmer?.name}</h2>
+          <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#5b21b6"}}>Farmer Ledger — {selectedFarmer?.name}</h2>
           <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>Period: {dateLabel}</div>
         </div>
       </div>

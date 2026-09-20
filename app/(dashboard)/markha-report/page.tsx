@@ -78,7 +78,7 @@ export default function MarkhaReportPage() {
       <td style="text-align:right">${r.net.toLocaleString()} KG</td>
     </tr>`).join("")
     const detail = markhaFilter !== "ALL" && detailLots.length > 0 ? `
-      <div style="margin-top:18px;font-weight:800;color:#14532d;font-size:12px">Lots in ${markhaFilter}</div>
+      <div style="margin-top:18px;font-weight:800;color:#5b21b6;font-size:12px">Lots in ${markhaFilter}</div>
       <table style="margin-top:6px">
         <thead><tr><th>#</th><th>Lot No</th><th>Category</th><th>Farmer</th><th>Godown</th><th style="text-align:right">Bags</th><th style="text-align:right">Net KG</th><th>Status</th><th>Date</th></tr></thead>
         <tbody>${detailLots.map((l, i) => `<tr>

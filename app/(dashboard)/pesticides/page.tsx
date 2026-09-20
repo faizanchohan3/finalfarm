@@ -160,7 +160,7 @@ export default function PesticidesPage() {
     w.document.write(`<html><head><title>Pesticide Stock List</title>
 <style>${reportCSS}
   body { max-width: 900px; margin: 0 auto; }
-  .section-title { font-size:13px; font-weight:800; color:#14532d; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid #166534; }
+  .section-title { font-size:13px; font-weight:800; color:#5b21b6; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid #166534; }
 </style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">

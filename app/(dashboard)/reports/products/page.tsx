@@ -51,7 +51,7 @@ export default function ProductReportPage() {
       {/* â”€â”€ Print Header â”€â”€ */}
       <div className="hidden print:block">
         <style>{`@media print { @page { size: A4 landscape; } }`}</style>
-        <div style={{background:"linear-gradient(135deg,#14532d 0%,#166534 60%,#15803d 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{background:"linear-gradient(135deg,#7c3aed 0%,#6366f1 55%,#4f46e5 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
             {shop?.logo
               ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
@@ -68,9 +68,9 @@ export default function ProductReportPage() {
             <div style={{fontSize:"10px",opacity:0.75}}>Printed: {today}</div>
           </div>
         </div>
-        <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
+        <div style={{height:"4px",background:"linear-gradient(90deg,#f0abfc 0%,#a78bfa 50%,#818cf8 100%)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb",marginBottom:"8px"}}>
-          <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Store Product Report</h2>
+          <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#5b21b6"}}>Store Product Report</h2>
           <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>All active products — stock levels, valuations and sales performance</div>
           <div style={{display:"flex",gap:"24px",marginTop:"8px",fontSize:"11px"}}>
             <span><strong>{totals.totalProducts}</strong> Products</span>

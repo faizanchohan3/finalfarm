@@ -46,7 +46,7 @@ export default function PesticideSalesReportPage() {
     <div className="space-y-6">
       {/* Print Header */}
       <div className="hidden print:block">
-        <div style={{background:"linear-gradient(135deg,#14532d 0%,#166534 60%,#15803d 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{background:"linear-gradient(135deg,#7c3aed 0%,#6366f1 55%,#4f46e5 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
             {shop?.logo
               ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
@@ -63,9 +63,9 @@ export default function PesticideSalesReportPage() {
             <div style={{fontSize:"10px",opacity:0.75}}>Printed: {today}</div>
           </div>
         </div>
-        <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
+        <div style={{height:"4px",background:"linear-gradient(90deg,#f0abfc 0%,#a78bfa 50%,#818cf8 100%)"}}></div>
         <div style={{padding:"10px 22px 8px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb",marginBottom:"10px"}}>
-          <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#14532d"}}>Pesticide Sales Report</h2>
+          <h2 style={{margin:0,fontSize:"16px",fontWeight:800,color:"#5b21b6"}}>Pesticide Sales Report</h2>
           <div style={{display:"flex",gap:"24px",marginTop:"6px",fontSize:"11px"}}>
             <span>Period: <strong>{dateLabel}</strong></span>
             <span>Total Sales: <strong>{sales.length}</strong></span>

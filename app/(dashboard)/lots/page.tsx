@@ -267,7 +267,7 @@ export default function LotsPage() {
       const netTotal = list.reduce((s, l) => s + (l.netWeight || 0), 0)
       const saleTotal = list.reduce((s, l) => s + (l.saleAmount || 0), 0)
       return `<div style="margin-bottom:22px">
-        <div style="font-weight:800;color:#14532d;font-size:13px;margin-bottom:5px">🏬 ${name}
+        <div style="font-weight:800;color:#5b21b6;font-size:13px;margin-bottom:5px">🏬 ${name}
           <span style="font-weight:500;color:#6b7280;font-size:11px">— ${list.length} lots · ${stored} in stock</span></div>
         <table>
           <thead><tr><th>#</th><th>Lot No</th><th>Category</th><th>Farmer</th><th>Bags</th><th style="text-align:right">Net (KG)</th><th>Status</th><th>Sold On</th><th>Buyer</th><th style="text-align:right">Sale</th></tr></thead>

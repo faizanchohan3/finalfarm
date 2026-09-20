@@ -333,7 +333,7 @@ ${buildPrintHeader(shop)}
       {selectedPesticideSaleDetail && (
         <div className="hidden print:block fixed inset-0 bg-blue-50 z-50">
           <style>{`@media print { @page { size: A4 portrait; margin: 0; } }`}</style>
-          <div style={{background:"linear-gradient(135deg,#14532d 0%,#166534 60%,#15803d 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{background:"linear-gradient(135deg,#7c3aed 0%,#6366f1 55%,#4f46e5 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
               {shop?.logo
                 ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
@@ -350,10 +350,10 @@ ${buildPrintHeader(shop)}
               <div style={{fontSize:"10px",opacity:0.75}}>Printed: {new Date().toLocaleDateString("en-PK")}</div>
             </div>
           </div>
-          <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
+          <div style={{height:"4px",background:"linear-gradient(90deg,#f0abfc 0%,#a78bfa 50%,#818cf8 100%)"}}></div>
           <div style={{padding:"10px 22px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb",display:"flex",alignItems:"flex-start",justifyContent:"space-between"}}>
             <div>
-              <div style={{fontSize:"16px",fontWeight:800,color:"#14532d"}}>Pesticide Sale Invoice</div>
+              <div style={{fontSize:"16px",fontWeight:800,color:"#5b21b6"}}>Pesticide Sale Invoice</div>
               <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>Invoice #: {selectedPesticideSaleDetail.id.slice(-8).toUpperCase()}</div>
             </div>
             <div style={{textAlign:"right",fontSize:"11px",color:"#6b7280",lineHeight:1.8}}>
@@ -419,7 +419,7 @@ ${buildPrintHeader(shop)}
         <div className="hidden print:block fixed inset-0 bg-blue-50 z-50">
           <style>{`@media print { @page { size: A4 portrait; margin: 0; } }`}</style>
           {/* Green gradient header */}
-          <div style={{background:"linear-gradient(135deg,#14532d 0%,#166534 60%,#15803d 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{background:"linear-gradient(135deg,#7c3aed 0%,#6366f1 55%,#4f46e5 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
               {shop?.logo
                 ? <img src={shop.logo} style={{width:"52px",height:"52px",borderRadius:"8px",background:"#fff",padding:"3px",objectFit:"contain"}} alt="" />
@@ -437,11 +437,11 @@ ${buildPrintHeader(shop)}
             </div>
           </div>
           {/* Gold stripe */}
-          <div style={{height:"4px",background:"linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%)"}}></div>
+          <div style={{height:"4px",background:"linear-gradient(90deg,#f0abfc 0%,#a78bfa 50%,#818cf8 100%)"}}></div>
           {/* Document sub-header */}
           <div style={{padding:"10px 22px",background:"#f8fdf8",borderBottom:"1px solid #e5e7eb",display:"flex",alignItems:"flex-start",justifyContent:"space-between"}}>
             <div>
-              <div style={{fontSize:"16px",fontWeight:800,color:"#14532d"}}>Sales Invoice</div>
+              <div style={{fontSize:"16px",fontWeight:800,color:"#5b21b6"}}>Sales Invoice</div>
               <div style={{fontSize:"11px",color:"#6b7280",marginTop:"2px"}}>Invoice #: {selectedSale.id.slice(-8).toUpperCase()}</div>
             </div>
             <div style={{textAlign:"right",fontSize:"11px",color:"#6b7280",lineHeight:1.8}}>
