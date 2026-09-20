@@ -33,12 +33,14 @@ export default function CommissionPage() {
   const [partyId, setPartyId] = useState("")              // "" = none, "walkin" = walk-in, "farmer_X" or supplier id
   const [walkInSeller, setWalkInSeller] = useState("")
   const [commodity, setCommodity] = useState("")
+  const [vehicleNo, setVehicleNo] = useState("")
   const [bags, setBags] = useState("")
   const [bagType, setBagType] = useState("bag")
   const [grossWeight, setGrossWeight] = useState("")
   const [tareWeight, setTareWeight] = useState("")
   const [bardanaWeight, setBardanaWeight] = useState("")
-  const [rate, setRate] = useState("")             // rate per kg
+  const [rate, setRate] = useState("")             // rate value (per kg or per mound)
+  const [rateUnit, setRateUnit] = useState("kg")   // kg | mound (1 mound = 40 kg)
   const [totalValue, setTotalValue] = useState("")
   const [commissionRate, setCommissionRate] = useState("2.5")
   const [direction, setDirection] = useState("RECEIVE") // RECEIVE = we get commission, PAY = we pay it
@@ -105,34 +107,38 @@ export default function CommissionPage() {
     return n > 0 ? n : 0
   })()
 
-  // Total = rate per kg × net weight
+  // 1 mound (maund) = 40 kg
+  const mound = netWeight > 0 ? netWeight / 40 : 0
+
+  // Goods value = rate × (net kg) OR rate × (mounds)
   useEffect(() => {
     const r = parseFloat(rate)
-    if (netWeight > 0 && r > 0) setTotalValue((netWeight * r).toFixed(2))
+    const base = rateUnit === "mound" ? netWeight / 40 : netWeight
+    if (base > 0 && r > 0) setTotalValue((base * r).toFixed(2))
     else setTotalValue("")
-  }, [netWeight, rate])
+  }, [netWeight, rate, rateUnit])
 
-  const total = parseFloat(totalValue || "0")
+  const total = parseFloat(totalValue || "0")  // goods value
   const commRate = commissionRate !== "" ? parseFloat(commissionRate) : 0
   const commAmount = total > 0 ? parseFloat(((total * commRate) / 100).toFixed(2)) : 0
   const labourAmt = parseFloat(labourAmount || "0")
-  // RECEIVE: we deduct commission from the seller (seller gets total − commission).
-  // PAY: we pay the commission ourselves, so the seller gets the full total.
   const isPayDir = direction === "PAY"
+  const isReceive = !isPayDir
   // Labour: ADD = charged on top of the buyer's total; DEDUCT = taken out of the seller's amount.
   const isAddLabour = labourMode === "ADD"
-  const buyerOwes = total > 0 ? total + (isAddLabour ? labourAmt : 0) : 0
-  const baseSeller = isPayDir ? total : parseFloat((total - commAmount).toFixed(2))
-  const sellerPayable = total > 0 ? Math.max(baseSeller - (isAddLabour ? 0 : labourAmt), 0) : 0
-  const netCommission = isPayDir ? -commAmount : commAmount
+  // Commission applies to BOTH sides when received: added to the buyer, deducted from the seller.
+  const buyerOwes = total > 0 ? total + (isReceive ? commAmount : 0) + (isAddLabour ? labourAmt : 0) : 0
+  const sellerPayable = total > 0 ? Math.max(total - (isReceive ? commAmount : 0) - (isAddLabour ? 0 : labourAmt), 0) : 0
+  // Received earns commission from both sides; paid is a commission you pay out.
+  const netCommission = isReceive ? commAmount * 2 : -commAmount
   const balance = buyerOwes - parseFloat(paidAmount || "0")
 
   function resetNewForm() {
     setCustomerId(""); setWalkInCustomer("")
     setPartyId(""); setWalkInSeller("")
-    setCommodity(""); setBags(""); setBagType("bag")
+    setCommodity(""); setVehicleNo(""); setBags(""); setBagType("bag")
     setGrossWeight(""); setTareWeight(""); setBardanaWeight("")
-    setRate(""); setTotalValue(""); setCommissionRate("2.5"); setDirection("RECEIVE"); setLabourAmount("0"); setLabourMode("ADD"); setPaidAmount("0"); setNotes("")
+    setRate(""); setRateUnit("kg"); setTotalValue(""); setCommissionRate("2.5"); setDirection("RECEIVE"); setLabourAmount("0"); setLabourMode("ADD"); setPaidAmount("0"); setNotes("")
   }
 
   async function handleSave() {
@@ -158,6 +164,7 @@ export default function CommissionPage() {
           supplierId,
           walkInSeller: isWalkInSeller ? walkInSeller.trim() || null : null,
           commodity,
+          vehicleNo,
           bags,
           bagType,
           grossWeight,
@@ -165,6 +172,7 @@ export default function CommissionPage() {
           bardanaWeight,
           weight: String(netWeight),
           rate,
+          rateUnit,
           totalValue,
           commissionRate,
           direction,
@@ -566,12 +574,19 @@ ${buildPrintHeader(shop)}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">{t("Commodity Details")}</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
-              <div>
-                <Label className="text-xs font-semibold text-gray-600">{t("Commodity / Product")}</Label>
-                <Input className="mt-1" placeholder="e.g. Wheat, Rice, Cotton, Sugar..." value={commodity}
-                  onChange={(e) => setCommodity(e.target.value)} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Commodity / Product")}</Label>
+                  <Input className="mt-1" placeholder="e.g. Wheat, Rice, Cotton, Sugar..." value={commodity}
+                    onChange={(e) => setCommodity(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Vehicle No")}</Label>
+                  <Input className="mt-1" placeholder="e.g. LES-1234" value={vehicleNo}
+                    onChange={(e) => setVehicleNo(e.target.value)} />
+                </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">{t("Bags")}</Label>
                   <Input type="number" className="mt-1" placeholder="0" value={bags}
@@ -588,11 +603,6 @@ ${buildPrintHeader(shop)}
                     <option value="jali">{t("Jali")}</option>
                     <option value="bag">{t("Bag")}</option>
                   </select>
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-gray-600">{t("Rate / kg")} (PKR)</Label>
-                  <Input type="number" className="mt-1" placeholder="0" value={rate}
-                    onChange={(e) => setRate(e.target.value)} />
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -616,6 +626,28 @@ ${buildPrintHeader(shop)}
                   <Input readOnly className="mt-1 bg-blue-100 font-semibold" placeholder="0" value={netWeight ? String(netWeight) : ""} />
                 </div>
               </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-xs font-semibold text-gray-600">{rateUnit === "mound" ? t("Rate / Mound") : t("Rate / kg")} (PKR)</Label>
+                  <Input type="number" className="mt-1" placeholder="0" value={rate}
+                    onChange={(e) => setRate(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Rate unit")}</Label>
+                  <select
+                    className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={rateUnit}
+                    onChange={(e) => setRateUnit(e.target.value)}
+                  >
+                    <option value="kg">{t("Per kg")}</option>
+                    <option value="mound">{t("Per Mound (40 kg)")}</option>
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold text-gray-600">{t("Mound")} <span className="font-normal text-gray-400">({t("auto")})</span></Label>
+                  <Input readOnly className="mt-1 bg-blue-100 font-semibold" placeholder="0" value={mound ? mound.toFixed(2) : ""} />
+                </div>
+              </div>
             </div>
 
             {/* â”€â”€ Section 3: Amounts â”€â”€ */}
@@ -630,7 +662,7 @@ ${buildPrintHeader(shop)}
                     <Input type="number" className="pl-9 font-bold" placeholder="0" value={totalValue}
                       onChange={(e) => setTotalValue(e.target.value)} />
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">{t("Net kg × Rate/kg")}</p>
+                  <p className="text-xs text-gray-400 mt-1">{rateUnit === "mound" ? t("Mound × Rate/Mound") : t("Net kg × Rate/kg")}</p>
                 </div>
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">Commission %</Label>

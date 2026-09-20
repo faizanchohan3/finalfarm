@@ -44,6 +44,7 @@ export async function POST(req: Request) {
     supplierId,
     walkInSeller,
     commodity,
+    vehicleNo,
     bags,
     bagType,
     weight,
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
     tareWeight,
     bardanaWeight,
     rate,
+    rateUnit,
     totalValue,
     commissionRate,
     direction,
@@ -74,14 +76,16 @@ export async function POST(req: Request) {
   }
 
   const commRate = commissionRate !== undefined && commissionRate !== "" ? parseFloat(commissionRate) : 2.5
-  const goods = parseFloat(totalValue) // goods value = net kg × rate/kg
+  const goods = parseFloat(totalValue) // goods value = net kg × rate/kg (or mound × rate/mound)
   const commAmount = parseFloat(((goods * commRate) / 100).toFixed(2))
   const labourAmt = parseFloat(labourAmount || "0")
-  // Labour: ADD = charged on top of the buyer's total; DEDUCT = taken from the seller's amount.
-  const total = isAddLabour ? goods + labourAmt : goods // what the buyer owes
-  // RECEIVE: commission deducted from the seller; PAY: seller gets the full goods value.
-  const baseSeller = isPay ? goods : parseFloat((goods - commAmount).toFixed(2))
-  const sellerPayable = Math.max(baseSeller - (isAddLabour ? 0 : labourAmt), 0)
+  const isReceive = !isPay
+  // Commission both-sides: RECEIVE adds it to the buyer AND deducts it from the seller.
+  // Labour: ADD = on top of the buyer's total; DEDUCT = taken from the seller's amount.
+  const total = goods + (isReceive ? commAmount : 0) + (isAddLabour ? labourAmt : 0) // buyer owes
+  const sellerPayable = Math.max(goods - (isReceive ? commAmount : 0) - (isAddLabour ? 0 : labourAmt), 0)
+  // Commission earned (received both sides) or paid out.
+  const commEarned = isReceive ? parseFloat((commAmount * 2).toFixed(2)) : commAmount
   const paid = parseFloat(initialPaid || "0")
   const balance = total - paid
   const status = balance <= 0 ? "PAID" : paid > 0 ? "PARTIAL" : "PENDING"
@@ -101,6 +105,7 @@ export async function POST(req: Request) {
         supplierId: supplierId || null,
         walkInSeller: walkInSeller || null,
         commodity: commodity || null,
+        vehicleNo: vehicleNo?.trim() || null,
         bags: bags ? parseInt(bags) : null,
         bagType: bagType || "bag",
         weight: num(weight),
@@ -108,6 +113,7 @@ export async function POST(req: Request) {
         tareWeight: num(tareWeight),
         bardanaWeight: num(bardanaWeight),
         rate: parseFloat(rate || "0"),
+        rateUnit: rateUnit === "mound" ? "mound" : "kg",
         totalValue: total,
         commissionRate: commRate,
         commissionDirection: isPay ? "PAY" : "RECEIVE",
@@ -157,7 +163,7 @@ export async function POST(req: Request) {
       data: {
         shopId: session.user.shopId || null,
         type: isPay ? "DEBIT" : "CREDIT",
-        amount: commAmount,
+        amount: commEarned,
         description: `Commission ${isPay ? "paid" : "earned"} — ${commodity || "goods"}${sellerName ? ` from ${sellerName}` : ""} to ${buyerName}`,
         reference: c.id,
         category: isPay ? "Commission Paid" : "Commission Income",
@@ -166,7 +172,7 @@ export async function POST(req: Request) {
       },
     })
     if (commissionAccount) {
-      await tx.account.update({ where: { id: commissionAccount.id }, data: { balance: { increment: commAmount } } })
+      await tx.account.update({ where: { id: commissionAccount.id }, data: { balance: { increment: commEarned } } })
     }
 
     // Post labour as expense to Labour account

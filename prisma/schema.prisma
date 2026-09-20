@@ -933,13 +933,15 @@ model Commission {
   walkInSeller     String?
   walkInCustomer   String?
   commodity        String?
+  vehicleNo        String?
   bags             Int?
   bagType          String?    @default("bag") // bori | jali | bag
   weight           Float?     // net weight (kg)
   grossWeight      Float?
   tareWeight       Float?
   bardanaWeight    Float?
-  rate             Float      @default(0) // rate per kg
+  rate             Float      @default(0) // rate value (per kg or per mound)
+  rateUnit         String?    @default("kg") // kg | mound (1 mound = 40 kg)
   totalValue       Float
   commissionRate   Float      @default(2.5)
   commissionDirection String? @default("RECEIVE") // RECEIVE = we earn it, PAY = we pay it
