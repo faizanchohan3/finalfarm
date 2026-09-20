@@ -129,8 +129,8 @@ export default function CommissionPage() {
   // Commission applies to BOTH sides when received: added to the buyer, deducted from the seller.
   const buyerOwes = total > 0 ? total + (isReceive ? commAmount : 0) + (isAddLabour ? labourAmt : 0) : 0
   const sellerPayable = total > 0 ? Math.max(total - (isReceive ? commAmount : 0) - (isAddLabour ? 0 : labourAmt), 0) : 0
-  // Received earns commission from both sides; paid is a commission you pay out.
-  const netCommission = isReceive ? commAmount * 2 : -commAmount
+  // Commission amount is calculated once (goods × rate%).
+  const netCommission = isReceive ? commAmount : -commAmount
   const balance = buyerOwes - parseFloat(paidAmount || "0")
 
   function resetNewForm() {

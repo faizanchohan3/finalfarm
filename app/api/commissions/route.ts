@@ -84,8 +84,8 @@ export async function POST(req: Request) {
   // Labour: ADD = on top of the buyer's total; DEDUCT = taken from the seller's amount.
   const total = goods + (isReceive ? commAmount : 0) + (isAddLabour ? labourAmt : 0) // buyer owes
   const sellerPayable = Math.max(goods - (isReceive ? commAmount : 0) - (isAddLabour ? 0 : labourAmt), 0)
-  // Commission earned (received both sides) or paid out.
-  const commEarned = isReceive ? parseFloat((commAmount * 2).toFixed(2)) : commAmount
+  // Commission amount is calculated once (goods × rate%).
+  const commEarned = commAmount
   const paid = parseFloat(initialPaid || "0")
   const balance = total - paid
   const status = balance <= 0 ? "PAID" : paid > 0 ? "PARTIAL" : "PENDING"
