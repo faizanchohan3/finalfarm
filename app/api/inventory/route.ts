@@ -11,7 +11,7 @@ export async function GET() {
 
   const products = await db.product.findMany({
     where: { ...shopFilter, isActive: true },
-    include: { category: true },
+    include: { category: true, room: true },
     orderBy: { name: "asc" },
   })
 
@@ -23,10 +23,10 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  const { name, categoryId, unit, currentStock, minStock, purchasePrice, salePrice } = body
+  const { name, categoryId, roomId, unit, currentStock, minStock, purchasePrice, salePrice } = body
 
   const product = await db.product.create({
-    data: { shopId: session.user.shopId || null, name, categoryId, unit, currentStock, minStock, purchasePrice, salePrice },
+    data: { shopId: session.user.shopId || null, name, categoryId, roomId: roomId || null, unit, currentStock, minStock, purchasePrice, salePrice },
   })
 
   if (currentStock > 0) {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Fragment, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,26 +19,33 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<any>(null)
+  const [rooms, setRooms] = useState<any[]>([])
   const [form, setForm] = useState({
-    name: "", categoryId: "", unit: "KG", currentStock: "0",
+    name: "", categoryId: "", roomId: "", unit: "KG", currentStock: "0",
     minStock: "0", purchasePrice: "0", salePrice: "0",
   })
   const [showCategories, setShowCategories] = useState(false)
   const [newCatName, setNewCatName] = useState("")
   const [catSaving, setCatSaving] = useState(false)
+  const [showRooms, setShowRooms] = useState(false)
+  const [newRoomName, setNewRoomName] = useState("")
+  const [roomSaving, setRoomSaving] = useState(false)
   const [shop, setShop] = useState<any>(null)
   const [categorySearch, setCategorySearch] = useState("")
+  const [roomSearch, setRoomSearch] = useState("")
 
   async function loadData() {
     try {
       setLoading(true)
-      const [pr, cr, shr] = await Promise.all([
+      const [pr, cr, rr, shr] = await Promise.all([
         fetch("/api/inventory").then((r) => r.json()),
         fetch("/api/categories").then((r) => r.json()),
+        fetch("/api/rooms").then((r) => r.json()),
         fetch("/api/settings").then((r) => r.json()),
       ])
       setProducts(pr.products || [])
       setCategories(cr.categories || [])
+      setRooms(rr.rooms || [])
       setShop(shr.shop || null)
     } finally {
       setLoading(false)
@@ -49,14 +56,14 @@ export default function InventoryPage() {
 
   function openAdd() {
     setEditing(null)
-    setForm({ name: "", categoryId: "", unit: "KG", currentStock: "0", minStock: "0", purchasePrice: "0", salePrice: "0" })
+    setForm({ name: "", categoryId: "", roomId: "", unit: "KG", currentStock: "0", minStock: "0", purchasePrice: "0", salePrice: "0" })
     setShowModal(true)
   }
 
   function openEdit(p: any) {
     setEditing(p)
     setForm({
-      name: p.name, categoryId: p.categoryId, unit: p.unit,
+      name: p.name, categoryId: p.categoryId, roomId: p.roomId || "", unit: p.unit,
       currentStock: String(p.currentStock), minStock: String(p.minStock),
       purchasePrice: String(p.purchasePrice), salePrice: String(p.salePrice),
     })
@@ -105,13 +112,36 @@ export default function InventoryPage() {
     loadData()
   }
 
+  async function addRoom() {
+    if (!newRoomName.trim()) return
+    setRoomSaving(true)
+    await fetch("/api/rooms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newRoomName.trim() }),
+    })
+    setNewRoomName("")
+    setRoomSaving(false)
+    loadData()
+  }
+
+  async function deleteRoom(id: string) {
+    if (!confirm("Delete this room? Products in this room will move to Unassigned.")) return
+    await fetch(`/api/rooms/${id}`, { method: "DELETE" })
+    loadData()
+  }
+
   function printAllStock() {
     const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
     const totalValue = products.reduce((s, p) => s + p.currentStock * p.purchasePrice, 0)
-    const rows = filtered.map((p, i) => {
-      const isLow = p.currentStock <= p.minStock
-      return `<tr style="${isLow ? "background:#fef2f2;" : i % 2 === 0 ? "background:#f9fdf9;" : ""}">
-        <td>${i + 1}</td>
+    let idx = 0
+    const rows = groupByRoom(filtered).map((g) => {
+      const groupValue = g.items.reduce((s, p) => s + p.currentStock * p.purchasePrice, 0)
+      const itemRows = g.items.map((p) => {
+        idx++
+        const isLow = p.currentStock <= p.minStock
+        return `<tr style="${isLow ? "background:#fef2f2;" : idx % 2 === 0 ? "background:#f9fdf9;" : ""}">
+        <td>${idx}</td>
         <td><strong>${p.name}</strong></td>
         <td>${p.category?.name || "—"}</td>
         <td style="text-align:right;${isLow ? "color:#b91c1c;font-weight:700;" : ""}">${p.currentStock}</td>
@@ -121,6 +151,14 @@ export default function InventoryPage() {
         <td style="text-align:right">PKR ${(p.salePrice || 0).toLocaleString()}</td>
         <td style="text-align:right">PKR ${(p.currentStock * p.purchasePrice).toLocaleString()}</td>
         <td style="text-align:center"><span style="font-size:10px;padding:2px 8px;border-radius:99px;background:${isLow ? "#fee2e2" : "#dcfce7"};color:${isLow ? "#b91c1c" : "#15803d"};font-weight:600">${isLow ? "Low Stock" : "In Stock"}</span></td>
+      </tr>`
+      }).join("")
+      return `<tr style="background:#f5f3ff">
+        <td colspan="10" style="font-weight:800;color:#5b21b6;padding:6px 8px">${g.name} (${g.items.length})</td>
+      </tr>${itemRows}<tr style="background:#faf9fc">
+        <td colspan="8" style="text-align:right;font-weight:600;color:#6b7280">${g.name} subtotal (${g.items.length} product${g.items.length > 1 ? "s" : ""})</td>
+        <td style="text-align:right;font-weight:700">PKR ${groupValue.toLocaleString()}</td>
+        <td></td>
       </tr>`
     }).join("")
     const w = window.open("", "_blank")!
@@ -165,6 +203,22 @@ ${buildPrintHeader(shop)}
     p.category?.name.toLowerCase().includes(search.toLowerCase())
   )
 
+  // Group products by room; rooms alphabetical, "Unassigned" last
+  function groupByRoom(list: any[]) {
+    const map = new Map<string, any[]>()
+    for (const p of list) {
+      const key = p.room?.name || "Unassigned"
+      if (!map.has(key)) map.set(key, [])
+      map.get(key)!.push(p)
+    }
+    const names = Array.from(map.keys()).filter((n) => n !== "Unassigned").sort((a, b) => a.localeCompare(b))
+    const groups = names.map((n) => ({ name: n, items: map.get(n)! }))
+    if (map.has("Unassigned")) groups.push({ name: "Unassigned", items: map.get("Unassigned")! })
+    return groups
+  }
+
+  const roomGroups = groupByRoom(filtered)
+
   const lowStock = products.filter((p) => p.currentStock <= p.minStock)
   const criticalStock = products.filter((p) => p.currentStock <= 2)
 
@@ -183,6 +237,11 @@ ${buildPrintHeader(shop)}
             <Tag className="w-4 h-4" />
             Categories ({categories.length})
             {showCategories ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </Button>
+          <Button variant="outline" onClick={() => setShowRooms((v) => !v)} className="gap-2">
+            <Package className="w-4 h-4" />
+            Rooms ({rooms.length})
+            {showRooms ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </Button>
           <Button onClick={openAdd} className="gap-1">
             <Plus className="w-4 h-4" /> Add Product
@@ -225,6 +284,51 @@ ${buildPrintHeader(shop)}
                     onClick={() => deleteCategory(c.id)}
                     className="text-purple-400 hover:text-red-600 transition-colors ml-1"
                     title="Delete category"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Room Management Panel */}
+      {showRooms && (
+        <div className="bg-blue-50 border border-blue-300 rounded-xl p-5 shadow-sm">
+          <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Package className="w-4 h-4 text-purple-600" />
+            Manage Rooms
+          </h3>
+
+          {/* Add new room */}
+          <div className="flex gap-2 mb-4">
+            <Input
+              placeholder="New room number/name (e.g. Room 1, Room 2)"
+              value={newRoomName}
+              onChange={(e) => setNewRoomName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addRoom()}
+              className="flex-1"
+            />
+            <Button onClick={addRoom} disabled={roomSaving || !newRoomName.trim()} className="gap-1">
+              <Plus className="w-4 h-4" />
+              {roomSaving ? "Adding..." : "Add"}
+            </Button>
+          </div>
+
+          {/* Room list */}
+          {rooms.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-4">No rooms yet. Add one above to get started.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {rooms.map((r) => (
+                <div key={r.id} className="flex items-center gap-1.5 bg-purple-50 border border-purple-200 text-purple-800 text-sm px-3 py-1.5 rounded-full">
+                  <span className="font-medium">{r.name}</span>
+                  <button
+                    onClick={() => deleteRoom(r.id)}
+                    className="text-purple-400 hover:text-red-600 transition-colors ml-1"
+                    title="Delete room"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -310,36 +414,54 @@ ${buildPrintHeader(shop)}
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((p) => (
-                    <tr key={p.id} className="border-b border-gray-50 hover:bg-blue-50">
-                      <td className="py-3 px-3 font-medium text-gray-800">{p.name}</td>
-                      <td className="py-3 px-3 text-gray-600">{p.category?.name}</td>
-                      <td className="py-3 px-3">
-                        <span className={p.currentStock <= p.minStock ? "text-red-600 font-semibold" : "text-gray-700"}>
-                          {p.currentStock}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-gray-500">{p.unit}</td>
-                      <td className="py-3 px-3 text-gray-600">{p.minStock}</td>
-                      <td className="py-3 px-3 text-gray-700">{formatCurrency(p.purchasePrice)}</td>
-                      <td className="py-3 px-3 text-gray-700">{formatCurrency(p.salePrice)}</td>
-                      <td className="py-3 px-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${p.currentStock <= p.minStock ? "bg-red-100 text-red-700" : "bg-green-100 text-purple-700"}`}>
-                          {p.currentStock <= p.minStock ? "Low Stock" : "In Stock"}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => openEdit(p)} className="p-1 text-gray-400 hover:text-blue-600">
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => handleDelete(p.id)} className="p-1 text-gray-400 hover:text-red-600">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {roomGroups.map((g) => {
+                    const groupValue = g.items.reduce((s, p) => s + p.currentStock * p.purchasePrice, 0)
+                    return (
+                      <Fragment key={g.name}>
+                        <tr className="bg-purple-50 border-b border-purple-200">
+                          <td colSpan={9} className="py-2 px-3 font-semibold text-purple-800">
+                            {g.name} <span className="text-purple-500 font-normal">({g.items.length})</span>
+                          </td>
+                        </tr>
+                        {g.items.map((p) => (
+                          <tr key={p.id} className="border-b border-gray-50 hover:bg-blue-50">
+                            <td className="py-3 px-3 font-medium text-gray-800">{p.name}</td>
+                            <td className="py-3 px-3 text-gray-600">{p.category?.name}</td>
+                            <td className="py-3 px-3">
+                              <span className={p.currentStock <= p.minStock ? "text-red-600 font-semibold" : "text-gray-700"}>
+                                {p.currentStock}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-gray-500">{p.unit}</td>
+                            <td className="py-3 px-3 text-gray-600">{p.minStock}</td>
+                            <td className="py-3 px-3 text-gray-700">{formatCurrency(p.purchasePrice)}</td>
+                            <td className="py-3 px-3 text-gray-700">{formatCurrency(p.salePrice)}</td>
+                            <td className="py-3 px-3">
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${p.currentStock <= p.minStock ? "bg-red-100 text-red-700" : "bg-green-100 text-purple-700"}`}>
+                                {p.currentStock <= p.minStock ? "Low Stock" : "In Stock"}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3">
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => openEdit(p)} className="p-1 text-gray-400 hover:text-blue-600">
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button onClick={() => handleDelete(p.id)} className="p-1 text-gray-400 hover:text-red-600">
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        <tr className="border-b border-gray-100 bg-gray-50/60">
+                          <td colSpan={8} className="py-2 px-3 text-right text-xs font-medium text-gray-500">
+                            {g.name} subtotal ({g.items.length} product{g.items.length > 1 ? "s" : ""})
+                          </td>
+                          <td className="py-2 px-3 text-xs font-semibold text-gray-700">{formatCurrency(groupValue)}</td>
+                        </tr>
+                      </Fragment>
+                    )
+                  })}
                   {filtered.length === 0 && (
                     <tr><td colSpan={9} className="text-center py-8 text-gray-400">No products found</td></tr>
                   )}
@@ -406,6 +528,37 @@ ${buildPrintHeader(shop)}
                           categories.filter((c: any) => c.name.toLowerCase().includes(categorySearch.toLowerCase())).map((c: any) => (
                             <SelectItem key={c.id} value={c.id}>
                               {c.name}
+                            </SelectItem>
+                          ))
+                        )}
+                      </div>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+              <div>
+                <Label className="text-xs font-semibold text-gray-600">Room</Label>
+                {rooms.length === 0 ? (
+                  <div className="mt-1 text-xs text-blue-600 bg-blue-50 border border-blue-300 rounded-lg px-3 py-2.5">
+                    No rooms yet. Go to <strong>Rooms</strong> tab above to add one.
+                  </div>
+                ) : (
+                  <Select value={form.roomId || "none"} onValueChange={(v) => { setForm({ ...form, roomId: v === "none" ? "" : v }); setRoomSearch("") }}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select a room" />
+                    </SelectTrigger>
+                    <SelectContent side="bottom" sideOffset={8} className="p-0">
+                      <div className="sticky top-0 bg-blue-50 border-b p-2">
+                        <Input placeholder="Search rooms..." value={roomSearch} onChange={(e) => setRoomSearch(e.target.value)} className="h-8 text-xs" autoFocus />
+                      </div>
+                      <div className="max-h-40 overflow-y-auto">
+                        <SelectItem value="none">Unassigned</SelectItem>
+                        {rooms.filter((r: any) => r.name.toLowerCase().includes(roomSearch.toLowerCase())).length === 0 ? (
+                          <div className="px-2 py-4 text-xs text-gray-500 text-center">No rooms found</div>
+                        ) : (
+                          rooms.filter((r: any) => r.name.toLowerCase().includes(roomSearch.toLowerCase())).map((r: any) => (
+                            <SelectItem key={r.id} value={r.id}>
+                              {r.name}
                             </SelectItem>
                           ))
                         )}

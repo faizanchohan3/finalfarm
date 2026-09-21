@@ -125,6 +125,7 @@ model Shop {
   accounts            Account[]
   lots                Lot[]
   markhas             Markha[]
+  rooms               Room[]
 }
 
 // ── MARKHA (lot brand / mark) ────────────────────────────────────────────────
@@ -200,11 +201,22 @@ model Category {
   lots     Lot[]
 }
 
+model Room {
+  id        String   @id @default(cuid())
+  shopId    String?
+  name      String
+  createdAt DateTime @default(now())
+
+  shop     Shop?     @relation(fields: [shopId], references: [id])
+  products Product[]
+}
+
 model Product {
   id            String   @id @default(cuid())
   shopId        String?
   name          String
   categoryId    String
+  roomId        String?
   unit          String   @default("KG")
   currentStock  Float    @default(0)
   minStock      Float    @default(0)
@@ -216,6 +228,7 @@ model Product {
 
   shop                Shop?                @relation(fields: [shopId], references: [id])
   category            Category             @relation(fields: [categoryId], references: [id])
+  room                Room?                @relation(fields: [roomId], references: [id])
   saleItems           SaleItem[]
   purchaseItems       PurchaseItem[]
   stockMovements      StockMovement[]
