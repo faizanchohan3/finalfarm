@@ -24,6 +24,7 @@ export const UR: Record<string, string> = {
   "Gate / Weighbridge": "گیٹ / وے برج",
   "Transport": "ٹرانسپورٹ",
   "Notes": "نوٹس",
+  "Upload Data": "ڈیٹا اپلوڈ",
   "Reports": "رپورٹس",
   "Audit Log": "آڈٹ لاگ",
   "Users": "صارفین",
