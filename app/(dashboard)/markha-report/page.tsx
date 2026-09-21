@@ -40,6 +40,13 @@ export default function MarkhaReportPage() {
     return [...set].sort()
   })()
 
+  // Which list a name belongs to: saved slot, else whichever lot field it was used in.
+  const slotOf = (name: string): 1 | 2 => {
+    const saved = markhas.find((m) => m.name === name)
+    if (saved) return saved.slot === 2 ? 2 : 1
+    return lots.some((l) => l.markha1 === name) ? 1 : 2
+  }
+
   const rows = names.map((name) => {
     const matched = lots.filter((l) => l.markha1 === name || l.markha2 === name)
     const stock = matched.filter(inStockOf)
@@ -113,11 +120,15 @@ export default function MarkhaReportPage() {
             <select
               value={markhaFilter}
               onChange={(e) => setMarkhaFilter(e.target.value)}
-              className="h-9 rounded-md border border-gray-300 bg-white px-2 text-sm text-gray-700"
+              className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 shadow-xs focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-ring/20"
               title={t("Filter by markha")}
             >
               <option value="ALL">{t("All markhas")}</option>
-              {names.map((n) => <option key={n} value={n}>{n}</option>)}
+              {([1, 2] as const).map((slot) => (
+                <optgroup key={slot} label={t(`Markha ${slot}`)}>
+                  {names.filter((n) => slotOf(n) === slot).map((n) => <option key={n} value={n}>{n}</option>)}
+                </optgroup>
+              ))}
             </select>
           </div>
           <Button variant="outline" className="gap-2" onClick={printReport} disabled={shownRows.length === 0}>

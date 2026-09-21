@@ -134,6 +134,7 @@ model Markha {
   id        String   @id @default(cuid())
   shopId    String?
   name      String
+  slot      Int      @default(1) // 1 = Markha 1 list, 2 = Markha 2 list (a name lives in only one)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
@@ -207,8 +208,9 @@ model Room {
   name      String
   createdAt DateTime @default(now())
 
-  shop     Shop?     @relation(fields: [shopId], references: [id])
-  products Product[]
+  shop      Shop?      @relation(fields: [shopId], references: [id])
+  products  Product[]
+  purchases Purchase[]
 }
 
 model Product {
@@ -365,6 +367,7 @@ model Purchase {
   farmerId         String?
   sellerCustomerId String?
   walkinSeller     String?
+  roomId           String? // store room the purchased goods go into (one room can hold many products)
   totalAmount      Float
   paidAmount       Float      @default(0)
   balance          Float      @default(0)
@@ -378,6 +381,7 @@ model Purchase {
   supplier       Supplier?      @relation(fields: [supplierId], references: [id])
   farmer         Farmer?        @relation(fields: [farmerId], references: [id])
   sellerCustomer Customer?      @relation("PurchaseSeller", fields: [sellerCustomerId], references: [id])
+  room           Room?          @relation(fields: [roomId], references: [id])
   createdBy      User           @relation(fields: [createdById], references: [id])
   items          PurchaseItem[]
   payments       Payment[]
@@ -712,6 +716,7 @@ model Warehouse {
   location  String?
   capacity  Float?
   manager   String?
+  isPotato  Boolean  @default(false) // potato godowns are the only ones offered in the Add Lot form
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 

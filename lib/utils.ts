@@ -66,11 +66,11 @@ export function getStatusColor(status: string): string {
 
 export function getRoleColor(role: string): string {
   const colors: Record<string, string> = {
-    SUPER_ADMIN: "bg-purple-100 text-purple-800",
-    ADMIN: "bg-blue-100 text-blue-800",
-    MANAGER: "bg-green-100 text-green-800",
-    CASHIER: "bg-yellow-100 text-yellow-800",
-    AUDITOR: "bg-gray-100 text-gray-800",
+    SUPER_ADMIN: "bg-brand-50 text-brand-700",
+    ADMIN: "bg-brand-50 text-brand-700",
+    MANAGER: "bg-gray-100 text-gray-700",
+    CASHIER: "bg-amber-50 text-amber-700",
+    AUDITOR: "bg-gray-100 text-gray-700",
   }
   return colors[role] || "bg-gray-100 text-gray-800"
 }

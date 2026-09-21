@@ -393,12 +393,12 @@ ${buildPrintHeader(shop)}
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">{t("Commission (Aadat)")}</h2>
           <p className="text-gray-500 text-sm">{commissions.length} {t("total transactions")}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={() => printAllCommissions(filtered)}>
             <Printer className="w-4 h-4" /> {t("Print All")}
           </Button>
@@ -509,19 +509,19 @@ ${buildPrintHeader(shop)}
       <Dialog open={showNew} onOpenChange={setShowNew}>
         <DialogContent className="w-[96vw] max-w-4xl max-h-[92vh] overflow-y-auto p-0">
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-gradient-to-r from-orange-600 to-orange-500 text-blue-900 px-6 py-4 rounded-t-lg flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-blue-50/20 flex items-center justify-center flex-shrink-0">
-                <Percent className="w-5 h-5 text-blue-900" />
+          <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-gray-200 text-gray-900 px-6 py-4 rounded-t-2xl flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
+                <Percent className="w-5 h-5 text-brand-600" />
               </div>
               <div>
-                <h2 className="text-lg font-bold">{t("New Commission")}</h2>
-                <p className="text-orange-100 text-xs">{t("Fill seller, buyer, and transaction details")}</p>
+                <h2 className="text-base font-semibold">{t("New Commission")}</h2>
+                <p className="text-gray-500 text-xs">{t("Fill seller, buyer, and transaction details")}</p>
               </div>
             </div>
             <button
               onClick={() => setShowNew(false)}
-              className="text-blue-900 hover:bg-blue-50/20 rounded-lg p-1.5 transition-colors flex-shrink-0"
+              className="text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg p-1.5 transition-colors flex-shrink-0"
               title="Close"
             >
               <X className="w-5 h-5" />
@@ -530,7 +530,7 @@ ${buildPrintHeader(shop)}
 
           <div className="p-5 space-y-5">
 
-            {/* â”€â”€ Section 1: Parties â”€â”€ */}
+            {/* ── Section 1: Parties ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Seller & Buyer</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -568,7 +568,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* â”€â”€ Section 2: Commodity & Quantity â”€â”€ */}
+            {/* ── Section 2: Commodity & Quantity ── */}
               </div>
             </div>
             <div>
@@ -595,7 +595,7 @@ ${buildPrintHeader(shop)}
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">{t("Bag Type")}</Label>
                   <select
-                    className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="mt-1 flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 shadow-xs focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-ring/20"
                     value={bagType}
                     onChange={(e) => setBagType(e.target.value)}
                   >
@@ -635,7 +635,7 @@ ${buildPrintHeader(shop)}
                 <div>
                   <Label className="text-xs font-semibold text-gray-600">{t("Rate unit")}</Label>
                   <select
-                    className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="mt-1 flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 shadow-xs focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-ring/20"
                     value={rateUnit}
                     onChange={(e) => setRateUnit(e.target.value)}
                   >
@@ -650,7 +650,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* â”€â”€ Section 3: Amounts â”€â”€ */}
+            {/* ── Section 3: Amounts ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Amounts & Commission</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -752,7 +752,7 @@ ${buildPrintHeader(shop)}
               )}
             </div>
 
-            {/* â”€â”€ Section 4: Payment & Notes â”€â”€ */}
+            {/* ── Section 4: Payment & Notes ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Payment & Notes</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -782,7 +782,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* â”€â”€ Action Buttons â”€â”€ */}
+            {/* ── Action Buttons ── */}
             <div className="flex gap-3 pt-1">
               <Button variant="outline" onClick={() => setShowNew(false)} className="flex-1" disabled={saving}>Cancel</Button>
               <Button onClick={handleSave} disabled={saving} className="flex-1 bg-orange-600 hover:bg-orange-700 gap-2">
@@ -802,11 +802,11 @@ ${buildPrintHeader(shop)}
           {payTarget && (
             <div className="space-y-4">
               <div className="bg-blue-50 rounded-lg p-3 text-sm space-y-1">
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2 flex-wrap">
                   <span className="text-gray-500">Buyer:</span>
                   <span className="font-medium">{payTarget.customer?.name || payTarget.walkInCustomer}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2 flex-wrap">
                   <span className="text-gray-500">Outstanding:</span>
                   <span className="font-bold text-red-600">{formatCurrency(payTarget.balance)}</span>
                 </div>
@@ -831,7 +831,7 @@ ${buildPrintHeader(shop)}
                 <Label>Notes</Label>
                 <Input value={payNotes} onChange={(e) => setPayNotes(e.target.value)} placeholder="Optional..." />
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button variant="outline" onClick={() => setPayTarget(null)} className="flex-1">Cancel</Button>
                 <Button onClick={handlePay} disabled={paying} className="flex-1">
                   {paying ? "Saving..." : "Record Payment"}
@@ -855,27 +855,27 @@ ${buildPrintHeader(shop)}
           </DialogHeader>
           <div className="space-y-4">
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-300 text-sm space-y-1.5">
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Reference</span>
                 <span className="font-semibold">#{deleteTarget?.id?.slice(-6).toUpperCase()}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Commodity</span>
                 <span className="font-semibold">{deleteTarget?.commodity || "—"}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Buyer</span>
                 <span className="font-semibold">{deleteTarget?.customer?.name || deleteTarget?.walkInCustomer || "—"}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Seller</span>
                 <span className="font-semibold">{deleteTarget?.farmer?.name || deleteTarget?.supplier?.name || deleteTarget?.walkInSeller || "—"}</span>
               </div>
-              <div className="flex justify-between border-t pt-1.5">
+              <div className="flex justify-between border-t pt-1.5 gap-2 flex-wrap">
                 <span className="text-gray-500">Total Value</span>
                 <span className="font-bold text-red-600">{formatCurrency(deleteTarget?.totalValue || 0)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Date</span>
                 <span>{deleteTarget ? formatDate(deleteTarget.createdAt) : ""}</span>
               </div>
@@ -886,9 +886,9 @@ ${buildPrintHeader(shop)}
               <p>✓ Removed from seller (farmer/supplier) ledger</p>
               <p>✓ Commission income reversed from accounts</p>
               <p>✓ Labour expense reversed from accounts</p>
-              <p>âœ— This cannot be undone</p>
+              <p>✗ This cannot be undone</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <Button variant="outline" className="flex-1" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
               <Button className="flex-1 bg-red-600 hover:bg-red-700 gap-2" onClick={confirmDelete} disabled={deleting}>
                 <Trash2 className="w-4 h-4" />{deleting ? "Deleting..." : "Delete Commission"}

@@ -329,7 +329,7 @@ ${buildPrintHeader(shop)}
 
   return (
     <>
-      {/* â”€â”€ Pesticide Sale Print Invoice (branded format) â”€â”€ */}
+      {/* ── Pesticide Sale Print Invoice (branded format) ── */}
       {selectedPesticideSaleDetail && (
         <div className="hidden print:block fixed inset-0 bg-blue-50 z-50">
           <style>{`@media print { @page { size: A4 portrait; margin: 0; } }`}</style>
@@ -414,7 +414,7 @@ ${buildPrintHeader(shop)}
         </div>
       )}
 
-      {/* â”€â”€ Product Sale Print Invoice (branded format) â”€â”€ */}
+      {/* ── Product Sale Print Invoice (branded format) ── */}
       {selectedSale && (
         <div className="hidden print:block fixed inset-0 bg-blue-50 z-50">
           <style>{`@media print { @page { size: A4 portrait; margin: 0; } }`}</style>
@@ -512,14 +512,14 @@ ${buildPrintHeader(shop)}
         </div>
       )}
 
-      {/* â”€â”€ Main Page (hidden on print) â”€â”€ */}
+      {/* ── Main Page (hidden on print) ── */}
       <div className="space-y-6 print:hidden">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{t("Sales")}</h2>
             <p className="text-gray-500 text-sm">{t("Today")}: {formatCurrency(todayTotal)}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {activeTab === "products" ? (
               <Button onClick={() => setShowModal(true)}>
                 <Plus className="w-4 h-4" /> {t("New Sale")}
@@ -533,7 +533,7 @@ ${buildPrintHeader(shop)}
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-blue-300">
+        <div className="flex overflow-x-auto overflow-y-hidden [scrollbar-width:none] whitespace-nowrap gap-2 border-b border-blue-300">
           <button
             onClick={() => setActiveTab("products")}
             className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "products" ? "border-purple-700 text-purple-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
@@ -715,7 +715,7 @@ ${buildPrintHeader(shop)}
         <Dialog open={showModal} onOpenChange={setShowModal}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2 flex-wrap">
                 <ShoppingCart className="w-5 h-5" /> New Sale
               </DialogTitle>
             </DialogHeader>
@@ -767,14 +767,14 @@ ${buildPrintHeader(shop)}
                 />
               </div>
               <div>
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
                   <Label>Items</Label>
                   <Button size="sm" variant="outline" onClick={addItem}><Plus className="w-3 h-3" /> Add Row</Button>
                 </div>
                 <div className="space-y-2">
                   {items.map((item, i) => (
-                    <div key={i} className="grid grid-cols-12 gap-2 items-end">
-                      <div className="col-span-5">
+                    <div key={i} className="grid grid-cols-6 sm:grid-cols-12 gap-2 items-start rounded-lg border border-gray-200 p-2 sm:border-0 sm:p-0">
+                      <div className="col-span-6 sm:col-span-5 min-w-0">
                         <SearchableSelect
                           value={item.productId}
                           onValueChange={(v) => updateItem(i, "productId", v)}
@@ -789,29 +789,27 @@ ${buildPrintHeader(shop)}
                       <div className="col-span-2">
                         <Input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => updateItem(i, "quantity", e.target.value)} />
                       </div>
-                      <div className="col-span-3">
+                      <div className="col-span-2">
                         <Input type="number" placeholder="Price" value={item.price} onChange={(e) => updateItem(i, "price", e.target.value)} />
                       </div>
-                      <div className="col-span-1 text-xs text-gray-500 text-right">
-                        {formatCurrency(parseFloat(item.quantity || "0") * parseFloat(item.price || "0"))}
-                      </div>
-                      <div className="col-span-1">
-                        <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
+                      <div className="col-span-2 sm:col-span-3 flex items-center justify-end gap-2 h-9 min-w-0">
+                        <span className="text-xs font-medium text-gray-700 tabular-nums truncate">{formatCurrency(parseFloat(item.quantity || "0") * parseFloat(item.price || "0"))}</span>
+                        <button type="button" onClick={() => removeItem(i)} title="Remove row" className="flex-shrink-0 p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="bg-blue-50 rounded-lg p-4 space-y-2">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm gap-2 flex-wrap">
                   <span className="text-gray-600">Total Amount:</span>
                   <span className="font-bold text-gray-900">{formatCurrency(total)}</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <Label className="whitespace-nowrap">Amount Paid:</Label>
                   <Input type="number" value={paidAmount} onChange={(e) => setPaidAmount(e.target.value)} className="max-w-[150px]" />
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm gap-2 flex-wrap">
                   <span className="text-gray-600">Balance:</span>
                   <span className={`font-bold ${balance > 0 ? "text-red-600" : "text-purple-600"}`}>{formatCurrency(balance)}</span>
                 </div>
@@ -820,7 +818,7 @@ ${buildPrintHeader(shop)}
                 <Label>Notes</Label>
                 <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional notes..." rows={2} />
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">{t("Cancel")}</Button>
                 <Button onClick={handleSave} className="flex-1">{t("Create Sale")}</Button>
               </div>
@@ -832,7 +830,7 @@ ${buildPrintHeader(shop)}
         <Dialog open={showPesticideSaleModal} onOpenChange={setShowPesticideSaleModal}>
           <DialogContent className="max-w-sm">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2 flex-wrap">
                 <Sprout className="w-5 h-5 text-purple-600" /> New Pesticide Sale
               </DialogTitle>
             </DialogHeader>
@@ -859,7 +857,7 @@ ${buildPrintHeader(shop)}
                 <Input type="number" value={pesticideSaleForm.quantity} onChange={(e) => setPesticideSaleForm({ ...pesticideSaleForm, quantity: e.target.value })} />
               </div>
               {selectedPesticide && (
-                <div className="flex justify-between items-center bg-blue-50 rounded px-3 py-2">
+                <div className="flex justify-between items-center bg-blue-50 rounded px-3 py-2 gap-2 flex-wrap">
                   <span className="text-sm text-gray-600">Total Amount:</span>
                   <span className="text-lg font-bold text-purple-700">{formatCurrency(pesticideSaleTotal)}</span>
                 </div>
@@ -893,7 +891,7 @@ ${buildPrintHeader(shop)}
                 <Label>Amount Paid</Label>
                 <Input type="number" value={pesticideSaleForm.paidAmount} onChange={(e) => setPesticideSaleForm({ ...pesticideSaleForm, paidAmount: e.target.value })} />
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button variant="outline" onClick={() => setShowPesticideSaleModal(false)} className="flex-1">Cancel</Button>
                 <Button onClick={handlePesticideSale} className="flex-1">Sell</Button>
               </div>
@@ -906,8 +904,8 @@ ${buildPrintHeader(shop)}
           <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <div className="flex items-center justify-between">
-                  <DialogTitle className="flex items-center gap-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <DialogTitle className="flex items-center gap-2 flex-wrap">
                     <ShoppingCart className="w-5 h-5 text-purple-600" />
                     Sale Details
                     <span className="text-sm font-normal text-gray-400">#{selectedSale.id.slice(-8).toUpperCase()}</span>
@@ -940,6 +938,7 @@ ${buildPrintHeader(shop)}
                 <div>
                   <p className="text-sm font-semibold text-gray-700 mb-2">Items</p>
                   <div className="border rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-blue-50 border-b">
                         <tr>
@@ -964,16 +963,17 @@ ${buildPrintHeader(shop)}
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-4">
                   <div className="flex justify-end">
                     <div className="w-56 space-y-2 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-2 flex-wrap">
                         <span className="text-gray-600">Total Amount:</span>
                         <span className="font-bold text-gray-900">{formatCurrency(selectedSale.totalAmount)}</span>
                       </div>
-                      <div className="flex justify-between text-purple-700">
+                      <div className="flex justify-between text-purple-700 gap-2 flex-wrap">
                         <span>Amount Paid:</span>
                         <span className="font-semibold">{formatCurrency(selectedSale.paidAmount)}</span>
                       </div>
@@ -1000,8 +1000,8 @@ ${buildPrintHeader(shop)}
           <Dialog open={showPesticideDetailModal} onOpenChange={setShowPesticideDetailModal}>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <div className="flex items-center justify-between">
-                  <DialogTitle className="flex items-center gap-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <DialogTitle className="flex items-center gap-2 flex-wrap">
                     <Sprout className="w-5 h-5 text-purple-600" />
                     Pesticide Sale
                     <span className="text-sm font-normal text-gray-400">#{selectedPesticideSaleDetail.id.slice(-8).toUpperCase()}</span>
@@ -1029,6 +1029,7 @@ ${buildPrintHeader(shop)}
                   </div>
                 </div>
                 <div className="border rounded-lg overflow-hidden">
+                  <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-blue-50 border-b">
                       <tr>
@@ -1049,15 +1050,16 @@ ${buildPrintHeader(shop)}
                       </tr>
                     </tbody>
                   </table>
+                  </div>
                 </div>
                 <div className="bg-blue-50 rounded-lg p-4">
                   <div className="flex justify-end">
                     <div className="w-56 space-y-2 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-2 flex-wrap">
                         <span className="text-gray-600">Total Amount:</span>
                         <span className="font-bold text-gray-900">{formatCurrency(selectedPesticideSaleDetail.totalAmount)}</span>
                       </div>
-                      <div className="flex justify-between text-purple-700">
+                      <div className="flex justify-between text-purple-700 gap-2 flex-wrap">
                         <span>Amount Paid:</span>
                         <span className="font-semibold">{formatCurrency(selectedPesticideSaleDetail.paidAmount)}</span>
                       </div>
@@ -1091,19 +1093,19 @@ ${buildPrintHeader(shop)}
           </DialogHeader>
           <div className="space-y-4">
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-300 text-sm space-y-1">
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Invoice</span>
                 <span className="font-semibold">#{deleteTarget?.id?.slice(-8).toUpperCase()}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Customer</span>
                 <span className="font-semibold">{deleteTarget?.customer?.name || deleteTarget?.farmer?.name || "Walk-in"}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Amount</span>
                 <span className="font-bold text-red-600">{formatCurrency(deleteTarget?.totalAmount || 0)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Date</span>
                 <span>{deleteTarget ? formatDate(deleteTarget.createdAt) : ""}</span>
               </div>
@@ -1112,9 +1114,9 @@ ${buildPrintHeader(shop)}
               <p className="font-semibold">What happens when deleted:</p>
               <p>✓ Sale removed from customer ledger</p>
               <p>✓ Stock quantities restored</p>
-              <p>âœ— This cannot be undone</p>
+              <p>✗ This cannot be undone</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <Button variant="outline" className="flex-1" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
               <Button className="flex-1 bg-red-600 hover:bg-red-700 gap-2" onClick={confirmDeleteSale} disabled={deleting}>
                 <Trash2 className="w-4 h-4" />{deleting ? "Deleting..." : "Delete Sale"}

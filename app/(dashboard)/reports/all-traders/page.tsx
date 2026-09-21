@@ -167,7 +167,7 @@ ${buildPrintHeader(shop)}
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">All Traders Report</h2>
           <p className="text-gray-500 text-sm">{isRestrictedRole ? "Profile details for all traders" : "Balance summary for all traders (buyers/sellers)"}</p>
@@ -233,7 +233,7 @@ ${buildPrintHeader(shop)}
       {/* Table */}
       <Card>
         <div className="p-4 border-b">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="relative max-w-sm flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input placeholder="Search by name, phone, address..." value={search}

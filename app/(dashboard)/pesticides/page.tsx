@@ -320,7 +320,7 @@ ${buildPrintHeader(shop)}
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Pesticides</h2>
           <p className="text-gray-500 text-sm">{pesticides.length} products</p>
@@ -346,7 +346,7 @@ ${buildPrintHeader(shop)}
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-blue-300">
+      <div className="flex overflow-x-auto overflow-y-hidden [scrollbar-width:none] whitespace-nowrap gap-2 border-b border-blue-300">
         {(["stock", "sales"] as const).map((tab) => (
           <button
             key={tab}
@@ -372,6 +372,7 @@ ${buildPrintHeader(shop)}
             {loading && !pesticides.length ? (
               <div className="text-center py-8 text-gray-400">Loading...</div>
             ) : (
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-blue-300">
@@ -410,7 +411,7 @@ ${buildPrintHeader(shop)}
                         </td>
                         <td className="py-3 px-3">{formatCurrency(p.salePrice)}</td>
                         <td className="py-3 px-3">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <button onClick={() => openSale(p)} className="p-1 text-gray-400 hover:text-purple-600" title="Sell">
                               <ShoppingCart className="w-4 h-4" />
                             </button>
@@ -431,12 +432,14 @@ ${buildPrintHeader(shop)}
                   {filtered.length === 0 && <tr><td colSpan={9} className="text-center py-8 text-gray-400">No pesticides found</td></tr>}
                 </tbody>
               </table>
+              </div>
             )}
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardContent className="pt-6">
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-blue-300">
@@ -462,6 +465,7 @@ ${buildPrintHeader(shop)}
                 {sales.length === 0 && <tr><td colSpan={9} className="text-center py-8 text-gray-400">No sales yet</td></tr>}
               </tbody>
             </table>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -470,7 +474,7 @@ ${buildPrintHeader(shop)}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               <Sprout className="w-5 h-5" /> {editing ? "Edit" : "Add"} Pesticide
             </DialogTitle>
           </DialogHeader>
@@ -539,7 +543,7 @@ ${buildPrintHeader(shop)}
               const netCost = Math.max(0, subtotal - incentiveAmt)
               return (
                 <>
-                  <div className="flex justify-between text-sm text-gray-500 px-1">
+                  <div className="flex justify-between text-sm text-gray-500 px-1 gap-2 flex-wrap">
                     <span>Subtotal ({qty} × {formatCurrency(purchasePrice)})</span>
                     <span className="font-medium text-gray-700">{formatCurrency(subtotal)}</span>
                   </div>
@@ -555,7 +559,7 @@ ${buildPrintHeader(shop)}
                       <p className="text-xs text-blue-600 mt-1 px-1">= {formatCurrency(incentiveAmt)} discount on this purchase</p>
                     )}
                   </div>
-                  <div className="bg-blue-50 rounded-lg px-4 py-3 flex justify-between items-center border border-blue-200">
+                  <div className="bg-blue-50 rounded-lg px-4 py-3 flex justify-between items-center border border-blue-200 gap-2 flex-wrap">
                     <span className="text-sm font-semibold text-blue-800">Net Purchase Cost</span>
                     <span className="text-xl font-bold text-blue-700">{formatCurrency(netCost)}</span>
                   </div>
@@ -575,10 +579,10 @@ ${buildPrintHeader(shop)}
       <Dialog open={showCatModal} onOpenChange={setShowCatModal}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Tag className="w-4 h-4" /> Pesticide Categories</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 flex-wrap"><Tag className="w-4 h-4" /> Pesticide Categories</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Input
                 placeholder="New category name..."
                 value={newCatInput}
@@ -592,7 +596,7 @@ ${buildPrintHeader(shop)}
                 <p className="text-center py-6 text-gray-400 text-sm">No categories yet</p>
               )}
               {categories.map((c: any) => (
-                <div key={c.id} className="flex items-center justify-between px-3 py-2">
+                <div key={c.id} className="flex items-center justify-between px-3 py-2 gap-2 flex-wrap">
                   <span className="text-sm text-gray-800">{c.name}</span>
                   <button onClick={() => handleDeleteCategory(c.id, c.name)} className="p-1 text-gray-400 hover:text-red-600">
                     <Trash2 className="w-3.5 h-3.5" />
@@ -600,7 +604,7 @@ ${buildPrintHeader(shop)}
                 </div>
               ))}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button variant="outline" className="flex-1" onClick={() => setShowCatModal(false)}>Close</Button>
               <Button variant="outline" className="flex-1" onClick={printAllCategories}><Printer className="w-4 h-4 mr-1" /> Print</Button>
             </div>
@@ -647,18 +651,18 @@ ${buildPrintHeader(shop)}
                   </div>
                 )}
 
-                <div className="bg-blue-50 rounded-lg p-3 text-sm text-gray-600 flex justify-between">
+                <div className="bg-blue-50 rounded-lg p-3 text-sm text-gray-600 flex justify-between gap-2 flex-wrap">
                   <span>Available: <strong>{selectedPesticide?.quantity} {selectedPesticide?.unit}</strong></span>
                   <span>Unit Price: <strong>{formatCurrency(unitPrice)}</strong></span>
                 </div>
                 <div><Label>Quantity</Label><Input type="number" value={saleForm.quantity} onChange={(e) => setSaleForm({ ...saleForm, quantity: e.target.value })} /></div>
-                <div className="bg-green-50 rounded-lg px-4 py-3 flex justify-between items-center border border-green-200">
+                <div className="bg-green-50 rounded-lg px-4 py-3 flex justify-between items-center border border-green-200 gap-2 flex-wrap">
                   <span className="text-sm font-semibold text-purple-800">Total Amount</span>
                   <span className="text-xl font-bold text-purple-700">{formatCurrency(totalAmount)}</span>
                 </div>
                 <div><Label>Customer Name</Label><Input value={saleForm.customerName} onChange={(e) => setSaleForm({ ...saleForm, customerName: e.target.value })} /></div>
                 <div><Label>Amount Paid</Label><Input type="number" value={saleForm.paidAmount} onChange={(e) => setSaleForm({ ...saleForm, paidAmount: e.target.value })} /></div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                   <Button variant="outline" onClick={() => setShowSaleModal(false)} className="flex-1">Cancel</Button>
                   <Button onClick={handleSale} className="flex-1">Sell</Button>
                 </div>

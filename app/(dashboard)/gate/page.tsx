@@ -139,7 +139,7 @@ ${buildPrintHeader(shop)}
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Gate Entry / Exit</h2>
           <p className="text-gray-500 text-sm">Weighbridge, gate passes & vehicle tracking</p>
@@ -179,7 +179,7 @@ ${buildPrintHeader(shop)}
       </div>
 
       {/* Date Filter */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <Label className="whitespace-nowrap">Filter Date:</Label>
         <Input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="w-44" />
         <Button variant="outline" size="sm" onClick={() => setFilterDate(new Date().toISOString().split("T")[0])}>Today</Button>
@@ -332,7 +332,7 @@ ${buildPrintHeader(shop)}
       <Dialog open={!!showWeighModal} onOpenChange={() => setShowWeighModal(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Scale className="w-5 h-5" /> Weighbridge — {showWeighModal?.entryNo}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 flex-wrap"><Scale className="w-5 h-5" /> Weighbridge — {showWeighModal?.entryNo}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">

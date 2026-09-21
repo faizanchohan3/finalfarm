@@ -76,7 +76,7 @@ export default function AgentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Commission Agents (Aadat)</h2>
           <p className="text-gray-500 text-sm">Manage aadat agents, commissions & ledgers</p>
@@ -194,6 +194,7 @@ export default function AgentsPage() {
                             {!expanded[a.id].ledger?.length ? (
                               <p className="text-xs text-gray-400">No transactions yet</p>
                             ) : (
+                              <div className="overflow-x-auto">
                               <table className="w-full text-xs border border-blue-300 rounded">
                                 <thead className="bg-blue-50">
                                   <tr className="border-b border-blue-300">
@@ -216,6 +217,7 @@ export default function AgentsPage() {
                                   ))}
                                 </tbody>
                               </table>
+                              </div>
                             )}
                           </div>
                         </td>

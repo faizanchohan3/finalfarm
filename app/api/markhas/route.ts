@@ -19,11 +19,24 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   try {
-    const { name } = await req.json()
+    const { name, slot } = await req.json()
     if (!name?.trim()) return NextResponse.json({ error: "Markha name is required" }, { status: 400 })
+    const markhaSlot = Number(slot) === 2 ? 2 : 1
+
+    // A name may live in only one list: Markha 1 items can't be in Markha 2 and vice versa.
+    const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
+    const existing = await db.markha.findFirst({
+      where: { ...shopFilter, isActive: true, name: { equals: name.trim(), mode: "insensitive" } },
+    })
+    if (existing) {
+      return NextResponse.json(
+        { error: `"${existing.name}" already exists in Markha ${existing.slot}` },
+        { status: 409 },
+      )
+    }
 
     const markha = await db.markha.create({
-      data: { shopId: session.user.shopId ?? null, name: name.trim() },
+      data: { shopId: session.user.shopId ?? null, name: name.trim(), slot: markhaSlot },
     })
     return NextResponse.json({ markha }, { status: 201 })
   } catch (err: any) {

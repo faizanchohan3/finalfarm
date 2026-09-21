@@ -201,7 +201,7 @@ export default function FarmersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Farmer Management</h2>
           <p className="text-gray-500 text-sm">Manage farmer records, ledgers & payments</p>
@@ -322,7 +322,7 @@ export default function FarmersPage() {
                       <tr key={`${f.id}-ledger`} className="bg-green-50/20 border-b border-green-100">
                         <td colSpan={10} className="px-4 py-4">
                           <div className="ml-6">
-                            <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
                               <p className="text-xs font-semibold text-gray-600 flex items-center gap-1">
                                 <BookOpen className="w-3.5 h-3.5" /> Farmer Ledger
                               </p>
@@ -340,11 +340,12 @@ export default function FarmersPage() {
                                 {selectedPayments.size > 0 && (
                                   <div className="flex items-center gap-2 bg-blue-50 p-2 rounded border border-blue-200">
                                     <span className="text-xs font-medium text-blue-900">{selectedPayments.size} payment(s) selected</span>
-                                    <button onClick={() => showDeleteConfirmModal(f.id)} className="ml-auto px-2 py-1 bg-red-600 text-blue-900 text-xs rounded hover:bg-red-700">
+                                    <button onClick={() => showDeleteConfirmModal(f.id)} className="ml-auto px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">
                                       Delete Selected
                                     </button>
                                   </div>
                                 )}
+                                <div className="overflow-x-auto">
                                 <table className="w-full text-xs border border-blue-300 rounded">
                                   <thead className="bg-blue-50">
                                     <tr className="border-b border-blue-300">
@@ -390,6 +391,7 @@ export default function FarmersPage() {
                                     </tr>
                                   </tbody>
                                 </table>
+                                </div>
                               </div>
                             )}
                           </div>
@@ -421,10 +423,10 @@ export default function FarmersPage() {
               {photoPreview && (
                 <div className="mb-2 relative">
                   <img src={photoPreview} alt="Preview" className="w-20 h-20 rounded-lg object-cover" />
-                  <button onClick={() => { setPhotoPreview(""); setForm({ ...form, picture: "" }); }} className="absolute -top-2 -right-2 bg-red-500 text-blue-900 rounded-full w-6 h-6 flex items-center justify-center text-xs">âœ•</button>
+                  <button onClick={() => { setPhotoPreview(""); setForm({ ...form, picture: "" }); }} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">✕</button>
                 </div>
               )}
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed border-green-400 rounded-lg cursor-pointer hover:bg-green-50 transition">
                   <Upload className="w-4 h-4 text-purple-600" />
                   <span className="text-sm font-medium text-purple-700">Upload Photo</span>
@@ -474,17 +476,17 @@ export default function FarmersPage() {
               <p className="text-xs text-gray-400 mt-1">{new Date().toLocaleString("en-PK")}</p>
             </div>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-gray-500">Farmer:</span><span className="font-semibold">{lastPayment.name}</span></div>
-              {lastPayment.phone && <div className="flex justify-between"><span className="text-gray-500">Phone:</span><span>{lastPayment.phone}</span></div>}
+              <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">Farmer:</span><span className="font-semibold">{lastPayment.name}</span></div>
+              {lastPayment.phone && <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">Phone:</span><span>{lastPayment.phone}</span></div>}
               <div className="border-t pt-2 mt-2">
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2 flex-wrap">
                   <span className="text-gray-500">{lastPayment.paymentType === "RECEIVE" ? "Amount Received:" : "Amount Paid:"}</span>
                   <span className="text-lg font-bold text-purple-700">{formatCurrency(lastPayment.amount)}</span>
                 </div>
-                <div className="flex justify-between mt-1"><span className="text-gray-500">Method:</span><span>{lastPayment.method.replace("_", " ")}</span></div>
-                {lastPayment.notes && <div className="flex justify-between mt-1"><span className="text-gray-500">Notes:</span><span>{lastPayment.notes}</span></div>}
+                <div className="flex justify-between mt-1 gap-2 flex-wrap"><span className="text-gray-500">Method:</span><span>{lastPayment.method.replace("_", " ")}</span></div>
+                {lastPayment.notes && <div className="flex justify-between mt-1 gap-2 flex-wrap"><span className="text-gray-500">Notes:</span><span>{lastPayment.notes}</span></div>}
               </div>
-              <div className="border-t-2 border-gray-800 pt-2 flex justify-between font-bold text-base">
+              <div className="border-t-2 border-gray-800 pt-2 flex justify-between font-bold text-base gap-2 flex-wrap">
                 <span>Balance:</span>
                 <span className={lastPayment.balance > 0 ? "text-red-700" : lastPayment.balance < 0 ? "text-blue-700" : "text-purple-700"}>
                   {formatCurrency(Math.abs(lastPayment.balance))} {lastPayment.balance > 0 ? "Payable" : lastPayment.balance < 0 ? "Advance" : "Settled"}
@@ -500,7 +502,7 @@ export default function FarmersPage() {
       <Dialog open={showPayModal} onOpenChange={(open) => { setShowPayModal(open); if (!open) setLastPayment(null) }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               {lastPayment ? <Check className="w-5 h-5 text-purple-600" /> : <Banknote className="w-5 h-5 text-purple-700" />}
               {lastPayment ? "Payment Recorded" : "Record Payment"}
             </DialogTitle>
@@ -516,17 +518,17 @@ export default function FarmersPage() {
                 <p className="text-xs text-gray-500 mt-0.5">{lastPayment.paymentType === "RECEIVE" ? "Received from Farmer" : "Paid to Farmer"}</p>
               </div>
               <div className="border border-blue-300 rounded-lg p-4 space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-gray-500">Amount</span><span className="font-bold text-purple-700">{formatCurrency(lastPayment.amount)}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Method</span><span>{lastPayment.method.replace("_", " ")}</span></div>
-                {lastPayment.notes && <div className="flex justify-between"><span className="text-gray-500">Notes</span><span className="text-xs">{lastPayment.notes}</span></div>}
-                <div className="border-t pt-2 flex justify-between font-semibold">
+                <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">Amount</span><span className="font-bold text-purple-700">{formatCurrency(lastPayment.amount)}</span></div>
+                <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">Method</span><span>{lastPayment.method.replace("_", " ")}</span></div>
+                {lastPayment.notes && <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">Notes</span><span className="text-xs">{lastPayment.notes}</span></div>}
+                <div className="border-t pt-2 flex justify-between font-semibold gap-2 flex-wrap">
                   <span className="text-gray-600">New Balance</span>
                   <span className={lastPayment.balance > 0 ? "text-red-600" : lastPayment.balance < 0 ? "text-blue-600" : "text-purple-700"}>
                     {formatCurrency(Math.abs(lastPayment.balance))} {lastPayment.balance > 0 ? "Payable" : lastPayment.balance < 0 ? "Advance" : ""}
                   </span>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button variant="outline" onClick={() => { setShowPayModal(false); setLastPayment(null) }} className="flex-1">Close</Button>
                 <Button onClick={() => window.print()} className="flex-1 bg-purple-700 hover:bg-purple-800 gap-2">
                   <Printer className="w-4 h-4" /> Print Receipt
@@ -547,12 +549,12 @@ export default function FarmersPage() {
                 <Label className="mb-2 block">Payment Type</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <button type="button" onClick={() => setPayForm({ ...payForm, paymentType: "PAY" })}
-                    className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors ${payForm.paymentType === "PAY" ? "bg-purple-700 text-blue-900 border-purple-700" : "bg-blue-50 text-gray-600 border-blue-300 hover:border-green-300"}`}>
+                    className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors ${payForm.paymentType === "PAY" ? "bg-purple-700 text-white border-purple-700" : "bg-blue-50 text-gray-600 border-blue-300 hover:border-green-300"}`}>
                     Paid to Farmer
                     <p className="text-xs font-normal opacity-75 mt-0.5">Paying farmer (Cr)</p>
                   </button>
                   <button type="button" onClick={() => setPayForm({ ...payForm, paymentType: "RECEIVE" })}
-                    className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors ${payForm.paymentType === "RECEIVE" ? "bg-blue-600 text-blue-900 border-blue-600" : "bg-blue-50 text-gray-600 border-blue-300 hover:border-blue-300"}`}>
+                    className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors ${payForm.paymentType === "RECEIVE" ? "bg-blue-600 text-white border-blue-600" : "bg-blue-50 text-gray-600 border-blue-300 hover:border-blue-300"}`}>
                     Received
                     <p className="text-xs font-normal opacity-75 mt-0.5">Income received (Dr)</p>
                   </button>
@@ -578,7 +580,7 @@ export default function FarmersPage() {
                 <Label>Notes</Label>
                 <Textarea rows={2} placeholder="Optional notes..." value={payForm.notes} onChange={(e) => setPayForm({ ...payForm, notes: e.target.value })} />
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button variant="outline" onClick={() => setShowPayModal(false)} className="flex-1">Cancel</Button>
                 <Button onClick={handlePayment} disabled={payLoading} className="flex-1 bg-purple-700 hover:bg-purple-800">
                   {payLoading ? "Saving..." : "Record Payment"}
@@ -592,7 +594,7 @@ export default function FarmersPage() {
       <Dialog open={!!showDeleteConfirm} onOpenChange={() => setShowDeleteConfirm(null)}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               <Trash2 className="w-5 h-5 text-red-600" />
               Delete Transactions
             </DialogTitle>
@@ -630,12 +632,12 @@ export default function FarmersPage() {
       {/* Detail Modal */}
       <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="flex flex-row items-center justify-between space-y-0">
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0 gap-2 flex-wrap">
             <div>
               <DialogTitle>Farmer Details</DialogTitle>
               <p className="text-xs text-gray-500 mt-1">View farmer account, purchases & sales</p>
             </div>
-            <button onClick={() => setShowDetailModal(false)} className="text-gray-400 hover:text-gray-600">âœ•</button>
+            <button onClick={() => setShowDetailModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
           </DialogHeader>
 
           {farmerDetail && selectedFarmer && (
@@ -661,7 +663,7 @@ export default function FarmersPage() {
               </div>
 
               {/* Balance Summary */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-xs text-blue-600 font-semibold mb-1">Total Purchased</p>
                   <p className="text-lg font-bold text-blue-900">{formatCurrency(farmerDetail.ledger?.reduce((s: number, e: any) => s + (e.type === "PURCHASE" ? e.debit : 0), 0) || 0)}</p>
@@ -687,7 +689,7 @@ export default function FarmersPage() {
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {farmerDetail.purchases.map((p: any) => (
                       <div key={p.id} className="bg-blue-50 rounded p-3 text-sm border border-blue-300">
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start gap-2 flex-wrap">
                           <div>
                             <p className="font-medium text-gray-900">{p.items.map((i: any) => i.product?.name || "Item").join(", ")}</p>
                             <p className="text-xs text-gray-500 mt-1">{formatDate(p.createdAt)}</p>
@@ -714,7 +716,7 @@ export default function FarmersPage() {
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {farmerDetail.sales.map((s: any) => (
                       <div key={s.id} className="bg-blue-50 rounded p-3 text-sm border border-blue-300">
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start gap-2 flex-wrap">
                           <div>
                             <p className="font-medium text-gray-900">{s.items.map((i: any) => i.product?.name || "Item").join(", ")}</p>
                             <p className="text-xs text-gray-500 mt-1">{formatDate(s.createdAt)}</p>

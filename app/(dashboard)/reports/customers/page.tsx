@@ -54,7 +54,7 @@ export default function CustomersReportPage() {
   return (
     <div className="space-y-6">
 
-      {/* â”€â”€ Print Header â”€â”€ */}
+      {/* ── Print Header ── */}
       <div className="hidden print:block">
         <div style={{background:"linear-gradient(135deg,#7c3aed 0%,#6366f1 55%,#4f46e5 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
@@ -86,8 +86,8 @@ export default function CustomersReportPage() {
         </div>
       </div>
 
-      {/* â”€â”€ Screen Header â”€â”€ */}
-      <div className="flex items-center justify-between print:hidden">
+      {/* ── Screen Header ── */}
+      <div className="flex items-center justify-between print:hidden gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Trader Report</h2>
           <p className="text-gray-500 text-sm">Click any row to expand sales details</p>
@@ -97,7 +97,7 @@ export default function CustomersReportPage() {
         </Button>
       </div>
 
-      {/* â”€â”€ Summary Cards â”€â”€ */}
+      {/* ── Summary Cards ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 print:hidden">
         <Card>
           <CardContent className="p-4">
@@ -127,7 +127,7 @@ export default function CustomersReportPage() {
         </Card>
       </div>
 
-      {/* â”€â”€ Search â”€â”€ */}
+      {/* ── Search ── */}
       <div className="relative max-w-sm print:hidden">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <Input
@@ -138,7 +138,7 @@ export default function CustomersReportPage() {
         />
       </div>
 
-      {/* â”€â”€ Main Table â”€â”€ */}
+      {/* ── Main Table ── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -215,6 +215,7 @@ export default function CustomersReportPage() {
                             {expanded[c.id].sales?.length === 0 ? (
                               <p className="text-xs text-gray-400">No sales yet</p>
                             ) : (
+                              <div className="overflow-x-auto">
                               <table className="w-full text-xs border border-blue-300 rounded">
                                 <thead className="bg-blue-50">
                                   <tr className="border-b border-blue-300">
@@ -252,6 +253,7 @@ export default function CustomersReportPage() {
                                   ))}
                                 </tbody>
                               </table>
+                              </div>
                             )}
                           </div>
                         </td>

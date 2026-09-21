@@ -41,15 +41,23 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  const warehouse = await db.warehouse.create({
-    data: {
-      name: body.name,
-      location: body.location || null,
-      capacity: body.capacity || null,
-      manager: body.manager || null,
-    },
-  })
-  return NextResponse.json({ warehouse })
+  if (!body.name?.trim()) return NextResponse.json({ error: "Godown name is required" }, { status: 400 })
+  try {
+    const warehouse = await db.warehouse.create({
+      data: {
+        shopId: session.user.shopId || null,
+        name: body.name.trim(),
+        location: body.location || null,
+        capacity: body.capacity || null,
+        manager: body.manager || null,
+        isPotato: !!body.isPotato,
+      },
+    })
+    return NextResponse.json({ warehouse })
+  } catch (err: any) {
+    console.error("Godown create error:", err)
+    return NextResponse.json({ error: err?.message || "Failed to create godown" }, { status: 500 })
+  }
 }
 
 export async function PUT(req: Request) {
@@ -64,6 +72,7 @@ export async function PUT(req: Request) {
       location: body.location || null,
       capacity: body.capacity || null,
       manager: body.manager || null,
+      isPotato: !!body.isPotato,
     },
   })
   return NextResponse.json({ warehouse })

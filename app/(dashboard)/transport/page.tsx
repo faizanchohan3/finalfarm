@@ -77,7 +77,7 @@ export default function TransportPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Truck className="w-6 h-6 text-blue-600" /> Transport / Freight
@@ -124,7 +124,7 @@ export default function TransportPage() {
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono text-xs text-gray-400">{s.slipNo}</span>
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[s.status] || "bg-gray-100 text-gray-600"}`}>
                           {s.status}
@@ -170,7 +170,7 @@ export default function TransportPage() {
               <div><Label>Commodity</Label><Input value={form.commodity} onChange={(e) => set("commodity", e.target.value)} placeholder="e.g. Wheat" /></div>
               <div><Label>Bags</Label><Input type="number" value={form.bags} onChange={(e) => set("bags", e.target.value)} placeholder="0" /></div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div><Label>Freight (Rs)</Label><Input type="number" value={form.freight} onChange={(e) => set("freight", e.target.value)} placeholder="0" /></div>
               <div><Label>Rent (Rs)</Label><Input type="number" value={form.rent} onChange={(e) => set("rent", e.target.value)} placeholder="0" /></div>
               <div><Label>Rate</Label><Input type="number" value={form.rate} onChange={(e) => set("rate", e.target.value)} placeholder="0" /></div>

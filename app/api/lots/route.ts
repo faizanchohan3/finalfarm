@@ -46,8 +46,31 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  if (!body.categoryId) {
+  const categoryName = typeof body.categoryName === "string" ? body.categoryName.trim() : ""
+  if (!body.categoryId && !categoryName) {
     return NextResponse.json({ error: "Category is required." }, { status: 400 })
+  }
+  if (!body.billNo?.trim()) {
+    return NextResponse.json({ error: "Bill No is required." }, { status: 400 })
+  }
+
+  if (body.warehouseId) {
+    const godown = await db.warehouse.findUnique({ where: { id: body.warehouseId }, select: { isPotato: true } })
+    if (!godown?.isPotato) {
+      return NextResponse.json({ error: "Select a potato godown." }, { status: 400 })
+    }
+  }
+
+  // Category is typed freely: reuse an existing one by name, otherwise create it.
+  let categoryId: string = body.categoryId
+  if (!categoryId) {
+    const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
+    const existing = await db.category.findFirst({
+      where: { ...shopFilter, name: { equals: categoryName, mode: "insensitive" } },
+    })
+    categoryId = existing
+      ? existing.id
+      : (await db.category.create({ data: { shopId: session.user.shopId || null, name: categoryName } })).id
   }
 
   const gross = body.grossWeight !== "" && body.grossWeight != null ? parseFloat(body.grossWeight) : null
@@ -66,13 +89,13 @@ export async function POST(req: Request) {
       shopId: session.user.shopId || null,
       lotNo,
       farmerId: body.farmerId || null,
-      categoryId: body.categoryId,
+      categoryId,
       warehouseId: body.warehouseId || null,
       bags,
       bagType,
       markha1: body.markha1?.trim() || null,
       markha2: body.markha2?.trim() || null,
-      billNo: body.billNo?.trim() || null,
+      billNo: body.billNo.trim(),
       vehicleNo: body.vehicleNo?.trim() || null,
       grossWeight: gross,
       tareWeight: tare,

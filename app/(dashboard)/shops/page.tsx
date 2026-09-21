@@ -98,7 +98,7 @@ export default function ShopsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Shop Management</h1>
           <p className="text-sm text-gray-500 mt-1">Approve, manage and monitor all registered shops</p>
@@ -119,7 +119,7 @@ export default function ShopsPage() {
       )}
 
       {/* Filter tabs */}
-      <div className="flex gap-2 border-b border-blue-300 pb-0">
+      <div className="flex overflow-x-auto overflow-y-hidden [scrollbar-width:none] whitespace-nowrap gap-2 border-b border-blue-300 pb-0">
         {["ALL", "PENDING", "APPROVED", "REJECTED"].map((f) => (
           <button
             key={f}
@@ -132,7 +132,7 @@ export default function ShopsPage() {
           >
             {f === "ALL" ? "All Shops" : f.charAt(0) + f.slice(1).toLowerCase()}
             {f === "PENDING" && pending > 0 && (
-              <span className="ml-2 bg-blue-500 text-blue-900 text-xs rounded-full px-1.5 py-0.5">{pending}</span>
+              <span className="ml-2 bg-blue-500 text-white text-xs rounded-full px-1.5 py-0.5">{pending}</span>
             )}
           </button>
         ))}
@@ -147,8 +147,8 @@ export default function ShopsPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {shops.map((shop) => (
             <div key={shop.id} className="bg-blue-50 rounded-xl border border-blue-300 p-5 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
+              <div className="flex items-start justify-between mb-3 gap-2 flex-wrap">
+                <div className="flex items-center gap-3 flex-wrap">
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                     <Store className="w-5 h-5 text-purple-700" />
                   </div>
@@ -196,7 +196,7 @@ export default function ShopsPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {shop.status === "PENDING" && (
                   <>
                     <Button
@@ -246,7 +246,7 @@ export default function ShopsPage() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between mt-3">
+              <div className="flex items-center justify-between mt-3 gap-2 flex-wrap">
                 <button
                   onClick={() => openReset(shop)}
                   className="flex items-center gap-1 text-xs text-orange-600 font-medium hover:text-orange-800 hover:underline"
@@ -275,7 +275,7 @@ export default function ShopsPage() {
       <Dialog open={!!resetShop} onOpenChange={(o) => !o && setResetShop(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               <KeyRound className="w-5 h-5 text-orange-600" />
               Reset Owner Password
             </DialogTitle>

@@ -6,11 +6,18 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Building2, Plus, PencilLine, Trash2, ArrowDownCircle, ArrowUpCircle, Check } from "lucide-react"
+import { Building2, Plus, PencilLine, Trash2, ArrowDownCircle, ArrowUpCircle, Check, BookOpen } from "lucide-react"
+import { formatCurrency, formatDate } from "@/lib/utils"
 
 const DEFAULT_FORM = { name: "", accountNumber: "" }
 const todayStr = () => new Date().toISOString().slice(0, 10)
 const DEFAULT_TXN = { type: "CREDIT", amount: "", description: "", reference: "", date: todayStr() }
+// Entry types from /api/reports/bank-transactions that bring money into the bank.
+const isInflow = (type: string) => type === "RECEIPT" || type === "INCOME"
+const ENTRY_LABELS: Record<string, string> = {
+  RECEIPT: "Receipt", PAYMENT: "Payment", FARMER_PAYMENT: "Farmer Pay",
+  DRIVER_PAYMENT: "Driver Pay", INCOME: "Credit", EXPENSE: "Debit",
+}
 
 export default function BanksPage() {
   const [banks, setBanks] = useState<any[]>([])
@@ -26,6 +33,13 @@ export default function BanksPage() {
   const [txnForm, setTxnForm] = useState(DEFAULT_TXN)
   const [txnSaving, setTxnSaving] = useState(false)
   const [txnDone, setTxnDone] = useState(false)
+
+  // Ledger / transaction history
+  const [ledgerBank, setLedgerBank] = useState<any>(null)
+  const [ledgerEntries, setLedgerEntries] = useState<any[]>([])
+  const [ledgerLoading, setLedgerLoading] = useState(false)
+  const [ledgerFrom, setLedgerFrom] = useState("")
+  const [ledgerTo, setLedgerTo] = useState("")
 
   async function loadData() {
     try {
@@ -99,6 +113,44 @@ export default function BanksPage() {
     await fetch(`/api/banks/${id}`, { method: "DELETE" })
   }
 
+  async function openLedger(bank: any) {
+    setLedgerBank(bank)
+    setLedgerFrom(""); setLedgerTo("")
+    setLedgerEntries([])
+    setLedgerLoading(true)
+    try {
+      const data = await fetch(`/api/reports/bank-transactions?bankId=${bank.id}`).then((r) => r.json())
+      setLedgerEntries(data.entries || [])
+    } catch {
+      setLedgerEntries([])
+    } finally {
+      setLedgerLoading(false)
+    }
+  }
+
+  // Oldest first with running balance; entries before "from" roll into the opening balance.
+  const ledger = (() => {
+    const fromTs = ledgerFrom ? new Date(ledgerFrom).getTime() : -Infinity
+    const toTs = ledgerTo ? new Date(`${ledgerTo}T23:59:59.999`).getTime() : Infinity
+    const sorted = [...ledgerEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    let opening = 0
+    let balance = 0
+    let totalIn = 0
+    let totalOut = 0
+    const rows: any[] = []
+    for (const e of sorted) {
+      const ts = new Date(e.date).getTime()
+      const signed = isInflow(e.type) ? e.amount : -e.amount
+      if (ts < fromTs) { opening += signed; continue }
+      if (ts > toTs) continue
+      if (rows.length === 0) balance = opening
+      balance += signed
+      if (signed >= 0) totalIn += e.amount; else totalOut += e.amount
+      rows.push({ ...e, balance })
+    }
+    return { opening, rows, totalIn, totalOut, closing: rows.length ? balance : opening }
+  })()
+
   function openTxn(bank: any) {
     setTxnBank(bank)
     setTxnForm(DEFAULT_TXN)
@@ -135,7 +187,7 @@ export default function BanksPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Bank Accounts</h2>
           <p className="text-gray-500 text-sm">Manage your bank accounts used in transactions</p>
@@ -177,7 +229,7 @@ export default function BanksPage() {
                     <tr key={bank.id} className="border-b border-gray-50 hover:bg-blue-50">
                       <td className="py-3 px-4 text-gray-400 text-xs">{i + 1}</td>
                       <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
                             <Building2 className="w-4 h-4 text-blue-600" />
                           </div>
@@ -191,7 +243,14 @@ export default function BanksPage() {
                         {bank.id.startsWith("temp-") ? "Saving…" : new Date(bank.createdAt).toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })}
                       </td>
                       <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <button
+                            onClick={() => openLedger(bank)}
+                            disabled={bank.id.startsWith("temp-")}
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-md transition-colors disabled:opacity-40"
+                          >
+                            <BookOpen className="w-3.5 h-3.5" /> Ledger
+                          </button>
                           <button
                             onClick={() => openTxn(bank)}
                             disabled={bank.id.startsWith("temp-")}
@@ -227,7 +286,7 @@ export default function BanksPage() {
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               <Building2 className="w-5 h-5 text-blue-600" />
               {editing ? "Edit Bank" : "Add Bank Account"}
             </DialogTitle>
@@ -262,11 +321,92 @@ export default function BanksPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Ledger / Transaction History Modal */}
+      <Dialog open={!!ledgerBank} onOpenChange={(open) => { if (!open) setLedgerBank(null) }}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
+              <BookOpen className="w-5 h-5 text-purple-600" />
+              Ledger — {ledgerBank?.name}
+              {ledgerBank?.accountNumber && <span className="text-sm font-normal text-gray-500">({ledgerBank.accountNumber})</span>}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="flex gap-3 flex-wrap items-end">
+              <div>
+                <Label>From</Label>
+                <Input type="date" value={ledgerFrom} onChange={(e) => setLedgerFrom(e.target.value)} />
+              </div>
+              <div>
+                <Label>To</Label>
+                <Input type="date" value={ledgerTo} onChange={(e) => setLedgerTo(e.target.value)} />
+              </div>
+              {(ledgerFrom || ledgerTo) && (
+                <Button variant="outline" onClick={() => { setLedgerFrom(""); setLedgerTo("") }}>Clear</Button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="rounded-lg bg-gray-50 p-3">
+                <p className="text-xs text-gray-500">Opening</p>
+                <p className="font-semibold text-gray-900">{formatCurrency(ledger.opening)}</p>
+              </div>
+              <div className="rounded-lg bg-emerald-50 p-3">
+                <p className="text-xs text-emerald-700">Total In</p>
+                <p className="font-semibold text-emerald-700">{formatCurrency(ledger.totalIn)}</p>
+              </div>
+              <div className="rounded-lg bg-red-50 p-3">
+                <p className="text-xs text-red-700">Total Out</p>
+                <p className="font-semibold text-red-700">{formatCurrency(ledger.totalOut)}</p>
+              </div>
+              <div className="rounded-lg bg-purple-50 p-3">
+                <p className="text-xs text-purple-700">Balance</p>
+                <p className="font-semibold text-purple-700">{formatCurrency(ledger.closing)}</p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto max-h-[50vh] overflow-y-auto rounded-lg border border-gray-200">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-gray-50">
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-2 px-3 text-gray-500 font-medium">Date</th>
+                    <th className="text-left py-2 px-3 text-gray-500 font-medium">Type</th>
+                    <th className="text-left py-2 px-3 text-gray-500 font-medium">Description</th>
+                    <th className="text-left py-2 px-3 text-gray-500 font-medium">Ref</th>
+                    <th className="text-right py-2 px-3 text-gray-500 font-medium">In</th>
+                    <th className="text-right py-2 px-3 text-gray-500 font-medium">Out</th>
+                    <th className="text-right py-2 px-3 text-gray-500 font-medium">Balance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ledgerLoading ? (
+                    <tr><td colSpan={7} className="text-center py-8 text-gray-400">Loading...</td></tr>
+                  ) : ledger.rows.length === 0 ? (
+                    <tr><td colSpan={7} className="text-center py-8 text-gray-400">No transactions</td></tr>
+                  ) : ledger.rows.map((e) => (
+                    <tr key={`${e.type}-${e.id}`} className="border-b border-gray-50">
+                      <td className="py-2 px-3 text-gray-600 whitespace-nowrap">{formatDate(e.date)}</td>
+                      <td className="py-2 px-3 text-gray-600 whitespace-nowrap">{ENTRY_LABELS[e.type] || e.type}</td>
+                      <td className="py-2 px-3 text-gray-900">{e.description}</td>
+                      <td className="py-2 px-3 text-gray-500">{e.reference || "—"}</td>
+                      <td className="py-2 px-3 text-right text-emerald-700 whitespace-nowrap">{isInflow(e.type) ? formatCurrency(e.amount) : ""}</td>
+                      <td className="py-2 px-3 text-right text-red-600 whitespace-nowrap">{isInflow(e.type) ? "" : formatCurrency(e.amount)}</td>
+                      <td className={`py-2 px-3 text-right font-medium whitespace-nowrap ${e.balance < 0 ? "text-red-600" : "text-gray-900"}`}>{formatCurrency(e.balance)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Record Credit / Debit Modal */}
       <Dialog open={showTxnModal} onOpenChange={(open) => { setShowTxnModal(open); if (!open) setTxnDone(false) }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               {txnDone ? <Check className="w-5 h-5 text-emerald-600" /> : <Building2 className="w-5 h-5 text-blue-600" />}
               {txnDone ? "Transaction Recorded" : "Record Bank Transaction"}
             </DialogTitle>
@@ -288,7 +428,7 @@ export default function BanksPage() {
                   This entry now appears in the Bank Transactions report.
                 </p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button variant="outline" onClick={() => setShowTxnModal(false)} className="flex-1">Close</Button>
                 <Button
                   onClick={() => { setTxnForm({ ...DEFAULT_TXN }); setTxnDone(false) }}

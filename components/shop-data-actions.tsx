@@ -78,12 +78,12 @@ export function ShopDataActions() {
     "inline-flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5 border transition-colors disabled:opacity-50"
 
   return (
-    <div className="flex items-center gap-2">
-      <button onClick={handleExport} disabled={exporting} className={`${btn} text-emerald-200 bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/20`}>
+    <div className="flex items-center gap-2 flex-wrap">
+      <button onClick={handleExport} disabled={exporting} className={`${btn} text-gray-700 bg-white border-gray-200 hover:bg-gray-50`}>
         {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
         {exporting ? "Exporting…" : "Export Data"}
       </button>
-      <button onClick={() => fileRef.current?.click()} disabled={importing} className={`${btn} text-sky-200 bg-sky-500/10 border-sky-500/30 hover:bg-sky-500/20`}>
+      <button onClick={() => fileRef.current?.click()} disabled={importing} className={`${btn} text-gray-700 bg-white border-gray-200 hover:bg-gray-50`}>
         {importing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
         {importing ? "Importing…" : "Import Data"}
       </button>

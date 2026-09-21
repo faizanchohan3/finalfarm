@@ -20,7 +20,7 @@ export default function WarehousePage() {
   const [showWarehouseModal, setShowWarehouseModal] = useState(false)
   const [showTransferModal, setShowTransferModal] = useState(false)
   const [showAdjustModal, setShowAdjustModal] = useState(false)
-  const [wForm, setWForm] = useState({ id: "", name: "", location: "", capacity: "", manager: "" })
+  const [wForm, setWForm] = useState({ id: "", name: "", location: "", capacity: "", manager: "", isPotato: false })
   const [tForm, setTForm] = useState({ fromWarehouseId: "", toWarehouseId: "", productId: "", quantity: "", notes: "" })
   const [aForm, setAForm] = useState({ warehouseId: "", productId: "", type: "INCREASE", quantity: "", reason: "" })
 
@@ -44,10 +44,14 @@ export default function WarehousePage() {
     if (!wForm.name.trim()) return alert("Name required")
     const url = wForm.id ? "/api/warehouse" : "/api/warehouse"
     const method = wForm.id ? "PUT" : "POST"
-    await fetch(url, {
+    const res = await fetch(url, {
       method, headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...wForm, capacity: wForm.capacity ? parseFloat(wForm.capacity) : null }),
-    })
+    }).catch(() => null)
+    if (!res?.ok) {
+      const d = await res?.json().catch(() => ({}))
+      return alert(d?.error || "Failed to save godown. Please try again.")
+    }
     setShowWarehouseModal(false); loadData()
   }
 
@@ -88,19 +92,19 @@ export default function WarehousePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Warehouse / Godown Management</h2>
           <p className="text-gray-500 text-sm">Multi-location inventory, stock transfers & adjustments</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={() => { setAForm({ warehouseId: "", productId: "", type: "INCREASE", quantity: "", reason: "" }); setShowAdjustModal(true) }} className="gap-2">
             <Settings2 className="w-4 h-4" /> Adjust Stock
           </Button>
           <Button variant="outline" onClick={() => { setTForm({ fromWarehouseId: "", toWarehouseId: "", productId: "", quantity: "", notes: "" }); setShowTransferModal(true) }} className="gap-2">
             <ArrowLeftRight className="w-4 h-4" /> Transfer
           </Button>
-          <Button onClick={() => { setWForm({ id: "", name: "", location: "", capacity: "", manager: "" }); setShowWarehouseModal(true) }}
+          <Button onClick={() => { setWForm({ id: "", name: "", location: "", capacity: "", manager: "", isPotato: false }); setShowWarehouseModal(true) }}
             className="bg-blue-700 hover:bg-blue-800 gap-2">
             <Plus className="w-4 h-4" /> Add Godown
           </Button>
@@ -108,7 +112,7 @@ export default function WarehousePage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b">
+      <div className="flex overflow-x-auto overflow-y-hidden [scrollbar-width:none] whitespace-nowrap gap-2 border-b">
         {([["godowns", "Godowns", warehouses.length], ["transfers", "Stock Transfers", transfers.length], ["adjustments", "Adjustments", adjustments.length]] as const).map(([key, label, count]) => (
           <button key={key} onClick={() => setTab(key as any)}
             className={`pb-2 px-4 text-sm font-medium transition-colors border-b-2 ${tab === key ? "border-blue-700 text-blue-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
@@ -123,11 +127,12 @@ export default function WarehousePage() {
           {loading ? <p className="text-gray-400 col-span-3">Loading...</p> : warehouses.map((w) => (
             <Card key={w.id}>
               <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Warehouse className="w-4 h-4 text-blue-600" /> {w.name}
+                    {w.isPotato && <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">Potato</span>}
                   </CardTitle>
-                  <button onClick={() => { setWForm({ id: w.id, name: w.name, location: w.location || "", capacity: w.capacity ? String(w.capacity) : "", manager: w.manager || "" }); setShowWarehouseModal(true) }}
+                  <button onClick={() => { setWForm({ id: w.id, name: w.name, location: w.location || "", capacity: w.capacity ? String(w.capacity) : "", manager: w.manager || "", isPotato: !!w.isPotato }); setShowWarehouseModal(true) }}
                     className="text-xs text-gray-400 hover:text-blue-600">Edit</button>
                 </div>
                 <p className="text-xs text-gray-500">{w.location || "No location set"}</p>
@@ -159,7 +164,7 @@ export default function WarehousePage() {
                     </p>
                     <div className="space-y-1">
                       {w.lots.slice(0, 6).map((l: any) => (
-                        <div key={l.id} className="flex justify-between text-xs gap-2">
+                        <div key={l.id} className="flex justify-between text-xs gap-2 flex-wrap">
                           <span className="text-gray-600 font-mono truncate">{l.lotNo}</span>
                           <span className="text-gray-500 text-right flex-shrink-0">
                             {l.category?.name || "—"}{l.bags ? ` · ${l.bags} bags` : ""}
@@ -175,7 +180,7 @@ export default function WarehousePage() {
                 {w.stock?.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-gray-100 space-y-1">
                     {w.stock.slice(0, 5).map((s: any) => (
-                      <div key={s.id} className="flex justify-between text-xs">
+                      <div key={s.id} className="flex justify-between text-xs gap-2 flex-wrap">
                         <span className="text-gray-600">{s.product.name}</span>
                         <span className={`font-medium ${s.quantity <= 2 ? "text-red-600" : "text-gray-700"}`}>
                           {s.quantity} {s.product.unit} {s.quantity <= 2 && <AlertTriangle className="inline w-3 h-3" />}
@@ -237,7 +242,7 @@ export default function WarehousePage() {
                         {t.status === "PENDING" && (
                           <button
                             onClick={() => handleApproveTransfer(t.id)}
-                            className="text-xs bg-purple-700 hover:bg-purple-800 text-blue-900 px-3 py-1 rounded font-medium"
+                            className="text-xs bg-purple-700 hover:bg-purple-800 text-white px-3 py-1 rounded font-medium"
                           >
                             Approve
                           </button>
@@ -311,6 +316,15 @@ export default function WarehousePage() {
               <div><Label>Manager</Label>
                 <Input value={wForm.manager} onChange={(e) => setWForm({ ...wForm, manager: e.target.value })} /></div>
             </div>
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={wForm.isPotato}
+                onChange={(e) => setWForm({ ...wForm, isPotato: e.target.checked })}
+                className="w-4 h-4 accent-purple-600"
+              />
+              Potato godown <span className="text-xs text-gray-400">(shown when adding a lot)</span>
+            </label>
             <div className="flex gap-3 pt-2">
               <Button variant="outline" onClick={() => setShowWarehouseModal(false)} className="flex-1">Cancel</Button>
               <Button onClick={handleSaveWarehouse} className="flex-1 bg-blue-700 hover:bg-blue-800">Save</Button>

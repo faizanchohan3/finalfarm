@@ -166,19 +166,19 @@ ${buildPrintHeader(shop)}
       </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between print:hidden">
+      <div className="flex items-center justify-between print:hidden gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Farmer Ledger</h2>
           <p className="text-gray-500 text-sm">{farmers.length} farmers · Payable: {formatCurrency(totalPayable)}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {ledger && <Button onClick={() => window.print()} variant="outline" className="gap-2"><Printer className="w-4 h-4" /> Print Ledger</Button>}
           <Button onClick={printAll} disabled={printingAll} variant="outline" className="gap-2"><Printer className="w-4 h-4" />{printingAll ? "Preparing..." : "Print All Ledgers"}</Button>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4 print:hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 print:hidden">
         <Card><CardContent className="p-4">
           <p className="text-xs text-gray-500 uppercase font-medium">Total Farmers</p>
           <p className="text-xl font-bold text-gray-900 mt-1">{farmers.length}</p>

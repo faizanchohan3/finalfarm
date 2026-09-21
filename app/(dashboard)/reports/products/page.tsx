@@ -48,7 +48,7 @@ export default function ProductReportPage() {
 
   return (
     <div className="space-y-6">
-      {/* â”€â”€ Print Header â”€â”€ */}
+      {/* ── Print Header ── */}
       <div className="hidden print:block">
         <style>{`@media print { @page { size: A4 landscape; } }`}</style>
         <div style={{background:"linear-gradient(135deg,#7c3aed 0%,#6366f1 55%,#4f46e5 100%)",color:"#fff",padding:"16px 22px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -81,8 +81,8 @@ export default function ProductReportPage() {
         </div>
       </div>
 
-      {/* â”€â”€ Screen Header â”€â”€ */}
-      <div className="flex items-center justify-between print:hidden">
+      {/* ── Screen Header ── */}
+      <div className="flex items-center justify-between print:hidden gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Product Report</h2>
           <p className="text-gray-500 text-sm">Stock levels, valuations & sales performance</p>
@@ -92,7 +92,7 @@ export default function ProductReportPage() {
         </Button>
       </div>
 
-      {/* â”€â”€ Summary Cards â”€â”€ */}
+      {/* ── Summary Cards ── */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 print:hidden">
         <Card>
           <CardContent className="p-4">
@@ -133,7 +133,7 @@ export default function ProductReportPage() {
         </Card>
       </div>
 
-      {/* â”€â”€ Date Range Filter â”€â”€ */}
+      {/* ── Date Range Filter ── */}
       <div className="flex flex-wrap gap-3 items-end print:hidden bg-blue-50 border border-blue-300 rounded-xl p-4">
         <div>
           <label className="text-xs font-medium text-gray-600 block mb-1">From Date</label>
@@ -166,7 +166,7 @@ export default function ProductReportPage() {
         )}
       </div>
 
-      {/* â”€â”€ Stock / Search Filters â”€â”€ */}
+      {/* ── Stock / Search Filters ── */}
       <div className="flex gap-3 items-center print:hidden">
         <div className="relative max-w-xs flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -196,7 +196,7 @@ export default function ProductReportPage() {
         </Button>
       </div>
 
-      {/* â”€â”€ Table â”€â”€ */}
+      {/* ── Table ── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
@@ -234,7 +234,7 @@ export default function ProductReportPage() {
                   >
                     <td className="px-4 py-3 text-gray-400 text-xs">{i + 1}</td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium text-gray-900">{p.name}</span>
                         {p.isLowStock && (
                           <AlertTriangle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />

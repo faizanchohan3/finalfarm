@@ -370,7 +370,7 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Product Categories */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
             <CardTitle className="text-base flex items-center gap-2">
               <Tag className="w-4 h-4" /> Product Categories
             </CardTitle>
@@ -381,7 +381,7 @@ export default function SettingsPage() {
           <CardContent>
             <div className="space-y-2">
               {categories.map((c) => (
-                <div key={c.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div key={c.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg gap-2 flex-wrap">
                   <span className="text-sm font-medium text-gray-700">{c.name}</span>
                   <span className="text-xs text-gray-400">ID: {c.id.slice(0, 8)}</span>
                 </div>
@@ -393,7 +393,7 @@ export default function SettingsPage() {
 
         {/* Pesticide Categories */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
             <CardTitle className="text-base flex items-center gap-2">
               <Tag className="w-4 h-4" /> Pesticide Categories
             </CardTitle>
@@ -404,7 +404,7 @@ export default function SettingsPage() {
           <CardContent>
             <div className="space-y-2">
               {pestCategories.map((c) => (
-                <div key={c.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div key={c.id} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg gap-2 flex-wrap">
                   <span className="text-sm font-medium text-gray-700">{c.name}</span>
                 </div>
               ))}
@@ -419,7 +419,7 @@ export default function SettingsPage() {
           <DialogHeader><DialogTitle>Add Product Category</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div><Label>Category Name</Label><Input value={catName} onChange={(e) => setCatName(e.target.value)} placeholder="e.g. Grains, Seeds" autoFocus /></div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <Button variant="outline" onClick={() => setShowCatModal(false)} className="flex-1">Cancel</Button>
               <Button onClick={addCategory} className="flex-1">Add Category</Button>
             </div>
@@ -432,7 +432,7 @@ export default function SettingsPage() {
           <DialogHeader><DialogTitle>Add Pesticide Category</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div><Label>Category Name</Label><Input value={pestCatName} onChange={(e) => setPestCatName(e.target.value)} placeholder="e.g. Herbicide, Fungicide" autoFocus /></div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <Button variant="outline" onClick={() => setShowPestCatModal(false)} className="flex-1">Cancel</Button>
               <Button onClick={addPestCategory} className="flex-1">Add Category</Button>
             </div>

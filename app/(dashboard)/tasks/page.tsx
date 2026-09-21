@@ -105,7 +105,7 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Notes</h2>
           <p className="text-gray-500 text-sm">Assign and track work</p>
@@ -121,7 +121,7 @@ export default function TasksPage() {
             onClick={() => setFilter(status)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === status
-                ? "bg-purple-700 text-blue-900"
+                ? "bg-purple-700 text-white"
                 : "bg-blue-50 text-gray-600 border border-blue-300 hover:bg-blue-50"
             }`}
           >
@@ -138,7 +138,7 @@ export default function TasksPage() {
           {filtered.map((task) => (
             <Card key={task.id} className={`hover:shadow-md transition-shadow ${task.status === "COMPLETED" ? "opacity-70" : ""}`}>
               <CardContent className="p-5">
-                <div className="flex items-start justify-between gap-2 mb-3">
+                <div className="flex items-start justify-between gap-2 mb-3 flex-wrap">
                   <div className="flex items-center gap-1.5">
                     {priorityIcon(task.priority)}
                     <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(task.priority)}`}>{task.priority}</span>
@@ -167,7 +167,7 @@ export default function TasksPage() {
                   )}
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="flex gap-1">
                     {task.status !== "COMPLETED" && (
                       <button
@@ -245,7 +245,7 @@ export default function TasksPage() {
                 </Select>
               </div>
             )}
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
               <Button onClick={handleSave} className="flex-1">{editing ? "Update" : "Create Note"}</Button>
             </div>

@@ -33,6 +33,7 @@ export default function InventoryPage() {
   const [shop, setShop] = useState<any>(null)
   const [categorySearch, setCategorySearch] = useState("")
   const [roomSearch, setRoomSearch] = useState("")
+  const [roomFilter, setRoomFilter] = useState("all")
 
   async function loadData() {
     try {
@@ -133,7 +134,7 @@ export default function InventoryPage() {
 
   function printAllStock() {
     const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
-    const totalValue = products.reduce((s, p) => s + p.currentStock * p.purchasePrice, 0)
+    const totalValue = filtered.reduce((s, p) => s + p.currentStock * p.purchasePrice, 0)
     let idx = 0
     const rows = groupByRoom(filtered).map((g) => {
       const groupValue = g.items.reduce((s, p) => s + p.currentStock * p.purchasePrice, 0)
@@ -169,7 +170,7 @@ export default function InventoryPage() {
 </style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
-  <div><div class="doc-title">Store Stock Report</div><div class="doc-sub">Total: ${filtered.length} products</div></div>
+  <div><div class="doc-title">Store Stock Report</div><div class="doc-sub">${roomFilterLabel ? `Room: ${roomFilterLabel} · ` : ""}Total: ${filtered.length} products</div></div>
   <div class="doc-meta"><div>Printed: ${date}</div></div>
 </div>
 <div class="body-pad">
@@ -198,10 +199,16 @@ ${buildPrintHeader(shop)}
     w.document.close()
   }
 
-  const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.category?.name.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = products.filter((p) => {
+    if (roomFilter === "unassigned" ? p.roomId : roomFilter !== "all" && p.roomId !== roomFilter) return false
+    return (
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.category?.name.toLowerCase().includes(search.toLowerCase())
+    )
+  })
+
+  const roomFilterLabel =
+    roomFilter === "all" ? "" : roomFilter === "unassigned" ? "Unassigned" : rooms.find((r) => r.id === roomFilter)?.name || ""
 
   // Group products by room; rooms alphabetical, "Unassigned" last
   function groupByRoom(list: any[]) {
@@ -224,7 +231,7 @@ ${buildPrintHeader(shop)}
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Store</h2>
           <p className="text-gray-500 text-sm">{products.length} products total</p>
@@ -339,7 +346,7 @@ ${buildPrintHeader(shop)}
         </div>
       )}
 
-      {/* Critical Stock Alert (â‰¤ 2 units) */}
+      {/* Critical Stock Alert (≤ 2 units) */}
       {criticalStock.length > 0 && (
         <div className="bg-red-50 border border-red-300 rounded-lg p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -388,7 +395,7 @@ ${buildPrintHeader(shop)}
       {/* Table */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
@@ -398,6 +405,23 @@ ${buildPrintHeader(shop)}
                 className="pl-9"
               />
             </div>
+            <Select value={roomFilter} onValueChange={(v) => setRoomFilter(v ?? "all")}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All Rooms" />
+              </SelectTrigger>
+              <SelectContent position="popper" side="bottom">
+                <SelectItem value="all">All Rooms</SelectItem>
+                {rooms.map((r: any) => (
+                  <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                ))}
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+              </SelectContent>
+            </Select>
+            {roomFilter !== "all" && (
+              <Button variant="ghost" size="sm" onClick={() => setRoomFilter("all")} className="gap-1 text-gray-500">
+                <X className="w-3.5 h-3.5" /> Clear
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -442,7 +466,7 @@ ${buildPrintHeader(shop)}
                               </span>
                             </td>
                             <td className="py-3 px-3">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <button onClick={() => openEdit(p)} className="p-1 text-gray-400 hover:text-blue-600">
                                   <Edit className="w-4 h-4" />
                                 </button>
@@ -476,19 +500,19 @@ ${buildPrintHeader(shop)}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="w-[96vw] max-w-2xl max-h-[92vh] overflow-y-auto p-0">
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-blue-500 text-blue-900 px-6 py-4 rounded-t-lg flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-blue-50/20 flex items-center justify-center flex-shrink-0">
-                <Package className="w-5 h-5 text-blue-900" />
+          <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-gray-200 text-gray-900 px-6 py-4 rounded-t-2xl flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
+                <Package className="w-5 h-5 text-brand-600" />
               </div>
               <div>
-                <h2 className="text-lg font-bold">{editing ? "Edit Product" : "Add Product"}</h2>
-                <p className="text-blue-100 text-xs">Fill in product details and pricing</p>
+                <h2 className="text-base font-semibold">{editing ? "Edit Product" : "Add Product"}</h2>
+                <p className="text-gray-500 text-xs">Fill in product details and pricing</p>
               </div>
             </div>
             <button
               onClick={() => setShowModal(false)}
-              className="text-blue-900 hover:bg-blue-50/20 rounded-lg p-1.5 transition-colors flex-shrink-0"
+              className="text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg p-1.5 transition-colors flex-shrink-0"
               title="Close"
             >
               <X className="w-5 h-5" />
@@ -497,7 +521,7 @@ ${buildPrintHeader(shop)}
 
           <div className="p-5 space-y-5">
 
-            {/* â”€â”€ Section 1: Basic Info â”€â”€ */}
+            {/* ── Section 1: Basic Info ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Product Info</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -510,7 +534,7 @@ ${buildPrintHeader(shop)}
                 <Label className="text-xs font-semibold text-gray-600">Category *</Label>
                 {categories.length === 0 ? (
                   <div className="mt-1 text-xs text-blue-600 bg-blue-50 border border-blue-300 rounded-lg px-3 py-2.5">
-                    ðŸ“‚ No categories yet. Go to <strong>Categories</strong> tab above to add one.
+                    📂 No categories yet. Go to <strong>Categories</strong> tab above to add one.
                   </div>
                 ) : (
                   <Select value={form.categoryId} onValueChange={(v) => { setForm({ ...form, categoryId: v }); setCategorySearch("") }}>
@@ -570,7 +594,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* â”€â”€ Section 2: Unit & Stock â”€â”€ */}
+            {/* ── Section 2: Unit & Stock ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Unit & Stock</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -616,7 +640,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* â”€â”€ Section 3: Pricing â”€â”€ */}
+            {/* ── Section 3: Pricing ── */}
             <div>
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3">Pricing</h3>
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
@@ -641,7 +665,7 @@ ${buildPrintHeader(shop)}
               </div>
             </div>
 
-            {/* â”€â”€ Action Buttons â”€â”€ */}
+            {/* ── Action Buttons ── */}
             <div className="flex gap-3 pt-1">
               <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
               <Button onClick={handleSave} className="flex-1 bg-blue-600 hover:bg-blue-700 gap-2">

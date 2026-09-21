@@ -32,7 +32,7 @@ export async function GET(req: Request) {
   }
   const dateWhere = from || to ? { createdAt: dateFilter } : {}
 
-  const [payments, farmerPayments, transactions] = await Promise.all([
+  const [payments, farmerPayments, driverPayments, transactions] = await Promise.all([
     db.payment.findMany({
       where: { ...bankFilter, ...dateWhere },
       include: {
@@ -47,6 +47,14 @@ export async function GET(req: Request) {
       include: {
         bank: { select: { name: true } },
         farmer: { select: { name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.driverPayment.findMany({
+      where: { ...bankFilter, ...dateWhere },
+      include: {
+        bank: { select: { name: true } },
+        driver: { select: { name: true } },
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -88,6 +96,18 @@ export async function GET(req: Request) {
       party: fp.farmer?.name || "Farmer",
       description: `Payment to farmer ${fp.farmer?.name || ""}`,
       reference: fp.reference || null,
+    })),
+    ...driverPayments.map((dp) => ({
+      id: dp.id,
+      date: dp.createdAt,
+      type: "DRIVER_PAYMENT",
+      bank: dp.bank?.name || "-",
+      bankId: dp.bankId,
+      method: dp.method,
+      amount: dp.amount,
+      party: dp.driver?.name || "Driver",
+      description: `Payment to driver ${dp.driver?.name || ""}`,
+      reference: dp.reference || null,
     })),
     ...transactions.map((t) => ({
       id: t.id,

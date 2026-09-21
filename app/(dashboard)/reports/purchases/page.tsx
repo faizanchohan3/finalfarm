@@ -70,7 +70,7 @@ export default function PurchasesReportPage() {
       </div>
 
       {/* Screen header */}
-      <div className="flex items-center justify-between print:hidden">
+      <div className="flex items-center justify-between print:hidden gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Purchase Report</h2>
           <p className="text-gray-500 text-sm">Detailed purchase transactions</p>
@@ -114,7 +114,7 @@ export default function PurchasesReportPage() {
       </Card>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Total Amount</p>

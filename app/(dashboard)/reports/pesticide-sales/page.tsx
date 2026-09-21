@@ -77,7 +77,7 @@ export default function PesticideSalesReportPage() {
       </div>
 
       {/* Screen Header */}
-      <div className="flex items-center justify-between print:hidden">
+      <div className="flex items-center justify-between print:hidden gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Pesticide Sales Report</h2>
           <p className="text-gray-500 text-sm">All pesticide sales with buyer and payment details</p>

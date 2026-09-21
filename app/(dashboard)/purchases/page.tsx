@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { SearchableSelect } from "@/components/ui/searchable-select"
+import { CreatableCombobox } from "@/components/ui/creatable-combobox"
 import { Textarea } from "@/components/ui/textarea"
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
-import { buildPrintHeader, receiptCSS, reportCSS } from "@/lib/print-utils"
+import { buildPrintHeader, escapeHtml, receiptCSS, reportCSS } from "@/lib/print-utils"
 import { Plus, Search, Trash2, ShoppingBag, Printer, Percent, Package } from "lucide-react"
 import { useLang } from "@/lib/i18n"
 
@@ -31,6 +32,8 @@ export default function PurchasesPage() {
   // Stock path state
   const [partyId, setPartyId] = useState("")
   const [walkinSellerName, setWalkinSellerName] = useState("")
+  const [rooms, setRooms] = useState<any[]>([])
+  const [roomName, setRoomName] = useState("")
   const [paidAmount, setPaidAmount] = useState("0")
   const [notes, setNotes] = useState("")
   const [items, setItems] = useState([{ productId: "", quantity: "1", price: "0", customName: "" }])
@@ -76,13 +79,14 @@ export default function PurchasesPage() {
 
   async function loadData() {
     setLoading(true)
-    const [pr, prod, sup, fr, cu, sh] = await Promise.all([
+    const [pr, prod, sup, fr, cu, sh, rm] = await Promise.all([
       safeFetch("/api/purchases", { purchases: [] }),
       safeFetch("/api/inventory", { products: [] }),
       safeFetch("/api/suppliers", { suppliers: [] }),
       safeFetch("/api/farmers", { farmers: [] }),
       safeFetch("/api/customers", { customers: [] }),
       safeFetch("/api/settings", { shop: null }),
+      safeFetch("/api/rooms", { rooms: [] }),
     ])
     setPurchases(pr.purchases || [])
     setProducts(prod.products || [])
@@ -90,6 +94,12 @@ export default function PurchasesPage() {
     setFarmers(fr.farmers || [])
     setCustomers(cu.customers || [])
     setShop(sh.shop || null)
+    // Keep rooms created this session even if the rooms response came from browser cache.
+    setRooms((prev) => {
+      const fetched: any[] = rm.rooms || []
+      const extra = prev.filter((r) => !fetched.some((f) => f.id === r.id))
+      return [...fetched, ...extra].sort((x, y) => x.name.localeCompare(y.name))
+    })
     setLoading(false)
   }
 
@@ -137,7 +147,7 @@ export default function PurchasesPage() {
 
   function resetModal() {
     setPurchaseType("stock")
-    setPartyId(""); setWalkinSellerName(""); setPaidAmount("0"); setNotes("")
+    setPartyId(""); setWalkinSellerName(""); setRoomName(""); setPaidAmount("0"); setNotes("")
     setItems([{ productId: "", quantity: "1", price: "0", customName: "" }])
     setCPartyId(""); setCWalkInSeller(""); setCCustomerId(""); setCWalkInCustomer("")
     setCProductId(""); setCBags(""); setCWeight(""); setCRate(""); setCTotalValue("")
@@ -164,6 +174,8 @@ export default function PurchasesPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         supplierId, farmerId, sellerCustomerId, walkinSeller,
+        roomId: rooms.find((r) => r.name.toLowerCase() === roomName.trim().toLowerCase())?.id,
+        roomName: roomName.trim() || undefined,
         items: items.filter((i) => i.productId).map((i) => ({
           productId: i.productId === "manual" ? null : i.productId,
           customName: i.productId === "manual" ? i.customName.trim() : undefined,
@@ -176,6 +188,12 @@ export default function PurchasesPage() {
       }),
     })
     if (res.ok) {
+      // /api/rooms is briefly browser-cached, so add a newly typed room to the list directly.
+      const { purchase } = await res.clone().json().catch(() => ({}))
+      const typedRoom = roomName.trim()
+      if (purchase?.roomId && !rooms.some((r) => r.id === purchase.roomId)) {
+        setRooms((prev) => [...prev, { id: purchase.roomId, name: typedRoom }].sort((x, y) => x.name.localeCompare(y.name)))
+      }
       setShowModal(false); resetModal(); loadData()
     } else {
       const d = await res.json().catch(() => ({}))
@@ -222,14 +240,14 @@ export default function PurchasesPage() {
   }
 
   function printPurchase(p: any) {
-    const from = p.farmer?.name || p.supplier?.name || p.sellerCustomer?.name || p.walkinSeller || "Direct"
+    const from = escapeHtml(p.farmer?.name || p.supplier?.name || p.sellerCustomer?.name || p.walkinSeller || "Direct")
     const ref = p.id.slice(-6).toUpperCase()
     const date = new Date(p.createdAt).toLocaleDateString("en-PK")
     const statusCls = p.status === "PAID" ? "PAID" : p.status === "PARTIAL" ? "PARTIAL" : "PENDING"
     const itemRows = (p.items || []).map((i: any) => `
       <tr>
-        <td>${i.product?.name || "—"}</td>
-        <td style="text-align:center">${i.quantity} ${i.product?.unit || ""}</td>
+        <td>${escapeHtml(i.product?.name || "—")}</td>
+        <td style="text-align:center">${i.quantity} ${escapeHtml(i.product?.unit || "")}</td>
         <td style="text-align:right">PKR ${(i.price || 0).toLocaleString()}</td>
         <td style="text-align:right">PKR ${(i.total || 0).toLocaleString()}</td>
       </tr>`).join("")
@@ -240,15 +258,16 @@ ${buildPrintHeader(shop)}
 <div class="doc-header">
   <div>
     <div class="doc-title">Purchase Receipt</div>
-    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; By: ${p.createdBy?.name || "—"}</div>
+    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; By: ${escapeHtml(p.createdBy?.name || "—")}</div>
   </div>
   <div class="doc-meta"><div>${date}</div><span class="badge badge-${statusCls}">${p.status}</span></div>
 </div>
 <div class="body-pad">
   <div class="info-grid">
-    <div><div class="lbl">From</div><div class="val">${from}</div>${p.farmer?.phone || p.supplier?.phone ? `<div style="color:#6b7280;font-size:10px;margin-top:2px">${p.farmer?.phone || p.supplier?.phone}</div>` : ""}</div>
+    <div><div class="lbl">From</div><div class="val">${from}</div>${p.farmer?.phone || p.supplier?.phone ? `<div style="color:#6b7280;font-size:10px;margin-top:2px">${escapeHtml(p.farmer?.phone || p.supplier?.phone)}</div>` : ""}</div>
     <div><div class="lbl">Type</div><div class="val">${p.farmer ? "Farmer" : p.supplier ? "Supplier" : p.sellerCustomer ? "Trader" : p.walkinSeller ? "Walk-in" : "Direct"}</div></div>
     <div><div class="lbl">Date</div><div class="val">${date}</div></div>
+    ${p.room ? `<div><div class="lbl">Room</div><div class="val">${escapeHtml(p.room.name)}</div></div>` : ""}
   </div>
   <table>
     <thead><tr><th>Product</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr></thead>
@@ -263,7 +282,7 @@ ${buildPrintHeader(shop)}
       <tfoot><tr class="grand"><td>Balance Due</td><td style="text-align:right;color:${p.balance > 0 ? "#b91c1c" : "#15803d"}">PKR ${(p.balance || 0).toLocaleString()}</td></tr></tfoot>
     </table>
   </div>
-  ${p.notes ? `<p style="font-size:11px;color:#555;margin-top:12px"><strong>Notes:</strong> ${p.notes}</p>` : ""}
+  ${p.notes ? `<p style="font-size:11px;color:#555;margin-top:12px"><strong>Notes:</strong> ${escapeHtml(p.notes)}</p>` : ""}
   <div class="sig-row">
     <span>Received By: _______________________</span>
     <span>Authorized By: _______________________</span>
@@ -275,9 +294,9 @@ ${buildPrintHeader(shop)}
 
   function printAllPurchases(list: any[]) {
     const rows = list.map((p, i) => {
-      const from = p.farmer?.name || p.supplier?.name || p.sellerCustomer?.name || p.walkinSeller || "Direct"
+      const from = escapeHtml(p.farmer?.name || p.supplier?.name || p.sellerCustomer?.name || p.walkinSeller || "Direct")
       const type = p.farmer ? "Farmer" : p.supplier ? "Supplier" : p.sellerCustomer ? "Trader" : p.walkinSeller ? "Walk-in" : "Direct"
-      const its = (p.items || []).map((it: any) => `${it.quantity} ${it.product?.unit || ""} ${it.product?.name || ""}`).join(", ")
+      const its = (p.items || []).map((it: any) => `${it.quantity} ${escapeHtml(it.product?.unit || "")} ${escapeHtml(it.product?.name || "")}`).join(", ")
       const statusCls = p.status === "PAID" ? "PAID" : p.status === "PARTIAL" ? "PARTIAL" : "PENDING"
       return `<tr>
         <td>${i + 1}</td><td>${from}</td><td>${type}</td>
@@ -287,7 +306,7 @@ ${buildPrintHeader(shop)}
         <td style="text-align:right;color:${p.balance > 0 ? "#b91c1c" : "#15803d"}">PKR ${(p.balance || 0).toLocaleString()}</td>
         <td><span class="badge badge-${statusCls}">${p.status}</span></td>
         <td>${new Date(p.createdAt).toLocaleDateString("en-PK")}</td>
-        <td>${p.createdBy?.name || "—"}</td>
+        <td>${escapeHtml(p.createdBy?.name || "—")}</td>
       </tr>`
     }).join("")
     const totalAmt = list.reduce((s, p) => s + (p.totalAmount || 0), 0)
@@ -343,12 +362,12 @@ ${buildPrintHeader(shop)}
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">{t("Purchases")}</h2>
           <p className="text-gray-500 text-sm">{purchases.length} {t("total purchases")}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={() => printAllPurchases(filtered)}>
             <Printer className="w-4 h-4" /> {t("Print All")}
           </Button>
@@ -382,7 +401,10 @@ ${buildPrintHeader(shop)}
                   {filtered.map((p, i) => (
                     <tr key={p.id} className="border-b border-gray-50 hover:bg-blue-50">
                       <td className="py-3 px-3 text-gray-400 text-xs">{i + 1}</td>
-                      <td className="py-3 px-3 font-medium text-gray-800">{p.farmer?.name || p.supplier?.name || p.sellerCustomer?.name || p.walkinSeller || "Direct"}</td>
+                      <td className="py-3 px-3 font-medium text-gray-800">
+                        {p.farmer?.name || p.supplier?.name || p.sellerCustomer?.name || p.walkinSeller || "Direct"}
+                        {p.room && <div className="text-xs font-normal text-gray-500">Room: {p.room.name}</div>}
+                      </td>
                       <td className="py-3 px-3">
                         {p.farmer ? (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-purple-700">Farmer</span>
@@ -429,7 +451,7 @@ ${buildPrintHeader(shop)}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               <ShoppingBag className="w-5 h-5" /> New Purchase
             </DialogTitle>
           </DialogHeader>
@@ -467,7 +489,7 @@ ${buildPrintHeader(shop)}
               onClick={() => setPurchaseType("stock")}
               className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-colors ${
                 purchaseType === "stock"
-                  ? "bg-purple-700 text-blue-900 shadow-sm"
+                  ? "bg-purple-700 text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -476,7 +498,7 @@ ${buildPrintHeader(shop)}
         
           </div>
 
-          {/* â”€â”€ ADD TO STOCK path â”€â”€ */}
+          {/* ── ADD TO STOCK path ── */}
           {purchaseType === "stock" && (
             <div className="space-y-4">
               <div>
@@ -502,20 +524,30 @@ ${buildPrintHeader(shop)}
                 )}
               </div>
               <div>
-                <div className="flex items-center justify-between mb-2">
+                <Label>Room <span className="text-gray-400 font-normal">— optional, all items below go into this room</span></Label>
+                <CreatableCombobox
+                  value={roomName}
+                  onChange={setRoomName}
+                  options={rooms.map((r) => r.name)}
+                  placeholder="Search or type room (e.g. Room 1)"
+                  newLabel="New room"
+                />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
                   <Label>Items</Label>
                   <Button size="sm" variant="outline" onClick={addItem}><Plus className="w-3 h-3" /> Add Row</Button>
                 </div>
                 <div className="space-y-2">
                   {items.map((item, i) => (
-                    <div key={i} className="grid grid-cols-12 gap-2 items-center">
-                      <div className="col-span-5">
+                    <div key={i} className="grid grid-cols-6 sm:grid-cols-12 gap-2 items-start rounded-lg border border-gray-200 p-2 sm:border-0 sm:p-0">
+                      <div className="col-span-6 sm:col-span-5 min-w-0">
                         <SearchableSelect
                           value={item.productId}
                           onValueChange={(v) => updateItem(i, "productId", v)}
                           placeholder="Select product"
                           options={[
-                            { value: "manual", label: "âœ Manual / Custom Entry" },
+                            { value: "manual", label: "✏ Manual / Custom Entry" },
                             ...products.map((p: any) => ({ value: p.id, label: p.name }))
                           ]}
                         />
@@ -531,28 +563,26 @@ ${buildPrintHeader(shop)}
                       <div className="col-span-2">
                         <Input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => updateItem(i, "quantity", e.target.value)} />
                       </div>
-                      <div className="col-span-3">
+                      <div className="col-span-2">
                         <Input type="number" placeholder="Price" value={item.price} onChange={(e) => updateItem(i, "price", e.target.value)} />
                       </div>
-                      <div className="col-span-1 text-xs text-right text-gray-500">
-                        {formatCurrency(parseFloat(item.quantity || "0") * parseFloat(item.price || "0"))}
-                      </div>
-                      <div className="col-span-1">
-                        <button onClick={() => removeItem(i)} className="text-red-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
+                      <div className="col-span-2 sm:col-span-3 flex items-center justify-end gap-2 h-9 min-w-0">
+                        <span className="text-xs font-medium text-gray-700 tabular-nums truncate">{formatCurrency(parseFloat(item.quantity || "0") * parseFloat(item.price || "0"))}</span>
+                        <button type="button" onClick={() => removeItem(i)} title="Remove row" className="flex-shrink-0 p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="bg-blue-50 rounded-lg p-4 space-y-2">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm gap-2 flex-wrap">
                   <span>Total:</span><span className="font-bold">{formatCurrency(stockTotal)}</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <Label className="whitespace-nowrap">Amount Paid:</Label>
                   <Input type="number" value={paidAmount} onChange={(e) => setPaidAmount(e.target.value)} className="max-w-[150px]" />
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm gap-2 flex-wrap">
                   <span>Balance:</span>
                   <span className={`font-bold ${stockBalance > 0 ? "text-red-600" : "text-purple-600"}`}>{formatCurrency(stockBalance)}</span>
                 </div>
@@ -561,14 +591,14 @@ ${buildPrintHeader(shop)}
                 <Label>Notes</Label>
                 <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
                 <Button onClick={handleSaveStock} className="flex-1 bg-purple-700 hover:bg-purple-800">Add to Stock</Button>
               </div>
             </div>
           )}
 
-          {/* â”€â”€ COMMISSION path â”€â”€ */}
+          {/* ── COMMISSION path ── */}
           {purchaseType === "commission" && (
             <div className="space-y-4">
               {/* Previous Record Toggle for Commission */}
@@ -631,7 +661,7 @@ ${buildPrintHeader(shop)}
                   options={products.map((p: any) => ({ value: p.id, label: p.name, sub: p.unit }))}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div><Label>Bags</Label><Input type="number" placeholder="0" value={cBags} onChange={(e) => setCBags(e.target.value)} /></div>
                 <div><Label>Weight (KG)</Label><Input type="number" placeholder="0" value={cWeight} onChange={(e) => setCWeight(e.target.value)} /></div>
                 <div><Label>Rate (per KG)</Label><Input type="number" placeholder="0" value={cRate} onChange={(e) => setCRate(e.target.value)} /></div>
@@ -645,26 +675,26 @@ ${buildPrintHeader(shop)}
                 <div><Label>Commission %</Label><Input type="number" placeholder="2.5" value={cCommissionRate} onChange={(e) => setCCommissionRate(e.target.value)} /></div>
               </div>
               <div className="bg-orange-50 rounded-lg p-3 space-y-1.5 text-sm border border-orange-100">
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2 flex-wrap">
                   <span className="text-gray-600">Total Value (buyer owes):</span>
                   <span className="font-medium">{formatCurrency(cTotal)}</span>
                 </div>
-                <div className="flex justify-between text-purple-700">
+                <div className="flex justify-between text-purple-700 gap-2 flex-wrap">
                   <span>Your Commission ({cCommissionRate}%):</span>
                   <span className="font-bold">{formatCurrency(cCommAmt)}</span>
                 </div>
-                <div className="flex justify-between text-blue-700 border-t border-orange-200 pt-1.5">
+                <div className="flex justify-between text-blue-700 border-t border-orange-200 pt-1.5 gap-2 flex-wrap">
                   <span>Seller Payable:</span>
                   <span className="font-semibold">{formatCurrency(cSellerPayable)}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <Label className="whitespace-nowrap">Initial Payment:</Label>
                 <Input type="number" value={cPaidAmount} onChange={(e) => setCPaidAmount(e.target.value)} className="max-w-[150px]" />
                 <span className="text-sm text-gray-500">Balance: {formatCurrency(cBalance)}</span>
               </div>
               <div><Label>Notes</Label><Textarea value={cNotes} onChange={(e) => setCNotes(e.target.value)} rows={2} /></div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
                 <Button onClick={handleSaveCommission} disabled={saving} className="flex-1 bg-orange-600 hover:bg-orange-700">
                   {saving ? "Saving..." : "Create Commission"}
@@ -688,19 +718,19 @@ ${buildPrintHeader(shop)}
           </DialogHeader>
           <div className="space-y-4">
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-300 text-sm space-y-1">
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Reference</span>
                 <span className="font-semibold">#{deleteTarget?.id?.slice(-8).toUpperCase()}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Supplier / Party</span>
                 <span className="font-semibold">{deleteTarget?.supplier?.name || deleteTarget?.farmer?.name || deleteTarget?.sellerCustomer?.name || deleteTarget?.walkinSeller || "Walk-in"}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Amount</span>
                 <span className="font-bold text-red-600">{formatCurrency(deleteTarget?.totalAmount || 0)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Date</span>
                 <span>{deleteTarget ? formatDate(deleteTarget.createdAt) : ""}</span>
               </div>
@@ -709,9 +739,9 @@ ${buildPrintHeader(shop)}
               <p className="font-semibold">What happens when deleted:</p>
               <p>✓ Purchase removed from supplier/farmer ledger</p>
               <p>✓ Stock quantities reversed</p>
-              <p>âœ— This cannot be undone</p>
+              <p>✗ This cannot be undone</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <Button variant="outline" className="flex-1" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
               <Button className="flex-1 bg-red-600 hover:bg-red-700 gap-2" onClick={confirmDeletePurchase} disabled={deleting}>
                 <Trash2 className="w-4 h-4" />{deleting ? "Deleting..." : "Delete Purchase"}

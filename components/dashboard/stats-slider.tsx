@@ -15,13 +15,13 @@ type SliderData = {
 
 // Inline styles — avoids Tailwind purging dynamic class strings
 const SLIDE_STYLES = [
-  { background: "linear-gradient(135deg, #15803d 0%, #166534 60%, #14532d 100%)" },
-  { background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 60%, #1e40af 100%)" },
-  { background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 60%, #5b21b6 100%)" },
-  { background: "linear-gradient(135deg, #ea580c 0%, #dc2626 60%, #b91c1c 100%)" },
+  { background: "linear-gradient(135deg, #18181b 0%, #27272a 100%)" },
+  { background: "linear-gradient(135deg, #18181b 0%, #27272a 100%)" },
+  { background: "linear-gradient(135deg, #18181b 0%, #27272a 100%)" },
+  { background: "linear-gradient(135deg, #18181b 0%, #27272a 100%)" },
 ]
 
-const ACCENT_COLORS = ["#bbf7d0", "#bfdbfe", "#ddd6fe", "#fed7aa"]
+const ACCENT_COLORS = ["#6ee7b7", "#6ee7b7", "#6ee7b7", "#fca5a5"]
 
 export function StatsSlider(props: SliderData) {
   const [current, setCurrent] = useState(0)
@@ -106,7 +106,7 @@ export function StatsSlider(props: SliderData) {
           className="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center"
           style={{ background: "rgba(255,255,255,0.15)" }}
         >
-          <Icon className="w-7 h-7 text-blue-900" />
+          <Icon className="w-7 h-7 text-white" />
         </div>
 
         {/* Text */}
@@ -114,7 +114,7 @@ export function StatsSlider(props: SliderData) {
           <p className="text-sm font-medium mb-0.5" style={{ color: accent }}>
             {slide.label}
           </p>
-          <p className="text-3xl font-bold text-blue-900 leading-tight truncate">{slide.value}</p>
+          <p className="text-3xl font-bold text-white leading-tight truncate">{slide.value}</p>
           <p className="text-sm mt-1" style={{ color: accent }}>
             {slide.sub}
           </p>
@@ -123,7 +123,7 @@ export function StatsSlider(props: SliderData) {
         {/* Alert badge */}
         {slide.badge !== null && (
           <div
-            className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center font-bold text-blue-900 text-lg"
+            className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center font-bold text-white text-lg"
             style={{ background: "rgba(255,255,255,0.2)", border: "2px solid rgba(255,255,255,0.4)" }}
           >
             {slide.badge}
@@ -140,7 +140,7 @@ export function StatsSlider(props: SliderData) {
         onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.2)")}
         aria-label="Previous"
       >
-        <ChevronLeft className="w-4 h-4 text-blue-900" />
+        <ChevronLeft className="w-4 h-4 text-white" />
       </button>
 
       {/* Next button */}
@@ -152,7 +152,7 @@ export function StatsSlider(props: SliderData) {
         onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.2)")}
         aria-label="Next"
       >
-        <ChevronRight className="w-4 h-4 text-blue-900" />
+        <ChevronRight className="w-4 h-4 text-white" />
       </button>
 
       {/* Dot indicators */}

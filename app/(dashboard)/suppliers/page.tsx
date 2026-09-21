@@ -213,7 +213,7 @@ export default function SuppliersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Suppliers</h2>
           <p className="text-gray-500 text-sm">{suppliers.length} suppliers registered</p>
@@ -225,7 +225,7 @@ export default function SuppliersPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-5">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <div className="p-2 bg-blue-50 rounded-lg"><Truck className="w-5 h-5 text-blue-600" /></div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{suppliers.length}</p>
@@ -236,7 +236,7 @@ export default function SuppliersPage() {
         </Card>
         <Card>
           <CardContent className="p-5">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <div className="p-2 bg-green-50 rounded-lg"><TrendingDown className="w-5 h-5 text-purple-600" /></div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{suppliers.filter(s => s.isActive).length}</p>
@@ -247,7 +247,7 @@ export default function SuppliersPage() {
         </Card>
         <Card>
           <CardContent className="p-5">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <div className="p-2 bg-orange-50 rounded-lg"><ArrowUpCircle className="w-5 h-5 text-orange-600" /></div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">View Detail</p>
@@ -371,7 +371,7 @@ export default function SuppliersPage() {
                   <img src={form.picture} alt="Preview" className="w-12 h-12 rounded object-cover border" />
                 )}
                 {photoPreview && (
-                  <div className="flex gap-2 items-center">
+                  <div className="flex gap-2 items-center flex-wrap">
                     <img src={photoPreview} alt="Preview" className="w-12 h-12 rounded object-cover border" />
                     <button type="button" onClick={deletePhoto} className="p-1.5 rounded hover:bg-red-100">
                       <X className="w-4 h-4 text-red-600" />
@@ -408,7 +408,7 @@ export default function SuppliersPage() {
       <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               <Truck className="w-5 h-5" />
               {selected?.name}
             </DialogTitle>
@@ -419,7 +419,7 @@ export default function SuppliersPage() {
           ) : (
             <div className="space-y-5">
               {/* Summary */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="bg-blue-50 rounded-lg p-4 text-center">
                   <p className="text-xl font-bold text-blue-700">{formatCurrency(detail.totalBusiness)}</p>
                   <p className="text-xs text-blue-600 mt-1">Total Purchased</p>
@@ -445,7 +445,7 @@ export default function SuppliersPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   size="sm"
                   onClick={() => { setShowDetailModal(false); setSelectedPayments(new Set()); openPayment(selected) }}
@@ -483,7 +483,7 @@ export default function SuppliersPage() {
                     {selectedPayments.size > 0 && (
                       <div className="flex items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-200">
                         <span className="text-sm font-medium text-blue-900">{selectedPayments.size} payment(s) selected</span>
-                        <button onClick={showDeleteConfirmModal} className="ml-auto px-3 py-1 bg-red-600 text-blue-900 text-sm rounded hover:bg-red-700">
+                        <button onClick={showDeleteConfirmModal} className="ml-auto px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">
                           Delete Selected
                         </button>
                       </div>
@@ -603,14 +603,14 @@ export default function SuppliersPage() {
               <p className="text-xs text-gray-400 mt-1">{new Date().toLocaleString("en-PK")}</p>
             </div>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-gray-500">Supplier:</span><span className="font-semibold">{lastPayment.name}</span></div>
-              {lastPayment.phone && <div className="flex justify-between"><span className="text-gray-500">Phone:</span><span>{lastPayment.phone}</span></div>}
+              <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">Supplier:</span><span className="font-semibold">{lastPayment.name}</span></div>
+              {lastPayment.phone && <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">Phone:</span><span>{lastPayment.phone}</span></div>}
               <div className="border-t pt-2 mt-2">
-                <div className="flex justify-between"><span className="text-gray-500">{lastPayment.direction === "RECEIVE" ? "Received from Supplier:" : "Amount Paid:"}</span><span className="text-lg font-bold text-blue-700">{formatCurrency(lastPayment.amount)}</span></div>
-                <div className="flex justify-between mt-1"><span className="text-gray-500">Method:</span><span>{lastPayment.method.replace("_", " ")}</span></div>
-                {lastPayment.notes && <div className="flex justify-between mt-1"><span className="text-gray-500">Reference:</span><span>{lastPayment.notes}</span></div>}
+                <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">{lastPayment.direction === "RECEIVE" ? "Received from Supplier:" : "Amount Paid:"}</span><span className="text-lg font-bold text-blue-700">{formatCurrency(lastPayment.amount)}</span></div>
+                <div className="flex justify-between mt-1 gap-2 flex-wrap"><span className="text-gray-500">Method:</span><span>{lastPayment.method.replace("_", " ")}</span></div>
+                {lastPayment.notes && <div className="flex justify-between mt-1 gap-2 flex-wrap"><span className="text-gray-500">Reference:</span><span>{lastPayment.notes}</span></div>}
               </div>
-              <div className="border-t-2 border-gray-800 pt-2 flex justify-between font-bold text-base">
+              <div className="border-t-2 border-gray-800 pt-2 flex justify-between font-bold text-base gap-2 flex-wrap">
                 <span>Balance:</span>
                 <span className={lastPayment.balance > 0 ? "text-red-700" : "text-purple-700"}>{formatCurrency(Math.abs(lastPayment.balance))}</span>
               </div>
@@ -624,7 +624,7 @@ export default function SuppliersPage() {
       <Dialog open={showPaymentModal} onOpenChange={(open) => { setShowPaymentModal(open); if (!open) setLastPayment(null) }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               {lastPayment ? <Check className="w-5 h-5 text-purple-600" /> : <ArrowUpCircle className="w-5 h-5 text-blue-600" />}
               {lastPayment ? "Payment Recorded" : "Pay Supplier"}
             </DialogTitle>
@@ -640,18 +640,18 @@ export default function SuppliersPage() {
                 {lastPayment.phone && <p className={`text-xs ${lastPayment.direction === "RECEIVE" ? "text-orange-600" : "text-blue-600"}`}>{lastPayment.phone}</p>}
               </div>
               <div className="border border-blue-300 rounded-lg p-4 space-y-2 text-sm">
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2 flex-wrap">
                   <span className="text-gray-500">{lastPayment.direction === "RECEIVE" ? "Received from Supplier" : "Paid to Supplier"}</span>
                   <span className={`font-bold ${lastPayment.direction === "RECEIVE" ? "text-orange-700" : "text-blue-700"}`}>{formatCurrency(lastPayment.amount)}</span>
                 </div>
-                <div className="flex justify-between"><span className="text-gray-500">Method</span><span>{lastPayment.method.replace("_", " ")}</span></div>
-                {lastPayment.notes && <div className="flex justify-between"><span className="text-gray-500">Reference</span><span className="text-xs">{lastPayment.notes}</span></div>}
-                <div className="border-t pt-2 flex justify-between font-semibold">
+                <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">Method</span><span>{lastPayment.method.replace("_", " ")}</span></div>
+                {lastPayment.notes && <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">Reference</span><span className="text-xs">{lastPayment.notes}</span></div>}
+                <div className="border-t pt-2 flex justify-between font-semibold gap-2 flex-wrap">
                   <span className="text-gray-600">Balance</span>
                   <span className={lastPayment.balance > 0 ? "text-red-600" : "text-purple-700"}>{formatCurrency(Math.abs(lastPayment.balance))}</span>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button variant="outline" onClick={() => { setShowPaymentModal(false); setLastPayment(null) }} className="flex-1">Close</Button>
                 <Button onClick={() => window.print()} className="flex-1 gap-2">
                   <Printer className="w-4 h-4" /> Print Receipt
@@ -731,7 +731,7 @@ export default function SuppliersPage() {
                   onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
                 />
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <Button variant="outline" onClick={() => setShowPaymentModal(false)} className="flex-1">Cancel</Button>
                 <Button onClick={handlePayment} disabled={saving} className="flex-1">
                   {saving ? "Processing..." : "Confirm Payment"}
@@ -745,7 +745,7 @@ export default function SuppliersPage() {
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               <Trash2 className="w-5 h-5 text-red-600" />
               Delete Transactions
             </DialogTitle>

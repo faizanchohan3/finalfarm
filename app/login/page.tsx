@@ -85,7 +85,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-white flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 text-white p-8 flex-col justify-center relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-brand-800 via-brand-900 to-gray-950 text-white p-8 flex-col justify-center relative overflow-hidden">
         <div className="absolute top-0 right-0 w-48 h-48 bg-blue-400 rounded-full opacity-10 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-400 rounded-full opacity-10 blur-3xl"></div>
 

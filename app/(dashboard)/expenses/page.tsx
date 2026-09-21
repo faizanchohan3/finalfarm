@@ -97,7 +97,7 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Expenses</h2>
           <p className="text-gray-500 text-sm">Track all business expenditures</p>
@@ -144,7 +144,7 @@ export default function ExpensesPage() {
               {categoryTotals.map((cat) => {
                 const pct = total > 0 ? (cat._sum.amount / total) * 100 : 0
                 return (
-                  <div key={cat.category} className="flex items-center gap-3">
+                  <div key={cat.category} className="flex items-center gap-3 flex-wrap">
                     <p className="text-xs text-gray-600 w-28 truncate">{cat.category || "General"}</p>
                     <div className="flex-1 h-2 bg-blue-100 rounded-full overflow-hidden">
                       <div
@@ -254,7 +254,7 @@ export default function ExpensesPage() {
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
               <Receipt className="w-5 h-5 text-red-600" /> Add Expense
             </DialogTitle>
           </DialogHeader>

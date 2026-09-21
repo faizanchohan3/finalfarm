@@ -77,7 +77,7 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
           <p className="text-gray-500 text-sm">{users.filter((u) => u.isActive).length} active users</p>
@@ -114,7 +114,7 @@ export default function UsersPage() {
                   {users.map((u) => (
                     <tr key={u.id} className={`border-b border-gray-50 hover:bg-blue-50 ${!u.isActive ? "opacity-50" : ""}`}>
                       <td className="py-3 px-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <div className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
                             <User className="w-4 h-4 text-gray-500" />
                           </div>
@@ -134,7 +134,7 @@ export default function UsersPage() {
                       </td>
                       <td className="py-3 px-3 text-gray-500">{formatDate(u.createdAt)}</td>
                       <td className="py-3 px-3">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <button onClick={() => openEdit(u)} className="p-1 text-gray-400 hover:text-blue-600">
                             <Edit className="w-4 h-4" />
                           </button>
@@ -174,12 +174,12 @@ export default function UsersPage() {
               </Select>
             </div>
             {editing && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <input type="checkbox" id="isActive" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="w-4 h-4" />
                 <Label htmlFor="isActive">Active</Label>
               </div>
             )}
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1">Cancel</Button>
               <Button onClick={handleSave} className="flex-1">{editing ? "Update" : "Create User"}</Button>
             </div>

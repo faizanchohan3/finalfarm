@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
+import { CreatableCombobox } from "@/components/ui/creatable-combobox"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt, Printer, Tag, Search } from "lucide-react"
 import { useLang } from "@/lib/i18n"
@@ -30,14 +32,17 @@ const PAY_COLORS: Record<string, string> = {
 }
 
 const EMPTY = {
-  farmerId: "", categoryId: "", warehouseId: "",
+  farmerId: "", categoryName: "", warehouseId: "",
   markha1: "", markha2: "", billNo: "", vehicleNo: "",
   bagType: "bori", bags: "",
-  grossWeight: "", tareWeight: "", grade: "", notes: "",
+  grossWeight: "", tareWeight: "", notes: "",
 }
 
 // Maps stored bagType to a translatable label; used for the card display.
 const BAG_TYPE_LABEL: Record<string, string> = { bori: "Bori", jali: "Jali", tora: "Tora" }
+
+// Radix Select disallows "" as an item value, so "None" uses a sentinel.
+const NO_MARKHA = "__none__"
 
 export default function LotsPage() {
   const { t } = useLang()
@@ -112,7 +117,8 @@ export default function LotsPage() {
   })()
 
   async function handleCreate() {
-    if (!form.categoryId) { setError("Please select a category."); return }
+    if (!form.categoryName.trim()) { setError("Please enter a category."); return }
+    if (!form.billNo.trim()) { setError("Please enter a bill no."); return }
     setSaving(true); setError(null)
     try {
       const res = await fetch("/api/lots", {
@@ -122,6 +128,11 @@ export default function LotsPage() {
         const d = await res.json().catch(() => ({}))
         setError(d?.error || "Failed to create lot.")
       } else {
+        // A newly typed category was created server-side; add it to the suggestions.
+        const { lot } = await res.json().catch(() => ({}))
+        if (lot?.category && !categories.some((c) => c.id === lot.category.id)) {
+          setCategories((prev) => [...prev, lot.category].sort((a, b) => a.name.localeCompare(b.name)))
+        }
         setForm({ ...EMPTY }); setShowCreate(false); loadLots()
       }
     } catch { setError("Network error. Please try again.") }
@@ -171,7 +182,7 @@ export default function LotsPage() {
       ["Lot No", lot.lotNo],
       ["Date", new Date(lot.createdAt).toLocaleDateString("en-PK")],
       ["Status", String(lot.status).replace("_", " ")],
-      ["Category", `${lot.category?.name || "—"}${lot.grade ? ` · ${lot.grade}` : ""}`],
+      ["Category", lot.category?.name || "—"],
       ["Farmer", lot.farmer?.name || "—"],
       ["Godown", lot.warehouse?.name || "—"],
       ["Vehicle No", lot.vehicleNo || "—"],
@@ -337,7 +348,7 @@ export default function LotsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Boxes className="w-6 h-6 text-purple-600" /> {t("Potato Store")}
@@ -393,7 +404,7 @@ export default function LotsPage() {
           <select
             value={reportGodown}
             onChange={(e) => setReportGodown(e.target.value)}
-            className="h-8 rounded-md border border-gray-300 bg-white px-2 text-xs text-gray-700"
+            className="h-8 rounded-lg border border-gray-200 bg-white px-2 text-xs text-gray-700 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-ring/20"
             title={t("Filter by godown")}
           >
             <option value="ALL">{t("All Godowns")}</option>
@@ -406,11 +417,15 @@ export default function LotsPage() {
           <select
             value={markhaFilter}
             onChange={(e) => setMarkhaFilter(e.target.value)}
-            className="h-8 rounded-md border border-gray-300 bg-white px-2 text-xs text-gray-700"
+            className="h-8 rounded-lg border border-gray-200 bg-white px-2 text-xs text-gray-700 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-ring/20"
             title={t("Filter by markha")}
           >
             <option value="ALL">{t("All markhas")}</option>
-            {markhas.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
+            {([1, 2] as const).map((slot) => (
+              <optgroup key={slot} label={t(`Markha ${slot}`)}>
+                {markhas.filter((m) => (m.slot ?? 1) === slot).map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
+              </optgroup>
+            ))}
           </select>
         </div>
       </div>
@@ -432,15 +447,15 @@ export default function LotsPage() {
           {visibleLots.map((lot) => (
             <Card key={lot.id}>
               <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono text-sm font-semibold text-gray-900">{lot.lotNo}</span>
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[lot.status]}`}>
                         {lot.status.replace("_", " ")}
                       </span>
                     </div>
-                    <p className="font-semibold text-gray-900">{lot.category?.name || "—"}{lot.grade ? ` · ${lot.grade}` : ""}</p>
+                    <p className="font-semibold text-gray-900">{lot.category?.name || "—"}</p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
                       <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{lot.farmer?.name || t("No farmer")}</span>
                       {lot.warehouse && <span className="flex items-center gap-1"><WarehouseIcon className="w-3.5 h-3.5" />{lot.warehouse.name}</span>}
@@ -514,12 +529,13 @@ export default function LotsPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>{t("Category")} *</Label>
-                <Select value={form.categoryId} onValueChange={(v) => set("categoryId", v)}>
-                  <SelectTrigger><SelectValue placeholder={t("Select category")} /></SelectTrigger>
-                  <SelectContent>
-                    {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <CreatableCombobox
+                  value={form.categoryName}
+                  onChange={(v) => set("categoryName", v)}
+                  options={categories.map((c) => c.name)}
+                  placeholder={t("Search or type category")}
+                  newLabel={t("New category")}
+                />
               </div>
               <div>
                 <Label>{t("Farmer")}</Label>
@@ -537,29 +553,39 @@ export default function LotsPage() {
                 <Select value={form.warehouseId} onValueChange={(v) => set("warehouseId", v)}>
                   <SelectTrigger><SelectValue placeholder={t("Select godown")} /></SelectTrigger>
                   <SelectContent>
-                    {warehouses.map((w) => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+                    {warehouses.filter((w) => w.isPotato).map((w) => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                {!warehouses.some((w) => w.isPotato) && (
+                  <p className="text-xs text-gray-400 mt-1">{t("No potato godown yet. Mark one in Warehouse.")}</p>
+                )}
               </div>
               <div><Label>{t("Vehicle No")}</Label><Input value={form.vehicleNo} onChange={(e) => set("vehicleNo", e.target.value)} placeholder="e.g. LES-1234" /></div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div><Label>{t("Bill No")}</Label><Input value={form.billNo} onChange={(e) => set("billNo", e.target.value)} placeholder={t("Optional")} /></div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div><Label>{t("Bill No")} *</Label><Input value={form.billNo} onChange={(e) => set("billNo", e.target.value)} /></div>
               <div>
                 <Label>{t("Markha 1")}</Label>
                 <select value={form.markha1} onChange={(e) => set("markha1", e.target.value)}
-                  className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                  className="mt-1 flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 shadow-xs focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-ring/20">
                   <option value="">— {t("None")} —</option>
-                  {markhas.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
+                  {markhas.filter((m) => (m.slot ?? 1) === 1).map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
                 </select>
               </div>
               <div>
                 <Label>{t("Markha 2")}</Label>
-                <select value={form.markha2} onChange={(e) => set("markha2", e.target.value)}
-                  className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-                  <option value="">— {t("None")} —</option>
-                  {markhas.map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
-                </select>
+                <SearchableSelect
+                  value={form.markha2}
+                  onValueChange={(v) => set("markha2", v === NO_MARKHA ? "" : v)}
+                  placeholder={`— ${t("None")} —`}
+                  searchPlaceholder={t("Search markha...")}
+                  emptyText={t("No markhas")}
+                  options={[
+                    { value: NO_MARKHA, label: `— ${t("None")} —` },
+                    ...markhas.filter((m) => m.slot === 2).map((m) => ({ value: m.name, label: m.name })),
+                  ]}
+                  className="mt-1 h-9"
+                />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -576,7 +602,7 @@ export default function LotsPage() {
               </div>
               <div><Label>{t("Bags")}</Label><Input type="number" value={form.bags} onChange={(e) => set("bags", e.target.value)} placeholder="0" /></div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div><Label>{t("Gross wt")}</Label><Input type="number" value={form.grossWeight} onChange={(e) => set("grossWeight", e.target.value)} placeholder="0" /></div>
               <div><Label>{t("Tare wt")}</Label><Input type="number" value={form.tareWeight} onChange={(e) => set("tareWeight", e.target.value)} placeholder="0" /></div>
               <div>
@@ -584,7 +610,6 @@ export default function LotsPage() {
                 <Input value={netPreview != null ? String(netPreview) : ""} readOnly placeholder={t("auto")} className="bg-gray-50" />
               </div>
             </div>
-            <div><Label>{t("Grade / quality")}</Label><Input value={form.grade} onChange={(e) => set("grade", e.target.value)} placeholder={t("e.g. A / Fine (optional)")} /></div>
             <div><Label>{t("Notes")}</Label><Input value={form.notes} onChange={(e) => set("notes", e.target.value)} placeholder={t("Optional")} /></div>
             {error && <p className="text-sm text-red-600">{error}</p>}
             <div className="flex gap-3 pt-1">
@@ -665,9 +690,9 @@ export default function LotsPage() {
             <div><Label>Notes</Label><Input value={sNotes} onChange={(e) => setSNotes(e.target.value)} placeholder="Optional" /></div>
 
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm space-y-1">
-              <div className="flex justify-between"><span className="text-gray-500">Sale value</span><span className="font-medium">{formatCurrency(sTotal)}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Commission ({sCommRate || 0}%)</span><span className="font-medium text-emerald-700">− {formatCurrency(sCommAmount)}</span></div>
-              <div className="flex justify-between border-t border-gray-200 pt-1 mt-1"><span className="text-gray-700 font-semibold">Farmer payable</span><span className="font-bold text-gray-900">{formatCurrency(sFarmerPayable)}</span></div>
+              <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">Sale value</span><span className="font-medium">{formatCurrency(sTotal)}</span></div>
+              <div className="flex justify-between gap-2 flex-wrap"><span className="text-gray-500">Commission ({sCommRate || 0}%)</span><span className="font-medium text-emerald-700">− {formatCurrency(sCommAmount)}</span></div>
+              <div className="flex justify-between border-t border-gray-200 pt-1 mt-1 gap-2 flex-wrap"><span className="text-gray-700 font-semibold">Farmer payable</span><span className="font-bold text-gray-900">{formatCurrency(sFarmerPayable)}</span></div>
             </div>
 
             {settleError && <p className="text-sm text-red-600">{settleError}</p>}

@@ -135,12 +135,12 @@ export default function FinancePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Roznamcha</h2>
           <p className="text-gray-500 text-sm">Track income, expenses, and balance</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Link href="/banks">
             <Button variant="outline" className="gap-2">
               <Building2 className="w-4 h-4" /> Manage Banks
@@ -156,7 +156,7 @@ export default function FinancePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border-l-4 border-l-green-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => { setDetailType("income"); setShowDetailModal(true); }}>
           <CardContent className="p-5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
                 <p className="text-sm text-gray-500">Total Income</p>
                 <p className="text-2xl font-bold text-purple-600">{formatCurrency(summary.income)}</p>
@@ -169,7 +169,7 @@ export default function FinancePage() {
         </Card>
         <Card className="border-l-4 border-l-red-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => { setDetailType("expense"); setShowDetailModal(true); }}>
           <CardContent className="p-5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
                 <p className="text-sm text-gray-500">Total Expenses</p>
                 <p className="text-2xl font-bold text-red-600">{formatCurrency(summary.expense)}</p>
@@ -182,7 +182,7 @@ export default function FinancePage() {
         </Card>
         <Card className="border-l-4 border-l-blue-500 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => { setDetailType("balance"); setShowDetailModal(true); }}>
           <CardContent className="p-5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
               <div>
                 <p className="text-sm text-gray-500">Net Balance</p>
                 <p className={`text-2xl font-bold ${summary.balance >= 0 ? "text-blue-600" : "text-red-600"}`}>
@@ -199,9 +199,9 @@ export default function FinancePage() {
 
       {/* Transactions Table */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 gap-2 flex-wrap">
           <CardTitle className="text-base">Transaction History</CardTitle>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">From Date</label>
               <Input type="date" value={dateFilter.from} onChange={(e) => setDateFilter({ ...dateFilter, from: e.target.value })} className="w-40" />
@@ -273,7 +273,7 @@ export default function FinancePage() {
                       <td className="py-3 px-3 text-gray-500">{t.createdBy?.name}</td>
                       <td className="py-3 px-3 text-gray-500">{formatDateTime(t.createdAt)}</td>
                       <td className="py-3 px-3">
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           <button
                             onClick={() => openEdit(t)}
                             className="text-blue-600 hover:text-blue-800 text-xs font-medium hover:underline"
@@ -316,7 +316,7 @@ export default function FinancePage() {
 
           <div className="space-y-5">
 
-            {/* â”€â”€ Step 1: Type Toggle â”€â”€ */}
+            {/* ── Step 1: Type Toggle ── */}
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setForm({ ...form, type: "CREDIT", category: "", accountId: "" })}
@@ -342,7 +342,7 @@ export default function FinancePage() {
               </button>
             </div>
 
-            {/* â”€â”€ Step 2: Amount â”€â”€ */}
+            {/* ── Step 2: Amount ── */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Amount (PKR) *</Label>
               <div className="relative mt-1">
@@ -358,12 +358,12 @@ export default function FinancePage() {
               </div>
               {form.amount && parseFloat(form.amount) > 0 && (
                 <p className={`text-xs mt-1 font-medium ${form.type === "CREDIT" ? "text-purple-600" : "text-red-600"}`}>
-                  {form.type === "CREDIT" ? "+" : "âˆ’"} {formatCurrency(parseFloat(form.amount))}
+                  {form.type === "CREDIT" ? "+" : "−"} {formatCurrency(parseFloat(form.amount))}
                 </p>
               )}
             </div>
 
-            {/* â”€â”€ Step 3: Description â”€â”€ */}
+            {/* ── Step 3: Description ── */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Description *</Label>
               <Input
@@ -374,7 +374,7 @@ export default function FinancePage() {
               />
             </div>
 
-            {/* â”€â”€ Step 3B: Transaction Date â”€â”€ */}
+            {/* ── Step 3B: Transaction Date ── */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Transaction Date *</Label>
               <Input
@@ -385,7 +385,7 @@ export default function FinancePage() {
               />
             </div>
 
-            {/* â”€â”€ Step 4: Category Chips â”€â”€ */}
+            {/* ── Step 4: Category Chips ── */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Category</Label>
               <div className="flex flex-wrap gap-1.5 mt-2">
@@ -398,8 +398,8 @@ export default function FinancePage() {
                       className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
                         form.category === cat
                           ? form.type === "CREDIT"
-                            ? "bg-purple-600 text-blue-900 border-purple-600"
-                            : "bg-red-600 text-blue-900 border-red-600"
+                            ? "bg-purple-600 text-white border-purple-600"
+                            : "bg-red-600 text-white border-red-600"
                           : "bg-blue-50 text-gray-600 border-blue-300 hover:border-gray-400"
                       }`}
                     >
@@ -431,7 +431,7 @@ export default function FinancePage() {
               )}
             </div>
 
-            {/* â”€â”€ Step 5: Payment Method â”€â”€ */}
+            {/* ── Step 5: Payment Method ── */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Payment Method</Label>
               <div className="grid grid-cols-2 gap-2 mt-1">
@@ -471,7 +471,7 @@ export default function FinancePage() {
               )}
             </div>
 
-            {/* â”€â”€ Step 6: Account (collapsed by default) â”€â”€ */}
+            {/* ── Step 6: Account (collapsed by default) ── */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Chart of Account <span className="font-normal normal-case text-gray-400">(optional)</span></Label>
               {accounts.length === 0 ? (
@@ -504,7 +504,7 @@ export default function FinancePage() {
               )}
             </div>
 
-            {/* â”€â”€ Step 6B: Debit/Credit (appears when account is selected) â”€â”€ */}
+            {/* ── Step 6B: Debit/Credit (appears when account is selected) ── */}
             {form.accountId && (
               <div>
                 <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Entry Type</Label>
@@ -533,14 +533,14 @@ export default function FinancePage() {
               </div>
             )}
 
-            {/* â”€â”€ Step 7: Reference â”€â”€ */}
+            {/* ── Step 7: Reference ── */}
             <div>
               <Label className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Reference <span className="font-normal normal-case text-gray-400">(optional)</span></Label>
               <Input className="mt-1" placeholder="Invoice #, Cheque #, Note..." value={form.reference}
                 onChange={(e) => setForm({ ...form, reference: e.target.value })} />
             </div>
 
-            {/* â”€â”€ Action Buttons â”€â”€ */}
+            {/* ── Action Buttons ── */}
             <div className="flex gap-3 pt-1">
               <Button variant="outline" onClick={() => setShowModal(false)} className="flex-1" disabled={saving}>
                 Cancel
@@ -574,7 +574,7 @@ export default function FinancePage() {
 
           <div className="space-y-4">
             {detailType === "balance" && (
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                   <p className="text-sm text-purple-600 font-medium">Total Income</p>
                   <p className="text-2xl font-bold text-purple-700">{formatCurrency(summary.income)}</p>

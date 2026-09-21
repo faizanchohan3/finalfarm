@@ -1,8 +1,11 @@
 import type { Metadata } from "next"
+import { Geist } from "next/font/google"
 import "./globals.css"
 import { SessionProvider } from "next-auth/react"
 import { auth } from "@/auth"
 import { LanguageProvider } from "@/lib/i18n"
+
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
 
 export const metadata: Metadata = {
   title: "ArgoFirm - Farm Management",
@@ -21,8 +24,8 @@ export default async function RootLayout({
   const session = await auth()
 
   return (
-    <html lang="en" className="h-full">
-      <body className="min-h-full bg-blue-50">
+    <html lang="en" className={`h-full ${geist.variable}`}>
+      <body className="min-h-full bg-white">
         <SessionProvider session={session}>
           <LanguageProvider>{children}</LanguageProvider>
         </SessionProvider>

@@ -27,6 +27,8 @@ type Props = {
   disabled?: boolean
   side?: "top" | "right" | "bottom" | "left"
   searchable?: boolean
+  searchPlaceholder?: string
+  emptyText?: string
 }
 
 export function SearchableSelect({
@@ -39,6 +41,8 @@ export function SearchableSelect({
   disabled,
   side = "bottom",
   searchable = true,
+  searchPlaceholder = "Search categories...",
+  emptyText = "No categories",
 }: Props) {
   const [search, setSearch] = useState("")
 
@@ -58,7 +62,7 @@ export function SearchableSelect({
 
   return (
     <Select value={value || undefined} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger className={cn("w-full border-2 border-blue-300 hover:border-green-500 transition-colors", className)}>
+      <SelectTrigger className={cn("w-full hover:border-gray-300 transition-colors", className)}>
         {value ? (
           <div className="flex items-center gap-2 w-full">
             <span className="text-sm font-medium">{selectedLabel}</span>
@@ -72,11 +76,11 @@ export function SearchableSelect({
       </SelectTrigger>
       <SelectContent side={side} className="w-[--radix-select-trigger-width] min-w-[200px]">
         {searchable && (
-          <div className="p-2 border-b sticky top-0 bg-blue-50 z-50">
+          <div className="p-2 border-b sticky top-0 bg-white z-50">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 w-4 h-4 text-gray-400" />
               <Input
-                placeholder="Search categories..."
+                placeholder={searchPlaceholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-8 h-8 text-sm border-blue-300"
@@ -99,7 +103,7 @@ export function SearchableSelect({
 
         {filteredOptions.length === 0 && filteredGroups.length === 0 ? (
           <div className="p-4 text-center text-sm text-gray-500">
-            {search ? "No categories found" : "No categories available"}
+            {search ? `${emptyText} found` : `${emptyText} available`}
           </div>
         ) : (
           <>

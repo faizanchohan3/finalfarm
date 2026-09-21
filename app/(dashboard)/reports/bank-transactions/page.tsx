@@ -12,6 +12,7 @@ const TYPE_LABELS: Record<string, { label: string; color: string }> = {
   RECEIPT:        { label: "Receipt",       color: "bg-green-100 text-purple-700" },
   PAYMENT:        { label: "Payment",       color: "bg-blue-100 text-blue-700" },
   FARMER_PAYMENT: { label: "Farmer Pay",    color: "bg-orange-100 text-orange-700" },
+  DRIVER_PAYMENT: { label: "Driver Pay",    color: "bg-amber-100 text-amber-700" },
   INCOME:         { label: "Income",        color: "bg-emerald-100 text-emerald-700" },
   EXPENSE:        { label: "Expense",       color: "bg-red-100 text-red-700" },
 }
@@ -84,7 +85,7 @@ export default function BankTransactionsPage() {
       </div>
 
       {/* Screen header */}
-      <div className="flex items-center justify-between print:hidden">
+      <div className="flex items-center justify-between print:hidden gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Bank Transactions</h2>
           <p className="text-gray-500 text-sm">Filter by bank and date range</p>
@@ -102,7 +103,7 @@ export default function BankTransactionsPage() {
           <div className="flex flex-wrap gap-3 items-end">
             <div className="flex flex-col gap-1">
               <label className="text-xs text-gray-500 font-medium">Bank</label>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Select value={bankId} onValueChange={(val) => { setBankId(val); setBankSearch(""); }}>
                   <SelectTrigger className="w-56">
                     <SelectValue placeholder="All Banks" />
@@ -161,7 +162,7 @@ export default function BankTransactionsPage() {
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="border-l-4 border-l-green-500">
-              <CardContent className="p-5 flex items-center justify-between">
+              <CardContent className="p-5 flex items-center justify-between gap-2 flex-wrap">
                 <div>
                   <p className="text-sm text-gray-500">Total Inflow</p>
                   <p className="text-2xl font-bold text-purple-600">{formatCurrency(summary.totalIn)}</p>
@@ -173,7 +174,7 @@ export default function BankTransactionsPage() {
               </CardContent>
             </Card>
             <Card className="border-l-4 border-l-red-500">
-              <CardContent className="p-5 flex items-center justify-between">
+              <CardContent className="p-5 flex items-center justify-between gap-2 flex-wrap">
                 <div>
                   <p className="text-sm text-gray-500">Total Outflow</p>
                   <p className="text-2xl font-bold text-red-600">{formatCurrency(summary.totalOut)}</p>
@@ -185,7 +186,7 @@ export default function BankTransactionsPage() {
               </CardContent>
             </Card>
             <Card className="border-l-4 border-l-blue-500">
-              <CardContent className="p-5 flex items-center justify-between">
+              <CardContent className="p-5 flex items-center justify-between gap-2 flex-wrap">
                 <div>
                   <p className="text-sm text-gray-500">Net Balance</p>
                   <p className={`text-2xl font-bold ${summary.totalIn - summary.totalOut >= 0 ? "text-blue-600" : "text-red-600"}`}>

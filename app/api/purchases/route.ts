@@ -23,6 +23,7 @@ export async function GET(req: Request) {
         supplier: true,
         farmer: { select: { id: true, name: true, phone: true } },
         sellerCustomer: { select: { id: true, name: true, phone: true } },
+        room: { select: { id: true, name: true } },
         createdBy: { select: { name: true } },
         items: { include: { product: true } },
       },
@@ -38,13 +39,28 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  const { supplierId, farmerId, sellerCustomerId, walkinSeller, items, paidAmount, notes, purchaseDate } = body
+  const { supplierId, farmerId, sellerCustomerId, walkinSeller, items, paidAmount, notes, purchaseDate, roomId, roomName } = body
 
   const totalAmount = items.reduce((s: number, i: any) => s + i.quantity * i.price, 0)
   const balance = totalAmount - (paidAmount || 0)
   const status = balance <= 0 ? "PAID" : paidAmount > 0 ? "PARTIAL" : "PENDING"
 
   const purchase = await db.$transaction(async (tx) => {
+    // Room: pick an existing one by id, or a typed name (reused if it exists, otherwise created).
+    const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
+    let resolvedRoomId: string | null = null
+    if (roomId) {
+      const room = await tx.room.findFirst({ where: { id: roomId, ...shopFilter } })
+      if (!room) throw new Error("Room not found")
+      resolvedRoomId = room.id
+    } else if (typeof roomName === "string" && roomName.trim()) {
+      const name = roomName.trim()
+      const room =
+        (await tx.room.findFirst({ where: { ...shopFilter, name: { equals: name, mode: "insensitive" } } })) ??
+        (await tx.room.create({ data: { shopId: session.user.shopId || null, name } }))
+      resolvedRoomId = room.id
+    }
+
     // Resolve custom product names to real productIds
     const resolvedItems = await Promise.all(items.map(async (i: any) => {
       if (i.productId) return i
@@ -74,6 +90,7 @@ export async function POST(req: Request) {
         farmerId: farmerId || null,
         sellerCustomerId: sellerCustomerId || null,
         walkinSeller: walkinSeller || null,
+        roomId: resolvedRoomId,
         totalAmount,
         paidAmount: paidAmount || 0,
         balance,
@@ -113,6 +130,14 @@ export async function POST(req: Request) {
         where: { id: item.productId },
         data: { currentStock: { increment: item.quantity } },
       })
+      // Products with no room yet get placed in this purchase's room. A room holds any
+      // number of products; products already assigned elsewhere keep their room.
+      if (resolvedRoomId) {
+        await tx.product.updateMany({
+          where: { id: item.productId, roomId: null },
+          data: { roomId: resolvedRoomId },
+        })
+      }
       await tx.stockMovement.create({
         data: { productId: item.productId, type: "IN", quantity: item.quantity, reference: `Purchase #${p.id}` },
       })

@@ -37,7 +37,7 @@ export default function BalanceSheetPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Balance Sheet & P&L</h2>
           <p className="text-gray-500 text-sm">Complete financial statement with assets, liabilities, equity</p>
@@ -71,7 +71,7 @@ export default function BalanceSheetPage() {
           {/* P&L STATEMENT */}
           <Card className="border-2 border-blue-200 bg-blue-50">
             <CardHeader className="pb-2 border-b-2 border-blue-200">
-              <CardTitle className="text-lg text-blue-900">ðŸ“Š INCOME STATEMENT (P&L)</CardTitle>
+              <CardTitle className="text-lg text-blue-900">📊 INCOME STATEMENT (P&L)</CardTitle>
               <p className="text-xs text-blue-700 mt-1">Period: {dateLabel}</p>
             </CardHeader>
             <CardContent className="p-4">
@@ -80,17 +80,17 @@ export default function BalanceSheetPage() {
                 <div className="space-y-3">
                   <h3 className="font-bold text-purple-800 text-sm uppercase bg-green-100 px-3 py-2 rounded">Revenue</h3>
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-sm gap-2 flex-wrap">
                       <span className="text-gray-700">Agricultural Sales</span>
                       <span className="font-semibold">{formatCurrency(data.salesTotal)}</span>
                     </div>
                     {data.pesticideSalesTotal > 0 && (
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-sm gap-2 flex-wrap">
                         <span className="text-gray-700">Pesticide Sales</span>
                         <span className="font-semibold">{formatCurrency(data.pesticideSalesTotal)}</span>
                       </div>
                     )}
-                    <div className="border-t pt-2 flex justify-between text-sm font-bold text-purple-700">
+                    <div className="border-t pt-2 flex justify-between text-sm font-bold text-purple-700 gap-2 flex-wrap">
                       <span>Total Revenue</span>
                       <span>{formatCurrency(data.totalRevenue)}</span>
                     </div>
@@ -99,18 +99,18 @@ export default function BalanceSheetPage() {
                   <h3 className="font-bold text-purple-800 text-sm uppercase bg-green-100 px-3 py-2 rounded mt-4">Income</h3>
                   <div className="space-y-2">
                     {data.pesticideDiscountFromSupplier > 0 && (
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-sm gap-2 flex-wrap">
                         <span className="text-gray-700">Pesticide Discount from Supplier</span>
                         <span className="text-purple-700">+ {formatCurrency(data.pesticideDiscountFromSupplier)}</span>
                       </div>
                     )}
                     {data.otherIncome > 0 && (
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-sm gap-2 flex-wrap">
                         <span className="text-gray-700">Other Income</span>
                         <span className="text-purple-700">+ {formatCurrency(data.otherIncome)}</span>
                       </div>
                     )}
-                    <div className="border-t pt-2 flex justify-between text-sm font-bold text-purple-700">
+                    <div className="border-t pt-2 flex justify-between text-sm font-bold text-purple-700 gap-2 flex-wrap">
                       <span>Total Income</span>
                       <span>+ {formatCurrency(data.totalIncome)}</span>
                     </div>
@@ -121,31 +121,31 @@ export default function BalanceSheetPage() {
                 <div className="space-y-3">
                   <h3 className="font-bold text-red-800 text-sm uppercase bg-red-100 px-3 py-2 rounded">Expenses</h3>
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-sm gap-2 flex-wrap">
                       <span className="text-gray-700">Cost of Purchases</span>
-                      <span className="font-semibold text-red-600">âˆ’ {formatCurrency(data.purchasesTotal)}</span>
+                      <span className="font-semibold text-red-600">− {formatCurrency(data.purchasesTotal)}</span>
                     </div>
                     {data.otherExpense > 0 && (
-                      <div className="flex justify-between text-sm">
+                      <div className="flex justify-between text-sm gap-2 flex-wrap">
                         <span className="text-gray-700">Other Expenses</span>
-                        <span className="text-red-600">âˆ’ {formatCurrency(data.otherExpense)}</span>
+                        <span className="text-red-600">− {formatCurrency(data.otherExpense)}</span>
                       </div>
                     )}
-                    <div className="border-t pt-2 flex justify-between text-sm font-bold text-red-600">
+                    <div className="border-t pt-2 flex justify-between text-sm font-bold text-red-600 gap-2 flex-wrap">
                       <span>Total Expenses</span>
-                      <span>âˆ’ {formatCurrency(data.purchasesTotal + data.otherExpense)}</span>
+                      <span>− {formatCurrency(data.purchasesTotal + data.otherExpense)}</span>
                     </div>
                   </div>
 
                   <h3 className="font-bold text-blue-800 text-sm uppercase bg-blue-100 px-3 py-2 rounded mt-4">Profit/Loss</h3>
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-sm gap-2 flex-wrap">
                       <span className="text-gray-700">Gross Profit</span>
                       <span className={`font-bold ${data.grossProfit >= 0 ? "text-purple-700" : "text-red-600"}`}>
                         {formatCurrency(data.grossProfit)}
                       </span>
                     </div>
-                    <div className="border-t-2 pt-2 flex justify-between text-base font-bold rounded px-2 py-2"
+                    <div className="border-t-2 pt-2 flex justify-between text-base font-bold rounded px-2 py-2 gap-2 flex-wrap"
                       style={{background: data.netIncome >= 0 ? "#dcfce7" : "#fee2e2", color: data.netIncome >= 0 ? "#15803d" : "#991b1b"}}>
                       <span>Net {data.netIncome >= 0 ? "Profit" : "Loss"}</span>
                       <span>{formatCurrency(Math.abs(data.netIncome))}</span>
@@ -159,7 +159,7 @@ export default function BalanceSheetPage() {
           {/* BALANCE SHEET */}
           <Card className="border-2 border-purple-200 bg-purple-50">
             <CardHeader className="pb-2 border-b-2 border-purple-200">
-              <CardTitle className="text-lg text-purple-900">ðŸ’° BALANCE SHEET (Assets = Liabilities + Equity)</CardTitle>
+              <CardTitle className="text-lg text-purple-900">💰 BALANCE SHEET (Assets = Liabilities + Equity)</CardTitle>
               <p className="text-xs text-purple-700 mt-1">As of {new Date().toLocaleDateString("en-PK")}</p>
             </CardHeader>
             <CardContent className="p-4">
@@ -171,21 +171,21 @@ export default function BalanceSheetPage() {
                     <div className="border-l-4 border-blue-500 pl-3">
                       <p className="text-xs text-gray-600 font-medium">Current Assets</p>
                       <div className="space-y-2 mt-2 text-sm">
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2 flex-wrap">
                           <span className="text-gray-700">Customer Receivables</span>
                           <span className="font-semibold">{formatCurrency(data.customerReceivables)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2 flex-wrap">
                           <span className="text-gray-700">Farmer Receivables</span>
                           <span className="font-semibold">{formatCurrency(data.farmerReceivables)}</span>
                         </div>
-                        <div className="flex justify-between border-t pt-2">
+                        <div className="flex justify-between border-t pt-2 gap-2 flex-wrap">
                           <span className="text-gray-700">Stock Value</span>
                           <span className="font-semibold">{formatCurrency(data.totalStockValue)}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-blue-100 rounded px-3 py-2 flex justify-between font-bold text-blue-900 border-2 border-blue-300">
+                    <div className="bg-blue-100 rounded px-3 py-2 flex justify-between font-bold text-blue-900 border-2 border-blue-300 gap-2 flex-wrap">
                       <span>TOTAL ASSETS</span>
                       <span>{formatCurrency(data.totalAssets)}</span>
                     </div>
@@ -199,13 +199,13 @@ export default function BalanceSheetPage() {
                     <div className="border-l-4 border-red-500 pl-3">
                       <p className="text-xs text-gray-600 font-medium">Current Liabilities</p>
                       <div className="space-y-2 mt-2 text-sm">
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2 flex-wrap">
                           <span className="text-gray-700">Supplier Payables</span>
                           <span className="font-semibold text-red-600">{formatCurrency(data.supplierPayables)}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-red-100 rounded px-3 py-2 flex justify-between font-bold text-red-900 border-2 border-red-300">
+                    <div className="bg-red-100 rounded px-3 py-2 flex justify-between font-bold text-red-900 border-2 border-red-300 gap-2 flex-wrap">
                       <span>TOTAL LIABILITIES</span>
                       <span>{formatCurrency(data.totalLiabilities)}</span>
                     </div>
@@ -219,7 +219,7 @@ export default function BalanceSheetPage() {
                     <div className="border-l-4 border-green-500 pl-3">
                       <p className="text-xs text-gray-600 font-medium">Owner's Capital</p>
                       <div className="space-y-2 mt-2 text-sm">
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2 flex-wrap">
                           <span className="text-gray-700">Net Income/(Loss)</span>
                           <span className={`font-semibold ${data.netIncome >= 0 ? "text-purple-700" : "text-red-600"}`}>
                             {formatCurrency(data.netIncome)}
@@ -227,7 +227,7 @@ export default function BalanceSheetPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="bg-green-100 rounded px-3 py-2 flex justify-between font-bold text-purple-900 border-2 border-green-300">
+                    <div className="bg-green-100 rounded px-3 py-2 flex justify-between font-bold text-purple-900 border-2 border-green-300 gap-2 flex-wrap">
                       <span>TOTAL EQUITY</span>
                       <span>{formatCurrency(data.equity)}</span>
                     </div>
@@ -245,11 +245,11 @@ export default function BalanceSheetPage() {
                   )}
                 </div>
                 <div className="text-xs text-gray-700 space-y-1">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-2 flex-wrap">
                     <span>Assets:</span>
                     <span className="font-semibold">{formatCurrency(data.totalAssets)}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-2 flex-wrap">
                     <span>Liabilities + Equity:</span>
                     <span className="font-semibold">{formatCurrency(data.totalLiabilities + data.equity)}</span>
                   </div>
@@ -263,7 +263,7 @@ export default function BalanceSheetPage() {
             {/* Accounting Equation Diagram */}
             <Card className="border-2 border-indigo-200 bg-indigo-50">
               <CardHeader className="pb-2 border-b-2 border-indigo-200">
-                <CardTitle className="text-base text-indigo-900">ðŸ“ Accounting Equation</CardTitle>
+                <CardTitle className="text-base text-indigo-900">📐 Accounting Equation</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="flex items-center justify-center gap-4 mb-6">
@@ -300,7 +300,7 @@ export default function BalanceSheetPage() {
             {/* Revenue vs Expenses Pie Chart */}
             <Card className="border-2 border-emerald-200 bg-emerald-50 print:hidden">
               <CardHeader className="pb-2 border-b-2 border-emerald-200">
-                <CardTitle className="text-base text-emerald-900">ðŸ’° Revenue vs Expenses</CardTitle>
+                <CardTitle className="text-base text-emerald-900">💰 Revenue vs Expenses</CardTitle>
               </CardHeader>
               <CardContent className="p-4">
                 <ResponsiveContainer width="100%" height={280}>
@@ -332,7 +332,7 @@ export default function BalanceSheetPage() {
             {data.totalAssets > 0 && (
               <Card className="border-2 border-blue-200 bg-blue-50">
                 <CardHeader className="pb-2 border-b-2 border-blue-200">
-                  <CardTitle className="text-base text-blue-900">ðŸ¦ Assets Breakdown</CardTitle>
+                  <CardTitle className="text-base text-blue-900">🏦 Assets Breakdown</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <ResponsiveContainer width="100%" height={280}>
@@ -364,7 +364,7 @@ export default function BalanceSheetPage() {
           {/* Financial Summary Bar Chart */}
           <Card className="border-2 border-violet-200 bg-violet-50 print:hidden">
             <CardHeader className="pb-2 border-b-2 border-violet-200">
-              <CardTitle className="text-base text-violet-900">ðŸ“Š Financial Summary Comparison</CardTitle>
+              <CardTitle className="text-base text-violet-900">📊 Financial Summary Comparison</CardTitle>
             </CardHeader>
             <CardContent className="p-4">
               <ResponsiveContainer width="100%" height={350}>

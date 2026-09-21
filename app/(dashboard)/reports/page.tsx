@@ -171,7 +171,7 @@ export default function ReportsPage() {
         <p className="text-gray-500 text-sm">Business performance overview — select a report below</p>
       </div>
 
-      {/* â”€â”€ Key Metrics — Colorful Gradient Cards â”€â”€ */}
+      {/* ── Key Metrics — Colorful Gradient Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Link href="/reports/sales">
           <div
@@ -226,11 +226,11 @@ export default function ReportsPage() {
         </Link>
       </div>
 
-      {/* â”€â”€ Secondary Metric Cards â”€â”€ */}
+      {/* ── Secondary Metric Cards ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="border-green-100">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Net Balance</p>
               <Wallet className="w-4 h-4 text-purple-600" />
             </div>
@@ -243,7 +243,7 @@ export default function ReportsPage() {
 
         <Card className="border-blue-100">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Trader Udhar</p>
               <BookOpen className="w-4 h-4 text-orange-500" />
             </div>
@@ -256,7 +256,7 @@ export default function ReportsPage() {
 
         <Card className="border-violet-100">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Products Sold</p>
               <TrendingUp className="w-4 h-4 text-violet-600" />
             </div>
@@ -269,7 +269,7 @@ export default function ReportsPage() {
 
         <Card className={productData.lowStockCount > 0 ? "border-red-200 bg-red-50/30" : "border-blue-300"}>
           <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
               <p className={`text-xs font-medium uppercase tracking-wide ${productData.lowStockCount > 0 ? "text-red-500" : "text-gray-500"}`}>
                 Low Stock
               </p>
@@ -285,7 +285,7 @@ export default function ReportsPage() {
         </Card>
       </div>
 
-      {/* â”€â”€ Charts Row â”€â”€ */}
+      {/* ── Charts Row ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -346,7 +346,7 @@ export default function ReportsPage() {
                 {expenseData.topCategories.map((cat: any, i: number) => {
                   const pct = expenseData.total > 0 ? (cat._sum.amount / expenseData.total) * 100 : 0
                   return (
-                    <div key={cat.category} className="flex items-center gap-2">
+                    <div key={cat.category} className="flex items-center gap-2 flex-wrap">
                       <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: CATEGORY_COLORS[i] }} />
                       <p className="text-xs text-gray-500 w-20 truncate">{cat.category}</p>
                       <div className="flex-1 h-1.5 bg-blue-100 rounded-full overflow-hidden">
@@ -362,16 +362,16 @@ export default function ReportsPage() {
         </Card>
       </div>
 
-      {/* â”€â”€ Report Navigation Cards â”€â”€ */}
+      {/* ── Report Navigation Cards ── */}
       <div>
         <h3 className="text-base font-semibold text-gray-700 mb-3">Detailed Reports</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {visibleReportCards.map(({ href, title, description, icon: Icon, color }) => (
             <Link key={href} href={href}>
-              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-blue-300 group">
+              <Card className="hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer group">
                 <CardContent className="p-5 flex items-start gap-4">
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center flex-shrink-0`}>
-                    <Icon className="w-5 h-5 text-blue-900" />
+                  <div className="w-10 h-10 rounded-lg bg-gray-100 group-hover:bg-brand-50 flex items-center justify-center flex-shrink-0 transition-colors">
+                    <Icon className="w-5 h-5 text-gray-500 group-hover:text-brand-600 transition-colors" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 text-sm group-hover:text-purple-700 transition-colors">{title}</p>

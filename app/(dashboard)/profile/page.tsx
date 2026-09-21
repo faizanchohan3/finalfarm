@@ -111,7 +111,7 @@ export default function ProfilePage() {
       <div className="bg-blue-50 rounded-xl border border-blue-300 p-6 shadow-sm">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center flex-shrink-0">
-            <User className="w-8 h-8 text-blue-900" />
+            <User className="w-8 h-8 text-white" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900">{profile?.name}</h2>
@@ -132,17 +132,17 @@ export default function ProfilePage() {
           <div className="flex items-center gap-3 text-sm">
             <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
             <span className="text-gray-500 w-20">Email</span>
-            <span className="font-medium text-gray-800">{profile?.email}</span>
+            <span className="font-medium text-gray-800 min-w-0 break-all text-right">{profile?.email}</span>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Shield className="w-4 h-4 text-gray-400 flex-shrink-0" />
             <span className="text-gray-500 w-20">Role</span>
-            <span className="font-medium text-gray-800">{profile?.role?.replace("_", " ")}</span>
+            <span className="font-medium text-gray-800 min-w-0 break-all text-right">{profile?.role?.replace("_", " ")}</span>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
             <span className="text-gray-500 w-20">Joined</span>
-            <span className="font-medium text-gray-800">
+            <span className="font-medium text-gray-800 min-w-0 break-all text-right">
               {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString("en-PK", { year: "numeric", month: "long", day: "numeric" }) : "—"}
             </span>
           </div>
