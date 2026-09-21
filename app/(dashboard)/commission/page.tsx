@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Textarea } from "@/components/ui/textarea"
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
-import { buildPrintHeader, receiptCSS, reportCSS } from "@/lib/print-utils"
+import { buildPrintHeader, escapeHtml, receiptCSS, reportCSS } from "@/lib/print-utils"
 import { Plus, Search, Percent, CreditCard, Printer, Trash2, X } from "lucide-react"
 import { useLang } from "@/lib/i18n"
 
@@ -43,9 +43,8 @@ export default function CommissionPage() {
   const [rateUnit, setRateUnit] = useState("kg")   // kg | mound (1 mound = 40 kg)
   const [totalValue, setTotalValue] = useState("")
   const [commissionRate, setCommissionRate] = useState("2.5")
-  const [direction, setDirection] = useState("RECEIVE") // RECEIVE = we get commission, PAY = we pay it
   const [labourAmount, setLabourAmount] = useState("0")
-  const [labourMode, setLabourMode] = useState("ADD") // ADD = add labour to buyer total, DEDUCT = take from seller
+  const [labourMode, setLabourMode] = useState("ADD") // ADD = add labour on both sides, DEDUCT = subtract it on both sides
   const [paidAmount, setPaidAmount] = useState("0")
   const [notes, setNotes] = useState("")
   const [saving, setSaving] = useState(false)
@@ -122,15 +121,11 @@ export default function CommissionPage() {
   const commRate = commissionRate !== "" ? parseFloat(commissionRate) : 0
   const commAmount = total > 0 ? parseFloat(((total * commRate) / 100).toFixed(2)) : 0
   const labourAmt = parseFloat(labourAmount || "0")
-  const isPayDir = direction === "PAY"
-  const isReceive = !isPayDir
-  // Labour: ADD = charged on top of the buyer's total; DEDUCT = taken out of the seller's amount.
   const isAddLabour = labourMode === "ADD"
-  // Commission applies to BOTH sides when received: added to the buyer, deducted from the seller.
-  const buyerOwes = total > 0 ? total + (isReceive ? commAmount : 0) + (isAddLabour ? labourAmt : 0) : 0
-  const sellerPayable = total > 0 ? Math.max(total - (isReceive ? commAmount : 0) - (isAddLabour ? 0 : labourAmt), 0) : 0
-  // Commission amount is calculated once (goods × rate%).
-  const netCommission = isReceive ? commAmount : -commAmount
+  // Buyer and seller settle on the same amount: goods − commission, then ± labour (ADD adds, DEDUCT subtracts).
+  const netAmount = total > 0 ? Math.max(total - commAmount + (isAddLabour ? labourAmt : -labourAmt), 0) : 0
+  const buyerOwes = netAmount
+  const sellerPayable = netAmount
   const balance = buyerOwes - parseFloat(paidAmount || "0")
 
   function resetNewForm() {
@@ -138,7 +133,7 @@ export default function CommissionPage() {
     setPartyId(""); setWalkInSeller("")
     setCommodity(""); setVehicleNo(""); setBags(""); setBagType("bag")
     setGrossWeight(""); setTareWeight(""); setBardanaWeight("")
-    setRate(""); setRateUnit("kg"); setTotalValue(""); setCommissionRate("2.5"); setDirection("RECEIVE"); setLabourAmount("0"); setLabourMode("ADD"); setPaidAmount("0"); setNotes("")
+    setRate(""); setRateUnit("kg"); setTotalValue(""); setCommissionRate("2.5"); setLabourAmount("0"); setLabourMode("ADD"); setPaidAmount("0"); setNotes("")
   }
 
   async function handleSave() {
@@ -175,7 +170,6 @@ export default function CommissionPage() {
           rateUnit,
           totalValue,
           commissionRate,
-          direction,
           labourAmount,
           labourMode,
           paidAmount,
@@ -230,10 +224,73 @@ export default function CommissionPage() {
   const totalCommEarned = commissions.reduce((s, c) => s + c.commissionAmount, 0)
   const totalPending = commissions.filter((c) => c.status !== "PAID").reduce((s, c) => s + c.balance, 0)
 
-  // Seller copy: shows only what seller will receive — buyer total and commission hidden
+  // Goods value isn't stored, and past versions built the buyer total / seller payable differently
+  // (commission and labour added, deducted or left out). Explain each stored total as
+  // goods + a·commission + b·labour with a, b ∈ {−1, 0, +1}; goods is the value that fits the
+  // estimate (commission ÷ rate%, else weight × rate).
+  const SIGNS = [-1, 0, 1]
+  function breakdown(c: any) {
+    const comm = c.commissionAmount || 0
+    const labour = c.labourAmount || 0
+    const tv = c.totalValue || 0
+    const sp = c.sellerPayable || 0
+    const labourSign = (c.labourMode ?? "ADD") === "ADD" ? 1 : -1
+    const byWeight = c.rate && c.weight ? c.rate * (c.rateUnit === "mound" ? c.weight / 40 : c.weight) : null
+    const estimate = comm > 0 && c.commissionRate > 0 ? (comm * 100) / c.commissionRate : byWeight
+
+    // Signs tried in order: current formula (−commission, ±labour per mode) first.
+    const combos: [number, number][] = [[-1, labourSign], [0, labourSign], [1, labourSign], [-1, 0], [0, 0], [1, 0], [-1, -labourSign], [0, -labourSign], [1, -labourSign]]
+    let goods = tv + comm - labour * labourSign // current formula: total = goods − commission ± labour
+    if (estimate != null) {
+      const candidates = combos.map(([a, b]) => tv - a * comm - b * labour)
+      goods = candidates.reduce((best, x) => (Math.abs(x - estimate) < Math.abs(best - estimate) ? x : best))
+    }
+    const explain = (sideTotal: number) => {
+      for (const [a, b] of combos) {
+        if (Math.abs(goods + a * comm + b * labour - sideTotal) < 1) return { commSign: comm ? a : 0, labourSign: labour ? b : 0 }
+      }
+      return { commSign: 0, labourSign: 0 }
+    }
+    return { goods, comm, labour, buyer: explain(tv), seller: explain(sp) }
+  }
+
+  const signed = (sign: number, amount: number) => `${sign > 0 ? "+ " : sign < 0 ? "− " : ""}PKR ${amount.toLocaleString()}`
+
+  // Rows shared by both copies: goods amount, then commission and labour exactly as they were applied to this side.
+  function commonRows(c: any, side: "buyer" | "seller") {
+    const b = breakdown(c)
+    const s = b[side]
+    const commRow = b.comm
+      ? s.commSign
+        ? `<tr><td>Commission (${c.commissionRate}%)</td><td style="text-align:right">${signed(s.commSign, b.comm)}</td></tr>`
+        : `<tr style="color:#6b7280"><td>Commission (${c.commissionRate}%) <span style="font-size:10px">— not deducted</span></td><td style="text-align:right">PKR ${b.comm.toLocaleString()}</td></tr>`
+      : ""
+    const labourRow = b.labour && s.labourSign ? `<tr><td>Labour</td><td style="text-align:right">${signed(s.labourSign, b.labour)}</td></tr>` : ""
+    return `
+      ${c.weight ? `<tr><td>Weight</td><td style="text-align:right">${c.weight} KG</td></tr>` : ""}
+      ${c.bags ? `<tr><td>${bagUnit(c)}</td><td style="text-align:right">${c.bags} ${bagUnit(c)}</td></tr>` : ""}
+      <tr><td><strong>Goods Amount</strong></td><td style="text-align:right"><strong>PKR ${b.goods.toLocaleString()}</strong></td></tr>
+      ${commRow}
+      ${labourRow}`
+  }
+
+  function infoGrid(c: any, first: "buyer" | "seller") {
+    const seller = escapeHtml(c.farmer?.name || c.supplier?.name || c.walkInSeller || "—")
+    const buyer = escapeHtml(c.customer?.name || c.walkInCustomer || "—")
+    const parties = first === "buyer"
+      ? `<div><div class="lbl">Buyer</div><div class="val">${buyer}</div></div><div><div class="lbl">Seller</div><div class="val">${seller}</div></div>`
+      : `<div><div class="lbl">Seller</div><div class="val">${seller}</div></div><div><div class="lbl">Buyer</div><div class="val">${buyer}</div></div>`
+    return `<div class="info-grid">
+    ${parties}
+    ${c.commodity ? `<div><div class="lbl">Commodity</div><div class="val">${escapeHtml(c.commodity)}</div></div>` : ""}
+    ${c.rate ? `<div><div class="lbl">Rate</div><div class="val">PKR ${c.rate}/${c.rateUnit === "mound" ? "mound" : "kg"}</div></div>` : ""}
+    ${c.bags ? `<div><div class="lbl">${bagUnit(c)}</div><div class="val">${c.bags}</div></div>` : ""}
+    ${c.weight ? `<div><div class="lbl">Weight</div><div class="val">${c.weight} KG</div></div>` : ""}
+  </div>`
+  }
+
+  // Seller copy: same breakdown as the buyer copy (goods − commission ± labour).
   function printForSeller(c: any) {
-    const seller = c.farmer?.name || c.supplier?.name || c.walkInSeller || "—"
-    const buyer = c.customer?.name || c.walkInCustomer || "—"
     const ref = c.id.slice(-6).toUpperCase()
     const date = new Date(c.createdAt).toLocaleDateString("en-PK")
     const w = window.open("", "_blank")!
@@ -248,25 +305,17 @@ ${buildPrintHeader(shop)}
   <div class="doc-meta"><div>${date}</div></div>
 </div>
 <div class="body-pad">
-  <div class="info-grid">
-    <div><div class="lbl">Seller</div><div class="val">${seller}</div></div>
-    <div><div class="lbl">Buyer</div><div class="val">${buyer}</div></div>
-    ${c.commodity ? `<div><div class="lbl">Commodity</div><div class="val">${c.commodity}</div></div>` : ""}
-    ${c.rate ? `<div><div class="lbl">Rate</div><div class="val">PKR ${c.rate}/kg</div></div>` : ""}
-    ${c.bags ? `<div><div class="lbl">${bagUnit(c)}</div><div class="val">${c.bags}</div></div>` : ""}
-    ${c.weight ? `<div><div class="lbl">Weight</div><div class="val">${c.weight} KG</div></div>` : ""}
-  </div>
+  ${infoGrid(c, "seller")}
   <table>
     <thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead>
     <tbody>
-      ${c.weight ? `<tr><td>Weight</td><td style="text-align:right">${c.weight} KG</td></tr>` : ""}
-      ${c.bags ? `<tr><td>${bagUnit(c)}</td><td style="text-align:right">${c.bags} ${bagUnit(c)}</td></tr>` : ""}
+      ${commonRows(c, "seller")}
     </tbody>
     <tfoot>
       <tr><td><strong>Amount Payable to You</strong></td><td style="text-align:right;color:#1d4ed8" class="amount-big">PKR ${(c.sellerPayable || 0).toLocaleString()}</td></tr>
     </tfoot>
   </table>
-  ${c.notes ? `<p style="font-size:11px;color:#555;margin-top:8px"><strong>Notes:</strong> ${c.notes}</p>` : ""}
+  ${c.notes ? `<p style="font-size:11px;color:#555;margin-top:8px"><strong>Notes:</strong> ${escapeHtml(c.notes)}</p>` : ""}
   <div class="sig-row">
     <span>Seller Signature: _______________________</span>
     <span>Authorized By: _______________________</span>
@@ -276,10 +325,8 @@ ${buildPrintHeader(shop)}
     w.print()
   }
 
-  // Buyer copy: shows only what buyer owes — seller amount and commission hidden
+  // Buyer copy: same breakdown as the seller copy (goods − commission ± labour), plus payments.
   function printForBuyer(c: any) {
-    const seller = c.farmer?.name || c.supplier?.name || c.walkInSeller || "—"
-    const buyer = c.customer?.name || c.walkInCustomer || "—"
     const ref = c.id.slice(-6).toUpperCase()
     const date = new Date(c.createdAt).toLocaleDateString("en-PK")
     const statusCls = c.status === "PAID" ? "PAID" : c.status === "PARTIAL" ? "PARTIAL" : "PENDING"
@@ -295,19 +342,11 @@ ${buildPrintHeader(shop)}
   <div class="doc-meta"><div>${date}</div><span class="badge badge-${statusCls}">${c.status}</span></div>
 </div>
 <div class="body-pad">
-  <div class="info-grid">
-    <div><div class="lbl">Buyer</div><div class="val">${buyer}</div></div>
-    <div><div class="lbl">Seller</div><div class="val">${seller}</div></div>
-    ${c.commodity ? `<div><div class="lbl">Commodity</div><div class="val">${c.commodity}</div></div>` : ""}
-    ${c.rate ? `<div><div class="lbl">Rate</div><div class="val">PKR ${c.rate}/kg</div></div>` : ""}
-    ${c.bags ? `<div><div class="lbl">${bagUnit(c)}</div><div class="val">${c.bags}</div></div>` : ""}
-    ${c.weight ? `<div><div class="lbl">Weight</div><div class="val">${c.weight} KG</div></div>` : ""}
-  </div>
+  ${infoGrid(c, "buyer")}
   <table>
     <thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead>
     <tbody>
-      ${c.weight ? `<tr><td>Weight</td><td style="text-align:right">${c.weight} KG</td></tr>` : ""}
-      ${c.bags ? `<tr><td>${bagUnit(c)}</td><td style="text-align:right">${c.bags} ${bagUnit(c)}</td></tr>` : ""}
+      ${commonRows(c, "buyer")}
       <tr><td>Total Amount</td><td style="text-align:right">PKR ${(c.totalValue || 0).toLocaleString()}</td></tr>
       <tr><td>Paid</td><td style="text-align:right;color:#15803d">PKR ${(c.paidAmount || 0).toLocaleString()}</td></tr>
     </tbody>
@@ -315,7 +354,7 @@ ${buildPrintHeader(shop)}
       <tr><td><strong>Balance Due</strong></td><td style="text-align:right;color:${c.balance > 0 ? "#b91c1c" : "#15803d"}" class="amount-big">PKR ${(c.balance || 0).toLocaleString()}</td></tr>
     </tfoot>
   </table>
-  ${c.notes ? `<p style="font-size:11px;color:#555;margin-top:8px"><strong>Notes:</strong> ${c.notes}</p>` : ""}
+  ${c.notes ? `<p style="font-size:11px;color:#555;margin-top:8px"><strong>Notes:</strong> ${escapeHtml(c.notes)}</p>` : ""}
   <div class="sig-row">
     <span>Buyer Signature: _______________________</span>
     <span>Authorized By: _______________________</span>
@@ -702,34 +741,6 @@ ${buildPrintHeader(shop)}
                 </div>
               </div>
 
-              {/* Commission direction: do we receive it or pay it? */}
-              <div>
-                <Label className="text-xs font-semibold text-gray-600">{t("Commission")}</Label>
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  <button
-                    type="button"
-                    onClick={() => setDirection("RECEIVE")}
-                    className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition-colors ${
-                      direction === "RECEIVE" ? "border-emerald-600 bg-emerald-50 text-emerald-700" : "border-gray-200 text-gray-500 hover:border-gray-300"
-                    }`}
-                  >
-                    {t("Commission Received")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDirection("PAY")}
-                    className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition-colors ${
-                      direction === "PAY" ? "border-red-600 bg-red-50 text-red-700" : "border-gray-200 text-gray-500 hover:border-gray-300"
-                    }`}
-                  >
-                    {t("Commission Paid")}
-                  </button>
-                </div>
-                <p className="text-xs text-gray-400 mt-1">
-                  {direction === "RECEIVE" ? t("You earn this commission (income).") : t("You pay this commission (expense).")}
-                </p>
-              </div>
-
               {/* Live Summary */}
               {total > 0 && (
                 <div className="bg-blue-50 rounded-lg border border-orange-100 p-3 mt-1">
@@ -737,15 +748,16 @@ ${buildPrintHeader(shop)}
                     <div className="bg-blue-50 rounded-lg p-2.5">
                       <p className="text-xs text-blue-500 font-medium">Buyer Owes</p>
                       <p className="font-bold text-blue-700 text-sm mt-0.5">{formatCurrency(buyerOwes)}</p>
-                      {labourAmt > 0 && <p className="text-[10px] text-gray-400 mt-0.5">{isAddLabour ? `+ ${formatCurrency(labourAmt)} labour` : "goods only"}</p>}
+                      <p className="text-[10px] text-gray-400 mt-0.5">− {formatCurrency(commAmount)} comm{labourAmt > 0 ? ` ${isAddLabour ? "+" : "−"} ${formatCurrency(labourAmt)} labour` : ""}</p>
                     </div>
-                    <div className={`rounded-lg p-2.5 ${isPayDir ? "bg-red-50" : "bg-green-50"}`}>
-                      <p className={`text-xs font-medium ${isPayDir ? "text-red-500" : "text-green-500"}`}>{isPayDir ? t("Commission Paid") : t("Commission Received")}</p>
-                      <p className={`font-bold text-sm mt-0.5 ${isPayDir ? "text-red-700" : "text-purple-700"}`}>{formatCurrency(Math.abs(netCommission))}</p>
+                    <div className="rounded-lg p-2.5 bg-red-50">
+                      <p className="text-xs font-medium text-red-500">{t("Commission Paid")}</p>
+                      <p className="font-bold text-sm mt-0.5 text-red-700">{formatCurrency(commAmount)}</p>
                     </div>
                     <div className="bg-orange-50 rounded-lg p-2.5">
                       <p className="text-xs text-orange-500 font-medium">Seller Gets</p>
                       <p className="font-bold text-orange-700 text-sm mt-0.5">{formatCurrency(sellerPayable)}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">− {formatCurrency(commAmount)} comm{labourAmt > 0 ? ` ${isAddLabour ? "+" : "−"} ${formatCurrency(labourAmt)} labour` : ""}</p>
                     </div>
                   </div>
                 </div>

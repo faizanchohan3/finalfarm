@@ -965,6 +965,7 @@ model Commission {
   commissionDirection String? @default("RECEIVE") // RECEIVE = we earn it, PAY = we pay it
   commissionAmount Float
   labourAmount     Float      @default(0)
+  labourMode       String?    @default("ADD") // ADD = labour added to buyer total, DEDUCT = taken from seller
   sellerPayable    Float      @default(0)
   paidAmount       Float      @default(0)
   balance          Float      @default(0)

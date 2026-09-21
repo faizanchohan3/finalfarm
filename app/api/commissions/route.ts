@@ -55,7 +55,6 @@ export async function POST(req: Request) {
     rateUnit,
     totalValue,
     commissionRate,
-    direction,
     labourAmount,
     labourMode,
     notes,
@@ -65,7 +64,7 @@ export async function POST(req: Request) {
   } = body
 
   const num = (v: any) => (v !== "" && v != null ? parseFloat(v) : null)
-  const isPay = direction === "PAY"
+  const isPay = true // commission is always paid by us (expense)
   const isAddLabour = labourMode !== "DEDUCT" // default: add labour on top of buyer total
 
   if (!customerId && !walkInCustomer) {
@@ -79,12 +78,10 @@ export async function POST(req: Request) {
   const goods = parseFloat(totalValue) // goods value = net kg × rate/kg (or mound × rate/mound)
   const commAmount = parseFloat(((goods * commRate) / 100).toFixed(2))
   const labourAmt = parseFloat(labourAmount || "0")
-  const isReceive = !isPay
-  // Commission both-sides: RECEIVE adds it to the buyer AND deducts it from the seller.
-  // Labour: ADD = on top of the buyer's total; DEDUCT = taken from the seller's amount.
-  const total = goods + (isReceive ? commAmount : 0) + (isAddLabour ? labourAmt : 0) // buyer owes
-  const sellerPayable = Math.max(goods - (isReceive ? commAmount : 0) - (isAddLabour ? 0 : labourAmt), 0)
-  // Commission amount is calculated once (goods × rate%).
+  // Buyer and seller settle on the same amount: goods − commission, then ± labour
+  // (ADD adds labour on both sides, DEDUCT subtracts it on both sides).
+  const total = Math.max(goods - commAmount + (isAddLabour ? labourAmt : -labourAmt), 0) // buyer owes
+  const sellerPayable = total
   const commEarned = commAmount
   const paid = parseFloat(initialPaid || "0")
   const balance = total - paid
@@ -119,6 +116,7 @@ export async function POST(req: Request) {
         commissionDirection: isPay ? "PAY" : "RECEIVE",
         commissionAmount: commAmount,
         labourAmount: labourAmt,
+        labourMode: isAddLabour ? "ADD" : "DEDUCT",
         sellerPayable,
         paidAmount: paid,
         balance,

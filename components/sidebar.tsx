@@ -61,6 +61,7 @@ const cashierReportSubItems = [
 ]
 
 const shopNavItems: NavItem[] = [
+  { href: "/bill-maker", label: "Bill Maker", icon: FileText },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/inventory", label: "Store", icon: Package },
   { href: "/lots", label: "Potato Store", icon: Boxes, module: "moduleLots" },

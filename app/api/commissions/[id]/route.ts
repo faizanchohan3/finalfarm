@@ -45,10 +45,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     // Delete finance transactions linked to this commission
     await tx.transaction.deleteMany({ where: { reference: id } })
 
-    // Reverse commission income account balance — never go below 0
+    // Reverse the commission account it was posted to (INCOME when received, EXPENSE when paid) — never go below 0
     if (commission.commissionAmount > 0) {
       const commAccount = await tx.account.findFirst({
-        where: { ...shopFilter, type: "INCOME", name: { contains: "Commission" }, isActive: true },
+        where: { ...shopFilter, type: commission.commissionDirection === "PAY" ? "EXPENSE" : "INCOME", name: { contains: "Commission" }, isActive: true },
         orderBy: { code: "asc" },
       })
       if (commAccount) {
