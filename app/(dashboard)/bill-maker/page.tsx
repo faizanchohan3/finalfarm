@@ -12,10 +12,19 @@ import { buildPrintHeader, escapeHtml } from "@/lib/print-utils"
 // Standalone bill maker: nothing is saved to the database, the bill is only printed.
 // Only the next bill number is remembered in this browser.
 
-type Row = { date: string; weight: string; jali: string }
+type Row = { date: string; weight: string; qty: string }
+type UnitType = "Jali" | "Bori" | "Bag"
+type RateUnit = "kg" | "mound"
+
+// Labels that change with the chosen packing unit (Jali / Bori / Bag)
+const UNIT_LABELS: Record<UnitType, { cutPerLabel: string; unitCutLabel: string; totalLabel: string; cutSummaryLabel: string; ur: string }> = {
+  Jali: { cutPerLabel: "Cut per jali (KG)", unitCutLabel: "Jali cut (KG)", totalLabel: "Total jali", cutSummaryLabel: "Jali cut", ur: "جالی" },
+  Bori: { cutPerLabel: "Cut per bori (KG)", unitCutLabel: "Bori cut (KG)", totalLabel: "Total bori", cutSummaryLabel: "Bori cut", ur: "بوری" },
+  Bag: { cutPerLabel: "Cut per bag (KG)", unitCutLabel: "Bag cut (KG)", totalLabel: "Total bag", cutSummaryLabel: "Bag cut", ur: "بیگ" },
+}
 
 const todayStr = () => new Date().toISOString().slice(0, 10)
-const emptyRow = (): Row => ({ date: todayStr(), weight: "", jali: "" })
+const emptyRow = (): Row => ({ date: todayStr(), weight: "", qty: "" })
 const num = (v: string) => parseFloat(v) || 0
 const fmt = (n: number) => n.toLocaleString("en-PK", { maximumFractionDigits: 2 })
 const fmtDate = (d: string) => (d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "numeric", year: "2-digit" }) : "")
@@ -28,9 +37,13 @@ export default function BillMakerPage() {
   const [billDate, setBillDate] = useState(todayStr())
   const [name, setName] = useState("")
   const [product, setProduct] = useState("")
+  const [unitType, setUnitType] = useState<UnitType>("Jali")
   const [rows, setRows] = useState<Row[]>([emptyRow()])
-  const [cutPerJali, setCutPerJali] = useState("0.5")
+  const [cutPerUnit, setCutPerUnit] = useState("0.5")
   const [cutOverride, setCutOverride] = useState("")
+  const [vehicleCut, setVehicleCut] = useState("")
+  const [rateUnit, setRateUnit] = useState<RateUnit>("kg")
+  const [kgPerMound, setKgPerMound] = useState("60")
   const [rate, setRate] = useState("")
 
   useEffect(() => {
@@ -41,12 +54,17 @@ export default function BillMakerPage() {
     } catch {}
   }, [])
 
-  const totalJali = rows.reduce((s, r) => s + num(r.jali), 0)
+  const ul = UNIT_LABELS[unitType]
+
+  const totalQty = rows.reduce((s, r) => s + num(r.qty), 0)
   const totalWeight = rows.reduce((s, r) => s + num(r.weight), 0)
-  const autoCut = Math.round(totalJali * num(cutPerJali) * 100) / 100
+  const autoCut = Math.round(totalQty * num(cutPerUnit) * 100) / 100
   const cut = cutOverride !== "" ? num(cutOverride) : autoCut
-  const netWeight = totalWeight - cut
-  const amount = Math.round(netWeight * num(rate))
+  const weightAfterCut = totalWeight - cut
+  const safiWeight = weightAfterCut - num(vehicleCut)
+  const moundDivisor = num(kgPerMound) || 1
+  const mounds = safiWeight > 0 ? safiWeight / moundDivisor : 0
+  const amount = Math.round(rateUnit === "mound" ? mounds * num(rate) : safiWeight * num(rate))
 
   function updateRow(i: number, field: keyof Row, value: string) {
     setRows((prev) => prev.map((r, idx) => (idx === i ? { ...r, [field]: value } : r)))
@@ -54,16 +72,23 @@ export default function BillMakerPage() {
 
   function newBill() {
     if (!confirm(t("Clear this bill and start a new one?"))) return
-    setName(""); setProduct(""); setRows([emptyRow()]); setCutOverride(""); setRate(""); setBillDate(todayStr())
+    setName(""); setProduct(""); setRows([emptyRow()]); setCutOverride(""); setVehicleCut("")
+    setRate(""); setRateUnit("kg"); setKgPerMound("60"); setBillDate(todayStr())
   }
 
   function printBill() {
-    const filled = rows.filter((r) => num(r.weight) || num(r.jali))
+    const filled = rows.filter((r) => num(r.weight) || num(r.qty))
     if (!name.trim()) return alert(t("Enter the name"))
     if (filled.length === 0) return alert(t("Add at least one row"))
 
     const rowHtml = filled.map((r) => `
-      <tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${fmt(num(r.weight))}</td><td>${fmt(num(r.jali))}</td></tr>`).join("")
+      <tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${fmt(num(r.weight))}</td><td>${fmt(num(r.qty))}</td></tr>`).join("")
+
+    const rateLine = rateUnit === "mound"
+      ? `<div><span>ریٹ (فی من)</span><span class="num">${fmt(num(rate))}</span></div>
+         <div><span>وزن فی من</span><span class="num">${fmt(moundDivisor)} کلو</span></div>
+         <div><span>من</span><span class="num">${fmt(mounds)}</span></div>`
+      : `<div><span>ریٹ (فی کلو)</span><span class="num">${fmt(num(rate))}</span></div>`
 
     const w = window.open("", "_blank")
     if (!w) return
@@ -93,15 +118,18 @@ export default function BillMakerPage() {
 </div>
 <div class="name">بنام: <strong>${escapeHtml(name.trim())}</strong>${product.trim() ? `<span style="margin-inline-start:28px">جنس: <strong>${escapeHtml(product.trim())}</strong></span>` : ""}</div>
 <table>
-  <thead><tr><th>تاریخ</th><th>وزن (کلو)</th><th>تعداد جالی</th></tr></thead>
+  <thead><tr><th>تاریخ</th><th>وزن (کلو)</th><th>تعداد ${ul.ur}</th></tr></thead>
   <tbody>${rowHtml}</tbody>
 </table>
 <div class="sum">
-  <div><span>کل جالی</span><span class="num">${fmt(totalJali)}</span></div>
+  <div><span>کل ${ul.ur}</span><span class="num">${fmt(totalQty)}</span></div>
   <div><span>کل وزن</span><span class="num">${fmt(totalWeight)}</span></div>
-  <div><span>جالی کاٹ</span><span class="num">− ${fmt(cut)}</span></div>
-  <div><span>خالص وزن</span><span class="num">${fmt(netWeight)}</span></div>
-  <div><span>ریٹ (فی کلو)</span><span class="num">${fmt(num(rate))}</span></div>
+  <div><span>فی ${ul.ur} کاٹ (کلو)</span><span class="num">${fmt(num(cutPerUnit))}</span></div>
+  <div><span>${ul.ur} کاٹ</span><span class="num">− ${fmt(cut)}</span></div>
+  <div><span>وزن (کاٹ کے بعد)</span><span class="num">${fmt(weightAfterCut)}</span></div>
+  <div><span>گاڑی کاٹ</span><span class="num">− ${fmt(num(vehicleCut))}</span></div>
+  <div><span>صافی وزن</span><span class="num">${fmt(safiWeight)}</span></div>
+  ${rateLine}
   <div class="grand"><span>کل رقم</span><span class="num">Rs ${fmt(amount)}</span></div>
 </div>
 <div class="sig"><span>دستخط وصول کنندہ: ____________</span><span>دستخط: ____________</span></div>
@@ -143,23 +171,35 @@ export default function BillMakerPage() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-2 gap-2">
+            <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
               <Label>{t("Entries")}</Label>
-              <Button size="sm" variant="outline" onClick={() => setRows((prev) => [...prev, emptyRow()])} className="gap-1">
-                <Plus className="w-3 h-3" /> {t("Add Row")}
-              </Button>
+              <div className="flex items-center gap-2">
+                <select
+                  value={unitType}
+                  onChange={(e) => setUnitType(e.target.value as UnitType)}
+                  className="h-8 rounded-md border border-input bg-background px-2 text-xs font-medium shadow-sm"
+                  title={t("Packing")}
+                >
+                  <option value="Jali">{t("Jali")}</option>
+                  <option value="Bori">{t("Bori")}</option>
+                  <option value="Bag">{t("Bag")}</option>
+                </select>
+                <Button size="sm" variant="outline" onClick={() => setRows((prev) => [...prev, emptyRow()])} className="gap-1">
+                  <Plus className="w-3 h-3" /> {t("Add Row")}
+                </Button>
+              </div>
             </div>
             <div className="hidden sm:grid grid-cols-12 gap-2 px-1 pb-1 text-xs text-gray-500">
               <span className="col-span-4">{t("Date")}</span>
               <span className="col-span-4">{t("Weight (KG)")}</span>
-              <span className="col-span-3">{t("Jali")}</span>
+              <span className="col-span-3">{t(unitType)}</span>
             </div>
             <div className="space-y-2">
               {rows.map((r, i) => (
                 <div key={i} className="grid grid-cols-12 gap-2 items-center">
                   <Input className="col-span-12 sm:col-span-4" type="date" value={r.date} onChange={(e) => updateRow(i, "date", e.target.value)} />
                   <Input className="col-span-6 sm:col-span-4" type="number" placeholder={t("Weight (KG)")} value={r.weight} onChange={(e) => updateRow(i, "weight", e.target.value)} />
-                  <Input className="col-span-5 sm:col-span-3" type="number" placeholder={t("Jali")} value={r.jali} onChange={(e) => updateRow(i, "jali", e.target.value)} />
+                  <Input className="col-span-5 sm:col-span-3" type="number" placeholder={t(unitType)} value={r.qty} onChange={(e) => updateRow(i, "qty", e.target.value)} />
                   <button
                     type="button"
                     onClick={() => setRows((prev) => (prev.length > 1 ? prev.filter((_, idx) => idx !== i) : [emptyRow()]))}
@@ -171,29 +211,76 @@ export default function BillMakerPage() {
                 </div>
               ))}
             </div>
+            <div className="flex flex-wrap gap-x-6 gap-y-1 px-1 pt-2 text-xs text-gray-600">
+              <span>{t("Total weight")}: <span className="font-semibold text-gray-900 tabular-nums">{fmt(totalWeight)}</span></span>
+              <span>{t(ul.totalLabel)}: <span className="font-semibold text-gray-900 tabular-nums">{fmt(totalQty)}</span></span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
-              <Label>{t("Cut per jali (KG)")}</Label>
-              <Input type="number" value={cutPerJali} onChange={(e) => setCutPerJali(e.target.value)} />
+              <Label>{t(ul.cutPerLabel)}</Label>
+              <Input type="number" value={cutPerUnit} onChange={(e) => setCutPerUnit(e.target.value)} />
             </div>
             <div>
-              <Label>{t("Jali cut (KG)")}</Label>
+              <Label>{t(ul.unitCutLabel)}</Label>
               <Input type="number" value={cutOverride} placeholder={fmt(autoCut)} onChange={(e) => setCutOverride(e.target.value)} />
               <p className="text-[11px] text-gray-400 mt-1">{t("Leave empty to calculate automatically")}</p>
             </div>
             <div>
-              <Label>{t("Rate (per KG)")}</Label>
+              <Label>{t("Vehicle cut (KG)")}</Label>
+              <Input type="number" value={vehicleCut} onChange={(e) => setVehicleCut(e.target.value)} placeholder="0" />
+            </div>
+            <div>
+              <Label>{t("Weight after cut")}</Label>
+              <Input readOnly value={fmt(weightAfterCut)} className="bg-gray-50 font-medium" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div>
+              <Label>{t("Rate unit")}</Label>
+              <select
+                value={rateUnit}
+                onChange={(e) => setRateUnit(e.target.value as RateUnit)}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+              >
+                <option value="kg">{t("Per kg")}</option>
+                <option value="mound">{t("Per Mound")}</option>
+              </select>
+            </div>
+            {rateUnit === "mound" && (
+              <div>
+                <Label>{t("KG per Mound")}</Label>
+                <Input type="number" value={kgPerMound} onChange={(e) => setKgPerMound(e.target.value)} />
+              </div>
+            )}
+            <div>
+              <Label>{rateUnit === "mound" ? t("Rate / Mound") : t("Rate (per KG)")}</Label>
               <Input type="number" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="0" />
+            </div>
+            {rateUnit === "mound" && (
+              <div>
+                <Label>{t("Mounds")} <span className="font-normal text-gray-400 text-[11px]">({t("auto")})</span></Label>
+                <Input readOnly value={mounds ? mounds.toFixed(2) : ""} className="bg-gray-50 font-medium" />
+              </div>
+            )}
+            <div>
+              <Label>{t("Safi weight")}</Label>
+              <Input readOnly value={fmt(safiWeight)} className="bg-gray-50 font-semibold" />
             </div>
           </div>
 
           <div className="rounded-lg bg-purple-50 p-4 space-y-1.5 text-sm">
-            <div className="flex justify-between"><span>{t("Total jali")}</span><span className="font-medium tabular-nums">{fmt(totalJali)}</span></div>
+            <div className="flex justify-between"><span>{t(ul.totalLabel)}</span><span className="font-medium tabular-nums">{fmt(totalQty)}</span></div>
             <div className="flex justify-between"><span>{t("Total weight")}</span><span className="font-medium tabular-nums">{fmt(totalWeight)}</span></div>
-            <div className="flex justify-between"><span>{t("Jali cut")}</span><span className="font-medium tabular-nums">− {fmt(cut)}</span></div>
-            <div className="flex justify-between"><span>{t("Net weight")}</span><span className="font-semibold tabular-nums">{fmt(netWeight)}</span></div>
+            <div className="flex justify-between"><span>{t(ul.cutSummaryLabel)}</span><span className="font-medium tabular-nums">− {fmt(cut)}</span></div>
+            <div className="flex justify-between"><span>{t("Weight after cut")}</span><span className="font-medium tabular-nums">{fmt(weightAfterCut)}</span></div>
+            <div className="flex justify-between"><span>{t("Vehicle cut")}</span><span className="font-medium tabular-nums">− {fmt(num(vehicleCut))}</span></div>
+            <div className="flex justify-between"><span>{t("Safi weight")}</span><span className="font-semibold tabular-nums">{fmt(safiWeight)}</span></div>
+            {rateUnit === "mound" && (
+              <div className="flex justify-between"><span>{t("Mounds")}</span><span className="font-medium tabular-nums">{fmt(mounds)}</span></div>
+            )}
             <div className="flex justify-between border-t border-purple-200 pt-2 mt-2 text-base">
               <span className="font-semibold">{t("Total amount")}</span>
               <span className="font-bold text-purple-700 tabular-nums">Rs {fmt(amount)}</span>
