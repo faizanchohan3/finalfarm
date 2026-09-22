@@ -16,6 +16,9 @@ import { buildPrintHeader, receiptCSS, reportCSS } from "@/lib/print-utils"
 
 const STATUSES = ["ARRIVED", "WEIGHED", "STORED", "AVAILABLE", "IN_AUCTION", "SOLD", "DISPATCHED", "SETTLED", "CANCELLED"] as const
 
+// Markha 1 is a fixed list of potato grades — not shop-editable like Markha 2.
+const MARKHA1_OPTIONS = ["Safaid Beeg", "Surkh Beeg", "Safaid Rashan", "Surkh Rashan", "Safaid Goli", "Surkh Goli"]
+
 const STATUS_COLORS: Record<string, string> = {
   ARRIVED: "bg-blue-100 text-blue-700",
   WEIGHED: "bg-indigo-100 text-indigo-700",
@@ -421,11 +424,12 @@ export default function LotsPage() {
             title={t("Filter by markha")}
           >
             <option value="ALL">{t("All markhas")}</option>
-            {([1, 2] as const).map((slot) => (
-              <optgroup key={slot} label={t(`Markha ${slot}`)}>
-                {markhas.filter((m) => (m.slot ?? 1) === slot).map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
-              </optgroup>
-            ))}
+            <optgroup label={t("Markha 1")}>
+              {MARKHA1_OPTIONS.map((name) => <option key={name} value={name}>{t(name)}</option>)}
+            </optgroup>
+            <optgroup label={t("Markha 2")}>
+              {markhas.filter((m) => m.slot === 2).map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
+            </optgroup>
           </select>
         </div>
       </div>
@@ -569,7 +573,7 @@ export default function LotsPage() {
                 <select value={form.markha1} onChange={(e) => set("markha1", e.target.value)}
                   className="mt-1 flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 shadow-xs focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-ring/20">
                   <option value="">— {t("None")} —</option>
-                  {markhas.filter((m) => (m.slot ?? 1) === 1).map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
+                  {MARKHA1_OPTIONS.map((name) => <option key={name} value={name}>{t(name)}</option>)}
                 </select>
               </div>
               <div>
