@@ -37,6 +37,10 @@ export default function PurchasesPage() {
   const [paidAmount, setPaidAmount] = useState("0")
   const [notes, setNotes] = useState("")
   const [items, setItems] = useState([{ productId: "", quantity: "1", price: "0", customName: "" }])
+  const [packingUnit, setPackingUnit] = useState<"Jali" | "Bori" | "Tora">("Jali")
+  const [packingCount, setPackingCount] = useState("")
+  const [cutPerUnit, setCutPerUnit] = useState("0.5")
+  const [cutOverride, setCutOverride] = useState("")
   const [isPreviousRecord, setIsPreviousRecord] = useState(false)
   const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0])
   const [isPreviousRecordCommission, setIsPreviousRecordCommission] = useState(false)
@@ -140,6 +144,17 @@ export default function PurchasesPage() {
   const stockTotal = items.reduce((s, i) => s + parseFloat(i.quantity || "0") * parseFloat(i.price || "0"), 0)
   const stockBalance = stockTotal - parseFloat(paidAmount || "0")
 
+  // Packing / kaat: total weight from the item rows, minus the packing-material cut
+  const totalWeight = items.reduce((s, i) => s + (parseFloat(i.quantity || "0") || 0), 0)
+  const autoKaat = Math.round(parseFloat(packingCount || "0") * parseFloat(cutPerUnit || "0") * 100) / 100
+  const kaat = cutOverride !== "" ? parseFloat(cutOverride || "0") : autoKaat
+  const netWeight = totalWeight - kaat
+
+  function applyNetWeightToQty() {
+    if (items.length !== 1 || netWeight <= 0) return
+    updateItem(0, "quantity", String(netWeight))
+  }
+
   const cTotal = parseFloat(cTotalValue || "0")
   const cCommAmt = cTotal > 0 ? parseFloat(((cTotal * parseFloat(cCommissionRate || "0")) / 100).toFixed(2)) : 0
   const cSellerPayable = cTotal > 0 ? parseFloat((cTotal - cCommAmt).toFixed(2)) : 0
@@ -149,6 +164,7 @@ export default function PurchasesPage() {
     setPurchaseType("stock")
     setPartyId(""); setWalkinSellerName(""); setRoomName(""); setPaidAmount("0"); setNotes("")
     setItems([{ productId: "", quantity: "1", price: "0", customName: "" }])
+    setPackingUnit("Jali"); setPackingCount(""); setCutPerUnit("0.5"); setCutOverride("")
     setCPartyId(""); setCWalkInSeller(""); setCCustomerId(""); setCWalkInCustomer("")
     setCProductId(""); setCBags(""); setCWeight(""); setCRate(""); setCTotalValue("")
     setCCommissionRate("2.5"); setCPaidAmount("0"); setCNotes("")
@@ -169,6 +185,12 @@ export default function PurchasesPage() {
     const sellerCustomerId = isCustomer ? partyId.replace("customer_", "") : null
     const walkinSeller = isWalkin ? walkinSellerName.trim() || null : null
 
+    // No dedicated column for packing/kaat yet — record the breakdown in Notes so it isn't lost.
+    const packingNote = parseFloat(packingCount || "0") > 0
+      ? `${packingCount} ${packingUnit} × ${cutPerUnit}kg cut = ${kaat.toFixed(2)}kg kaat (gross ${totalWeight.toLocaleString()}kg, net ${netWeight.toFixed(2)}kg)`
+      : ""
+    const finalNotes = [notes.trim(), packingNote].filter(Boolean).join(" | ")
+
     const res = await fetch("/api/purchases", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -183,7 +205,7 @@ export default function PurchasesPage() {
           price: parseFloat(i.price),
         })),
         paidAmount: parseFloat(paidAmount),
-        notes,
+        notes: finalNotes || null,
         purchaseDate: isPreviousRecord ? purchaseDate : undefined,
       }),
     })
@@ -574,9 +596,44 @@ ${buildPrintHeader(shop)}
                   ))}
                 </div>
               </div>
+
+              <div className="rounded-lg border border-gray-200 p-3 space-y-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div>
+                    <Label>Packing</Label>
+                    <select
+                      value={packingUnit}
+                      onChange={(e) => setPackingUnit(e.target.value as "Jali" | "Bori" | "Tora")}
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                    >
+                      <option value="Jali">Jali</option>
+                      <option value="Bori">Bori</option>
+                      <option value="Tora">Tora</option>
+                    </select>
+                  </div>
+                  <div><Label>{packingUnit} Count</Label><Input type="number" placeholder="0" value={packingCount} onChange={(e) => setPackingCount(e.target.value)} /></div>
+                  <div><Label>Cut per {packingUnit} (KG)</Label><Input type="number" value={cutPerUnit} onChange={(e) => setCutPerUnit(e.target.value)} /></div>
+                  <div>
+                    <Label>Kaat (KG)</Label>
+                    <Input type="number" value={cutOverride} placeholder={autoKaat ? autoKaat.toFixed(2) : "0"} onChange={(e) => setCutOverride(e.target.value)} />
+                    <p className="text-[11px] text-gray-400 mt-1">Leave empty to calculate automatically</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm bg-gray-50 rounded-md px-3 py-2">
+                  <span>Total Weight: <span className="font-semibold tabular-nums">{totalWeight.toLocaleString()}</span> kg</span>
+                  <span>Kaat: <span className="font-semibold tabular-nums text-red-600">− {kaat.toLocaleString()}</span> kg</span>
+                  <span>Net Weight: <span className="font-semibold tabular-nums text-purple-700">{netWeight.toLocaleString()}</span> kg</span>
+                  {items.length === 1 && netWeight > 0 && (
+                    <Button size="sm" variant="outline" type="button" onClick={applyNetWeightToQty} className="ml-auto">
+                      Use Net Weight as Qty
+                    </Button>
+                  )}
+                </div>
+              </div>
+
               <div className="bg-blue-50 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm gap-2 flex-wrap">
-                  <span>Total:</span><span className="font-bold">{formatCurrency(stockTotal)}</span>
+                  <span>Total Amount:</span><span className="font-bold">{formatCurrency(stockTotal)}</span>
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
                   <Label className="whitespace-nowrap">Amount Paid:</Label>
