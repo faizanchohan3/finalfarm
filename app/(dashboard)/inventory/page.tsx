@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { buildPrintHeader, reportCSS } from "@/lib/print-utils"
-import { Plus, Search, Package, AlertTriangle, Edit, Trash2, Tag, ChevronDown, ChevronUp, X, Printer } from "lucide-react"
+import { Plus, Minus, Search, Package, AlertTriangle, Edit, Trash2, Tag, ChevronDown, ChevronUp, X, Printer, PlusCircle } from "lucide-react"
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<any[]>([])
@@ -34,12 +34,20 @@ export default function InventoryPage() {
   const [categorySearch, setCategorySearch] = useState("")
   const [roomSearch, setRoomSearch] = useState("")
   const [roomFilter, setRoomFilter] = useState("all")
+  const [categoryFilter, setCategoryFilter] = useState("all")
+  // Quick stock add / remove
+  const [stockTarget, setStockTarget] = useState<any>(null)
+  const [stockRoom, setStockRoom] = useState<{ name: string; items: any[] } | null>(null)
+  const [stockQty, setStockQty] = useState("")
+  const [stockReason, setStockReason] = useState("")
+  const [stockSaving, setStockSaving] = useState(false)
 
   async function loadData() {
     try {
       setLoading(true)
       const [pr, cr, rr, shr] = await Promise.all([
-        fetch("/api/inventory").then((r) => r.json()),
+        // no-store: the API sends a short browser cache, which would hide stock changes made on this page
+        fetch("/api/inventory", { cache: "no-store" }).then((r) => r.json()),
         fetch("/api/categories").then((r) => r.json()),
         fetch("/api/rooms").then((r) => r.json()),
         fetch("/api/settings").then((r) => r.json()),
@@ -86,6 +94,43 @@ export default function InventoryPage() {
       }),
     })
     if (res.ok) { setShowModal(false); loadData() }
+  }
+
+  function openStock(p: any) {
+    setStockRoom(null); setStockTarget(p); setStockQty(""); setStockReason("")
+  }
+
+  // Opened from a room heading: pick which product in that room to adjust
+  function openRoomStock(g: { name: string; items: any[] }) {
+    setStockRoom(g); setStockTarget(g.items[0]); setStockQty(""); setStockReason("")
+  }
+
+  function closeStock() {
+    setStockTarget(null); setStockRoom(null)
+  }
+
+  async function adjustStock(type: "INCREASE" | "DECREASE") {
+    const qty = parseFloat(stockQty)
+    if (!stockTarget || !(qty > 0)) return alert("Enter a quantity greater than 0")
+    if (type === "DECREASE" && qty > stockTarget.currentStock) {
+      if (!confirm(`Only ${stockTarget.currentStock} ${stockTarget.unit} in stock. Remove ${qty} anyway?`)) return
+    }
+    setStockSaving(true)
+    try {
+      const res = await fetch("/api/warehouse/adjust", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: stockTarget.id, type, quantity: qty, reason: stockReason.trim() || "Store quick adjust" }),
+      })
+      if (!res.ok) return alert("Failed to update stock")
+      // Show the new stock right away, then reload to stay in sync
+      const delta = type === "DECREASE" ? -qty : qty
+      setProducts((prev) => prev.map((p) => (p.id === stockTarget.id ? { ...p, currentStock: p.currentStock + delta } : p)))
+      closeStock()
+      loadData()
+    } finally {
+      setStockSaving(false)
+    }
   }
 
   async function handleDelete(id: string) {
@@ -170,7 +215,7 @@ export default function InventoryPage() {
 </style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
-  <div><div class="doc-title">Store Stock Report</div><div class="doc-sub">${roomFilterLabel ? `Room: ${roomFilterLabel} · ` : ""}Total: ${filtered.length} products</div></div>
+  <div><div class="doc-title">Store Stock Report</div><div class="doc-sub">${roomFilterLabel ? `Room: ${roomFilterLabel} · ` : ""}${categoryFilterLabel ? `Category: ${categoryFilterLabel} · ` : ""}Total: ${filtered.length} products</div></div>
   <div class="doc-meta"><div>Printed: ${date}</div></div>
 </div>
 <div class="body-pad">
@@ -201,14 +246,19 @@ ${buildPrintHeader(shop)}
 
   const filtered = products.filter((p) => {
     if (roomFilter === "unassigned" ? p.roomId : roomFilter !== "all" && p.roomId !== roomFilter) return false
+    if (categoryFilter === "none" ? p.categoryId : categoryFilter !== "all" && p.categoryId !== categoryFilter) return false
+    const q = search.toLowerCase()
     return (
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.category?.name.toLowerCase().includes(search.toLowerCase())
+      p.name.toLowerCase().includes(q) ||
+      (p.category?.name || "").toLowerCase().includes(q) ||
+      (p.room?.name || "").toLowerCase().includes(q)
     )
   })
 
   const roomFilterLabel =
     roomFilter === "all" ? "" : roomFilter === "unassigned" ? "Unassigned" : rooms.find((r) => r.id === roomFilter)?.name || ""
+  const categoryFilterLabel =
+    categoryFilter === "all" ? "" : categoryFilter === "none" ? "No category" : categories.find((c) => c.id === categoryFilter)?.name || ""
 
   // Group products by room; rooms alphabetical, "Unassigned" last
   function groupByRoom(list: any[]) {
@@ -225,6 +275,13 @@ ${buildPrintHeader(shop)}
   }
 
   const roomGroups = groupByRoom(filtered)
+
+  // Stock total per unit, e.g. "120 KG · 40 Bag"
+  function qtyByUnit(list: any[]) {
+    const totals = new Map<string, number>()
+    for (const p of list) totals.set(p.unit, (totals.get(p.unit) || 0) + (p.currentStock || 0))
+    return Array.from(totals.entries()).map(([u, q]) => `${q.toLocaleString("en-PK", { maximumFractionDigits: 2 })} ${u}`).join(" · ") || "0"
+  }
 
   const lowStock = products.filter((p) => p.currentStock <= p.minStock)
   const criticalStock = products.filter((p) => p.currentStock <= 2)
@@ -392,6 +449,39 @@ ${buildPrintHeader(shop)}
         ))}
       </div>
 
+      {/* Category totals by room */}
+      {categoryFilter !== "all" && (
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-semibold text-gray-800 mb-3">
+              {categoryFilterLabel} — stock by room
+              <span className="ml-2 font-normal text-gray-500">Total: {qtyByUnit(filtered)}</span>
+            </p>
+            {roomGroups.length === 0 ? (
+              <p className="text-sm text-gray-400">No products in this category</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {roomGroups.map((g) => (
+                  <button
+                    key={g.name}
+                    type="button"
+                    onClick={() => {
+                      const r = rooms.find((x) => x.name === g.name)
+                      setRoomFilter(g.name === "Unassigned" ? "unassigned" : r?.id || "all")
+                    }}
+                    className="text-left rounded-lg border border-purple-200 bg-purple-50 p-3 hover:border-purple-400 transition-colors"
+                  >
+                    <p className="text-xs text-purple-600 font-medium">{g.name}</p>
+                    <p className="text-lg font-bold text-purple-900 tabular-nums">{qtyByUnit(g.items)}</p>
+                    <p className="text-[11px] text-gray-500">{g.items.length} product{g.items.length > 1 ? "s" : ""}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Table */}
       <Card>
         <CardHeader>
@@ -399,7 +489,7 @@ ${buildPrintHeader(shop)}
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
-                placeholder="Search products..."
+                placeholder="Search product, category, room..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
@@ -417,8 +507,20 @@ ${buildPrintHeader(shop)}
                 <SelectItem value="unassigned">Unassigned</SelectItem>
               </SelectContent>
             </Select>
-            {roomFilter !== "all" && (
-              <Button variant="ghost" size="sm" onClick={() => setRoomFilter("all")} className="gap-1 text-gray-500">
+            <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v ?? "all")}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent position="popper" side="bottom">
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((c: any) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+                <SelectItem value="none">No category</SelectItem>
+              </SelectContent>
+            </Select>
+            {(roomFilter !== "all" || categoryFilter !== "all" || search) && (
+              <Button variant="ghost" size="sm" onClick={() => { setRoomFilter("all"); setCategoryFilter("all"); setSearch("") }} className="gap-1 text-gray-500">
                 <X className="w-3.5 h-3.5" /> Clear
               </Button>
             )}
@@ -444,7 +546,18 @@ ${buildPrintHeader(shop)}
                       <Fragment key={g.name}>
                         <tr className="bg-purple-50 border-b border-purple-200">
                           <td colSpan={9} className="py-2 px-3 font-semibold text-purple-800">
-                            {g.name} <span className="text-purple-500 font-normal">({g.items.length})</span>
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                              <span>
+                                {g.name} <span className="text-purple-500 font-normal">({g.items.length})</span>
+                                <span className="ml-3 text-xs font-normal text-purple-700">Qty: {qtyByUnit(g.items)}</span>
+                              </span>
+                              <button
+                                onClick={() => openRoomStock(g)}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-white text-purple-700 border border-purple-300 rounded hover:bg-purple-100"
+                              >
+                                <Plus className="w-3 h-3" />/<Minus className="w-3 h-3" /> Add / Remove qty
+                              </button>
+                            </div>
                           </td>
                         </tr>
                         {g.items.map((p) => (
@@ -452,9 +565,14 @@ ${buildPrintHeader(shop)}
                             <td className="py-3 px-3 font-medium text-gray-800">{p.name}</td>
                             <td className="py-3 px-3 text-gray-600">{p.category?.name}</td>
                             <td className="py-3 px-3">
-                              <span className={p.currentStock <= p.minStock ? "text-red-600 font-semibold" : "text-gray-700"}>
-                                {p.currentStock}
-                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <span className={p.currentStock <= p.minStock ? "text-red-600 font-semibold" : "text-gray-700"}>
+                                  {p.currentStock}
+                                </span>
+                                <button onClick={() => openStock(p)} className="p-0.5 text-purple-500 hover:text-purple-700" title="Add / remove quantity">
+                                  <PlusCircle className="w-4 h-4" />
+                                </button>
+                              </div>
                             </td>
                             <td className="py-3 px-3 text-gray-500">{p.unit}</td>
                             <td className="py-3 px-3 text-gray-600">{p.minStock}</td>
@@ -495,6 +613,59 @@ ${buildPrintHeader(shop)}
           )}
         </CardContent>
       </Card>
+
+      {/* Quick stock add / remove */}
+      <Dialog open={!!stockTarget} onOpenChange={(o) => { if (!o) closeStock() }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Add / Remove Quantity{stockRoom ? ` — ${stockRoom.name}` : ""}</DialogTitle>
+          </DialogHeader>
+          {stockTarget && (
+            <div className="space-y-4">
+              {stockRoom && stockRoom.items.length > 1 && (
+                <div>
+                  <Label>Product</Label>
+                  <select
+                    value={stockTarget.id}
+                    onChange={(e) => setStockTarget(stockRoom.items.find((p) => p.id === e.target.value) || stockTarget)}
+                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  >
+                    {stockRoom.items.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name} ({p.currentStock} {p.unit})</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div className="bg-purple-50 rounded-lg p-3 text-sm space-y-1">
+                <div className="flex justify-between gap-2"><span className="text-gray-500">Product</span><span className="font-medium">{stockTarget.name}</span></div>
+                <div className="flex justify-between gap-2"><span className="text-gray-500">Room</span><span>{stockTarget.room?.name || "Unassigned"}</span></div>
+                <div className="flex justify-between gap-2"><span className="text-gray-500">Current stock</span><span className="font-bold">{stockTarget.currentStock} {stockTarget.unit}</span></div>
+              </div>
+              <div>
+                <Label>Quantity ({stockTarget.unit})</Label>
+                <Input type="number" autoFocus value={stockQty} onChange={(e) => setStockQty(e.target.value)} placeholder="0" />
+                {parseFloat(stockQty) > 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    After add: <strong>{stockTarget.currentStock + parseFloat(stockQty)}</strong> · After remove: <strong>{stockTarget.currentStock - parseFloat(stockQty)}</strong>
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label>Note (optional)</Label>
+                <Input value={stockReason} onChange={(e) => setStockReason(e.target.value)} placeholder="e.g. new arrival, damaged" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" className="gap-1 border-red-300 text-red-700 hover:bg-red-50" disabled={stockSaving} onClick={() => adjustStock("DECREASE")}>
+                  <Minus className="w-4 h-4" /> Remove
+                </Button>
+                <Button className="gap-1" disabled={stockSaving} onClick={() => adjustStock("INCREASE")}>
+                  <Plus className="w-4 h-4" /> Add
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Add/Edit Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
