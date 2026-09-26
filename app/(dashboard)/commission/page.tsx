@@ -644,6 +644,10 @@ ${buildPrintHeader(shop)}
                     <option value="jali">{t("Jali")}</option>
                     <option value="bag">{t("Bag")}</option>
                   </select>
+                  <Button type="button" variant="outline" size="sm" className="h-8 text-xs mt-2"
+                    onClick={() => setWeightRows((rows) => [...rows, { gross: "", tare: "", bardana: "" }])}>
+                    <Plus className="w-3.5 h-3.5" /> {t("Add Row")}
+                  </Button>
                 </div>
               </div>
               <div className="space-y-2">
@@ -684,17 +688,11 @@ ${buildPrintHeader(shop)}
                     </div>
                   )
                 })}
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <Button type="button" variant="outline" size="sm" className="h-8 text-xs"
-                    onClick={() => setWeightRows((rows) => [...rows, { gross: "", tare: "", bardana: "" }])}>
-                    <Plus className="w-3.5 h-3.5" /> {t("Add Row")}
-                  </Button>
-                  {weightRows.length > 1 && (
-                    <p className="text-xs text-gray-600">
-                      {t("Total")}: {t("Gross wt")} <strong>{grossWeight}</strong> · {t("Tare wt")} <strong>{tareWeight}</strong> · {t("Bardana wt")} <strong>{bardanaWeight}</strong> · {t("Net wt")} <strong className="text-blue-700">{netWeight} kg</strong>
-                    </p>
-                  )}
-                </div>
+                {weightRows.length > 1 && (
+                  <p className="text-xs text-gray-600 text-right">
+                    {t("Total")}: {t("Gross wt")} <strong>{grossWeight}</strong> · {t("Tare wt")} <strong>{tareWeight}</strong> · {t("Bardana wt")} <strong>{bardanaWeight}</strong> · {t("Net wt")} <strong className="text-blue-700">{netWeight} kg</strong>
+                  </p>
+                )}
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
