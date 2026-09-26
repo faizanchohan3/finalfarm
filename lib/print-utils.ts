@@ -11,8 +11,8 @@ export function escapeHtml(value: unknown): string {
 export function buildPrintHeader(shop: any): string {
   const name = shop?.name || "Argo-Firn"
   const ownerName = shop?.ownerName || ""
-  const phone = shop?.phone || ""
-  const address = shop?.address || ""
+  const phones = [shop?.phone, shop?.phone2].filter(Boolean).map(escapeHtml)
+  const address = escapeHtml(shop?.address || "")
   const logo = shop?.logo || ""
   const initial = (name[0] || "G").toUpperCase()
 
@@ -29,7 +29,7 @@ export function buildPrintHeader(shop: any): string {
         </div>
       </div>
       <div style="text-align:right;font-size:11px;line-height:1.9;opacity:0.9">
-        ${phone ? `<div>&#9990;&nbsp; ${phone}</div>` : ""}
+        ${phones.map((p) => `<div>&#9990;&nbsp; ${p}</div>`).join("")}
         ${address ? `<div>&#9679;&nbsp; ${address}</div>` : ""}
       </div>
     </div>
@@ -90,4 +90,28 @@ export const reportCSS = `
   .badge-PARTIAL { background: #fef9c3; color: #854d0e; }
   .badge-PENDING { background: #fee2e2; color: #b91c1c; }
   @media print { body { } @page { margin: 8mm; } }
+`
+
+// Urdu bill layout used by Bill Maker and the Potato Store prints (RTL, Nastaliq font, purple total bar).
+export const billFontLink = `<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">`
+
+export const billCSS = `
+  * { box-sizing: border-box; }
+  body { font-family: 'Noto Nastaliq Urdu', 'Segoe UI', Arial, sans-serif; margin: 0 auto; max-width: 640px; color: #1f2937; font-size: 13px; }
+  .num { font-family: 'Segoe UI', Arial, sans-serif; direction: ltr; unicode-bidi: embed; }
+  .meta { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px 4px; }
+  .meta b { font-family: 'Segoe UI', Arial, sans-serif; }
+  .name { padding: 4px 24px 12px; border-bottom: 1px solid #e5e7eb; font-size: 15px; }
+  .section { padding: 12px 24px 0; font-weight: 700; color: #5b21b6; font-size: 14px; }
+  .section small { font-weight: 400; color: #6b7280; font-size: 12px; }
+  table { width: calc(100% - 48px); margin: 14px 24px; border-collapse: collapse; }
+  th { background: #f5f3ff; color: #5b21b6; padding: 8px; font-weight: 700; border-bottom: 2px solid #c4b5fd; }
+  td { padding: 7px 8px; text-align: center; border-bottom: 1px solid #f3f4f6; font-family: 'Segoe UI', Arial, sans-serif; }
+  tfoot td { font-weight: 700; background: #f5f3ff; border-top: 2px solid #c4b5fd; }
+  .sum { width: calc(100% - 48px); margin: 4px 24px; }
+  .sum div { display: flex; justify-content: space-between; align-items: center; padding: 7px 10px; border-bottom: 1px dashed #e5e7eb; }
+  .sum span:last-child { font-family: 'Segoe UI', Arial, sans-serif; font-weight: 700; }
+  .grand { background: #5b21b6; color: #fff; border-radius: 6px; margin-top: 8px; font-size: 16px; border: 0 !important; }
+  .sig { display: flex; justify-content: space-between; padding: 40px 24px 20px; font-size: 12px; color: #6b7280; }
+  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 `

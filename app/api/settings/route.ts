@@ -12,7 +12,7 @@ export async function GET() {
     const shop = await db.shop.findUnique({
       where: { id: session.user.shopId },
       select: {
-        id: true, name: true, ownerName: true, phone: true, address: true, logo: true,
+        id: true, name: true, ownerName: true, phone: true, phone2: true, address: true, logo: true,
         moduleGodown: true, moduleGate: true, moduleTransport: true,
         moduleFarmers: true, moduleCommission: true, modulePesticides: true,
         moduleLots: true, moduleAgents: true,
@@ -36,8 +36,9 @@ export async function PATCH(req: Request) {
     if ("logo" in body) data.logo = body.logo
     if (body.name) data.name = body.name.trim()
     if ("ownerName" in body) data.ownerName = body.ownerName || ""
-    if ("phone" in body) data.phone = body.phone || null
-    if ("address" in body) data.address = body.address || null
+    if ("phone" in body) data.phone = body.phone?.trim() || null
+    if ("phone2" in body) data.phone2 = body.phone2?.trim() || null
+    if ("address" in body) data.address = body.address?.trim() || null
     if ("moduleGodown" in body)     data.moduleGodown     = !!body.moduleGodown
     if ("moduleGate" in body)       data.moduleGate       = !!body.moduleGate
     if ("moduleTransport" in body)  data.moduleTransport  = !!body.moduleTransport

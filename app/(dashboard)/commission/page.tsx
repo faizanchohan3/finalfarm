@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Textarea } from "@/components/ui/textarea"
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
-import { buildPrintHeader, escapeHtml, receiptCSS, reportCSS } from "@/lib/print-utils"
+import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print-utils"
 import { Plus, Search, Percent, CreditCard, Printer, Trash2, X } from "lucide-react"
 import { useLang } from "@/lib/i18n"
+import { recordCode } from "@/lib/record-code"
 
 const BAG_LABELS: Record<string, string> = { bori: "Bori", jali: "Jali", bag: "Bag" }
 const bagUnit = (c: any) => BAG_LABELS[c?.bagType] || "Bags"
@@ -179,9 +180,11 @@ export default function CommissionPage() {
         }),
       })
       if (res.ok) {
+        const d = await res.json().catch(() => ({}))
         setShowNew(false)
         resetNewForm()
         loadData()
+        if (d?.commission?.id) alert(`Commission saved. ID: ${recordCode("commission", d.commission.id)}`)
       } else {
         const d = await res.json().catch(() => ({}))
         alert(d?.error || "Failed to save commission")
@@ -256,169 +259,114 @@ export default function CommissionPage() {
     return { goods, comm, labour, buyer: explain(tv), seller: explain(sp) }
   }
 
-  const signed = (sign: number, amount: number) => `${sign > 0 ? "+ " : sign < 0 ? "− " : ""}PKR ${amount.toLocaleString()}`
+  // ── Prints: same Urdu bill layout as Bill Maker ──
+  const UR_BAG: Record<string, string> = { bori: "بوری", jali: "جالی", bag: "بیگ" }
+  const UR_PAY: Record<string, string> = { PAID: "ادا شدہ", PARTIAL: "جزوی", PENDING: "باقی" }
+  const e = (v: unknown) => escapeHtml(v ?? "—")
+  const n = (v: number | null | undefined) => Number(v || 0).toLocaleString("en-PK", { maximumFractionDigits: 2 })
+  const day = (v: string | Date) => new Date(v).toLocaleDateString("en-GB", { day: "numeric", month: "numeric", year: "2-digit" })
+  const signed = (sign: number, amount: number) => `${sign > 0 ? "+ " : sign < 0 ? "− " : ""}${n(amount)}`
+  const sellerName = (c: any) => c.farmer?.name || c.supplier?.name || c.walkInSeller || "—"
+  const buyerName = (c: any) => c.customer?.name || c.walkInCustomer || "—"
 
-  // Rows shared by both copies: goods amount, then commission and labour exactly as they were applied to this side.
-  function commonRows(c: any, side: "buyer" | "seller") {
+  function openBillWindow(title: string, body: string, wide = false) {
+    const w = window.open("", "_blank")
+    if (!w) return
+    w.document.write(`<html dir="rtl"><head><title>${escapeHtml(title)}</title>
+${billFontLink}
+<style>${billCSS}${wide ? " body { max-width: 1000px; }" : ""}</style></head><body>
+<div dir="ltr">${buildPrintHeader(shop)}</div>
+${body}
+<script>document.fonts.ready.then(() => window.print())<\/script>
+</body></html>`)
+    w.document.close()
+  }
+
+  // Buyer / Seller copy: goods amount, then commission and labour exactly as applied to that side.
+  function printCopy(c: any, side: "buyer" | "seller") {
     const b = breakdown(c)
-    const s = b[side]
+    const sd = b[side]
+    const ref = recordCode("commission", c.id)
+    const bagUr = UR_BAG[c.bagType] || "بوری"
+    const hasWeights = c.grossWeight || c.tareWeight || c.bardanaWeight
+    const parties = side === "seller"
+      ? `فروخت کنندہ: <strong>${e(sellerName(c))}</strong><span style="margin-inline-start:28px">خریدار: <strong>${e(buyerName(c))}</strong></span>`
+      : `خریدار: <strong>${e(buyerName(c))}</strong><span style="margin-inline-start:28px">فروخت کنندہ: <strong>${e(sellerName(c))}</strong></span>`
+
     const commRow = b.comm
-      ? s.commSign
-        ? `<tr><td>Commission (${c.commissionRate}%)</td><td style="text-align:right">${signed(s.commSign, b.comm)}</td></tr>`
-        : `<tr style="color:#6b7280"><td>Commission (${c.commissionRate}%) <span style="font-size:10px">— not deducted</span></td><td style="text-align:right">PKR ${b.comm.toLocaleString()}</td></tr>`
+      ? sd.commSign
+        ? `<div><span>کمیشن (<span class="num">${c.commissionRate}%</span>)</span><span class="num">${signed(sd.commSign, b.comm)}</span></div>`
+        : `<div style="color:#6b7280"><span>کمیشن (<span class="num">${c.commissionRate}%</span>) — کٹوتی نہیں</span><span class="num">${n(b.comm)}</span></div>`
       : ""
-    const labourRow = b.labour && s.labourSign ? `<tr><td>Labour</td><td style="text-align:right">${signed(s.labourSign, b.labour)}</td></tr>` : ""
-    return `
-      ${c.weight ? `<tr><td>Weight</td><td style="text-align:right">${c.weight} KG</td></tr>` : ""}
-      ${c.bags ? `<tr><td>${bagUnit(c)}</td><td style="text-align:right">${c.bags} ${bagUnit(c)}</td></tr>` : ""}
-      <tr><td><strong>Goods Amount</strong></td><td style="text-align:right"><strong>PKR ${b.goods.toLocaleString()}</strong></td></tr>
-      ${commRow}
-      ${labourRow}`
+    const labourRow = b.labour && sd.labourSign ? `<div><span>مزدوری</span><span class="num">${signed(sd.labourSign, b.labour)}</span></div>` : ""
+
+    const totals = side === "seller"
+      ? `<div class="grand"><span>آپ کو قابل ادا رقم</span><span class="num">Rs ${n(c.sellerPayable)}</span></div>`
+      : `<div><span>کل رقم</span><span class="num">${n(c.totalValue)}</span></div>
+  <div><span>ادا شدہ</span><span class="num" style="color:#15803d">${n(c.paidAmount)}</span></div>
+  <div><span>حالت</span><span>${UR_PAY[c.status] || e(c.status)}</span></div>
+  <div class="grand"><span>بقایا</span><span class="num">Rs ${n(c.balance)}</span></div>`
+
+    openBillWindow(`${side === "seller" ? "Seller" : "Buyer"} Copy — ${ref}`, `
+<div class="meta">
+  <div>${side === "seller" ? "فروخت کنندہ کاپی" : "خریدار کاپی"} — آئی ڈی: <b>${ref}</b></div>
+  <div>تاریخ: <b>${day(c.createdAt)}</b></div>
+</div>
+<div class="name">${parties}</div>
+<table>
+  <thead><tr><th>جنس</th><th>گاڑی نمبر</th><th>تعداد ${bagUr}</th><th>ریٹ (${c.rateUnit === "mound" ? "فی من" : "فی کلو"})</th></tr></thead>
+  <tbody><tr><td style="font-family:inherit">${e(c.commodity)}</td><td>${e(c.vehicleNo)}</td><td>${c.bags ?? "—"}</td><td>${c.rate ? n(c.rate) : "—"}</td></tr></tbody>
+</table>
+${hasWeights ? `<table>
+  <thead><tr><th>کل وزن</th><th>خالی وزن</th><th>بردانہ</th><th>صافی وزن (کلو)</th></tr></thead>
+  <tbody><tr><td>${n(c.grossWeight)}</td><td>${n(c.tareWeight)}</td><td>${n(c.bardanaWeight)}</td><td>${n(c.weight)}</td></tr></tbody>
+</table>` : ""}
+<div class="sum">
+  ${c.weight && !hasWeights ? `<div><span>صافی وزن</span><span class="num">${n(c.weight)} KG</span></div>` : ""}
+  ${c.weight && c.rateUnit === "mound" ? `<div><span>من (40 کلو)</span><span class="num">${n(c.weight / 40)}</span></div>` : ""}
+  <div><span>مال کی رقم</span><span class="num">${n(b.goods)}</span></div>
+  ${commRow}
+  ${labourRow}
+  ${totals}
+</div>
+${c.notes ? `<p style="font-size:12px;color:#555;margin:10px 24px 0"><strong>نوٹ:</strong> ${e(c.notes)}</p>` : ""}
+<div class="sig"><span>${side === "seller" ? "دستخط فروخت کنندہ" : "دستخط خریدار"}: ____________</span><span>دستخط: ____________</span></div>`)
   }
 
-  function infoGrid(c: any, first: "buyer" | "seller") {
-    const seller = escapeHtml(c.farmer?.name || c.supplier?.name || c.walkInSeller || "—")
-    const buyer = escapeHtml(c.customer?.name || c.walkInCustomer || "—")
-    const parties = first === "buyer"
-      ? `<div><div class="lbl">Buyer</div><div class="val">${buyer}</div></div><div><div class="lbl">Seller</div><div class="val">${seller}</div></div>`
-      : `<div><div class="lbl">Seller</div><div class="val">${seller}</div></div><div><div class="lbl">Buyer</div><div class="val">${buyer}</div></div>`
-    return `<div class="info-grid">
-    ${parties}
-    ${c.commodity ? `<div><div class="lbl">Commodity</div><div class="val">${escapeHtml(c.commodity)}</div></div>` : ""}
-    ${c.rate ? `<div><div class="lbl">Rate</div><div class="val">PKR ${c.rate}/${c.rateUnit === "mound" ? "mound" : "kg"}</div></div>` : ""}
-    ${c.bags ? `<div><div class="lbl">${bagUnit(c)}</div><div class="val">${c.bags}</div></div>` : ""}
-    ${c.weight ? `<div><div class="lbl">Weight</div><div class="val">${c.weight} KG</div></div>` : ""}
-  </div>`
-  }
-
-  // Seller copy: same breakdown as the buyer copy (goods − commission ± labour).
-  function printForSeller(c: any) {
-    const ref = c.id.slice(-6).toUpperCase()
-    const date = new Date(c.createdAt).toLocaleDateString("en-PK")
-    const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Seller Copy — ${ref}</title>
-<style>${receiptCSS}</style></head><body>
-${buildPrintHeader(shop)}
-<div class="doc-header">
-  <div>
-    <div class="doc-title">Seller Copy</div>
-    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; ${date}</div>
-  </div>
-  <div class="doc-meta"><div>${date}</div></div>
-</div>
-<div class="body-pad">
-  ${infoGrid(c, "seller")}
-  <table>
-    <thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead>
-    <tbody>
-      ${commonRows(c, "seller")}
-    </tbody>
-    <tfoot>
-      <tr><td><strong>Amount Payable to You</strong></td><td style="text-align:right;color:#1d4ed8" class="amount-big">PKR ${(c.sellerPayable || 0).toLocaleString()}</td></tr>
-    </tfoot>
-  </table>
-  ${c.notes ? `<p style="font-size:11px;color:#555;margin-top:8px"><strong>Notes:</strong> ${escapeHtml(c.notes)}</p>` : ""}
-  <div class="sig-row">
-    <span>Seller Signature: _______________________</span>
-    <span>Authorized By: _______________________</span>
-  </div>
-</div>
-</body></html>`)
-    w.print()
-  }
-
-  // Buyer copy: same breakdown as the seller copy (goods − commission ± labour), plus payments.
-  function printForBuyer(c: any) {
-    const ref = c.id.slice(-6).toUpperCase()
-    const date = new Date(c.createdAt).toLocaleDateString("en-PK")
-    const statusCls = c.status === "PAID" ? "PAID" : c.status === "PARTIAL" ? "PARTIAL" : "PENDING"
-    const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Buyer Copy — ${ref}</title>
-<style>${receiptCSS}</style></head><body>
-${buildPrintHeader(shop)}
-<div class="doc-header">
-  <div>
-    <div class="doc-title">Buyer Copy</div>
-    <div class="doc-sub">Ref: #${ref} &nbsp;|&nbsp; ${date}</div>
-  </div>
-  <div class="doc-meta"><div>${date}</div><span class="badge badge-${statusCls}">${c.status}</span></div>
-</div>
-<div class="body-pad">
-  ${infoGrid(c, "buyer")}
-  <table>
-    <thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead>
-    <tbody>
-      ${commonRows(c, "buyer")}
-      <tr><td>Total Amount</td><td style="text-align:right">PKR ${(c.totalValue || 0).toLocaleString()}</td></tr>
-      <tr><td>Paid</td><td style="text-align:right;color:#15803d">PKR ${(c.paidAmount || 0).toLocaleString()}</td></tr>
-    </tbody>
-    <tfoot>
-      <tr><td><strong>Balance Due</strong></td><td style="text-align:right;color:${c.balance > 0 ? "#b91c1c" : "#15803d"}" class="amount-big">PKR ${(c.balance || 0).toLocaleString()}</td></tr>
-    </tfoot>
-  </table>
-  ${c.notes ? `<p style="font-size:11px;color:#555;margin-top:8px"><strong>Notes:</strong> ${escapeHtml(c.notes)}</p>` : ""}
-  <div class="sig-row">
-    <span>Buyer Signature: _______________________</span>
-    <span>Authorized By: _______________________</span>
-  </div>
-</div>
-</body></html>`)
-    w.print()
-  }
+  const printForSeller = (c: any) => printCopy(c, "seller")
+  const printForBuyer = (c: any) => printCopy(c, "buyer")
 
   function printAllCommissions(list: any[]) {
-    const rows = list.map((c, i) => {
-      const seller = c.farmer?.name || c.supplier?.name || c.walkInSeller || "—"
-      const buyer = c.customer?.name || c.walkInCustomer || "—"
-      const commodity = [c.commodity, c.bags ? `${c.bags} ${bagUnit(c)}` : null, c.weight ? `${c.weight} kg` : null].filter(Boolean).join(", ")
-      const statusCls = c.status === "PAID" ? "PAID" : c.status === "PARTIAL" ? "PARTIAL" : "PENDING"
-      return `<tr>
-        <td>${i + 1}</td>
-        <td>${seller}</td>
-        <td>${buyer}</td>
-        <td>${commodity || "—"}</td>
-        <td style="text-align:right">PKR ${(c.totalValue || 0).toLocaleString()}</td>
-        <td style="text-align:right;color:#15803d">PKR ${(c.paidAmount || 0).toLocaleString()}</td>
-        <td style="text-align:right;color:${c.balance > 0 ? "#b91c1c" : "#15803d"}">PKR ${(c.balance || 0).toLocaleString()}</td>
-        <td><span class="badge badge-${statusCls}">${c.status}</span></td>
-        <td>${new Date(c.createdAt).toLocaleDateString("en-PK")}</td>
-      </tr>`
-    }).join("")
-    const totVal = list.reduce((s, c) => s + (c.totalValue || 0), 0)
-    const totPaid = list.reduce((s, c) => s + (c.paidAmount || 0), 0)
-    const totBal = list.reduce((s, c) => s + (c.balance || 0), 0)
-    const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>All Commissions</title>
-<style>${reportCSS}</style></head><body>
-${buildPrintHeader(shop)}
-<div class="doc-header">
-  <div>
-    <div class="doc-title">Commission Transactions</div>
-    <div class="doc-sub">Printed on ${new Date().toLocaleDateString("en-PK")} &nbsp;|&nbsp; ${list.length} entries</div>
-  </div>
-  <div class="doc-meta"><div>${new Date().toLocaleString("en-PK")}</div></div>
+    const rows = list.map((c, i) => `<tr>
+      <td>${i + 1}</td>
+      <td>${recordCode("commission", c.id)}</td>
+      <td style="font-family:inherit">${e(sellerName(c))}</td>
+      <td style="font-family:inherit">${e(buyerName(c))}</td>
+      <td style="font-family:inherit">${e([c.commodity, c.bags ? `${c.bags} ${UR_BAG[c.bagType] || "بوری"}` : null, c.weight ? `${n(c.weight)} kg` : null].filter(Boolean).join("، ") || "—")}</td>
+      <td>${n(c.totalValue)}</td>
+      <td>${n(c.commissionAmount)}</td>
+      <td style="color:#15803d">${n(c.paidAmount)}</td>
+      <td style="color:${c.balance > 0 ? "#b91c1c" : "#15803d"}">${n(c.balance)}</td>
+      <td style="font-family:inherit">${UR_PAY[c.status] || e(c.status)}</td>
+      <td>${day(c.createdAt)}</td>
+    </tr>`).join("")
+    const sum = (k: string) => list.reduce((s, c) => s + (c[k] || 0), 0)
+    openBillWindow("All Commissions", `
+<div class="meta">
+  <div>کمیشن رپورٹ — <span class="num">${list.length}</span> اندراجات</div>
+  <div>تاریخ: <b>${day(new Date())}</b></div>
 </div>
-<div class="body-pad">
 <table>
-  <thead><tr>
-    <th>#</th><th>Seller</th><th>Buyer</th><th>Commodity</th>
-    <th style="text-align:right">Total Value</th>
-    <th style="text-align:right">Paid</th>
-    <th style="text-align:right">Balance</th>
-    <th>Status</th><th>Date</th>
-  </tr></thead>
+  <thead><tr><th>#</th><th>آئی ڈی</th><th>فروخت کنندہ</th><th>خریدار</th><th>جنس</th><th>کل رقم</th><th>کمیشن</th><th>ادا شدہ</th><th>بقایا</th><th>حالت</th><th>تاریخ</th></tr></thead>
   <tbody>${rows}</tbody>
-  <tfoot><tr>
-    <td colspan="4" style="text-align:right">Totals</td>
-    <td style="text-align:right">PKR ${totVal.toLocaleString()}</td>
-    <td style="text-align:right;color:#15803d">PKR ${totPaid.toLocaleString()}</td>
-    <td style="text-align:right">PKR ${totBal.toLocaleString()}</td>
-    <td colspan="2"></td>
-  </tr></tfoot>
+  <tfoot><tr><td colspan="5" style="font-family:inherit">میزان</td><td>${n(sum("totalValue"))}</td><td>${n(sum("commissionAmount"))}</td><td>${n(sum("paidAmount"))}</td><td>${n(sum("balance"))}</td><td colspan="2"></td></tr></tfoot>
 </table>
-</div>
-</body></html>`)
-    w.print()
+<div class="sum">
+  <div><span>کل رقم</span><span class="num">${n(sum("totalValue"))}</span></div>
+  <div><span>کل کمیشن</span><span class="num">${n(sum("commissionAmount"))}</span></div>
+  <div><span>ادا شدہ</span><span class="num">${n(sum("paidAmount"))}</span></div>
+  <div class="grand"><span>کل بقایا</span><span class="num">Rs ${n(sum("balance"))}</span></div>
+</div>`, true)
   }
 
   const sellerOptions = [
@@ -479,7 +427,7 @@ ${buildPrintHeader(shop)}
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-blue-300">
-                    {["#", "Seller", "Buyer", "Commodity", "Total Value", "Comm %", "Commission", "Labour", "Seller Payable", "Paid", "Balance", "Status", "Date", "Action", ""].map((h) => (
+                    {["#", "ID", "Seller", "Buyer", "Commodity", "Total Value", "Comm %", "Commission", "Labour", "Seller Payable", "Paid", "Balance", "Status", "Date", "Action", ""].map((h) => (
                       <th key={h} className="text-left py-3 px-2 text-gray-500 font-medium whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -488,6 +436,7 @@ ${buildPrintHeader(shop)}
                   {filtered.map((c, i) => (
                     <tr key={c.id} className="border-b border-gray-50 hover:bg-blue-50">
                       <td className="py-3 px-2 text-gray-400 text-xs">{i + 1}</td>
+                      <td className="py-3 px-2 font-mono text-xs text-purple-700 whitespace-nowrap">{recordCode("commission", c.id)}</td>
                       <td className="py-3 px-2 font-medium text-gray-800">
                         {c.farmer?.name || c.supplier?.name || c.walkInSeller || <span className="text-gray-400">—</span>}
                         {c.walkInSeller && <span className="ml-1 text-xs text-orange-500">(walk-in)</span>}
@@ -537,7 +486,7 @@ ${buildPrintHeader(shop)}
                     </tr>
                   ))}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={15} className="text-center py-8 text-gray-400">No commissions found</td></tr>
+                    <tr><td colSpan={16} className="text-center py-8 text-gray-400">No commissions found</td></tr>
                   )}
                 </tbody>
               </table>
@@ -898,7 +847,7 @@ ${buildPrintHeader(shop)}
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-300 text-sm space-y-1.5">
               <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Reference</span>
-                <span className="font-semibold">#{deleteTarget?.id?.slice(-6).toUpperCase()}</span>
+                <span className="font-semibold font-mono">{recordCode("commission", deleteTarget?.id)}</span>
               </div>
               <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Commodity</span>

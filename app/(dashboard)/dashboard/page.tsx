@@ -4,6 +4,7 @@ import { formatCurrency } from "@/lib/utils"
 import { ShoppingCart, TrendingUp, Users, Wheat, ArrowUpRight, ArrowDownRight, Clock, CheckSquare, Sparkles, Database } from "lucide-react"
 import Link from "next/link"
 import { ShopDataActions } from "@/components/shop-data-actions"
+import { RecordLookup } from "@/components/record-lookup"
 import { getT } from "@/lib/i18n-server"
 
 function initials(name?: string | null) {
@@ -207,6 +208,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           {t("Showing sample data — click \"Show Original Shop Data\" to see your real figures.")}
         </div>
       )}
+
+      {!isSuperAdmin && <RecordLookup />}
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Plus, Tag, ImageIcon, Trash2, Upload, Store, ToggleLeft, ToggleRight } from "lucide-react"
+import { Plus, Tag, ImageIcon, Trash2, Upload, Store, ToggleLeft, ToggleRight, Printer } from "lucide-react"
 
 export default function SettingsPage() {
   const [categories, setCategories] = useState<any[]>([])
@@ -19,6 +19,9 @@ export default function SettingsPage() {
   // Shop name state
   const [shopName, setShopName] = useState("")
   const [savingName, setSavingName] = useState(false)
+  // Contact details printed in the header of every print
+  const [contact, setContact] = useState({ address: "", phone: "", phone2: "" })
+  const [savingContact, setSavingContact] = useState(false)
 
   // Module toggles
   const [modules, setModules] = useState({
@@ -55,6 +58,7 @@ export default function SettingsPage() {
       const s = sr.value.shop
       if (s.logo) setCurrentLogo(s.logo)
       if (s.name) setShopName(s.name)
+      setContact({ address: s.address || "", phone: s.phone || "", phone2: s.phone2 || "" })
       setModules({
         moduleGodown:     !!s.moduleGodown,
         moduleGate:       !!s.moduleGate,
@@ -116,6 +120,26 @@ export default function SettingsPage() {
       alert("Network error. Please try again.")
     } finally {
       setSavingName(false)
+    }
+  }
+
+  async function saveContact() {
+    setSavingContact(true)
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contact),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        return alert(d?.error || "Failed to save contact details")
+      }
+      alert("Contact details saved. They will appear on every print.")
+    } catch {
+      alert("Network error. Please try again.")
+    } finally {
+      setSavingContact(false)
     }
   }
 
@@ -258,6 +282,47 @@ export default function SettingsPage() {
               {savingName ? "Saving..." : "Save"}
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Contact details for prints */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Printer className="w-4 h-4" /> Address &amp; Phone Numbers
+          </CardTitle>
+          <p className="text-xs text-gray-500">Printed at the top of every bill, receipt and report.</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div>
+            <Label className="mb-1 block">Address</Label>
+            <Input
+              value={contact.address}
+              onChange={(e) => setContact((c) => ({ ...c, address: e.target.value }))}
+              placeholder="e.g. Shop 12, Sabzi Mandi, Okara"
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <Label className="mb-1 block">Phone number 1</Label>
+              <Input
+                value={contact.phone}
+                onChange={(e) => setContact((c) => ({ ...c, phone: e.target.value }))}
+                placeholder="e.g. 0300-1234567"
+              />
+            </div>
+            <div>
+              <Label className="mb-1 block">Phone number 2</Label>
+              <Input
+                value={contact.phone2}
+                onChange={(e) => setContact((c) => ({ ...c, phone2: e.target.value }))}
+                placeholder="e.g. 0321-7654321"
+              />
+            </div>
+          </div>
+          <Button className="bg-teal-700 hover:bg-teal-800" onClick={saveContact} disabled={savingContact}>
+            {savingContact ? "Saving..." : "Save"}
+          </Button>
         </CardContent>
       </Card>
 

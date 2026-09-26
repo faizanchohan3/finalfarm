@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { FileText, Plus, Trash2, Printer, RotateCcw, Save, FolderOpen, Search } from "lucide-react"
 import { useLang } from "@/lib/i18n"
-import { buildPrintHeader, escapeHtml } from "@/lib/print-utils"
+import { recordCode } from "@/lib/record-code"
+import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print-utils"
 
 // Bill maker: bills can be saved to the database (Saved Bills list) and printed.
 // The next bill number is remembered in this browser and follows the highest saved bill.
@@ -156,7 +157,7 @@ export default function BillMakerPage() {
       setEditingId(d.bill.id)
       markBillNoUsed(billNo)
       loadBills()
-      alert(editingId ? t("Bill updated") : t("Bill saved"))
+      alert(`${editingId ? t("Bill updated") : t("Bill saved")} — ID: ${recordCode("bill", d.bill.id)}`)
     } finally {
       setSaving(false)
     }
@@ -203,27 +204,11 @@ export default function BillMakerPage() {
     const w = window.open("", "_blank")
     if (!w) return
     w.document.write(`<html dir="rtl"><head><title>Bill ${escapeHtml(billNo)}</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing: border-box; }
-  body { font-family: 'Noto Nastaliq Urdu', 'Segoe UI', Arial, sans-serif; margin: 0 auto; max-width: 640px; color: #1f2937; font-size: 13px; }
-  .num { font-family: 'Segoe UI', Arial, sans-serif; direction: ltr; unicode-bidi: embed; }
-  .meta { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px 4px; }
-  .meta b { font-family: 'Segoe UI', Arial, sans-serif; }
-  .name { padding: 4px 24px 12px; border-bottom: 1px solid #e5e7eb; font-size: 15px; }
-  table { width: calc(100% - 48px); margin: 14px 24px; border-collapse: collapse; }
-  th { background: #f5f3ff; color: #5b21b6; padding: 8px; font-weight: 700; border-bottom: 2px solid #c4b5fd; }
-  td { padding: 7px 8px; text-align: center; border-bottom: 1px solid #f3f4f6; font-family: 'Segoe UI', Arial, sans-serif; }
-  .sum { width: calc(100% - 48px); margin: 4px 24px; }
-  .sum div { display: flex; justify-content: space-between; align-items: center; padding: 7px 10px; border-bottom: 1px dashed #e5e7eb; }
-  .sum span:last-child { font-family: 'Segoe UI', Arial, sans-serif; font-weight: 700; }
-  .grand { background: #5b21b6; color: #fff; border-radius: 6px; margin-top: 8px; font-size: 16px; border: 0 !important; }
-  .sig { display: flex; justify-content: space-between; padding: 40px 24px 20px; font-size: 12px; color: #6b7280; }
-  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-</style></head><body>
+${billFontLink}
+<style>${billCSS}</style></head><body>
 <div dir="ltr">${buildPrintHeader(shop)}</div>
 <div class="meta">
-  <div>نمبر: <b>${escapeHtml(billNo)}</b></div>
+  <div>نمبر: <b>${escapeHtml(billNo)}</b>${editingId ? ` <span style="font-size:11px;color:#6b7280">(ID: <b>${recordCode("bill", editingId)}</b>)</span>` : ""}</div>
   <div>تاریخ: <b>${escapeHtml(fmtDate(billDate))}</b></div>
 </div>
 <div class="name">بنام: <strong>${escapeHtml(name.trim())}</strong>${product ? `<span style="margin-inline-start:28px">جنس: <strong>${escapeHtml(productUr)}</strong></span>` : ""}</div>
@@ -260,7 +245,7 @@ export default function BillMakerPage() {
             <FileText className="w-6 h-6 text-purple-600" /> {t("Bill Maker")}
           </h2>
           <p className="text-gray-500 text-sm">
-            {editingId ? <>{t("Editing saved bill")} #{billNo}</> : t("Make, save and print a weight bill.")}
+            {editingId ? <>{t("Editing saved bill")} #{billNo} · ID <span className="font-mono text-purple-700">{recordCode("bill", editingId)}</span></> : t("Make, save and print a weight bill.")}
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -431,7 +416,7 @@ export default function BillMakerPage() {
               <tbody>
                 {filteredBills.map((b) => (
                   <tr key={b.id} className={`border-b border-gray-50 hover:bg-purple-50 ${editingId === b.id ? "bg-purple-50" : ""}`}>
-                    <td className="py-2 px-2 font-medium">#{b.billNo}</td>
+                    <td className="py-2 px-2 font-medium">#{b.billNo}<div className="font-mono text-[11px] text-purple-700 font-normal">{recordCode("bill", b.id)}</div></td>
                     <td className="py-2 px-2 text-gray-600 whitespace-nowrap">{fmtDate(b.billDate)}</td>
                     <td className="py-2 px-2">{b.name}</td>
                     <td className="py-2 px-2 text-gray-600">{b.product ? t(b.product) : "—"}</td>

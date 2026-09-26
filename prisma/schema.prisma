@@ -81,6 +81,7 @@ model Shop {
   name      String
   ownerName String
   phone     String?
+  phone2    String?
   address   String?
   city      String?
   email     String     @unique

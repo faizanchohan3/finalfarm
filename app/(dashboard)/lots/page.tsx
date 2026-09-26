@@ -8,11 +8,10 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SearchableSelect } from "@/components/ui/searchable-select"
-import { CreatableCombobox } from "@/components/ui/creatable-combobox"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt, Printer, Tag, Search } from "lucide-react"
+import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt, Printer, Tag, Search, X } from "lucide-react"
 import { useLang } from "@/lib/i18n"
-import { buildPrintHeader, receiptCSS, reportCSS } from "@/lib/print-utils"
+import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print-utils"
 
 // Lots are shown as just Stored or Sold. The database keeps its detailed statuses:
 // sold / dispatched / settled count as Sold, cancelled stays Cancelled, everything else is Stored.
@@ -39,8 +38,16 @@ const PAY_COLORS: Record<string, string> = {
   PENDING: "text-amber-600", PARTIAL: "text-blue-600", PAID: "text-green-600", CANCELLED: "text-red-500",
 }
 
+// Lots are potatoes by default; the category can still be changed or a new one added with +.
+const DEFAULT_LOT_CATEGORY = "Potato"
+// Extra lot categories added with the + button, remembered in this browser.
+const LOT_CATEGORIES_KEY = "lots.extraCategories"
+function readLotCategories(): string[] {
+  try { const v = JSON.parse(localStorage.getItem(LOT_CATEGORIES_KEY) || "[]"); return Array.isArray(v) ? v : [] } catch { return [] }
+}
+
 const EMPTY = {
-  farmerId: "", categoryName: "", warehouseId: "",
+  farmerId: "", categoryName: DEFAULT_LOT_CATEGORY, warehouseId: "",
   markha1: "", markha2: "", billNo: "", vehicleNo: "",
   bagType: "bori", bags: "",
   grossWeight: "", tareWeight: "", notes: "",
@@ -58,6 +65,24 @@ export default function LotsPage() {
   const [shop, setShop] = useState<any>(null)
   const [farmers, setFarmers] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
+  const [addingCat, setAddingCat] = useState(false)
+  const [extraCats, setExtraCats] = useState<string[]>([])
+  useEffect(() => { setExtraCats(readLotCategories()) }, [])
+
+  // Add a category from the + button: remember it and select it for this lot.
+  function addLotCategory(name: string) {
+    const clean = name.trim()
+    if (!clean) return
+    const exists = [DEFAULT_LOT_CATEGORY, ...extraCats].find((c) => c.toLowerCase() === clean.toLowerCase())
+    if (!exists) {
+      const next = [...extraCats, clean]
+      setExtraCats(next)
+      try { localStorage.setItem(LOT_CATEGORIES_KEY, JSON.stringify(next)) } catch {}
+    }
+    set("categoryName", exists || clean)
+    setAddingCat(false)
+  }
+  const [newCat, setNewCat] = useState("")
   const [warehouses, setWarehouses] = useState<any[]>([])
   const [buyers, setBuyers] = useState<any[]>([])
   const [markhas, setMarkhas] = useState<any[]>([])
@@ -142,6 +167,7 @@ export default function LotsPage() {
           setCategories((prev) => [...prev, lot.category].sort((a, b) => a.name.localeCompare(b.name)))
         }
         setForm({ ...EMPTY }); setShowCreate(false); loadLots()
+        if (lot?.lotNo) alert(`Lot saved. ID: ${lot.lotNo}`)
       }
     } catch { setError("Network error. Please try again.") }
     setSaving(false)
@@ -178,75 +204,87 @@ export default function LotsPage() {
     loadLots()
   }
 
-  const money = (n: number) => "PKR " + (n || 0).toLocaleString()
-  const bagLabel = (lot: any) => t(BAG_TYPE_LABEL[lot.bagType] || "bags")
+
+  // ── Prints: same Urdu bill layout as Bill Maker ──
+  const UR_STATUS: Record<string, string> = { STORED: "اسٹور میں", SOLD: "فروخت شدہ", CANCELLED: "منسوخ" }
+  const UR_BAG: Record<string, string> = { bori: "بوری", jali: "جالی", tora: "توڑا" }
+  const UR_PAY: Record<string, string> = { PENDING: "باقی", PARTIAL: "جزوی", PAID: "ادا شدہ" }
+  const e = (v: unknown) => escapeHtml(v ?? "—")
+  const n = (v: number | null | undefined) => (v != null ? Number(v).toLocaleString("en-PK", { maximumFractionDigits: 2 }) : "—")
+  const d = (v: string | Date | null | undefined) => (v ? new Date(v).toLocaleDateString("en-GB", { day: "numeric", month: "numeric", year: "2-digit" }) : "—")
+  const bagUr = (lot: any) => UR_BAG[lot.bagType] || "بوری"
+  const statusUr = (lot: any) => UR_STATUS[simpleStatus(lot.status)] || lot.status
+
+  function openBillWindow(title: string, body: string) {
+    const w = window.open("", "_blank")
+    if (!w) return
+    w.document.write(`<html dir="rtl"><head><title>${escapeHtml(title)}</title>
+${billFontLink}
+<style>${billCSS}</style></head><body>
+<div dir="ltr">${buildPrintHeader(shop)}</div>
+${body}
+<script>document.fonts.ready.then(() => window.print())<\/script>
+</body></html>`)
+    w.document.close()
+  }
 
   // Print a single lot slip. For sold lots it also shows the sale/buyer block.
   function printLot(lot: any) {
-    const w = window.open("", "_blank")
-    if (!w) return
-    const sold = ["SOLD", "DISPATCHED", "SETTLED"].includes(lot.status)
-    const info: [string, string][] = [
-      ["Lot No", lot.lotNo],
-      ["Date", new Date(lot.createdAt).toLocaleDateString("en-PK")],
-      ["Status", simpleStatus(lot.status)],
-      ["Category", lot.category?.name || "—"],
-      ["Farmer", lot.farmer?.name || "—"],
-      ["Godown", lot.warehouse?.name || "—"],
-      ["Vehicle No", lot.vehicleNo || "—"],
-      ["Bill No", lot.billNo || "—"],
-      ["Markha", [lot.markha1, lot.markha2].filter(Boolean).join(", ") || "—"],
-      ["Bags", lot.bags != null ? `${lot.bags} ${bagLabel(lot)}` : "—"],
-      ["Gross / Tare / Net", `${lot.grossWeight ?? "—"} / ${lot.tareWeight ?? "—"} / ${lot.netWeight ?? "—"} KG`],
-    ]
-    if (sold) {
-      info.push(
-        ["Buyer (Trader)", lot.buyer?.name || "—"],
-        ["Sale Rate", lot.saleRate != null ? money(lot.saleRate) : "—"],
-        ["Payment", lot.paymentStatus || "—"],
-      )
-    }
-    const infoHtml = info.map(([l, v]) => `<div><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join("")
-    w.document.write(`<html><head><title>${lot.lotNo}</title><style>${receiptCSS}</style></head><body>
-      ${buildPrintHeader(shop)}
-      <div class="doc-header"><div><div class="doc-title">Lot Slip — ${lot.lotNo}</div><div class="doc-sub">${sold ? "Sold lot" : "Lot record"}</div></div>
-      <div class="doc-meta">${new Date().toLocaleString("en-PK")}</div></div>
-      <div class="body-pad"><div class="info-grid">${infoHtml}</div>
-      ${sold && lot.saleAmount ? `<div class="totals-box"><table><tr><td>Sale Amount</td><td style="text-align:right" class="grand">${money(lot.saleAmount)}</td></tr></table></div>` : ""}
-      <div class="sig-row"><span>Received by ______________</span><span>${shop?.name || ""}</span></div>
-      </div>
-      <script>window.onload=()=>window.print()<\/script></body></html>`)
-    w.document.close()
+    const sold = simpleStatus(lot.status) === "SOLD"
+    const markha = [lot.markha1, lot.markha2].filter(Boolean).join("، ")
+    openBillWindow(lot.lotNo, `
+<div class="meta">
+  <div>لاٹ نمبر: <b>${e(lot.lotNo)}</b></div>
+  <div>تاریخ: <b>${e(d(lot.createdAt))}</b></div>
+</div>
+<div class="name">کسان: <strong>${e(lot.farmer?.name)}</strong><span style="margin-inline-start:28px">جنس: <strong>${e(lot.category?.name)}</strong></span></div>
+<table>
+  <thead><tr><th>تعداد ${bagUr(lot)}</th><th>کل وزن (کلو)</th><th>خالی وزن (کلو)</th><th>صافی وزن (کلو)</th></tr></thead>
+  <tbody><tr><td>${n(lot.bags)}</td><td>${n(lot.grossWeight)}</td><td>${n(lot.tareWeight)}</td><td>${n(lot.netWeight)}</td></tr></tbody>
+</table>
+<div class="sum">
+  <div><span>حالت</span><span>${statusUr(lot)}</span></div>
+  <div><span>گودام</span><span>${e(lot.warehouse?.name)}</span></div>
+  <div><span>گاڑی نمبر</span><span class="num">${e(lot.vehicleNo)}</span></div>
+  <div><span>بل نمبر</span><span class="num">${e(lot.billNo)}</span></div>
+  ${markha ? `<div><span>مارکہ</span><span>${e(markha)}</span></div>` : ""}
+  ${sold ? `
+  <div><span>خریدار</span><span>${e(lot.buyer?.name)}</span></div>
+  <div><span>ریٹ</span><span class="num">${n(lot.saleRate)}</span></div>
+  <div><span>ادائیگی</span><span>${UR_PAY[lot.paymentStatus] || e(lot.paymentStatus)}</span></div>
+  <div class="grand"><span>کل رقم</span><span class="num">Rs ${n(lot.saleAmount || 0)}</span></div>`
+  : `<div class="grand"><span>صافی وزن</span><span class="num">${n(lot.netWeight)} KG</span></div>`}
+</div>
+<div class="sig"><span>دستخط وصول کنندہ: ____________</span><span>دستخط: ____________</span></div>`)
   }
 
   // Print the current (filtered) list of lots as a report.
   function printAllLots(list: any[]) {
-    const w = window.open("", "_blank")
-    if (!w) return
-    const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
     const rows = list.map((lot, i) => `<tr>
-      <td>${i + 1}</td>
-      <td>${lot.lotNo}</td>
-      <td>${new Date(lot.createdAt).toLocaleDateString("en-PK")}</td>
-      <td>${lot.category?.name || "—"}</td>
-      <td>${lot.farmer?.name || "—"}</td>
-      <td>${lot.bags != null ? `${lot.bags} ${bagLabel(lot)}` : "—"}</td>
-      <td style="text-align:right">${lot.netWeight != null ? lot.netWeight : "—"}</td>
-      <td>${simpleStatus(lot.status)}</td>
-      <td>${lot.buyer?.name || "—"}</td>
-      <td style="text-align:right">${lot.saleAmount ? money(lot.saleAmount) : "—"}</td>
+      <td>${i + 1}</td><td>${e(lot.lotNo)}</td><td>${e(d(lot.createdAt))}</td>
+      <td style="font-family:inherit">${e(lot.category?.name)}</td><td style="font-family:inherit">${e(lot.farmer?.name)}</td>
+      <td>${lot.bags != null ? n(lot.bags) : "—"}</td><td>${n(lot.netWeight)}</td>
+      <td style="font-family:inherit">${statusUr(lot)}</td><td style="font-family:inherit">${e(lot.buyer?.name)}</td>
+      <td>${lot.saleAmount ? n(lot.saleAmount) : "—"}</td>
     </tr>`).join("")
+    const totalNet = list.reduce((s, l) => s + (l.netWeight || 0), 0)
     const totalSale = list.reduce((s, l) => s + (l.saleAmount || 0), 0)
-    w.document.write(`<html><head><title>Lots Report</title><style>${reportCSS} body{max-width:1000px;margin:0 auto}</style></head><body>
-      ${buildPrintHeader(shop)}
-      <div class="doc-header"><div><div class="doc-title">Lots Report</div><div class="doc-sub">${list.length} lots · ${filter === "ALL" ? "All statuses" : FILTER_LABELS[filter]} · ${date}</div></div></div>
-      <div class="body-pad"><table>
-        <thead><tr><th>#</th><th>Lot No</th><th>Date</th><th>Category</th><th>Farmer</th><th>Bags</th><th style="text-align:right">Net (KG)</th><th>Status</th><th>Buyer</th><th style="text-align:right">Sale Amount</th></tr></thead>
-        <tbody>${rows}</tbody>
-        <tfoot><tr><td colspan="9">Total Sale Value</td><td style="text-align:right">${money(totalSale)}</td></tr></tfoot>
-      </table></div>
-      <script>window.onload=()=>window.print()<\/script></body></html>`)
-    w.document.close()
+    const label = filter === "ALL" ? "تمام" : UR_STATUS[filter] || filter
+    openBillWindow("Lots Report", `
+<style>body { max-width: 1000px; }</style>
+<div class="meta">
+  <div>لاٹ رپورٹ — <b>${label}</b></div>
+  <div>تاریخ: <b>${e(d(new Date()))}</b></div>
+</div>
+<table>
+  <thead><tr><th>#</th><th>لاٹ نمبر</th><th>تاریخ</th><th>جنس</th><th>کسان</th><th>تعداد</th><th>صافی وزن</th><th>حالت</th><th>خریدار</th><th>رقم</th></tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="sum">
+  <div><span>کل لاٹ</span><span class="num">${list.length}</span></div>
+  <div><span>کل صافی وزن</span><span class="num">${n(totalNet)} KG</span></div>
+  <div class="grand"><span>کل فروخت</span><span class="num">Rs ${n(totalSale)}</span></div>
+</div>`)
   }
 
   // Complete report grouped by godown: which lots are stored where, and when sold.
@@ -257,51 +295,48 @@ export default function LotsPage() {
     if (reportGodown !== "ALL") {
       all = all.filter((l) => (reportGodown === "NONE" ? !l.warehouse : l.warehouse?.id === reportGodown))
     }
-    const godownName = reportGodown === "ALL" ? "All Godowns" : reportGodown === "NONE" ? "No godown" : (warehouses.find((w) => w.id === reportGodown)?.name || "Godown")
-    const w = window.open("", "_blank")
-    if (!w) return
-    const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
+    const godownName = reportGodown === "ALL" ? "تمام گودام" : reportGodown === "NONE" ? "بغیر گودام" : (warehouses.find((w) => w.id === reportGodown)?.name || "گودام")
 
     const groups = new Map<string, any[]>()
     for (const lot of all) {
-      const key = lot.warehouse?.name || "— No godown —"
+      const key = lot.warehouse?.name || "بغیر گودام"
       if (!groups.has(key)) groups.set(key, [])
       groups.get(key)!.push(lot)
     }
 
     const sections = [...groups.entries()].map(([name, list]) => {
       const rows = list.map((lot, i) => `<tr>
-        <td>${i + 1}</td>
-        <td>${lot.lotNo}</td>
-        <td>${lot.category?.name || "—"}</td>
-        <td>${lot.farmer?.name || "—"}</td>
-        <td>${lot.bags != null ? `${lot.bags} ${bagLabel(lot)}` : "—"}</td>
-        <td style="text-align:right">${lot.netWeight != null ? lot.netWeight : "—"}</td>
-        <td>${simpleStatus(lot.status)}</td>
-        <td>${lot.soldAt ? new Date(lot.soldAt).toLocaleDateString("en-PK") : "—"}</td>
-        <td>${lot.buyer?.name || "—"}</td>
-        <td style="text-align:right">${lot.saleAmount ? money(lot.saleAmount) : "—"}</td>
+        <td>${i + 1}</td><td>${e(lot.lotNo)}</td>
+        <td style="font-family:inherit">${e(lot.category?.name)}</td><td style="font-family:inherit">${e(lot.farmer?.name)}</td>
+        <td>${lot.bags != null ? n(lot.bags) : "—"}</td><td>${n(lot.netWeight)}</td>
+        <td style="font-family:inherit">${statusUr(lot)}</td><td>${lot.soldAt ? e(d(lot.soldAt)) : "—"}</td>
+        <td style="font-family:inherit">${e(lot.buyer?.name)}</td><td>${lot.saleAmount ? n(lot.saleAmount) : "—"}</td>
       </tr>`).join("")
-      const stored = list.filter((l) => !["SOLD", "DISPATCHED", "SETTLED", "CANCELLED"].includes(l.status)).length
+      const stored = list.filter((l) => simpleStatus(l.status) === "STORED").length
       const netTotal = list.reduce((s, l) => s + (l.netWeight || 0), 0)
       const saleTotal = list.reduce((s, l) => s + (l.saleAmount || 0), 0)
-      return `<div style="margin-bottom:22px">
-        <div style="font-weight:800;color:#5b21b6;font-size:13px;margin-bottom:5px">🏬 ${name}
-          <span style="font-weight:500;color:#6b7280;font-size:11px">— ${list.length} lots · ${stored} in stock</span></div>
-        <table>
-          <thead><tr><th>#</th><th>Lot No</th><th>Category</th><th>Farmer</th><th>Bags</th><th style="text-align:right">Net (KG)</th><th>Status</th><th>Sold On</th><th>Buyer</th><th style="text-align:right">Sale</th></tr></thead>
-          <tbody>${rows}</tbody>
-          <tfoot><tr><td colspan="5">Subtotal</td><td style="text-align:right">${netTotal.toLocaleString()} KG</td><td colspan="3"></td><td style="text-align:right">${money(saleTotal)}</td></tr></tfoot>
-        </table>
-      </div>`
+      return `<div class="section">${e(name)} <small>— <span class="num">${list.length}</span> لاٹ · <span class="num">${stored}</span> اسٹور میں</small></div>
+<table>
+  <thead><tr><th>#</th><th>لاٹ نمبر</th><th>جنس</th><th>کسان</th><th>تعداد</th><th>صافی وزن</th><th>حالت</th><th>فروخت تاریخ</th><th>خریدار</th><th>رقم</th></tr></thead>
+  <tbody>${rows}</tbody>
+  <tfoot><tr><td colspan="5" style="font-family:inherit">میزان</td><td>${n(netTotal)} KG</td><td colspan="3"></td><td>${n(saleTotal)}</td></tr></tfoot>
+</table>`
     }).join("")
 
-    w.document.write(`<html><head><title>Godown Report — ${godownName}</title><style>${reportCSS} body{max-width:1000px;margin:0 auto}</style></head><body>
-      ${buildPrintHeader(shop)}
-      <div class="doc-header"><div><div class="doc-title">Godown Report — ${godownName}</div><div class="doc-sub">${groups.size} godown(s) · ${all.length} lots · ${date}</div></div></div>
-      <div class="body-pad">${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">No lots for this godown.</p>'}</div>
-      <script>window.onload=()=>window.print()<\/script></body></html>`)
-    w.document.close()
+    const allNet = all.reduce((s, l) => s + (l.netWeight || 0), 0)
+    const allSale = all.reduce((s, l) => s + (l.saleAmount || 0), 0)
+    openBillWindow(`Godown Report — ${godownName}`, `
+<style>body { max-width: 1000px; }</style>
+<div class="meta">
+  <div>گودام رپورٹ — <b style="font-family:inherit">${e(godownName)}</b></div>
+  <div>تاریخ: <b>${e(d(new Date()))}</b></div>
+</div>
+${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">اس گودام کے لیے کوئی لاٹ نہیں۔</p>'}
+<div class="sum">
+  <div><span>کل لاٹ</span><span class="num">${all.length}</span></div>
+  <div><span>کل صافی وزن</span><span class="num">${n(allNet)} KG</span></div>
+  <div class="grand"><span>کل فروخت</span><span class="num">Rs ${n(allSale)}</span></div>
+</div>`)
   }
 
   function openSettle(lot: any) {
@@ -549,13 +584,43 @@ export default function LotsPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>{t("Category")} *</Label>
-                <CreatableCombobox
-                  value={form.categoryName}
-                  onChange={(v) => set("categoryName", v)}
-                  options={categories.map((c) => c.name)}
-                  placeholder={t("Search or type category")}
-                  newLabel={t("New category")}
-                />
+                {addingCat ? (
+                  <div className="flex gap-1.5">
+                    <Input
+                      autoFocus
+                      value={newCat}
+                      onChange={(e) => setNewCat(e.target.value)}
+                      placeholder={t("New category")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && newCat.trim()) { e.preventDefault(); addLotCategory(newCat) }
+                        if (e.key === "Escape") { e.preventDefault(); setAddingCat(false) }
+                      }}
+                    />
+                    <Button type="button" size="sm" className="h-9" disabled={!newCat.trim()}
+                      onClick={() => addLotCategory(newCat)}>
+                      {t("Add")}
+                    </Button>
+                    <Button type="button" size="sm" variant="ghost" className="h-9 px-2" onClick={() => setAddingCat(false)} title={t("Cancel")}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex gap-1.5">
+                    <select
+                      value={form.categoryName}
+                      onChange={(e) => set("categoryName", e.target.value)}
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                    >
+                      {Array.from(new Set([DEFAULT_LOT_CATEGORY, ...extraCats, form.categoryName].filter(Boolean))).map((name) => (
+                        <option key={name} value={name}>{t(name)}</option>
+                      ))}
+                    </select>
+                    <Button type="button" size="sm" variant="outline" className="h-9 px-2.5" title={t("Add category")}
+                      onClick={() => { setNewCat(""); setAddingCat(true) }}>
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
               <div>
                 <Label>{t("Farmer")}</Label>

@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { buildPrintHeader, reportCSS } from "@/lib/print-utils"
+import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print-utils"
+import { recordCode } from "@/lib/record-code"
 import { Plus, Minus, Search, Package, AlertTriangle, Edit, Trash2, Tag, ChevronDown, ChevronUp, X, Printer, PlusCircle } from "lucide-react"
 
 export default function InventoryPage() {
@@ -93,7 +94,11 @@ export default function InventoryPage() {
         salePrice: parseFloat(form.salePrice),
       }),
     })
-    if (res.ok) { setShowModal(false); loadData() }
+    if (res.ok) {
+      const d = await res.json().catch(() => ({}))
+      setShowModal(false); loadData()
+      if (!editing && d?.product?.id) alert(`Product added. ID: ${recordCode("product", d.product.id)}`)
+    }
   }
 
   function openStock(p: any) {
@@ -177,69 +182,58 @@ export default function InventoryPage() {
     loadData()
   }
 
+  // Stock report in the same Urdu bill layout as Bill Maker, one section per room.
   function printAllStock() {
-    const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
+    const e = (v: unknown) => escapeHtml(v ?? "—")
+    const n = (v: number) => (v || 0).toLocaleString("en-PK", { maximumFractionDigits: 2 })
+    const day = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "numeric", year: "2-digit" })
     const totalValue = filtered.reduce((s, p) => s + p.currentStock * p.purchasePrice, 0)
-    let idx = 0
-    const rows = groupByRoom(filtered).map((g) => {
+    const lowCount = filtered.filter((p) => p.currentStock <= p.minStock).length
+
+    const sections = groupByRoom(filtered).map((g) => {
       const groupValue = g.items.reduce((s, p) => s + p.currentStock * p.purchasePrice, 0)
-      const itemRows = g.items.map((p) => {
-        idx++
+      const rows = g.items.map((p, i) => {
         const isLow = p.currentStock <= p.minStock
-        return `<tr style="${isLow ? "background:#fef2f2;" : idx % 2 === 0 ? "background:#f9fdf9;" : ""}">
-        <td>${idx}</td>
-        <td><strong>${p.name}</strong></td>
-        <td>${p.category?.name || "—"}</td>
-        <td style="text-align:right;${isLow ? "color:#b91c1c;font-weight:700;" : ""}">${p.currentStock}</td>
-        <td>${p.unit}</td>
-        <td style="text-align:right">${p.minStock}</td>
-        <td style="text-align:right">PKR ${(p.purchasePrice || 0).toLocaleString()}</td>
-        <td style="text-align:right">PKR ${(p.salePrice || 0).toLocaleString()}</td>
-        <td style="text-align:right">PKR ${(p.currentStock * p.purchasePrice).toLocaleString()}</td>
-        <td style="text-align:center"><span style="font-size:10px;padding:2px 8px;border-radius:99px;background:${isLow ? "#fee2e2" : "#dcfce7"};color:${isLow ? "#b91c1c" : "#15803d"};font-weight:600">${isLow ? "Low Stock" : "In Stock"}</span></td>
+        return `<tr${isLow ? ' style="background:#fef2f2"' : ""}>
+        <td>${i + 1}</td>
+        <td>${recordCode("product", p.id)}</td>
+        <td style="font-family:inherit">${e(p.name)}</td>
+        <td style="font-family:inherit">${e(p.category?.name)}</td>
+        <td${isLow ? ' style="color:#b91c1c;font-weight:700"' : ""}>${n(p.currentStock)} ${e(p.unit)}</td>
+        <td>${n(p.purchasePrice)}</td>
+        <td>${n(p.salePrice)}</td>
+        <td>${n(p.currentStock * p.purchasePrice)}</td>
+        <td style="font-family:inherit">${isLow ? "کم اسٹاک" : "دستیاب"}</td>
       </tr>`
       }).join("")
-      return `<tr style="background:#f5f3ff">
-        <td colspan="10" style="font-weight:800;color:#5b21b6;padding:6px 8px">${g.name} (${g.items.length})</td>
-      </tr>${itemRows}<tr style="background:#faf9fc">
-        <td colspan="8" style="text-align:right;font-weight:600;color:#6b7280">${g.name} subtotal (${g.items.length} product${g.items.length > 1 ? "s" : ""})</td>
-        <td style="text-align:right;font-weight:700">PKR ${groupValue.toLocaleString()}</td>
-        <td></td>
-      </tr>`
+      return `<div class="section">${e(g.name)} <small>— <span class="num">${g.items.length}</span> اشیاء · مقدار: <span class="num">${e(qtyByUnit(g.items))}</span></small></div>
+<table>
+  <thead><tr><th>#</th><th>آئی ڈی</th><th>جنس</th><th>کیٹیگری</th><th>اسٹاک</th><th>خرید ریٹ</th><th>فروخت ریٹ</th><th>مالیت</th><th>حالت</th></tr></thead>
+  <tbody>${rows}</tbody>
+  <tfoot><tr><td colspan="7" style="font-family:inherit">میزان</td><td>${n(groupValue)}</td><td></td></tr></tfoot>
+</table>`
     }).join("")
-    const w = window.open("", "_blank")!
-    w.document.write(`<html><head><title>Store Stock Report</title>
-<style>${reportCSS}
-  body { max-width: 960px; margin: 0 auto; }
-  .section-title { font-size:13px; font-weight:800; color:#1e3a5f; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid #1e3a5f; }
-</style></head><body>
-${buildPrintHeader(shop)}
-<div class="doc-header">
-  <div><div class="doc-title">Store Stock Report</div><div class="doc-sub">${roomFilterLabel ? `Room: ${roomFilterLabel} · ` : ""}${categoryFilterLabel ? `Category: ${categoryFilterLabel} · ` : ""}Total: ${filtered.length} products</div></div>
-  <div class="doc-meta"><div>Printed: ${date}</div></div>
+
+    const filterLine = [roomFilterLabel && `کمرہ: ${e(roomFilterLabel)}`, categoryFilterLabel && `کیٹیگری: ${e(categoryFilterLabel)}`].filter(Boolean).join(" · ")
+    const w = window.open("", "_blank")
+    if (!w) return
+    w.document.write(`<html dir="rtl"><head><title>Store Stock Report</title>
+${billFontLink}
+<style>${billCSS} body { max-width: 1000px; }</style></head><body>
+<div dir="ltr">${buildPrintHeader(shop)}</div>
+<div class="meta">
+  <div>اسٹور اسٹاک رپورٹ${filterLine ? ` — <span style="font-size:12px">${filterLine}</span>` : ""}</div>
+  <div>تاریخ: <b>${day}</b></div>
 </div>
-<div class="body-pad">
-  <table>
-    <thead><tr>
-      <th>#</th><th>Product</th><th>Category</th>
-      <th style="text-align:right">Stock</th><th>Unit</th>
-      <th style="text-align:right">Min Stock</th>
-      <th style="text-align:right">Purchase Price</th>
-      <th style="text-align:right">Sale Price</th>
-      <th style="text-align:right">Stock Value</th>
-      <th style="text-align:center">Status</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-    <tfoot><tr>
-      <td colspan="3"><strong>Total: ${filtered.length} products</strong></td>
-      <td colspan="5"></td>
-      <td style="text-align:right"><strong>PKR ${totalValue.toLocaleString()}</strong></td>
-      <td></td>
-    </tr></tfoot>
-  </table>
-  <div class="sig-row"><span>Generated on ${date}</span><span>${shop?.name || ""}</span></div>
+${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی جنس نہیں۔</p>'}
+<div class="sum">
+  <div><span>کل اشیاء</span><span class="num">${filtered.length}</span></div>
+  <div><span>کل مقدار</span><span class="num">${e(qtyByUnit(filtered))}</span></div>
+  <div><span>کم اسٹاک</span><span class="num">${lowCount}</span></div>
+  <div class="grand"><span>کل مالیت</span><span class="num">Rs ${n(totalValue)}</span></div>
 </div>
-<script>window.onload=()=>{window.print()}<\/script>
+<div class="sig"><span>دستخط: ____________</span><span>${e(shop?.name || "")}</span></div>
+<script>document.fonts.ready.then(() => window.print())<\/script>
 </body></html>`)
     w.document.close()
   }
@@ -562,7 +556,7 @@ ${buildPrintHeader(shop)}
                         </tr>
                         {g.items.map((p) => (
                           <tr key={p.id} className="border-b border-gray-50 hover:bg-blue-50">
-                            <td className="py-3 px-3 font-medium text-gray-800">{p.name}</td>
+                            <td className="py-3 px-3 font-medium text-gray-800">{p.name}<div className="font-mono text-[11px] text-purple-700 font-normal">{recordCode("product", p.id)}</div></td>
                             <td className="py-3 px-3 text-gray-600">{p.category?.name}</td>
                             <td className="py-3 px-3">
                               <div className="flex items-center gap-1.5">

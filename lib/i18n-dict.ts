@@ -298,6 +298,7 @@ export const UR: Record<string, string> = {
   "Potato": "آلو",
   "Makki": "مکئی",
   "Select product": "جنس منتخب کریں",
+  "Add category": "کیٹیگری شامل کریں",
   "Save Bill": "بل محفوظ کریں",
   "Update Bill": "بل اپڈیٹ کریں",
   "Bill saved": "بل محفوظ ہو گیا",
