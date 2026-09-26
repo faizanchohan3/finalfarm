@@ -36,9 +36,7 @@ export default function CommissionPage() {
   const [vehicleNo, setVehicleNo] = useState("")
   const [bags, setBags] = useState("")
   const [bagType, setBagType] = useState("bag")
-  const [grossWeight, setGrossWeight] = useState("")
-  const [tareWeight, setTareWeight] = useState("")
-  const [bardanaWeight, setBardanaWeight] = useState("")
+  const [weightRows, setWeightRows] = useState([{ gross: "", tare: "", bardana: "" }])
   const [rate, setRate] = useState("")             // rate value (per kg or per mound)
   const [rateUnit, setRateUnit] = useState("kg")   // kg | mound (1 mound = 40 kg)
   const [totalValue, setTotalValue] = useState("")
@@ -97,14 +95,18 @@ export default function CommissionPage() {
 
   useEffect(() => { loadData() }, [])
 
-  // Net weight (kg) = gross − tare − bardana (sacks)
-  const netWeight = (() => {
-    const g = parseFloat(grossWeight) || 0
-    const t2 = parseFloat(tareWeight) || 0
-    const b = parseFloat(bardanaWeight) || 0
-    const n = g - t2 - b
-    return n > 0 ? n : 0
-  })()
+  // Net weight (kg) per row = gross − tare − bardana (sacks); totals are summed across rows
+  const rowNet = (r: { gross: string; tare: string; bardana: string }) =>
+    Math.max((parseFloat(r.gross) || 0) - (parseFloat(r.tare) || 0) - (parseFloat(r.bardana) || 0), 0)
+  const sumRows = (key: "gross" | "tare" | "bardana") => weightRows.reduce((s, r) => s + (parseFloat(r[key]) || 0), 0)
+  const grossWeight = sumRows("gross")
+  const tareWeight = sumRows("tare")
+  const bardanaWeight = sumRows("bardana")
+  const netWeight = parseFloat(weightRows.reduce((s, r) => s + rowNet(r), 0).toFixed(3))
+
+  function updateWeightRow(i: number, key: "gross" | "tare" | "bardana", value: string) {
+    setWeightRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, [key]: value } : r)))
+  }
 
   // 1 mound (maund) = 40 kg
   const mound = netWeight > 0 ? netWeight / 40 : 0
@@ -132,7 +134,7 @@ export default function CommissionPage() {
     setCustomerId(""); setWalkInCustomer("")
     setPartyId(""); setWalkInSeller("")
     setCommodity(""); setVehicleNo(""); setBags(""); setBagType("bag")
-    setGrossWeight(""); setTareWeight(""); setBardanaWeight("")
+    setWeightRows([{ gross: "", tare: "", bardana: "" }])
     setRate(""); setRateUnit("kg"); setTotalValue(""); setCommissionRate("2.5"); setLabourAmount("0"); setLabourMode("ADD"); setPaidAmount("0"); setNotes("")
   }
 
@@ -162,9 +164,9 @@ export default function CommissionPage() {
           vehicleNo,
           bags,
           bagType,
-          grossWeight,
-          tareWeight,
-          bardanaWeight,
+          grossWeight: grossWeight ? String(grossWeight) : "",
+          tareWeight: tareWeight ? String(tareWeight) : "",
+          bardanaWeight: bardanaWeight ? String(bardanaWeight) : "",
           weight: String(netWeight),
           rate,
           rateUnit,
@@ -644,25 +646,54 @@ ${buildPrintHeader(shop)}
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div>
-                  <Label className="text-xs font-semibold text-gray-600">{t("Gross wt")} (kg)</Label>
-                  <Input type="number" className="mt-1" placeholder="0" value={grossWeight}
-                    onChange={(e) => setGrossWeight(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-gray-600">{t("Tare wt")} (kg)</Label>
-                  <Input type="number" className="mt-1" placeholder="0" value={tareWeight}
-                    onChange={(e) => setTareWeight(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-gray-600">{t("Bardana wt")} (kg)</Label>
-                  <Input type="number" className="mt-1" placeholder="0" value={bardanaWeight}
-                    onChange={(e) => setBardanaWeight(e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-gray-600">{t("Net wt")} <span className="font-normal text-gray-400">({t("auto")})</span></Label>
-                  <Input readOnly className="mt-1 bg-blue-100 font-semibold" placeholder="0" value={netWeight ? String(netWeight) : ""} />
+              <div className="space-y-2">
+                {weightRows.map((row, i) => {
+                  const n = rowNet(row)
+                  return (
+                    <div key={i} className="flex items-end gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
+                        <div>
+                          {i === 0 && <Label className="text-xs font-semibold text-gray-600">{t("Gross wt")} (kg)</Label>}
+                          <Input type="number" className="mt-1" placeholder="0" value={row.gross}
+                            onChange={(e) => updateWeightRow(i, "gross", e.target.value)} />
+                        </div>
+                        <div>
+                          {i === 0 && <Label className="text-xs font-semibold text-gray-600">{t("Tare wt")} (kg)</Label>}
+                          <Input type="number" className="mt-1" placeholder="0" value={row.tare}
+                            onChange={(e) => updateWeightRow(i, "tare", e.target.value)} />
+                        </div>
+                        <div>
+                          {i === 0 && <Label className="text-xs font-semibold text-gray-600">{t("Bardana wt")} (kg)</Label>}
+                          <Input type="number" className="mt-1" placeholder="0" value={row.bardana}
+                            onChange={(e) => updateWeightRow(i, "bardana", e.target.value)} />
+                        </div>
+                        <div>
+                          {i === 0 && <Label className="text-xs font-semibold text-gray-600">{t("Net wt")} <span className="font-normal text-gray-400">({t("auto")})</span></Label>}
+                          <Input readOnly className="mt-1 bg-blue-100 font-semibold" placeholder="0" value={n ? String(n) : ""} />
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setWeightRows((rows) => rows.filter((_, idx) => idx !== i))}
+                        disabled={weightRows.length === 1}
+                        className="mb-0.5 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                        title="Remove row"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )
+                })}
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <Button type="button" variant="outline" size="sm" className="h-8 text-xs"
+                    onClick={() => setWeightRows((rows) => [...rows, { gross: "", tare: "", bardana: "" }])}>
+                    <Plus className="w-3.5 h-3.5" /> {t("Add Row")}
+                  </Button>
+                  {weightRows.length > 1 && (
+                    <p className="text-xs text-gray-600">
+                      {t("Total")}: {t("Gross wt")} <strong>{grossWeight}</strong> · {t("Tare wt")} <strong>{tareWeight}</strong> · {t("Bardana wt")} <strong>{bardanaWeight}</strong> · {t("Net wt")} <strong className="text-blue-700">{netWeight} kg</strong>
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

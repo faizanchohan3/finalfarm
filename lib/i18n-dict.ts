@@ -203,6 +203,7 @@ export const UR: Record<string, string> = {
   "Per Mound (40 kg)": "فی من (40 کلو)",
   "Mound": "من",
   "Bardana wt": "بردانہ وزن",
+  "Add Row": "قطار شامل کریں",
   "Net kg × Rate/kg": "خالص کلو × فی کلو ریٹ",
   "Mound × Rate/Mound": "من × فی من ریٹ",
   "Commission Received": "کمیشن موصول",
