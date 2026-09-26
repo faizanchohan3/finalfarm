@@ -99,6 +99,9 @@ model Shop {
   modulePesticides Boolean @default(false)
   moduleLots       Boolean @default(true)
   moduleAgents     Boolean @default(true)
+  moduleSuppliers  Boolean @default(true)
+  modulePurchases  Boolean @default(true)
+  moduleSales      Boolean @default(true)
 
   users               User[]
   customers           Customer[]

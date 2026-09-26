@@ -16,6 +16,7 @@ export async function GET() {
         moduleGodown: true, moduleGate: true, moduleTransport: true,
         moduleFarmers: true, moduleCommission: true, modulePesticides: true,
         moduleLots: true, moduleAgents: true,
+        moduleSuppliers: true, modulePurchases: true, moduleSales: true,
       },
     })
     return cachedJson({ shop }, 30, 120)
@@ -45,6 +46,9 @@ export async function PATCH(req: Request) {
     if ("modulePesticides" in body) data.modulePesticides = !!body.modulePesticides
     if ("moduleLots" in body)       data.moduleLots       = !!body.moduleLots
     if ("moduleAgents" in body)     data.moduleAgents     = !!body.moduleAgents
+    if ("moduleSuppliers" in body)  data.moduleSuppliers  = !!body.moduleSuppliers
+    if ("modulePurchases" in body)  data.modulePurchases  = !!body.modulePurchases
+    if ("moduleSales" in body)      data.moduleSales      = !!body.moduleSales
 
     const shop = await db.shop.update({ where: { id: session.user.shopId }, data })
     return NextResponse.json({ shop })

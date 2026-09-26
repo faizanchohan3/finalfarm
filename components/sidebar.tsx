@@ -29,7 +29,7 @@ const MillIcon = () => (
   </svg>
 )
 
-type ModuleKey = "moduleGodown" | "moduleGate" | "moduleTransport" | "moduleFarmers" | "moduleCommission" | "modulePesticides" | "moduleLots" | "moduleAgents"
+type ModuleKey = "moduleGodown" | "moduleGate" | "moduleTransport" | "moduleFarmers" | "moduleCommission" | "modulePesticides" | "moduleLots" | "moduleAgents" | "moduleSuppliers" | "modulePurchases" | "moduleSales"
 
 type NavItem = {
   href: string
@@ -67,12 +67,12 @@ const shopNavItems: NavItem[] = [
   { href: "/lots", label: "Potato Store", icon: Boxes, module: "moduleLots" },
   { href: "/markha", label: "Markha", icon: Tag, module: "moduleLots" },
   { href: "/customers", label: "Traders", icon: UserCheck },
-  { href: "/suppliers", label: "Suppliers", icon: Truck },
+  { href: "/suppliers", label: "Suppliers", icon: Truck, module: "moduleSuppliers" },
   { href: "/farmers", label: "Farmers", icon: UserCheck, module: "moduleFarmers" },
   { href: "/commission", label: "Commission (Aadat)", icon: DollarSign, module: "moduleCommission" },
   { href: "/agents", label: "Agents", icon: UserCircle, module: "moduleAgents" },
-  { href: "/purchases", label: "Purchases", icon: ShoppingBag },
-  { href: "/sales", label: "Sales", icon: ShoppingCart },
+  { href: "/purchases", label: "Purchases", icon: ShoppingBag, module: "modulePurchases" },
+  { href: "/sales", label: "Sales", icon: ShoppingCart, module: "moduleSales" },
   { href: "/pesticides", label: "Pesticides", icon: Zap, module: "modulePesticides" },
   { href: "/finance", label: "Roznamcha", icon: Wallet },
   { href: "/banks", label: "Banks", icon: Building2 },
@@ -106,6 +106,7 @@ export function Sidebar() {
     moduleGodown: false, moduleGate: false, moduleTransport: false,
     moduleFarmers: true, moduleCommission: true, modulePesticides: false,
     moduleLots: true, moduleAgents: true,
+    moduleSuppliers: true, modulePurchases: true, moduleSales: true,
   })
 
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN"
@@ -159,6 +160,9 @@ export function Sidebar() {
               modulePesticides: !!d.shop.modulePesticides,
               moduleLots:       d.shop.moduleLots !== false,
               moduleAgents:     d.shop.moduleAgents !== false,
+              moduleSuppliers:  d.shop.moduleSuppliers !== false,
+              modulePurchases:  d.shop.modulePurchases !== false,
+              moduleSales:      d.shop.moduleSales !== false,
             })
           }
         })

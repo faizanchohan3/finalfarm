@@ -30,6 +30,9 @@ export default function SettingsPage() {
     modulePesticides: false,
     moduleLots: true,
     moduleAgents: true,
+    moduleSuppliers: true,
+    modulePurchases: true,
+    moduleSales: true,
   })
   const [savingModules, setSavingModules] = useState(false)
   const [moduleSavedKey, setModuleSavedKey] = useState<string | null>(null)
@@ -61,6 +64,9 @@ export default function SettingsPage() {
         modulePesticides: !!s.modulePesticides,
         moduleLots:       s.moduleLots !== false,
         moduleAgents:     s.moduleAgents !== false,
+        moduleSuppliers:  s.moduleSuppliers !== false,
+        modulePurchases:  s.modulePurchases !== false,
+        moduleSales:      s.moduleSales !== false,
       })
     }
   }
@@ -270,6 +276,9 @@ export default function SettingsPage() {
               { key: "moduleFarmers",    label: "Farmers",            desc: "Farmer accounts, peshgi, ledger" },
               { key: "moduleLots",       label: "Lots",               desc: "Lot tracking, arrival to settlement" },
               { key: "moduleAgents",     label: "Agents",             desc: "Commission agents and their ledger" },
+              { key: "moduleSuppliers",  label: "Suppliers",          desc: "Supplier accounts and ledger" },
+              { key: "modulePurchases",  label: "Purchases",          desc: "Purchase entries from suppliers" },
+              { key: "moduleSales",      label: "Sales",              desc: "Sales to traders and customers" },
               { key: "modulePesticides", label: "Pesticides",         desc: "Pesticide stock and sales" },
               { key: "moduleGodown",     label: "Godowns",            desc: "Warehouse and storage management" },
               { key: "moduleGate",       label: "Gate / Weighbridge", desc: "Entry/exit and weight recording" },
