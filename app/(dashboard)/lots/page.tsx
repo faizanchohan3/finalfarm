@@ -14,7 +14,12 @@ import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truc
 import { useLang } from "@/lib/i18n"
 import { buildPrintHeader, receiptCSS, reportCSS } from "@/lib/print-utils"
 
-const STATUSES = ["ARRIVED", "WEIGHED", "STORED", "AVAILABLE", "IN_AUCTION", "SOLD", "DISPATCHED", "SETTLED", "CANCELLED"] as const
+// Lots are shown as just Stored or Sold. The database keeps its detailed statuses:
+// sold / dispatched / settled count as Sold, cancelled stays Cancelled, everything else is Stored.
+const SOLD_STAGE = ["SOLD", "DISPATCHED", "SETTLED"]
+const simpleStatus = (s: string) => (s === "CANCELLED" ? "CANCELLED" : SOLD_STAGE.includes(s) ? "SOLD" : "STORED")
+const FILTERS = ["ALL", "STORED", "SOLD"] as const
+const FILTER_LABELS: Record<string, string> = { ALL: "All", STORED: "Stored", SOLD: "Sold" }
 
 // Markha 1 is a fixed list of potato grades — not shop-editable like Markha 2.
 const MARKHA1_OPTIONS = ["Safaid Beeg", "Surkh Beeg", "Safaid Rashan", "Surkh Rashan", "Safaid Goli", "Surkh Goli"]
@@ -83,7 +88,7 @@ export default function LotsPage() {
   async function loadLots() {
     setLoading(true)
     try {
-      const res = await fetch(`/api/lots?status=${filter}`)
+      const res = await fetch("/api/lots?status=ALL")
       const data = await res.json()
       setLots(data.lots || [])
     } catch { setLots([]) }
@@ -108,7 +113,7 @@ export default function LotsPage() {
   }
 
   useEffect(() => { loadRefs() }, [])
-  useEffect(() => { loadLots() }, [filter])
+  useEffect(() => { loadLots() }, [])
 
   function set<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }))
@@ -144,18 +149,18 @@ export default function LotsPage() {
 
   function openManage(lot: any) {
     setManage(lot)
-    setMStatus(lot.status)
+    setMStatus(simpleStatus(lot.status))
     setMBuyer(lot.buyer?.id || "")
     setMRate(lot.saleRate != null ? String(lot.saleRate) : "")
     setMPay(lot.paymentStatus || "PENDING")
   }
 
-  const isSaleStage = ["SOLD", "DISPATCHED", "SETTLED"].includes(mStatus)
+  const isSaleStage = mStatus === "SOLD"
 
   async function saveManage() {
     if (!manage) return
     setSaving(true)
-    const payload: any = { status: mStatus }
+    const payload: any = { status: mStatus === simpleStatus(manage.status) ? manage.status : mStatus }
     if (isSaleStage) {
       payload.buyerId = mBuyer || null
       payload.saleRate = mRate
@@ -184,7 +189,7 @@ export default function LotsPage() {
     const info: [string, string][] = [
       ["Lot No", lot.lotNo],
       ["Date", new Date(lot.createdAt).toLocaleDateString("en-PK")],
-      ["Status", String(lot.status).replace("_", " ")],
+      ["Status", simpleStatus(lot.status)],
       ["Category", lot.category?.name || "—"],
       ["Farmer", lot.farmer?.name || "—"],
       ["Godown", lot.warehouse?.name || "—"],
@@ -227,14 +232,14 @@ export default function LotsPage() {
       <td>${lot.farmer?.name || "—"}</td>
       <td>${lot.bags != null ? `${lot.bags} ${bagLabel(lot)}` : "—"}</td>
       <td style="text-align:right">${lot.netWeight != null ? lot.netWeight : "—"}</td>
-      <td>${String(lot.status).replace("_", " ")}</td>
+      <td>${simpleStatus(lot.status)}</td>
       <td>${lot.buyer?.name || "—"}</td>
       <td style="text-align:right">${lot.saleAmount ? money(lot.saleAmount) : "—"}</td>
     </tr>`).join("")
     const totalSale = list.reduce((s, l) => s + (l.saleAmount || 0), 0)
     w.document.write(`<html><head><title>Lots Report</title><style>${reportCSS} body{max-width:1000px;margin:0 auto}</style></head><body>
       ${buildPrintHeader(shop)}
-      <div class="doc-header"><div><div class="doc-title">Lots Report</div><div class="doc-sub">${list.length} lots · ${filter === "ALL" ? "All statuses" : String(filter).replace("_", " ")} · ${date}</div></div></div>
+      <div class="doc-header"><div><div class="doc-title">Lots Report</div><div class="doc-sub">${list.length} lots · ${filter === "ALL" ? "All statuses" : FILTER_LABELS[filter]} · ${date}</div></div></div>
       <div class="body-pad"><table>
         <thead><tr><th>#</th><th>Lot No</th><th>Date</th><th>Category</th><th>Farmer</th><th>Bags</th><th style="text-align:right">Net (KG)</th><th>Status</th><th>Buyer</th><th style="text-align:right">Sale Amount</th></tr></thead>
         <tbody>${rows}</tbody>
@@ -272,7 +277,7 @@ export default function LotsPage() {
         <td>${lot.farmer?.name || "—"}</td>
         <td>${lot.bags != null ? `${lot.bags} ${bagLabel(lot)}` : "—"}</td>
         <td style="text-align:right">${lot.netWeight != null ? lot.netWeight : "—"}</td>
-        <td>${String(lot.status).replace("_", " ")}</td>
+        <td>${simpleStatus(lot.status)}</td>
         <td>${lot.soldAt ? new Date(lot.soldAt).toLocaleDateString("en-PK") : "—"}</td>
         <td>${lot.buyer?.name || "—"}</td>
         <td style="text-align:right">${lot.saleAmount ? money(lot.saleAmount) : "—"}</td>
@@ -332,6 +337,7 @@ export default function LotsPage() {
 
   const q = search.trim().toLowerCase()
   const visibleLots = lots.filter((l) => {
+    if (filter !== "ALL" && simpleStatus(l.status) !== filter) return false
     if (markhaFilter !== "ALL" && l.markha1 !== markhaFilter && l.markha2 !== markhaFilter) return false
     if (reportGodown === "NONE" && l.warehouse) return false
     if (reportGodown !== "ALL" && reportGodown !== "NONE" && l.warehouse?.id !== reportGodown) return false
@@ -390,7 +396,7 @@ export default function LotsPage() {
       {/* Status + markha filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex gap-2 overflow-x-auto pb-1 flex-1 min-w-0">
-          {["ALL", ...STATUSES].map((s) => (
+          {FILTERS.map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s)}
@@ -398,7 +404,8 @@ export default function LotsPage() {
                 filter === s ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              {s === "ALL" ? "All" : s.replace("_", " ")}
+              {t(FILTER_LABELS[s])}{" "}
+              <span className="opacity-75">({s === "ALL" ? lots.length : lots.filter((l) => simpleStatus(l.status) === s).length})</span>
             </button>
           ))}
         </div>
@@ -442,7 +449,7 @@ export default function LotsPage() {
           <p className="text-gray-500">
             {markhaFilter !== "ALL" || reportGodown !== "ALL" || q
               ? `No lots match your search / filters.`
-              : `No lots${filter !== "ALL" ? ` with status ${filter.replace("_", " ")}` : ""} yet.`}
+              : `No lots${filter !== "ALL" ? ` with status ${FILTER_LABELS[filter]}` : ""} yet.`}
           </p>
           <p className="text-gray-400 text-sm">Create a lot when goods arrive at your mandi.</p>
         </CardContent></Card>
@@ -455,8 +462,8 @@ export default function LotsPage() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono text-sm font-semibold text-gray-900">{lot.lotNo}</span>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[lot.status]}`}>
-                        {lot.status.replace("_", " ")}
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[simpleStatus(lot.status)]}`}>
+                        {t(FILTER_LABELS[simpleStatus(lot.status)] || "Cancelled")}
                       </span>
                     </div>
                     <p className="font-semibold text-gray-900">{lot.category?.name || "—"}</p>
@@ -500,6 +507,15 @@ export default function LotsPage() {
                           title="Settle lot"
                         >
                           Settle
+                        </button>
+                      )}
+                      {simpleStatus(lot.status) === "STORED" && (
+                        <button
+                          onClick={() => { openManage(lot); setMStatus("SOLD") }}
+                          className="text-xs font-semibold px-2.5 py-1 rounded-md bg-green-600 text-white hover:bg-green-700"
+                          title="Mark this lot as sold"
+                        >
+                          {t("Sold")}
                         </button>
                       )}
                       {lot.status !== "CANCELLED" && lot.status !== "SETTLED" && (
@@ -634,9 +650,8 @@ export default function LotsPage() {
               <Select value={mStatus} onValueChange={setMStatus}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {STATUSES.filter((s) => s !== "CANCELLED" && s !== "SETTLED").map((s) => (
-                    <SelectItem key={s} value={s}>{s.replace("_", " ")}</SelectItem>
-                  ))}
+                  <SelectItem value="STORED">{t("Stored")}</SelectItem>
+                  <SelectItem value="SOLD">{t("Sold")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -101,7 +101,7 @@ export async function POST(req: Request) {
       tareWeight: tare,
       netWeight: net,
       grade: body.grade?.trim() || null,
-      status: body.status || "ARRIVED",
+      status: body.status || "STORED",
       notes: body.notes?.trim() || null,
       createdById: session.user!.id!,
     },
