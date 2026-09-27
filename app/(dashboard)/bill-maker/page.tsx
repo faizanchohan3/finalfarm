@@ -15,8 +15,15 @@ import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print
 // The next bill number is remembered in this browser and follows the highest saved bill.
 
 type Row = { date: string; weight: string }
-type UnitType = "Jali" | "Bori" | "Bag"
+type UnitType = "Jali" | "Bori" | "Bag" | "Tora"
 type RateUnit = "kg" | "mound"
+type BillFor = "Kissan" | "GalaMandi"
+
+// Who the bill is for (printed on the bill)
+const BILL_FOR: Record<BillFor, { label: string; ur: string }> = {
+  Kissan: { label: "Kissan", ur: "کسان" },
+  GalaMandi: { label: "Gala Mandi", ur: "غلہ منڈی" },
+}
 
 const MOUND_KG = 40 // 1 mound = 40 kg
 
@@ -32,6 +39,7 @@ const UNIT_LABELS: Record<UnitType, { cutPerLabel: string; unitCutLabel: string;
   Jali: { cutPerLabel: "Cut per jali (KG)", unitCutLabel: "Jali cut (KG)", cutSummaryLabel: "Jali cut", ur: "جالی" },
   Bori: { cutPerLabel: "Cut per bori (KG)", unitCutLabel: "Bori cut (KG)", cutSummaryLabel: "Bori cut", ur: "بوری" },
   Bag: { cutPerLabel: "Cut per bag (KG)", unitCutLabel: "Bag cut (KG)", cutSummaryLabel: "Bag cut", ur: "بیگ" },
+  Tora: { cutPerLabel: "Cut per tora (KG)", unitCutLabel: "Tora cut (KG)", cutSummaryLabel: "Tora cut", ur: "توڑا" },
 }
 
 const todayStr = () => new Date().toISOString().slice(0, 10)
@@ -60,6 +68,7 @@ export default function BillMakerPage() {
   const [traders, setTraders] = useState<any[]>([])
   const [product, setProduct] = useState("")
   const [unitType, setUnitType] = useState<UnitType>("Jali")
+  const [billFor, setBillFor] = useState<BillFor>("Kissan")
   const [rows, setRows] = useState<Row[]>([emptyRow()])
   const [cutPerUnit, setCutPerUnit] = useState("")
   const [cutOverride, setCutOverride] = useState("")
@@ -123,7 +132,7 @@ export default function BillMakerPage() {
 
   function resetForm(bills = savedBills) {
     setEditingId(null)
-    setName(""); setCustomerId(""); setProduct(""); setUnitType("Jali"); setRows([emptyRow()])
+    setName(""); setCustomerId(""); setProduct(""); setUnitType("Jali"); setBillFor("Kissan"); setRows([emptyRow()])
     setCutPerUnit(""); setCutOverride(""); setVehicleCut("")
     setRate(""); setRateUnit("kg"); setBillDate(todayStr())
     setBillNo(nextBillNo(bills))
@@ -149,7 +158,7 @@ export default function BillMakerPage() {
       const payload = {
         billNo, billDate, name, customerId, product,
         totalWeight, safiWeight, amount,
-        data: { rows: filled, unitType, cutPerUnit, cutOverride, vehicleCut, rateUnit, rate, cut, mounds },
+        data: { rows: filled, unitType, billFor, cutPerUnit, cutOverride, vehicleCut, rateUnit, rate, cut, mounds },
       }
       const res = await fetch(editingId ? `/api/bills/${editingId}` : "/api/bills", {
         method: editingId ? "PUT" : "POST",
@@ -176,6 +185,7 @@ export default function BillMakerPage() {
     setCustomerId(b.customerId || "")
     setProduct(b.product || "")
     setUnitType((d.unitType as UnitType) || "Jali")
+    setBillFor(d.billFor === "GalaMandi" ? "GalaMandi" : "Kissan")
     setRows(Array.isArray(d.rows) && d.rows.length ? d.rows.map((r: any) => ({ date: r.date || todayStr(), weight: String(r.weight ?? "") })) : [emptyRow()])
     setCutPerUnit(d.cutPerUnit ?? "")
     setCutOverride(d.cutOverride ?? "")
@@ -216,7 +226,7 @@ ${billFontLink}
   <div>نمبر: <b>${escapeHtml(billNo)}</b>${editingId ? ` <span style="font-size:11px;color:#6b7280">(ID: <b>${recordCode("bill", editingId)}</b>)</span>` : ""}</div>
   <div>تاریخ: <b>${escapeHtml(fmtDate(billDate))}</b></div>
 </div>
-<div class="name">بنام: <strong>${escapeHtml(name.trim())}</strong>${product ? `<span style="margin-inline-start:28px">جنس: <strong>${escapeHtml(productUr)}</strong></span>` : ""}</div>
+<div class="name">بل برائے: <strong>${BILL_FOR[billFor].ur}</strong><span style="margin-inline-start:28px">بنام: <strong>${escapeHtml(name.trim())}</strong></span>${product ? `<span style="margin-inline-start:28px">جنس: <strong>${escapeHtml(productUr)}</strong></span>` : ""}</div>
 <table>
   <thead><tr><th>تاریخ</th><th>وزن (کلو)</th></tr></thead>
   <tbody>${rowHtml}</tbody>
@@ -261,9 +271,20 @@ ${billFontLink}
 
       <Card>
         <CardContent className="p-4 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
             <div><Label>{t("Bill No")}</Label><Input value={billNo} onChange={(e) => setBillNo(e.target.value)} /></div>
             <div><Label>{t("Date")}</Label><Input type="date" value={billDate} onChange={(e) => setBillDate(e.target.value)} /></div>
+            <div>
+              <Label>{t("Bill for")}</Label>
+              <select
+                value={billFor}
+                onChange={(e) => setBillFor(e.target.value as BillFor)}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+              >
+                <option value="Kissan">{t("Kissan")}</option>
+                <option value="GalaMandi">{t("Gala Mandi")}</option>
+              </select>
+            </div>
             <div>
               <Label>{t("Trader")} *</Label>
               <SearchableSelect
@@ -329,6 +350,7 @@ ${billFontLink}
                 <option value="Jali">{t("Jali")}</option>
                 <option value="Bori">{t("Bori")}</option>
                 <option value="Bag">{t("Bag")}</option>
+                <option value="Tora">{t("Tora")}</option>
               </select>
             </div>
             <div>
