@@ -299,6 +299,8 @@ export const UR: Record<string, string> = {
   "Makki": "مکئی",
   "Select product": "جنس منتخب کریں",
   "Add category": "کیٹیگری شامل کریں",
+  "Select trader...": "بیوپاری منتخب کریں...",
+  "Select a trader": "بیوپاری منتخب کریں",
   "Save Bill": "بل محفوظ کریں",
   "Update Bill": "بل اپڈیٹ کریں",
   "Bill saved": "بل محفوظ ہو گیا",

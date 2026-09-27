@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { recordCode } from "@/lib/record-code"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -25,7 +26,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const customer = await db.customer.findUnique({ where: { id } })
   if (!customer) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const [sales, pesticideSales, customerCommissions, customerPayments, traderPurchases] = await Promise.all([
+  // Bills are dated by their bill date, not when they were saved
+  const billDateWhere: any = dateWhere.createdAt ? { billDate: dateWhere.createdAt } : {}
+
+  const [sales, pesticideSales, customerCommissions, customerPayments, traderPurchases, bills] = await Promise.all([
     db.sale.findMany({
       where: { customerId: id, ...dateWhere },
       orderBy: { createdAt: "asc" },
@@ -52,6 +56,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       where: { sellerCustomerId: id, ...dateWhere },
       orderBy: { createdAt: "asc" },
       include: { items: { include: { product: { select: { name: true, unit: true } } } } },
+    }),
+    db.bill.findMany({
+      where: { customerId: id, ...billDateWhere },
+      orderBy: { billDate: "asc" },
     }),
   ])
 
@@ -148,6 +156,18 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         credit: 0,
       })
     }
+  }
+
+  // Bill Maker bills charged to this trader
+  for (const bill of bills) {
+    const desc = [bill.product, bill.safiWeight ? `${bill.safiWeight.toLocaleString("en-PK", { maximumFractionDigits: 2 })} kg` : null].filter(Boolean).join(", ")
+    events.push({
+      date: bill.billDate,
+      type: "BILL",
+      description: `Bill #${bill.billNo} (${recordCode("bill", bill.id)})${desc ? ` — ${desc}` : ""}`,
+      debit: bill.amount,
+      credit: 0,
+    })
   }
 
   for (const cp of customerPayments) {

@@ -143,6 +143,7 @@ model Bill {
   billDate    DateTime
   name        String
   product     String?
+  customerId  String? // trader (customer) this bill is charged to
   data        Json
   totalWeight Float    @default(0)
   safiWeight  Float    @default(0)
@@ -151,9 +152,11 @@ model Bill {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  shop Shop? @relation(fields: [shopId], references: [id])
+  shop     Shop?     @relation(fields: [shopId], references: [id])
+  customer Customer? @relation(fields: [customerId], references: [id])
 
   @@index([shopId, createdAt])
+  @@index([customerId])
 }
 
 // ── MARKHA (lot brand / mark) ────────────────────────────────────────────────
@@ -301,6 +304,7 @@ model Customer {
   pesticideSales    PesticideSale[]
   freightSlips      FreightSlip[]
   commissions       Commission[]
+  bills             Bill[]
   payments          CustomerPayment[]
   purchasesAsSeller Purchase[]      @relation("PurchaseSeller")
   lots              Lot[]

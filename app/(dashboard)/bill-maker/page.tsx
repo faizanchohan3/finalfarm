@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { FileText, Plus, Trash2, Printer, RotateCcw, Save, FolderOpen, Search } from "lucide-react"
 import { useLang } from "@/lib/i18n"
 import { recordCode } from "@/lib/record-code"
@@ -54,7 +55,9 @@ export default function BillMakerPage() {
 
   const [billNo, setBillNo] = useState("1")
   const [billDate, setBillDate] = useState(todayStr())
-  const [name, setName] = useState("")
+  const [name, setName] = useState("")          // trader name, used on the printed bill
+  const [customerId, setCustomerId] = useState("") // trader the bill is charged to (goes to their ledger)
+  const [traders, setTraders] = useState<any[]>([])
   const [product, setProduct] = useState("")
   const [unitType, setUnitType] = useState<UnitType>("Jali")
   const [rows, setRows] = useState<Row[]>([emptyRow()])
@@ -87,6 +90,7 @@ export default function BillMakerPage() {
 
   useEffect(() => {
     fetch("/api/settings").then((r) => r.json()).then((d) => setShop(d.shop || null)).catch(() => {})
+    fetch("/api/customers").then((r) => r.json()).then((d) => setTraders(d.customers || [])).catch(() => {})
     setBillNo(nextBillNo([]))
     loadBills().then((bills) => setBillNo(nextBillNo(bills)))
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -119,7 +123,7 @@ export default function BillMakerPage() {
 
   function resetForm(bills = savedBills) {
     setEditingId(null)
-    setName(""); setProduct(""); setUnitType("Jali"); setRows([emptyRow()])
+    setName(""); setCustomerId(""); setProduct(""); setUnitType("Jali"); setRows([emptyRow()])
     setCutPerUnit(""); setCutOverride(""); setVehicleCut("")
     setRate(""); setRateUnit("kg"); setBillDate(todayStr())
     setBillNo(nextBillNo(bills))
@@ -131,7 +135,7 @@ export default function BillMakerPage() {
   }
 
   function validate() {
-    if (!name.trim()) { alert(t("Enter the name")); return null }
+    if (!customerId) { alert(t("Select a trader")); return null }
     const filled = rows.filter((r) => num(r.weight))
     if (filled.length === 0) { alert(t("Add at least one row")); return null }
     return filled
@@ -143,7 +147,7 @@ export default function BillMakerPage() {
     setSaving(true)
     try {
       const payload = {
-        billNo, billDate, name, product,
+        billNo, billDate, name, customerId, product,
         totalWeight, safiWeight, amount,
         data: { rows: filled, unitType, cutPerUnit, cutOverride, vehicleCut, rateUnit, rate, cut, mounds },
       }
@@ -169,6 +173,7 @@ export default function BillMakerPage() {
     setBillNo(b.billNo)
     setBillDate(new Date(b.billDate).toISOString().slice(0, 10))
     setName(b.name || "")
+    setCustomerId(b.customerId || "")
     setProduct(b.product || "")
     setUnitType((d.unitType as UnitType) || "Jali")
     setRows(Array.isArray(d.rows) && d.rows.length ? d.rows.map((r: any) => ({ date: r.date || todayStr(), weight: String(r.weight ?? "") })) : [emptyRow()])
@@ -259,7 +264,15 @@ ${billFontLink}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div><Label>{t("Bill No")}</Label><Input value={billNo} onChange={(e) => setBillNo(e.target.value)} /></div>
             <div><Label>{t("Date")}</Label><Input type="date" value={billDate} onChange={(e) => setBillDate(e.target.value)} /></div>
-            <div><Label>{t("Name")} *</Label><Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("Party name")} /></div>
+            <div>
+              <Label>{t("Trader")} *</Label>
+              <SearchableSelect
+                value={customerId}
+                onValueChange={(v) => { setCustomerId(v); setName(traders.find((c) => c.id === v)?.name || "") }}
+                placeholder={t("Select trader...")}
+                options={traders.map((c) => ({ value: c.id, label: c.name, sub: c.phone || undefined }))}
+              />
+            </div>
             <div>
               <Label>{t("Product")}</Label>
               <select
