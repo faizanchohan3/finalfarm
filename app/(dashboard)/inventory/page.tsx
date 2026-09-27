@@ -22,7 +22,7 @@ export default function InventoryPage() {
   const [editing, setEditing] = useState<any>(null)
   const [rooms, setRooms] = useState<any[]>([])
   const [form, setForm] = useState({
-    name: "", categoryId: "", roomId: "", unit: "KG", currentStock: "0",
+    name: "", categoryId: "", roomId: "", unit: "KG", currentStock: "",
     minStock: "0", purchasePrice: "0", salePrice: "0",
   })
   const [showCategories, setShowCategories] = useState(false)
@@ -66,7 +66,7 @@ export default function InventoryPage() {
 
   function openAdd() {
     setEditing(null)
-    setForm({ name: "", categoryId: "", roomId: "", unit: "KG", currentStock: "0", minStock: "0", purchasePrice: "0", salePrice: "0" })
+    setForm({ name: "", categoryId: "", roomId: "", unit: "KG", currentStock: "", minStock: "0", purchasePrice: "0", salePrice: "0" })
     setShowModal(true)
   }
 
@@ -88,8 +88,8 @@ export default function InventoryPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
-        currentStock: parseFloat(form.currentStock),
-        minStock: parseFloat(form.minStock),
+        currentStock: parseFloat(form.currentStock) || 0,
+        minStock: parseFloat(form.minStock) || 0,
         purchasePrice: parseFloat(form.purchasePrice),
         salePrice: parseFloat(form.salePrice),
       }),
@@ -528,7 +528,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-blue-300">
-                    {["Product", "Category", "Stock", "Unit", "Min Stock", "Purchase Price", "Sale Price", "Status", "Actions"].map((h) => (
+                    {["Product", "Category", "Stock", "Unit", "Purchase Price", "Sale Price", "Status", "Actions"].map((h) => (
                       <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
                     ))}
                   </tr>
@@ -539,7 +539,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                     return (
                       <Fragment key={g.name}>
                         <tr className="bg-purple-50 border-b border-purple-200">
-                          <td colSpan={9} className="py-2 px-3 font-semibold text-purple-800">
+                          <td colSpan={8} className="py-2 px-3 font-semibold text-purple-800">
                             <div className="flex items-center justify-between gap-2 flex-wrap">
                               <span>
                                 {g.name} <span className="text-purple-500 font-normal">({g.items.length})</span>
@@ -569,7 +569,6 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                               </div>
                             </td>
                             <td className="py-3 px-3 text-gray-500">{p.unit}</td>
-                            <td className="py-3 px-3 text-gray-600">{p.minStock}</td>
                             <td className="py-3 px-3 text-gray-700">{formatCurrency(p.purchasePrice)}</td>
                             <td className="py-3 px-3 text-gray-700">{formatCurrency(p.salePrice)}</td>
                             <td className="py-3 px-3">
@@ -590,7 +589,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                           </tr>
                         ))}
                         <tr className="border-b border-gray-100 bg-gray-50/60">
-                          <td colSpan={8} className="py-2 px-3 text-right text-xs font-medium text-gray-500">
+                          <td colSpan={7} className="py-2 px-3 text-right text-xs font-medium text-gray-500">
                             {g.name} subtotal ({g.items.length} product{g.items.length > 1 ? "s" : ""})
                           </td>
                           <td className="py-2 px-3 text-xs font-semibold text-gray-700">{formatCurrency(groupValue)}</td>
@@ -599,7 +598,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                     )
                   })}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={9} className="text-center py-8 text-gray-400">No products found</td></tr>
+                    <tr><td colSpan={8} className="text-center py-8 text-gray-400">No products found</td></tr>
                   )}
                 </tbody>
               </table>
@@ -789,15 +788,10 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                     )
                   })()}
                 </div>
-                <div>
-                  <Label className="text-xs font-semibold text-gray-600">Min Stock</Label>
-                  <Input type="number" className="mt-1" value={form.minStock}
-                    onChange={(e) => setForm({ ...form, minStock: e.target.value })} />
-                </div>
                 {!editing && (
                   <div>
-                    <Label className="text-xs font-semibold text-gray-600">Opening Stock</Label>
-                    <Input type="number" className="mt-1" value={form.currentStock}
+                    <Label className="text-xs font-semibold text-gray-600">Stock Qty</Label>
+                    <Input type="number" className="mt-1" placeholder="0" value={form.currentStock}
                       onChange={(e) => setForm({ ...form, currentStock: e.target.value })} />
                   </div>
                 )}
