@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print-utils"
 import { recordCode } from "@/lib/record-code"
-import { Plus, Minus, Search, Package, AlertTriangle, Edit, Trash2, Tag, ChevronDown, ChevronUp, X, Printer, PlusCircle } from "lucide-react"
+import { Plus, Minus, Search, Package, AlertTriangle, Edit, Trash2, Tag, ChevronDown, ChevronUp, X, Printer, PlusCircle, History } from "lucide-react"
+import { StockHistory } from "@/components/stock-history"
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<any[]>([])
@@ -42,6 +43,8 @@ export default function InventoryPage() {
   const [stockQty, setStockQty] = useState("")
   const [stockReason, setStockReason] = useState("")
   const [stockSaving, setStockSaving] = useState(false)
+  // Stock history dialog: null = closed, "" = all products, otherwise one product id
+  const [historyFor, setHistoryFor] = useState<string | null>(null)
 
   async function loadData() {
     try {
@@ -290,6 +293,9 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" onClick={printAllStock} className="gap-2">
             <Printer className="w-4 h-4" /> Print Stock
+          </Button>
+          <Button variant="outline" onClick={() => setHistoryFor("")} className="gap-2">
+            <History className="w-4 h-4" /> Stock History
           </Button>
           <Button variant="outline" onClick={() => setShowCategories((v) => !v)} className="gap-2">
             <Tag className="w-4 h-4" />
@@ -578,6 +584,9 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                             </td>
                             <td className="py-3 px-3">
                               <div className="flex items-center gap-2 flex-wrap">
+                                <button onClick={() => setHistoryFor(p.id)} className="p-1 text-gray-400 hover:text-purple-600" title="Stock history">
+                                  <History className="w-4 h-4" />
+                                </button>
                                 <button onClick={() => openEdit(p)} className="p-1 text-gray-400 hover:text-blue-600">
                                   <Edit className="w-4 h-4" />
                                 </button>
@@ -606,6 +615,14 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
           )}
         </CardContent>
       </Card>
+
+      <StockHistory
+        open={historyFor !== null}
+        onClose={() => setHistoryFor(null)}
+        products={products}
+        productId={historyFor || ""}
+        shop={shop}
+      />
 
       {/* Quick stock add / remove */}
       <Dialog open={!!stockTarget} onOpenChange={(o) => { if (!o) closeStock() }}>
