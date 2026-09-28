@@ -476,6 +476,36 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">اس گو
         </div>
       </div>
 
+      {/* Totals for the lots currently shown (follows status, godown, markha and search filters) */}
+      {!loading && (() => {
+        const counted = visibleLots.filter((l) => l.status !== "CANCELLED")
+        const cancelled = visibleLots.length - counted.length
+        const byType = new Map<string, { bags: number; lots: number }>()
+        for (const l of counted) {
+          const k = l.bagType || "bori"
+          const cur = byType.get(k) || { bags: 0, lots: 0 }
+          byType.set(k, { bags: cur.bags + (l.bags || 0), lots: cur.lots + 1 })
+        }
+        const net = counted.reduce((s, l) => s + (l.netWeight || 0), 0)
+        const fmtN = (v: number) => v.toLocaleString("en-PK", { maximumFractionDigits: 2 })
+        return (
+          <div className="flex flex-wrap gap-3">
+            {["jali", "bori", "tora"].filter((k) => byType.has(k)).map((k) => (
+              <div key={k} className="rounded-lg border border-purple-200 bg-purple-50 px-4 py-2">
+                <p className="text-xs text-purple-600 font-medium">{t("Total")} {t(BAG_TYPE_LABEL[k])}</p>
+                <p className="text-lg font-bold text-purple-900 tabular-nums">{fmtN(byType.get(k)!.bags)}</p>
+                <p className="text-[11px] text-gray-500">{byType.get(k)!.lots} {t("lots")}</p>
+              </div>
+            ))}
+            <div className="rounded-lg border border-gray-200 bg-white px-4 py-2">
+              <p className="text-xs text-gray-500 font-medium">{t("Net wt")}</p>
+              <p className="text-lg font-bold text-gray-900 tabular-nums">{fmtN(net)} KG</p>
+              <p className="text-[11px] text-gray-500">{counted.length} {t("lots")}{cancelled ? ` · ${cancelled} ${t("cancelled not counted")}` : ""}</p>
+            </div>
+          </div>
+        )
+      })()}
+
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading lots...</div>
       ) : visibleLots.length === 0 ? (

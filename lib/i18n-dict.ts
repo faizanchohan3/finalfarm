@@ -302,6 +302,8 @@ export const UR: Record<string, string> = {
   "Select trader...": "بیوپاری منتخب کریں...",
   "Select a trader": "بیوپاری منتخب کریں",
   "Bill for": "بل برائے",
+  "lots": "لاٹ",
+  "cancelled not counted": "منسوخ شامل نہیں",
   "Kissan": "کسان",
   "Gala Mandi": "غلہ منڈی",
   "Cut per tora (KG)": "فی توڑا کاٹ (کلو)",
