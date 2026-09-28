@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 
 const lotInclude = {
   farmer: { select: { id: true, name: true } },
@@ -70,6 +71,20 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  await db.lot.update({ where: { id }, data: { status: "CANCELLED" } })
+  await db.$transaction(async (tx) => {
+    // Keep a copy (with the status before cancelling) for the Deleted Records page
+    await archiveDeleted(tx, session, {
+      type: "LOT", recordId: id, code: existing.lotNo, title: `${existing.lotNo} — Bill ${existing.billNo || "—"}`,
+      amount: existing.saleAmount || 0,
+      summary: [
+        ["Lot No", existing.lotNo], ["Date", day(existing.createdAt)], ["Status before", existing.status],
+        ["Bill No", existing.billNo || "—"], ["Vehicle No", existing.vehicleNo || "—"],
+        ["Bags", existing.bags != null ? String(existing.bags) : "—"], ["Net weight", existing.netWeight != null ? `${existing.netWeight} KG` : "—"],
+        ["Sale amount", pkr(existing.saleAmount)],
+      ],
+      snapshot: { lot: existing },
+    })
+    await tx.lot.update({ where: { id }, data: { status: "CANCELLED" } })
+  })
   return NextResponse.json({ success: true })
 }

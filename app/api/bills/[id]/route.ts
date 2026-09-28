@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { applyToTrader, billFields, findTrader } from "../fields"
+import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
+import { recordCode } from "@/lib/record-code"
 
 async function findOwnBill(id: string, shopId: string | null | undefined) {
   const existing = await db.bill.findUnique({ where: { id } })
@@ -47,8 +49,17 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const found = await findOwnBill(id, session.user.shopId)
   if ("error" in found) return NextResponse.json({ error: found.error }, { status: found.status })
 
+  const b = found.bill
   await db.$transaction(async (tx) => {
-    await applyToTrader(tx, found.bill.customerId, -found.bill.amount)
+    await archiveDeleted(tx, session, {
+      type: "BILL", recordId: b.id, code: recordCode("bill", b.id), title: `Bill #${b.billNo} — ${b.name}`, amount: b.amount,
+      summary: [
+        ["Bill No", b.billNo], ["Date", day(b.billDate)], ["Trader", b.name], ["Product", b.product || "—"],
+        ["Total weight", `${b.totalWeight} KG`], ["Safi weight", `${b.safiWeight} KG`], ["Total amount", pkr(b.amount)],
+      ],
+      snapshot: { bill: b },
+    })
+    await applyToTrader(tx, b.customerId, -b.amount)
     await tx.bill.delete({ where: { id } })
   })
   return NextResponse.json({ success: true })

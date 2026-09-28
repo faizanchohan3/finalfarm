@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
+import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -109,7 +110,17 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
-  await db.supplier.update({ where: { id }, data: { isActive: false } })
+  const supplier = await db.supplier.findUnique({ where: { id } })
+  if (!supplier) return NextResponse.json({ error: "Not found" }, { status: 404 })
+  await db.$transaction(async (tx) => {
+    // Keep a copy for the Deleted Records page (supplier is only deactivated, restore re-activates)
+    await archiveDeleted(tx, session, {
+      type: "SUPPLIER", recordId: id, code: `SP-${id.slice(-6).toUpperCase()}`, title: supplier.name, amount: supplier.balance,
+      summary: [["Name", supplier.name], ["Phone", supplier.phone || "—"], ["Balance", pkr(supplier.balance)], ["Added on", day(supplier.createdAt)]],
+      snapshot: { supplier },
+    })
+    await tx.supplier.update({ where: { id }, data: { isActive: false } })
+  })
   await createAuditLog({ userId: session.user.id, action: "DELETE", module: "SUPPLIERS", details: `Deactivated supplier ID: ${id}` })
 
   return NextResponse.json({ success: true })

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
+import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
+import { recordCode } from "@/lib/record-code"
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -18,6 +20,11 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
 
   await db.$transaction(async (tx) => {
+    // Keep a full copy for the Deleted Records page; account changes are recorded below as they happen
+    const { payments, ...commissionRow } = commission
+    const transactions = await tx.transaction.findMany({ where: { reference: id } })
+    const accounts: { id: string; delta: number }[] = []
+    const c = commission
     // Reverse customer balance (remove their outstanding)
     if (commission.customerId) {
       await tx.customer.update({
@@ -54,6 +61,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       if (commAccount) {
         const newBal = Math.max(0, (commAccount.balance || 0) - commission.commissionAmount)
         await tx.account.update({ where: { id: commAccount.id }, data: { balance: newBal } })
+        accounts.push({ id: commAccount.id, delta: (commAccount.balance || 0) - newBal })
       }
     }
 
@@ -66,8 +74,22 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       if (labourAccount) {
         const newBal = Math.max(0, (labourAccount.balance || 0) - commission.labourAmount)
         await tx.account.update({ where: { id: labourAccount.id }, data: { balance: newBal } })
+        accounts.push({ id: labourAccount.id, delta: (labourAccount.balance || 0) - newBal })
       }
     }
+
+    await archiveDeleted(tx, session, {
+      type: "COMMISSION", recordId: id, code: recordCode("commission", id),
+      title: `${c.commodity || "Commission"} — ${c.walkInCustomer || "Trader"}`, amount: c.totalValue,
+      summary: [
+        ["Date", day(c.createdAt)], ["Commodity", c.commodity || "—"], ["Vehicle No", c.vehicleNo || "—"],
+        ["Bags", c.bags != null ? String(c.bags) : "—"], ["Net weight", c.weight != null ? `${c.weight} KG` : "—"],
+        ["Commission", `${pkr(c.commissionAmount)} (${c.commissionRate}%)`], ["Labour", pkr(c.labourAmount)],
+        ["Total amount", pkr(c.totalValue)], ["Seller payable", pkr(c.sellerPayable)], ["Paid", pkr(c.paidAmount)],
+        ["Balance", pkr(c.balance)], ["Status", c.status],
+      ],
+      snapshot: { commission: commissionRow, payments, transactions, accounts },
+    })
 
     // Delete commission payments and the commission itself
     await tx.commissionPayment.deleteMany({ where: { commissionId: id } })

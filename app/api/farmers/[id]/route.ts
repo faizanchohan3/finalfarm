@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -232,6 +233,16 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await params
 
-  await db.farmer.update({ where: { id }, data: { isActive: false } })
+  const farmer = await db.farmer.findUnique({ where: { id } })
+  if (!farmer) return NextResponse.json({ error: "Not found" }, { status: 404 })
+  await db.$transaction(async (tx) => {
+    // Keep a copy for the Deleted Records page (farmer is only deactivated, restore re-activates)
+    await archiveDeleted(tx, session, {
+      type: "FARMER", recordId: id, code: `FM-${id.slice(-6).toUpperCase()}`, title: farmer.name, amount: farmer.balance,
+      summary: [["Name", farmer.name], ["Phone", farmer.phone || "—"], ["Village", (farmer as any).village || "—"], ["Balance", pkr(farmer.balance)], ["Added on", day(farmer.createdAt)]],
+      snapshot: { farmer },
+    })
+    await tx.farmer.update({ where: { id }, data: { isActive: false } })
+  })
   return NextResponse.json({ ok: true })
 }

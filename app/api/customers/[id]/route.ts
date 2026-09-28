@@ -3,6 +3,7 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
 import { recordCode } from "@/lib/record-code"
+import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -267,28 +268,61 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const { searchParams } = new URL(req.url)
   const permanent = searchParams.get("permanent") === "true"
 
+  const traderSummary = (c: any): [string, string][] => [
+    ["Name", c.name], ["Phone", c.phone || "—"], ["Address", c.address || "—"],
+    ["Balance", pkr(c.balance)], ["Added on", day(c.createdAt)],
+  ]
+
   if (permanent) {
-    const customer = await db.customer.findUnique({ where: { id }, select: { name: true, isActive: true } })
+    const customer = await db.customer.findUnique({ where: { id } })
     if (!customer) return NextResponse.json({ error: "Not found" }, { status: 404 })
     if (customer.isActive) return NextResponse.json({ error: "Cannot delete an active trader. Deactivate first." }, { status: 400 })
 
     // Unlink customer from all records that allow null (financial data preserved)
     // CustomerPayment has non-nullable FK so those records are deleted
-    await db.$transaction([
-      db.sale.updateMany({ where: { customerId: id }, data: { customerId: null } }),
-      db.commission.updateMany({ where: { customerId: id }, data: { customerId: null } }),
-      db.pesticideSale.updateMany({ where: { customerId: id }, data: { customerId: null } }),
-      db.purchase.updateMany({ where: { sellerCustomerId: id }, data: { sellerCustomerId: null } }),
-      db.customerPayment.deleteMany({ where: { customerId: id } }),
-      db.customer.delete({ where: { id } }),
-    ])
+    await db.$transaction(async (tx) => {
+      // Keep the trader, their payments and what they were linked to, so a restore can put it all back
+      const ids = (rows: { id: string }[]) => rows.map((r) => r.id)
+      const [payments, sales, commissions, pesticideSales, purchases, bills] = await Promise.all([
+        tx.customerPayment.findMany({ where: { customerId: id } }),
+        tx.sale.findMany({ where: { customerId: id }, select: { id: true } }),
+        tx.commission.findMany({ where: { customerId: id }, select: { id: true } }),
+        tx.pesticideSale.findMany({ where: { customerId: id }, select: { id: true } }),
+        tx.purchase.findMany({ where: { sellerCustomerId: id }, select: { id: true } }),
+        tx.bill.findMany({ where: { customerId: id }, select: { id: true } }),
+      ])
+      await archiveDeleted(tx, session, {
+        type: "CUSTOMER_PERMANENT", recordId: id, code: `TR-${id.slice(-6).toUpperCase()}`, title: customer.name,
+        amount: customer.balance,
+        summary: [...traderSummary(customer), ["Payments removed", String(payments.length)]],
+        snapshot: {
+          customer, payments,
+          linked: { sales: ids(sales), commissions: ids(commissions), pesticideSales: ids(pesticideSales), purchases: ids(purchases), bills: ids(bills) },
+        },
+      })
+      await tx.sale.updateMany({ where: { customerId: id }, data: { customerId: null } })
+      await tx.commission.updateMany({ where: { customerId: id }, data: { customerId: null } })
+      await tx.pesticideSale.updateMany({ where: { customerId: id }, data: { customerId: null } })
+      await tx.purchase.updateMany({ where: { sellerCustomerId: id }, data: { sellerCustomerId: null } })
+      await tx.bill.updateMany({ where: { customerId: id }, data: { customerId: null } })
+      await tx.customerPayment.deleteMany({ where: { customerId: id } })
+      await tx.customer.delete({ where: { id } })
+    })
 
     await createAuditLog({ userId: session.user.id, action: "DELETE", module: "CUSTOMERS", details: `Deleted trader profile: ${customer.name} (transaction records preserved)` })
     return NextResponse.json({ success: true })
   }
 
   // Default: just deactivate
-  await db.customer.update({ where: { id }, data: { isActive: false } })
+  const existing = await db.customer.findUnique({ where: { id } })
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 })
+  await db.$transaction(async (tx) => {
+    await archiveDeleted(tx, session, {
+      type: "CUSTOMER", recordId: id, code: `TR-${id.slice(-6).toUpperCase()}`, title: existing.name,
+      amount: existing.balance, summary: traderSummary(existing), snapshot: { customer: existing },
+    })
+    await tx.customer.update({ where: { id }, data: { isActive: false } })
+  })
   await createAuditLog({ userId: session.user.id, action: "DELETE", module: "CUSTOMERS", details: `Deactivated customer ID: ${id}` })
   return NextResponse.json({ success: true })
 }

@@ -159,6 +159,28 @@ model Bill {
   @@index([customerId])
 }
 
+// ── RECYCLE BIN ──────────────────────────────────────────────────────────────
+
+// Full copy of a deleted record (see lib/recycle-bin.ts), shown on the Deleted Records page and restorable.
+model DeletedRecord {
+  id             String    @id @default(cuid())
+  shopId         String?
+  type           String    // BILL, COMMISSION, PURCHASE, LOT, PRODUCT, CUSTOMER, … (DeletedType)
+  recordId       String
+  code           String    // record ID shown to the user, e.g. CM-7K2Q9X
+  title          String
+  amount         Float     @default(0)
+  summary        Json      // [label, value][] for display and print
+  snapshot       Json      // rows needed to restore
+  deletedById    String?
+  deletedByName  String?
+  deletedAt      DateTime  @default(now())
+  restoredAt     DateTime?
+  restoredByName String?
+
+  @@index([shopId, deletedAt])
+}
+
 // ── MARKHA (lot brand / mark) ────────────────────────────────────────────────
 
 model Markha {

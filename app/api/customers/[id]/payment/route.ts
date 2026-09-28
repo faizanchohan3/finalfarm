@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
+import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -61,6 +62,17 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 })
 
     await db.$transaction(async (tx) => {
+      const trader = await tx.customer.findUnique({ where: { id }, select: { name: true } })
+      await archiveDeleted(tx, session, {
+        type: "CUSTOMER_PAYMENT", recordId: paymentId, code: `PY-${paymentId.slice(-6).toUpperCase()}`,
+        title: `${payment.direction === "PAY" ? "Paid to" : "Received from"} ${trader?.name || "trader"}`, amount: payment.amount,
+        summary: [
+          ["Trader", trader?.name || "—"], ["Date", day(payment.createdAt)],
+          ["Type", payment.direction === "PAY" ? "Paid to trader" : "Received from trader"],
+          ["Amount", pkr(payment.amount)], ["Method", payment.method], ["Notes", payment.notes || "—"],
+        ],
+        snapshot: { payment },
+      })
       await tx.customerPayment.delete({ where: { id: paymentId } })
 
       // Reverse the balance update

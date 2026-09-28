@@ -11,7 +11,7 @@ import {
   Truck, ChevronDown, Receipt, Warehouse,
   Scale, UserCircle, Building2, BookOpen, Zap, Boxes,
   TrendingUp, PieChart, DollarSign, ShoppingCart as CartIcon, FileText,
-  CreditCard, Building, Banknote, Tag, ImageUp,
+  CreditCard, Building, Banknote, Tag, ImageUp, Archive,
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useLang } from "@/lib/i18n"
@@ -84,6 +84,7 @@ const shopNavItems: NavItem[] = [
   { href: "/upload", label: "Upload Data", icon: ImageUp },
   { href: "/reports", label: "Reports", icon: BarChart3, hasChildren: true },
   { href: "/audit", label: "Audit Log", icon: ClipboardList },
+  { href: "/deleted", label: "Deleted Records", icon: Archive },
   { href: "/users", label: "Users", icon: Users },
   { href: "/settings", label: "Settings", icon: Settings },
 ]

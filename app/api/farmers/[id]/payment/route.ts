@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
+import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -21,6 +22,18 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     const displayAmt = Math.abs(payment.amount)
 
     await db.$transaction(async (tx) => {
+      // Keep a copy (and the linked purchase as it was) for the Deleted Records page
+      const farmer = await tx.farmer.findUnique({ where: { id }, select: { name: true } })
+      const purchaseBefore = payment.purchaseId && !isReceive ? await tx.farmerPurchase.findUnique({ where: { id: payment.purchaseId } }) : null
+      await archiveDeleted(tx, session, {
+        type: "FARMER_PAYMENT", recordId: paymentId, code: `PY-${paymentId.slice(-6).toUpperCase()}`,
+        title: `${isReceive ? "Received from" : "Paid to"} ${farmer?.name || "farmer"}`, amount: displayAmt,
+        summary: [
+          ["Farmer", farmer?.name || "—"], ["Date", day(payment.createdAt)],
+          ["Type", isReceive ? "Received from farmer" : "Paid to farmer"], ["Amount", pkr(displayAmt)],
+        ],
+        snapshot: { payment, purchaseBefore },
+      })
       await tx.farmerPayment.delete({ where: { id: paymentId } })
 
       // Reverse the balance update

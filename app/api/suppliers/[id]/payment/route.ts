@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
+import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -59,6 +60,17 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 })
 
     await db.$transaction(async (tx) => {
+      const supplier = await tx.supplier.findUnique({ where: { id }, select: { name: true } })
+      await archiveDeleted(tx, session, {
+        type: "SUPPLIER_PAYMENT", recordId: paymentId, code: `PY-${paymentId.slice(-6).toUpperCase()}`,
+        title: `${payment.direction === "PAY" ? "Paid to" : "Received from"} ${supplier?.name || "supplier"}`, amount: payment.amount,
+        summary: [
+          ["Supplier", supplier?.name || "—"], ["Date", day(payment.createdAt)],
+          ["Type", payment.direction === "PAY" ? "Paid to supplier" : "Received from supplier"],
+          ["Amount", pkr(payment.amount)], ["Method", (payment as any).method || "—"], ["Notes", (payment as any).notes || "—"],
+        ],
+        snapshot: { payment },
+      })
       await tx.supplierPayment.delete({ where: { id: paymentId } })
 
       // Reverse the balance update

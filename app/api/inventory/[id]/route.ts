@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
+import { archiveDeleted, pkr } from "@/lib/recycle-bin"
+import { recordCode } from "@/lib/record-code"
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -27,7 +29,24 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
   const { id } = await params
 
-  await db.product.update({ where: { id }, data: { isActive: false } })
+  const p = await db.product.findUnique({ where: { id }, include: { category: true, room: true } })
+  if (!p) return NextResponse.json({ error: "Product not found" }, { status: 404 })
+
+  await db.$transaction(async (tx) => {
+    // Keep a copy for the Deleted Records page (the product is only hidden, so restore just shows it again)
+    const { category, room, ...row } = p
+    await archiveDeleted(tx, session, {
+      type: "PRODUCT", recordId: id, code: recordCode("product", id), title: p.name,
+      amount: p.currentStock * p.purchasePrice,
+      summary: [
+        ["Product", p.name], ["Category", category?.name || "—"], ["Room", room?.name || "Unassigned"],
+        ["Stock", `${p.currentStock} ${p.unit}`], ["Purchase price", pkr(p.purchasePrice)], ["Sale price", pkr(p.salePrice)],
+        ["Stock value", pkr(p.currentStock * p.purchasePrice)],
+      ],
+      snapshot: { product: row },
+    })
+    await tx.product.update({ where: { id }, data: { isActive: false } })
+  })
   await createAuditLog({ userId: session.user.id, action: "DELETE", module: "INVENTORY", details: `Deleted product ID: ${id}` })
 
   return NextResponse.json({ success: true })
