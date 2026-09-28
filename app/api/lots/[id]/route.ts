@@ -43,14 +43,40 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   // Sale details (typically when marking SOLD)
   if ("buyerId" in body) data.buyerId = body.buyerId || null
   if ("saleRate" in body) data.saleRate = body.saleRate !== "" && body.saleRate != null ? parseFloat(body.saleRate) : null
+  if ("saleQty" in body) data.saleQty = body.saleQty !== "" && body.saleQty != null ? parseFloat(body.saleQty) : null
+  if ("saleUnit" in body) data.saleUnit = ["bag", "kg", "mound"].includes(body.saleUnit) ? body.saleUnit : null
   if ("paymentStatus" in body) data.paymentStatus = body.paymentStatus
+
+  // Selling: buyer, quantity and rate are required; the amount goes to the buyer's ledger
+  if (body.status === "SOLD") {
+    if (!(data.buyerId ?? existing.buyerId)) return NextResponse.json({ error: "Select the buyer" }, { status: 400 })
+    if (!((data.saleQty ?? existing.saleQty) > 0)) return NextResponse.json({ error: "Enter the quantity sold" }, { status: 400 })
+    if (!((data.saleRate ?? existing.saleRate) > 0)) return NextResponse.json({ error: "Enter the rate" }, { status: 400 })
+  }
 
   if ("saleAmount" in body && body.saleAmount !== "" && body.saleAmount != null) {
     data.saleAmount = parseFloat(body.saleAmount)
+  } else if ((data.saleQty ?? existing.saleQty) != null && (data.saleRate ?? existing.saleRate) != null && ("saleQty" in body || "saleRate" in body)) {
+    // Amount = quantity × rate (rate is per bag, per kg or per 40 kg mound, matching the quantity)
+    data.saleAmount = Math.round((data.saleQty ?? existing.saleQty) * (data.saleRate ?? existing.saleRate) * 100) / 100
   } else if (data.saleRate != null) {
     // Derive amount from rate × net weight when an explicit amount isn't given
     const netForCalc = data.netWeight ?? existing.netWeight
     if (netForCalc != null) data.saleAmount = data.saleRate * netForCalc
+  }
+
+  // Payment received from the buyer: PAID = full amount, PARTIAL = the amount entered, PENDING = nothing
+  if ("paymentStatus" in body || "paidAmount" in body || data.saleAmount != null) {
+    const amount = data.saleAmount ?? existing.saleAmount ?? 0
+    const status = data.paymentStatus ?? existing.paymentStatus
+    if (status === "PAID") data.paidAmount = amount
+    else if (status === "PARTIAL") {
+      const paid = "paidAmount" in body ? parseFloat(body.paidAmount) : existing.paidAmount
+      if (!(paid > 0) || paid >= amount) {
+        return NextResponse.json({ error: "For a partial payment, enter an amount paid above 0 and below the sale amount" }, { status: 400 })
+      }
+      data.paidAmount = paid
+    } else data.paidAmount = 0
   }
 
   if (body.status === "SOLD" && !existing.soldAt) data.soldAt = new Date()

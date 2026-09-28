@@ -62,6 +62,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   // Initial paid at sale/commission creation + standalone CustomerPayment records
   const initialPaid =
+    soldLots.reduce((s, l) => s + (l.paidAmount || 0), 0) +
     sales.reduce((s, sale) => s + sale.paidAmount, 0) +
     commissions.reduce((s, c) => s + c.paidAmount, 0) +
     pesticideSales.reduce((s, ps) => s + ps.paidAmount, 0)
@@ -84,13 +85,24 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   }[] = []
 
   for (const lot of soldLots) {
+    const unit = lot.saleUnit === "kg" ? "kg" : lot.saleUnit === "mound" ? "mound" : (lot.bagType || "bags")
+    const qty = lot.saleQty != null ? `${lot.saleQty} ${unit}${lot.saleRate ? ` × ${lot.saleRate}` : ""}` : lot.bags ? `${lot.bags} bags` : ""
     ledgerEvents.push({
       date: lot.soldAt || lot.createdAt,
       type: "LOT_SALE",
-      description: `Lot ${lot.lotNo} — ${lot.category?.name || "goods"}${lot.bags ? ` (${lot.bags} bags)` : ""}`,
+      description: `Lot ${lot.lotNo} — ${lot.category?.name || "goods"}${qty ? ` (${qty})` : ""}`,
       debit: lot.saleAmount || 0,
       credit: 0,
     })
+    if (lot.paidAmount > 0) {
+      ledgerEvents.push({
+        date: lot.soldAt || lot.createdAt,
+        type: "PAYMENT",
+        description: `Payment received at sale — Lot ${lot.lotNo}`,
+        debit: 0,
+        credit: lot.paidAmount,
+      })
+    }
   }
 
   for (const bill of bills) {

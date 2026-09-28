@@ -36,6 +36,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const labourAmt = parseFloat(body.labourAmount || "0")
   // Seller (farmer) receives total minus our commission; labour is a cost against commission.
   const sellerPayable = parseFloat((total - commAmount).toFixed(2))
+  // Payment already received from the buyer when the lot was sold carries over to the commission
+  const paid = Math.min(Math.max(lot.paidAmount || 0, 0), total)
   const shopId = session.user.shopId || null
   const shopFilter = shopId ? { shopId } : {}
 
@@ -54,16 +56,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         commissionAmount: commAmount,
         labourAmount: labourAmt,
         sellerPayable,
-        paidAmount: 0,
-        balance: total,
-        status: "PENDING",
+        paidAmount: paid,
+        balance: total - paid,
+        status: paid >= total ? "PAID" : paid > 0 ? "PARTIAL" : "PENDING",
         notes: body.notes?.trim() || `Settlement for ${lot.lotNo}`,
         createdById: session.user.id,
       },
     })
+    if (paid > 0) {
+      await tx.commissionPayment.create({
+        data: { commissionId: c.id, amount: paid, method: "CASH", notes: `Paid at sale — ${lot.lotNo}` },
+      })
+    }
 
-    // Buyer owes the mandi the full sale value (receivable)
-    await tx.customer.update({ where: { id: lot.buyerId! }, data: { balance: { increment: total } } })
+    // Buyer owes the mandi the sale value, less what they already paid (receivable)
+    await tx.customer.update({ where: { id: lot.buyerId! }, data: { balance: { increment: total - paid } } })
 
     // Mandi owes the farmer the sale value minus commission (payable)
     if (lot.farmerId) {

@@ -102,7 +102,10 @@ export default function LotsPage() {
   const [mStatus, setMStatus] = useState("")
   const [mBuyer, setMBuyer] = useState("")
   const [mRate, setMRate] = useState("")
+  const [mQty, setMQty] = useState("")
+  const [mUnit, setMUnit] = useState("bag") // bag | kg | mound — what the rate is per
   const [mPay, setMPay] = useState("PENDING")
+  const [mPaid, setMPaid] = useState("") // amount received when payment is PARTIAL
 
   const [settle, setSettle] = useState<any | null>(null)
   const [sCommRate, setSCommRate] = useState("2.5")
@@ -178,24 +181,46 @@ export default function LotsPage() {
     setMStatus(simpleStatus(lot.status))
     setMBuyer(lot.buyer?.id || "")
     setMRate(lot.saleRate != null ? String(lot.saleRate) : "")
+    // Quantity sold defaults to the lot's bag count, rate per bag
+    setMQty(lot.saleQty != null ? String(lot.saleQty) : lot.bags != null ? String(lot.bags) : "")
+    setMUnit(lot.saleUnit || "bag")
     setMPay(lot.paymentStatus || "PENDING")
+    setMPaid(lot.paymentStatus === "PARTIAL" && lot.paidAmount ? String(lot.paidAmount) : "")
   }
 
   const isSaleStage = mStatus === "SOLD"
+  const mAmount = (parseFloat(mQty) || 0) * (parseFloat(mRate) || 0)
 
   async function saveManage() {
     if (!manage) return
-    setSaving(true)
     const payload: any = { status: mStatus === simpleStatus(manage.status) ? manage.status : mStatus }
     if (isSaleStage) {
-      payload.buyerId = mBuyer || null
+      if (!mBuyer) return alert("Select the buyer")
+      if (!(parseFloat(mQty) > 0)) return alert("Enter the quantity sold")
+      if (!(parseFloat(mRate) > 0)) return alert("Enter the rate")
+      payload.buyerId = mBuyer
+      payload.saleQty = mQty
+      payload.saleUnit = mUnit
       payload.saleRate = mRate
+      if (mPay === "PARTIAL" && !(parseFloat(mPaid) > 0 && parseFloat(mPaid) < mAmount)) {
+        return alert("Enter the amount paid (more than 0 and less than the sale amount)")
+      }
       payload.paymentStatus = mPay
+      if (mPay === "PARTIAL") payload.paidAmount = mPaid
     }
-    await fetch(`/api/lots/${manage.id}`, {
-      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
-    })
-    setManage(null); setSaving(false); loadLots()
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/lots/${manage.id}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}))
+        return alert(d?.error || "Failed to save")
+      }
+      setManage(null); loadLots()
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function cancelLot(lot: any) {
@@ -762,8 +787,34 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">اس گو
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label>Quantity *</Label>
+                    <Input type="number" value={mQty} onChange={(e) => setMQty(e.target.value)} placeholder="0" />
+                  </div>
+                  <div>
+                    <Label>Unit</Label>
+                    <select
+                      value={mUnit}
+                      onChange={(e) => setMUnit(e.target.value)}
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm"
+                    >
+                      <option value="bag">{t(BAG_TYPE_LABEL[manage?.bagType] || "Bori")}</option>
+                      <option value="kg">KG</option>
+                      <option value="mound">{t("Mound")} (40 kg)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label>Rate * <span className="font-normal text-gray-400 text-[11px]">/ {mUnit === "bag" ? t(BAG_TYPE_LABEL[manage?.bagType] || "Bori") : mUnit === "kg" ? "kg" : t("Mound")}</span></Label>
+                    <Input type="number" value={mRate} onChange={(e) => setMRate(e.target.value)} placeholder="0" />
+                  </div>
+                </div>
+                <div className="rounded-md bg-white border border-purple-200 px-3 py-2 flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Amount <span className="text-xs">({mQty || 0} × {mRate || 0})</span></span>
+                  <span className="font-bold text-purple-700 tabular-nums">{formatCurrency(mAmount)}</span>
+                </div>
+                <p className="text-[11px] text-gray-400">This amount is charged to the buyer&apos;s ledger.</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><Label>Sale rate (per unit)</Label><Input type="number" value={mRate} onChange={(e) => setMRate(e.target.value)} placeholder="0" /></div>
                   <div>
                     <Label>Payment</Label>
                     <Select value={mPay} onValueChange={setMPay}>
@@ -773,9 +824,18 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">اس گو
                       </SelectContent>
                     </Select>
                   </div>
+                  {mPay === "PARTIAL" && (
+                    <div>
+                      <Label>Amount paid *</Label>
+                      <Input type="number" autoFocus value={mPaid} onChange={(e) => setMPaid(e.target.value)} placeholder="0" />
+                    </div>
+                  )}
                 </div>
-                {mRate && manage?.netWeight != null && (
-                  <p className="text-xs text-gray-500">Amount ≈ <b>{formatCurrency(parseFloat(mRate) * manage.netWeight)}</b> ({manage.netWeight} × {mRate})</p>
+                {mAmount > 0 && (
+                  <div className="text-xs text-gray-600 flex justify-between">
+                    <span>Paid: <b className="text-green-700">{formatCurrency(mPay === "PAID" ? mAmount : mPay === "PARTIAL" ? parseFloat(mPaid) || 0 : 0)}</b></span>
+                    <span>Balance due: <b className="text-red-600">{formatCurrency(Math.max(mAmount - (mPay === "PAID" ? mAmount : mPay === "PARTIAL" ? parseFloat(mPaid) || 0 : 0), 0))}</b></span>
+                  </div>
                 )}
               </div>
             )}

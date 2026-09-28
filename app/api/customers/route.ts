@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     db.commission.groupBy({ by: ["customerId"], _sum: { totalValue: true }, where: { customerId: { in: customerIds } } }),
     db.pesticideSale.groupBy({ by: ["customerId"], _sum: { totalAmount: true }, where: { customerId: { in: customerIds } } }),
     // Lots sold to a buyer but not yet settled (settled lots already count via their commission)
-    db.lot.groupBy({ by: ["buyerId"], _sum: { saleAmount: true }, where: { buyerId: { in: customerIds }, commissionId: null, status: { in: ["SOLD", "DISPATCHED"] } } }),
+    db.lot.groupBy({ by: ["buyerId"], _sum: { saleAmount: true, paidAmount: true }, where: { buyerId: { in: customerIds }, commissionId: null, status: { in: ["SOLD", "DISPATCHED"] } } }),
     db.customerPayment.groupBy({ by: ["customerId"], _sum: { amount: true }, where: { customerId: { in: customerIds }, direction: "RECEIVE" } }),
     db.customerPayment.groupBy({ by: ["customerId"], _sum: { amount: true }, where: { customerId: { in: customerIds }, direction: "PAY" } }),
     // Bill Maker bills charged to the trader
@@ -30,6 +30,7 @@ export async function GET(req: Request) {
   const commMap = Object.fromEntries(commissionTotals.map((r) => [r.customerId!, r._sum.totalValue || 0]))
   const pestMap = Object.fromEntries(pesticideSaleTotals.map((r) => [r.customerId!, r._sum.totalAmount || 0]))
   const lotMap = Object.fromEntries(lotTotals.map((r) => [r.buyerId!, r._sum.saleAmount || 0]))
+  const lotPaidMap = Object.fromEntries(lotTotals.map((r) => [r.buyerId!, r._sum.paidAmount || 0]))
   const receivedMap = Object.fromEntries(receivedPayments.map((r) => [r.customerId, r._sum.amount || 0]))
   const paidMap = Object.fromEntries(paidPayments.map((r) => [r.customerId, r._sum.amount || 0]))
   const billMap = Object.fromEntries(billTotals.map((r) => [r.customerId!, r._sum.amount || 0]))
@@ -37,8 +38,8 @@ export async function GET(req: Request) {
   const customersWithBalance = customers.map((c) => ({
     ...c,
     totalDebit: (saleMap[c.id] || 0) + (commMap[c.id] || 0) + (pestMap[c.id] || 0) + (lotMap[c.id] || 0) + (billMap[c.id] || 0) + (paidMap[c.id] || 0),
-    totalCredit: (receivedMap[c.id] || 0),
-    ledgerBalance: (saleMap[c.id] || 0) + (commMap[c.id] || 0) + (pestMap[c.id] || 0) + (lotMap[c.id] || 0) + (billMap[c.id] || 0) + (paidMap[c.id] || 0) - (receivedMap[c.id] || 0),
+    totalCredit: (receivedMap[c.id] || 0) + (lotPaidMap[c.id] || 0),
+    ledgerBalance: (saleMap[c.id] || 0) + (commMap[c.id] || 0) + (pestMap[c.id] || 0) + (lotMap[c.id] || 0) + (billMap[c.id] || 0) + (paidMap[c.id] || 0) - (receivedMap[c.id] || 0) - (lotPaidMap[c.id] || 0),
   }))
 
   return cachedJson({ customers: customersWithBalance })

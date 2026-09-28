@@ -17,13 +17,15 @@ export async function GET() {
   const customerIds = customers.map((c) => c.id)
   if (customerIds.length === 0) return NextResponse.json({ customers: [] })
 
-  const [saleTotals, commissionTotals, pesticideSaleTotals, receivedPayments, paidPayments, billTotals] = await Promise.all([
+  const [saleTotals, commissionTotals, pesticideSaleTotals, receivedPayments, paidPayments, billTotals, lotTotals] = await Promise.all([
     db.sale.groupBy({ by: ["customerId"], _sum: { totalAmount: true }, where: { customerId: { in: customerIds } } }),
     db.commission.groupBy({ by: ["customerId"], _sum: { totalValue: true }, where: { customerId: { in: customerIds } } }),
     db.pesticideSale.groupBy({ by: ["customerId"], _sum: { totalAmount: true }, where: { customerId: { in: customerIds } } }),
     db.customerPayment.groupBy({ by: ["customerId"], _sum: { amount: true }, where: { customerId: { in: customerIds }, direction: "RECEIVE" } }),
     db.customerPayment.groupBy({ by: ["customerId"], _sum: { amount: true }, where: { customerId: { in: customerIds }, direction: "PAY" } }),
     db.bill.groupBy({ by: ["customerId"], _sum: { amount: true }, where: { customerId: { in: customerIds } } }),
+    // Potato Store lots sold but not yet settled (settled lots count via their commission)
+    db.lot.groupBy({ by: ["buyerId"], _sum: { saleAmount: true, paidAmount: true }, where: { buyerId: { in: customerIds }, commissionId: null, status: { in: ["SOLD", "DISPATCHED"] } } }),
   ])
 
   const saleMap = Object.fromEntries(saleTotals.map((r) => [r.customerId!, r._sum.totalAmount || 0]))
@@ -32,11 +34,13 @@ export async function GET() {
   const receivedMap = Object.fromEntries(receivedPayments.map((r) => [r.customerId, r._sum.amount || 0]))
   const paidMap = Object.fromEntries(paidPayments.map((r) => [r.customerId, r._sum.amount || 0]))
   const billMap = Object.fromEntries(billTotals.map((r) => [r.customerId!, r._sum.amount || 0]))
+  const lotMap = Object.fromEntries(lotTotals.map((r) => [r.buyerId!, r._sum.saleAmount || 0]))
+  const lotPaidMap = Object.fromEntries(lotTotals.map((r) => [r.buyerId!, r._sum.paidAmount || 0]))
 
   const result = customers.map((c) => ({
     ...c,
-    totalDebit: (saleMap[c.id] || 0) + (commMap[c.id] || 0) + (pestMap[c.id] || 0) + (paidMap[c.id] || 0) + (billMap[c.id] || 0),
-    totalCredit: (receivedMap[c.id] || 0),
+    totalDebit: (saleMap[c.id] || 0) + (commMap[c.id] || 0) + (pestMap[c.id] || 0) + (paidMap[c.id] || 0) + (billMap[c.id] || 0) + (lotMap[c.id] || 0),
+    totalCredit: (receivedMap[c.id] || 0) + (lotPaidMap[c.id] || 0),
   }))
 
   return cachedJson({ customers: result })

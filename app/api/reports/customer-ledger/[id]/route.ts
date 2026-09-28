@@ -29,7 +29,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   // Bills are dated by their bill date, not when they were saved
   const billDateWhere: any = dateWhere.createdAt ? { billDate: dateWhere.createdAt } : {}
 
-  const [sales, pesticideSales, customerCommissions, customerPayments, traderPurchases, bills] = await Promise.all([
+  const [sales, pesticideSales, customerCommissions, customerPayments, traderPurchases, bills, soldLots] = await Promise.all([
     db.sale.findMany({
       where: { customerId: id, ...dateWhere },
       orderBy: { createdAt: "asc" },
@@ -60,6 +60,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     db.bill.findMany({
       where: { customerId: id, ...billDateWhere },
       orderBy: { billDate: "asc" },
+    }),
+    // Potato Store lots sold to this buyer and not yet settled (settled lots show via their commission)
+    db.lot.findMany({
+      where: { buyerId: id, commissionId: null, status: { in: ["SOLD", "DISPATCHED"] }, ...(dateWhere.createdAt ? { soldAt: dateWhere.createdAt } : {}) },
+      orderBy: { soldAt: "asc" },
+      include: { category: { select: { name: true } } },
     }),
   ])
 
@@ -154,6 +160,28 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         description: `Payment made to trader at purchase — CASH`,
         debit: purchase.paidAmount,
         credit: 0,
+      })
+    }
+  }
+
+  // Potato Store lot sales
+  for (const lot of soldLots) {
+    const unit = lot.saleUnit === "kg" ? "kg" : lot.saleUnit === "mound" ? "mound" : (lot.bagType || "bags")
+    const qty = lot.saleQty != null ? `${lot.saleQty} ${unit}` : lot.bags ? `${lot.bags} ${lot.bagType || "bags"}` : ""
+    events.push({
+      date: lot.soldAt || lot.createdAt,
+      type: "LOT_SALE",
+      description: `Lot ${lot.lotNo} — ${lot.category?.name || "goods"}${qty ? ` (${qty}${lot.saleRate ? ` × ${lot.saleRate}` : ""})` : ""}`,
+      debit: lot.saleAmount || 0,
+      credit: 0,
+    })
+    if (lot.paidAmount > 0) {
+      events.push({
+        date: lot.soldAt || lot.createdAt,
+        type: "PAYMENT",
+        description: `Payment received at sale — Lot ${lot.lotNo}`,
+        debit: 0,
+        credit: lot.paidAmount,
       })
     }
   }

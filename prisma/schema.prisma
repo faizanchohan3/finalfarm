@@ -627,8 +627,11 @@ model Lot {
   netWeight     Float?
   grade         String?
   status        LotStatus  @default(ARRIVED)
+  saleQty       Float?     // quantity sold, in saleUnit
+  saleUnit      String?    // bag | kg | mound (40 kg) — what saleRate is per
   saleRate      Float?
   saleAmount    Float      @default(0)
+  paidAmount    Float      @default(0) // received from the buyer at sale time (PAID = full, PARTIAL = part)
   paymentStatus SaleStatus @default(PENDING)
   soldAt        DateTime?
   settledAt     DateTime?
