@@ -283,32 +283,54 @@ ${body}
 <div class="sig"><span>دستخط وصول کنندہ: ____________</span><span>دستخط: ____________</span></div>`)
   }
 
-  // Print the current (filtered) list of lots as a report.
+  // Print the current (filtered) list of lots: heading shows the filters in use, totals match the screen.
   function printAllLots(list: any[]) {
-    const rows = list.map((lot, i) => `<tr>
+    const rows = list.map((lot, i) => `<tr${lot.status === "CANCELLED" ? ' style="color:#9ca3af"' : ""}>
       <td>${i + 1}</td><td>${e(lot.lotNo)}</td><td>${e(d(lot.createdAt))}</td>
-      <td style="font-family:inherit">${e(lot.category?.name)}</td><td style="font-family:inherit">${e(lot.farmer?.name)}</td>
-      <td>${lot.bags != null ? n(lot.bags) : "—"}</td><td>${n(lot.netWeight)}</td>
+      <td style="font-family:inherit">${e(lot.farmer?.name)}</td>
+      <td style="font-family:inherit">${e(lot.warehouse?.name)}</td>
+      <td style="font-family:inherit">${e([lot.markha1, lot.markha2].filter(Boolean).join("، ") || "—")}</td>
+      <td>${lot.bags != null ? n(lot.bags) : "—"} <span style="font-family:inherit">${bagUr(lot)}</span></td><td>${n(lot.netWeight)}</td>
       <td style="font-family:inherit">${statusUr(lot)}</td><td style="font-family:inherit">${e(lot.buyer?.name)}</td>
       <td>${lot.saleAmount ? n(lot.saleAmount) : "—"}</td>
     </tr>`).join("")
-    const totalNet = list.reduce((s, l) => s + (l.netWeight || 0), 0)
-    const totalSale = list.reduce((s, l) => s + (l.saleAmount || 0), 0)
-    const label = filter === "ALL" ? "تمام" : UR_STATUS[filter] || filter
+
+    // Totals leave out cancelled lots (same as the totals bar on screen)
+    const counted = list.filter((l) => l.status !== "CANCELLED")
+    const bagsOf = (type: string) => counted.filter((l) => (l.bagType || "bori") === type).reduce((s, l) => s + (l.bags || 0), 0)
+    const totalNet = counted.reduce((s, l) => s + (l.netWeight || 0), 0)
+    const totalSale = counted.reduce((s, l) => s + (l.saleAmount || 0), 0)
+    const totalPaid = counted.reduce((s, l) => s + (l.paidAmount || 0), 0)
+    const cancelled = list.length - counted.length
+
+    const godownLabel = reportGodown === "ALL" ? "" : reportGodown === "NONE" ? "بغیر گودام" : warehouses.find((w) => w.id === reportGodown)?.name || ""
+    const filters = [
+      `حالت: <b>${filter === "ALL" ? "تمام" : UR_STATUS[filter] || filter}</b>`,
+      godownLabel && `گودام: <b>${e(godownLabel)}</b>`,
+      markhaFilter !== "ALL" && `مارکہ: <b>${e(markhaFilter)}</b>`,
+      q && `تلاش: <b>${e(q)}</b>`,
+    ].filter(Boolean).join(" · ")
+
     openBillWindow("Lots Report", `
-<style>body { max-width: 1000px; }</style>
+<style>body { max-width: 1100px; } td, th { font-size: 12px; padding: 6px 5px; }</style>
 <div class="meta">
-  <div>لاٹ رپورٹ — <b>${label}</b></div>
+  <div>لاٹ رپورٹ</div>
   <div>تاریخ: <b>${e(d(new Date()))}</b></div>
 </div>
+<div class="name" style="font-size:13px">${filters}</div>
 <table>
-  <thead><tr><th>#</th><th>لاٹ نمبر</th><th>تاریخ</th><th>جنس</th><th>کسان</th><th>تعداد</th><th>صافی وزن</th><th>حالت</th><th>خریدار</th><th>رقم</th></tr></thead>
-  <tbody>${rows}</tbody>
+  <thead><tr><th>#</th><th>لاٹ نمبر</th><th>تاریخ</th><th>کسان</th><th>گودام</th><th>مارکہ</th><th>تعداد</th><th>صافی وزن</th><th>حالت</th><th>خریدار</th><th>رقم</th></tr></thead>
+  <tbody>${rows || '<tr><td colspan="11">کوئی لاٹ نہیں</td></tr>'}</tbody>
 </table>
 <div class="sum">
-  <div><span>کل لاٹ</span><span class="num">${list.length}</span></div>
+  <div><span>کل لاٹ</span><span class="num">${counted.length}${cancelled ? ` (+${cancelled} منسوخ)` : ""}</span></div>
+  ${bagsOf("jali") ? `<div><span>کل جالی</span><span class="num">${n(bagsOf("jali"))}</span></div>` : ""}
+  ${bagsOf("bori") ? `<div><span>کل بوری</span><span class="num">${n(bagsOf("bori"))}</span></div>` : ""}
+  ${bagsOf("tora") ? `<div><span>کل توڑا</span><span class="num">${n(bagsOf("tora"))}</span></div>` : ""}
   <div><span>کل صافی وزن</span><span class="num">${n(totalNet)} KG</span></div>
-  <div class="grand"><span>کل فروخت</span><span class="num">Rs ${n(totalSale)}</span></div>
+  <div><span>کل فروخت</span><span class="num">${n(totalSale)}</span></div>
+  <div><span>وصول شدہ</span><span class="num">${n(totalPaid)}</span></div>
+  <div class="grand"><span>بقایا</span><span class="num">Rs ${n(totalSale - totalPaid)}</span></div>
 </div>`)
   }
 
@@ -429,7 +451,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">اس گو
             <WarehouseIcon className="w-4 h-4" /> {t("Godown Report")}
           </Button>
           <Button variant="outline" className="gap-2" onClick={() => printAllLots(visibleLots)} disabled={visibleLots.length === 0}>
-            <Printer className="w-4 h-4" /> {t("Print All")}
+            <Printer className="w-4 h-4" /> {t("Print list")}
           </Button>
           <Button className="gap-2" onClick={() => { setForm({ ...EMPTY }); setError(null); setShowCreate(true) }}>
             <Plus className="w-4 h-4" /> {t("New Lot")}
@@ -522,6 +544,15 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">اس گو
                 <p className="text-[11px] text-gray-500">{byType.get(k)!.lots} {t("lots")}</p>
               </div>
             ))}
+            <button
+              type="button"
+              onClick={() => printAllLots(visibleLots)}
+              disabled={visibleLots.length === 0}
+              className="order-last self-center inline-flex items-center gap-1.5 rounded-lg border border-purple-300 bg-white px-3 py-2 text-sm font-medium text-purple-700 hover:bg-purple-50 disabled:opacity-40"
+              title={t("Print the lots shown")}
+            >
+              <Printer className="w-4 h-4" /> {t("Print")}
+            </button>
             <div className="rounded-lg border border-gray-200 bg-white px-4 py-2">
               <p className="text-xs text-gray-500 font-medium">{t("Net wt")}</p>
               <p className="text-lg font-bold text-gray-900 tabular-nums">{fmtN(net)} KG</p>
