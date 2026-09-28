@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
+import { recordCode } from "@/lib/record-code"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -9,7 +10,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const { id } = await params
 
-  const [customer, sales, commissions, pesticideSales, customerPayments, traderPurchases, soldLots] = await Promise.all([
+  const [customer, sales, commissions, pesticideSales, customerPayments, traderPurchases, soldLots, bills] = await Promise.all([
     db.customer.findUnique({ where: { id } }),
     db.sale.findMany({
       where: { customerId: id },
@@ -45,6 +46,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       orderBy: { soldAt: "asc" },
       include: { category: { select: { name: true } } },
     }),
+    // Bill Maker bills charged to this trader
+    db.bill.findMany({ where: { customerId: id }, orderBy: { billDate: "asc" } }),
   ])
 
   if (!customer) return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -53,7 +56,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     sales.reduce((s, sale) => s + sale.totalAmount, 0) +
     commissions.reduce((s, c) => s + c.totalValue, 0) +
     pesticideSales.reduce((s, ps) => s + ps.totalAmount, 0) +
-    soldLots.reduce((s, l) => s + (l.saleAmount || 0), 0)
+    soldLots.reduce((s, l) => s + (l.saleAmount || 0), 0) +
+    bills.reduce((s, b) => s + b.amount, 0)
 
   // Initial paid at sale/commission creation + standalone CustomerPayment records
   const initialPaid =
@@ -72,7 +76,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const ledgerEvents: {
     id?: string
     date: Date
-    type: "SALE" | "COMMISSION" | "PESTICIDE" | "PAYMENT" | "TRADER_PURCHASE" | "LOT_SALE"
+    type: "SALE" | "COMMISSION" | "PESTICIDE" | "PAYMENT" | "TRADER_PURCHASE" | "LOT_SALE" | "BILL"
     description: string
     debit: number
     credit: number
@@ -84,6 +88,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       type: "LOT_SALE",
       description: `Lot ${lot.lotNo} — ${lot.category?.name || "goods"}${lot.bags ? ` (${lot.bags} bags)` : ""}`,
       debit: lot.saleAmount || 0,
+      credit: 0,
+    })
+  }
+
+  for (const bill of bills) {
+    const desc = [bill.product, bill.safiWeight ? `${bill.safiWeight.toLocaleString("en-PK", { maximumFractionDigits: 2 })} kg` : null].filter(Boolean).join(", ")
+    ledgerEvents.push({
+      date: bill.billDate,
+      type: "BILL",
+      description: `Bill #${bill.billNo} (${recordCode("bill", bill.id)})${desc ? ` — ${desc}` : ""}`,
+      debit: bill.amount,
       credit: 0,
     })
   }

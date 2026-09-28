@@ -718,6 +718,7 @@ export default function CustomersPage() {
                                   entry.type === "PAYMENT" ? "bg-green-100 text-purple-700"
                                   : entry.type === "COMMISSION" ? "bg-purple-100 text-purple-700"
                                   : entry.type === "PESTICIDE" ? "bg-orange-100 text-orange-700"
+                                  : entry.type === "BILL" ? "bg-amber-100 text-amber-800"
                                   : "bg-blue-100 text-blue-700"
                                 }`}>
                                   {entry.type}

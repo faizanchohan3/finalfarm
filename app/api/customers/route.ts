@@ -14,7 +14,7 @@ export async function GET(req: Request) {
 
   // Calculate balance from transactions for each customer
   const customerIds = customers.map((c) => c.id)
-  const [saleTotals, commissionTotals, pesticideSaleTotals, lotTotals, receivedPayments, paidPayments] = await Promise.all([
+  const [saleTotals, commissionTotals, pesticideSaleTotals, lotTotals, receivedPayments, paidPayments, billTotals] = await Promise.all([
     db.sale.groupBy({ by: ["customerId"], _sum: { totalAmount: true }, where: { customerId: { in: customerIds } } }),
     db.commission.groupBy({ by: ["customerId"], _sum: { totalValue: true }, where: { customerId: { in: customerIds } } }),
     db.pesticideSale.groupBy({ by: ["customerId"], _sum: { totalAmount: true }, where: { customerId: { in: customerIds } } }),
@@ -22,6 +22,8 @@ export async function GET(req: Request) {
     db.lot.groupBy({ by: ["buyerId"], _sum: { saleAmount: true }, where: { buyerId: { in: customerIds }, commissionId: null, status: { in: ["SOLD", "DISPATCHED"] } } }),
     db.customerPayment.groupBy({ by: ["customerId"], _sum: { amount: true }, where: { customerId: { in: customerIds }, direction: "RECEIVE" } }),
     db.customerPayment.groupBy({ by: ["customerId"], _sum: { amount: true }, where: { customerId: { in: customerIds }, direction: "PAY" } }),
+    // Bill Maker bills charged to the trader
+    db.bill.groupBy({ by: ["customerId"], _sum: { amount: true }, where: { customerId: { in: customerIds } } }),
   ])
 
   const saleMap = Object.fromEntries(saleTotals.map((r) => [r.customerId!, r._sum.totalAmount || 0]))
@@ -30,12 +32,13 @@ export async function GET(req: Request) {
   const lotMap = Object.fromEntries(lotTotals.map((r) => [r.buyerId!, r._sum.saleAmount || 0]))
   const receivedMap = Object.fromEntries(receivedPayments.map((r) => [r.customerId, r._sum.amount || 0]))
   const paidMap = Object.fromEntries(paidPayments.map((r) => [r.customerId, r._sum.amount || 0]))
+  const billMap = Object.fromEntries(billTotals.map((r) => [r.customerId!, r._sum.amount || 0]))
 
   const customersWithBalance = customers.map((c) => ({
     ...c,
-    totalDebit: (saleMap[c.id] || 0) + (commMap[c.id] || 0) + (pestMap[c.id] || 0) + (lotMap[c.id] || 0) + (paidMap[c.id] || 0),
+    totalDebit: (saleMap[c.id] || 0) + (commMap[c.id] || 0) + (pestMap[c.id] || 0) + (lotMap[c.id] || 0) + (billMap[c.id] || 0) + (paidMap[c.id] || 0),
     totalCredit: (receivedMap[c.id] || 0),
-    ledgerBalance: (saleMap[c.id] || 0) + (commMap[c.id] || 0) + (pestMap[c.id] || 0) + (lotMap[c.id] || 0) + (paidMap[c.id] || 0) - (receivedMap[c.id] || 0),
+    ledgerBalance: (saleMap[c.id] || 0) + (commMap[c.id] || 0) + (pestMap[c.id] || 0) + (lotMap[c.id] || 0) + (billMap[c.id] || 0) + (paidMap[c.id] || 0) - (receivedMap[c.id] || 0),
   }))
 
   return cachedJson({ customers: customersWithBalance })
