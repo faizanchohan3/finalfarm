@@ -11,15 +11,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const from = searchParams.get("from")
   const to = searchParams.get("to")
 
+  // Only the upper bound is applied in the query — earlier entries are needed
+  // to work out the opening balance when a "from" date is given.
+  const fromDate = from ? new Date(from) : null
   const dateWhere: any = {}
-  if (from || to) {
-    dateWhere.createdAt = {}
-    if (from) dateWhere.createdAt.gte = new Date(from)
-    if (to) {
-      const toDate = new Date(to)
-      toDate.setHours(23, 59, 59, 999)
-      dateWhere.createdAt.lte = toDate
-    }
+  if (to) {
+    const toDate = new Date(to)
+    toDate.setHours(23, 59, 59, 999)
+    dateWhere.createdAt = { lte: toDate }
   }
 
   const supplier = await db.supplier.findUnique({ where: { id } })
@@ -102,8 +101,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   // Standard: running = credit - debit
   // Positive (Cr) = you owe supplier | Negative (Dr) = supplier owes you / advance paid
-  let running = 0
-  const entries = events.map((e) => {
+  let openingBalance = 0
+  const inRange = events.filter((e) => {
+    if (fromDate && new Date(e.date) < fromDate) {
+      openingBalance += e.credit - e.debit
+      return false
+    }
+    return true
+  })
+
+  let running = openingBalance
+  const entries = inRange.map((e) => {
     running += e.credit - e.debit
     return { ...e, balance: running }
   })
@@ -111,5 +119,5 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const totalDebit = entries.reduce((s, e) => s + e.debit, 0)
   const totalCredit = entries.reduce((s, e) => s + e.credit, 0)
 
-  return NextResponse.json({ supplier, entries, totalDebit, totalCredit, closingBalance: running })
+  return NextResponse.json({ supplier, entries, openingBalance, totalDebit, totalCredit, closingBalance: running })
 }

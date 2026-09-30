@@ -30,15 +30,12 @@ function SupplierLedgerContent() {
   const [loading, setLoading] = useState(false)
   const [printingAll, setPrintingAll] = useState(false)
   const [shop, setShop] = useState<any>(null)
+  const [statusFilter, setStatusFilter] = useState("all")
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/reports/all-suppliers").then((r) => r.json()),
-      fetch("/api/settings").then((r) => r.json()).catch(() => ({ shop: null })),
-    ]).then(([sd, shr]) => {
-      setSuppliers(sd.suppliers || [])
-      setShop(shr.shop || null)
-      setSummaryLoading(false)
+    fetch("/api/settings").then((r) => r.json()).catch(() => ({ shop: null }))
+      .then((shr) => setShop(shr.shop || null))
+    loadSummary().then(() => {
       const preselect = searchParams.get("id")
       if (preselect) setSupplierId(preselect)
     })
@@ -46,36 +43,61 @@ function SupplierLedgerContent() {
 
   useEffect(() => {
     if (supplierId) loadLedger()
+    else setLedger(null)
   }, [supplierId])
 
-  async function loadLedger() {
+  function dateParams(from = dateFrom, to = dateTo) {
+    const params = new URLSearchParams()
+    if (from) params.set("from", from)
+    if (to) params.set("to", to)
+    return params
+  }
+
+  async function loadSummary(from = dateFrom, to = dateTo) {
+    setSummaryLoading(true)
+    const sd = await fetch(`/api/reports/all-suppliers?${dateParams(from, to)}`).then((r) => r.json())
+    setSuppliers(sd.suppliers || [])
+    setSummaryLoading(false)
+  }
+
+  async function loadLedger(from = dateFrom, to = dateTo) {
     if (!supplierId) return
     setLoading(true)
-    const params = new URLSearchParams()
-    if (dateFrom) params.set("from", dateFrom)
-    if (dateTo) params.set("to", dateTo)
-    const data = await fetch(`/api/reports/supplier-ledger/${supplierId}?${params}`).then((r) => r.json())
+    const data = await fetch(`/api/reports/supplier-ledger/${supplierId}?${dateParams(from, to)}`).then((r) => r.json())
     setLedger(data)
     setLoading(false)
   }
 
-  function clearLedger() {
+  function applyFilters() {
+    loadSummary()
+    loadLedger()
+  }
+
+  function clearFilters() {
     setSupplierId("")
     setLedger(null)
     setDateFrom("")
     setDateTo("")
+    setStatusFilter("all")
+    setSearch("")
+    loadSummary("", "")
   }
 
   const dateLabel = dateFrom || dateTo
     ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
     : "All Time"
 
-  const filtered = suppliers.filter(
-    (s) =>
+  const filtered = suppliers.filter((s) => {
+    const bal = s.balance || 0
+    if (statusFilter === "payable" && !(bal > 0)) return false
+    if (statusFilter === "advance" && !(bal < 0)) return false
+    if (statusFilter === "settled" && bal !== 0) return false
+    return (
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       (s.phone || "").includes(search) ||
       (s.address || "").toLowerCase().includes(search.toLowerCase())
-  )
+    )
+  })
 
   const selectedSupplier = suppliers.find((s) => s.id === supplierId)
   const totalPayable = suppliers.filter((s) => s.balance > 0).reduce((s, f) => s + f.balance, 0)
@@ -85,7 +107,7 @@ function SupplierLedgerContent() {
     setPrintingAll(true)
     const date = new Date().toLocaleDateString("en-PK", { day: "2-digit", month: "short", year: "numeric" })
     const ledgers = await Promise.all(
-      filtered.map((s) => fetch(`/api/reports/supplier-ledger/${s.id}`).then((r) => r.json()))
+      filtered.map((s) => fetch(`/api/reports/supplier-ledger/${s.id}?${dateParams()}`).then((r) => r.json()))
     )
     setPrintingAll(false)
     const sections = ledgers.map((data, idx) => {
@@ -116,7 +138,7 @@ function SupplierLedgerContent() {
         </div>
         ${(data.entries||[]).length>0?`<table>
           <thead><tr><th>#</th><th>Date</th><th>Type</th><th>Description</th><th style="text-align:right">Debit</th><th style="text-align:right">Credit</th><th style="text-align:right">Balance</th></tr></thead>
-          <tbody>${txRows}</tbody>
+          <tbody>${data.openingBalance ? `<tr><td></td><td colspan="5"><strong>Opening Balance</strong></td><td style="text-align:right;font-weight:600">PKR ${Math.abs(data.openingBalance).toLocaleString()} ${data.openingBalance>0?"Cr":"Dr"}</td></tr>` : ""}${txRows}</tbody>
           <tfoot><tr><td colspan="4"><strong>Closing — ${(data.entries||[]).length} entries</strong></td>
             <td style="text-align:right"><strong>PKR ${(data.totalDebit||0).toLocaleString()}</strong></td>
             <td style="text-align:right;color:#15803d"><strong>PKR ${(data.totalCredit||0).toLocaleString()}</strong></td>
@@ -130,7 +152,7 @@ function SupplierLedgerContent() {
 <style>${reportCSS} body{max-width:960px;margin:0 auto}</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
-  <div><div class="doc-title">All Suppliers — Full Ledger</div><div class="doc-sub">${filtered.length} suppliers · ${date}</div></div>
+  <div><div class="doc-title">All Suppliers — Full Ledger</div><div class="doc-sub">${filtered.length} suppliers · Period: ${dateLabel} · ${date}</div></div>
   <div class="doc-meta"><div>Payable: PKR ${totalPayable.toLocaleString()}</div><div>Advance: PKR ${totalAdvance.toLocaleString()}</div></div>
 </div>
 <div class="body-pad">${sections}</div>
@@ -190,6 +212,52 @@ ${buildPrintHeader(shop)}
       </div>
 
       <Card className="print:hidden">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-3 items-end">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-500 font-medium">Supplier</label>
+              <Select value={supplierId || "all"} onValueChange={(v) => setSupplierId(v === "all" ? "" : v)}>
+                <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Suppliers</SelectItem>
+                  {suppliers.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-500 font-medium">Status</label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="payable">Payable</SelectItem>
+                  <SelectItem value="advance">Advance</SelectItem>
+                  <SelectItem value="settled">Settled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-500 font-medium">From Date</label>
+              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-40" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-500 font-medium">To Date</label>
+              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
+            </div>
+            <Button onClick={applyFilters} disabled={loading || summaryLoading} className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300">
+              {loading || summaryLoading ? "Loading..." : "Apply Filter"}
+            </Button>
+            <Button variant="outline" onClick={clearFilters} className="gap-1"><X className="w-4 h-4" /> Clear</Button>
+          </div>
+          {(dateFrom || dateTo) && (
+            <p className="text-xs text-gray-500 mt-2">
+              Period: {dateLabel}. Table Total Dr / Total Cr cover this period; Balance and Status are current.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="print:hidden">
         <div className="p-4 border-b flex items-center gap-3">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -245,30 +313,6 @@ ${buildPrintHeader(shop)}
 
       {supplierId && (
         <>
-          <Card className="print:hidden">
-            <CardContent className="p-4">
-              <div className="flex flex-wrap gap-3 items-end">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs text-gray-500 font-medium">Supplier</label>
-                  <Select value={supplierId} onValueChange={(v) => { setSupplierId(v); setLedger(null) }}>
-                    <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
-                    <SelectContent>{suppliers.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs text-gray-500 font-medium">From Date</label>
-                  <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-40" />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs text-gray-500 font-medium">To Date</label>
-                  <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
-                </div>
-                <Button onClick={loadLedger} disabled={loading} className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300">{loading ? "Loading..." : "Apply Filter"}</Button>
-                <Button variant="outline" onClick={clearLedger} className="gap-1"><X className="w-4 h-4" /> Clear</Button>
-              </div>
-            </CardContent>
-          </Card>
-
           {loading && <div className="text-center py-10 text-gray-400">Loading ledger...</div>}
 
           {ledger && !loading && (
@@ -320,6 +364,19 @@ ${buildPrintHeader(shop)}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
+                        {!!ledger.openingBalance && (
+                          <tr className="bg-gray-50">
+                            <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{dateFrom ? formatDate(dateFrom) : ""}</td>
+                            <td className="px-4 py-3" />
+                            <td className="px-4 py-3 text-gray-700 text-xs font-semibold">Opening Balance (brought forward)</td>
+                            <td className="px-4 py-3" />
+                            <td className="px-4 py-3" />
+                            <td className={`px-4 py-3 text-right font-medium ${ledger.openingBalance > 0 ? "text-red-600" : "text-purple-700"}`}>
+                              {formatCurrency(Math.abs(ledger.openingBalance))}
+                              <span className="text-xs ml-1">{ledger.openingBalance > 0 ? "Cr" : "Dr"}</span>
+                            </td>
+                          </tr>
+                        )}
                         {ledger.entries?.map((entry: any, i: number) => (
                           <tr key={i} className={entry.type === "PAYMENT" ? "bg-green-50/40" : ""}>
                             <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(entry.date)}</td>

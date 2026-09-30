@@ -5,9 +5,10 @@ import { useSession } from "next-auth/react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { formatCurrency } from "@/lib/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { formatCurrency, formatDate } from "@/lib/utils"
 import { buildPrintHeader, reportCSS } from "@/lib/print-utils"
-import { Printer, Search, Store, ArrowRight } from "lucide-react"
+import { Printer, Search, Store, ArrowRight, X } from "lucide-react"
 import Link from "next/link"
 
 export default function AllSuppliersReportPage() {
@@ -16,26 +17,54 @@ export default function AllSuppliersReportPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [shop, setShop] = useState<any>(null)
+  const [dateFrom, setDateFrom] = useState("")
+  const [dateTo, setDateTo] = useState("")
+  const [supplierFilter, setSupplierFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all")
 
   const isRestrictedRole = session?.user?.role && ["CASHIER", "AUDITOR"].includes(session.user.role)
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/reports/all-suppliers").then((r) => r.json()),
-      fetch("/api/settings").then((r) => r.json()).catch(() => ({ shop: null })),
-    ]).then(([sd, shr]) => {
-      setSuppliers(sd.suppliers || [])
-      setShop(shr.shop || null)
-      setLoading(false)
-    })
+    fetch("/api/settings").then((r) => r.json()).catch(() => ({ shop: null }))
+      .then((shr) => setShop(shr.shop || null))
+    loadSuppliers()
   }, [])
 
-  const filtered = suppliers.filter(
-    (s) =>
+  async function loadSuppliers(from = dateFrom, to = dateTo) {
+    setLoading(true)
+    const params = new URLSearchParams()
+    if (from) params.set("from", from)
+    if (to) params.set("to", to)
+    const sd = await fetch(`/api/reports/all-suppliers?${params}`).then((r) => r.json())
+    setSuppliers(sd.suppliers || [])
+    setLoading(false)
+  }
+
+  function clearFilters() {
+    setDateFrom("")
+    setDateTo("")
+    setSupplierFilter("all")
+    setStatusFilter("all")
+    setSearch("")
+    loadSuppliers("", "")
+  }
+
+  const dateLabel = dateFrom || dateTo
+    ? `${dateFrom ? formatDate(dateFrom) : "Start"} — ${dateTo ? formatDate(dateTo) : "Today"}`
+    : "All Time"
+
+  const filtered = suppliers.filter((s) => {
+    if (supplierFilter !== "all" && s.id !== supplierFilter) return false
+    const bal = s.balance || 0
+    if (statusFilter === "payable" && !(bal > 0)) return false
+    if (statusFilter === "advance" && !(bal < 0)) return false
+    if (statusFilter === "settled" && bal !== 0) return false
+    return (
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       (s.phone || "").includes(search) ||
       (s.address || "").toLowerCase().includes(search.toLowerCase())
-  )
+    )
+  })
 
   const totalPayable = filtered.filter((s) => s.balance > 0).reduce((s, f) => s + f.balance, 0)
   const totalAdvance = filtered.filter((s) => s.balance < 0).reduce((s, f) => s + Math.abs(f.balance), 0)
@@ -113,7 +142,7 @@ ${buildPrintHeader(shop)}
 </style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
-  <div><div class="doc-title">All Suppliers Report</div><div class="doc-sub">Total: ${filtered.length} suppliers</div></div>
+  <div><div class="doc-title">All Suppliers Report</div><div class="doc-sub">Total: ${filtered.length} suppliers · Period: ${dateLabel}</div></div>
   <div class="doc-meta"><div>Printed: ${date}</div></div>
 </div>
 <div class="body-pad">
@@ -166,6 +195,57 @@ ${buildPrintHeader(shop)}
           <Printer className="w-4 h-4" /> Print Report
         </Button>
       </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-3 items-end">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-500 font-medium">Supplier</label>
+              <Select value={supplierFilter} onValueChange={setSupplierFilter}>
+                <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Suppliers</SelectItem>
+                  {suppliers.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            {!isRestrictedRole && (
+              <>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-gray-500 font-medium">Status</label>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="payable">Payable</SelectItem>
+                      <SelectItem value="advance">Advance</SelectItem>
+                      <SelectItem value="settled">Settled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-gray-500 font-medium">From Date</label>
+                  <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-40" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs text-gray-500 font-medium">To Date</label>
+                  <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-40" />
+                </div>
+                <Button onClick={() => loadSuppliers()} disabled={loading} className="bg-white hover:bg-gray-100 text-gray-900 border border-gray-300">
+                  {loading ? "Loading..." : "Apply Filter"}
+                </Button>
+              </>
+            )}
+            <Button variant="outline" onClick={clearFilters} className="gap-1"><X className="w-4 h-4" /> Clear</Button>
+          </div>
+          {!isRestrictedRole && (dateFrom || dateTo) && (
+            <p className="text-xs text-gray-500 mt-2">
+              Total Dr / Total Cr show transactions in {dateLabel}. Balance and status are the current balance.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -3,11 +3,26 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { cachedJson } from "@/lib/api-cache"
 
-export async function GET() {
+export async function GET(req: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
+
+  // Optional date range — limits Total Dr / Total Cr to transactions in the period
+  const { searchParams } = new URL(req.url)
+  const from = searchParams.get("from")
+  const to = searchParams.get("to")
+  const dateWhere: any = {}
+  if (from || to) {
+    dateWhere.createdAt = {}
+    if (from) dateWhere.createdAt.gte = new Date(from)
+    if (to) {
+      const toDate = new Date(to)
+      toDate.setHours(23, 59, 59, 999)
+      dateWhere.createdAt.lte = toDate
+    }
+  }
 
   const suppliers = await db.supplier.findMany({
     where: { ...shopFilter, isActive: true },
@@ -21,17 +36,17 @@ export async function GET() {
     db.purchase.groupBy({
       by: ["supplierId"],
       _sum: { totalAmount: true },
-      where: { supplierId: { in: supplierIds } },
+      where: { supplierId: { in: supplierIds }, ...dateWhere },
     }),
     db.commission.groupBy({
       by: ["supplierId"],
       _sum: { sellerPayable: true },
-      where: { supplierId: { in: supplierIds } },
+      where: { supplierId: { in: supplierIds }, ...dateWhere },
     }),
     db.supplierPayment.groupBy({
       by: ["supplierId"],
       _sum: { amount: true },
-      where: { supplierId: { in: supplierIds }, direction: "PAY" },
+      where: { supplierId: { in: supplierIds }, direction: "PAY", ...dateWhere },
     }),
   ])
 
@@ -47,4 +62,3 @@ export async function GET() {
 
   return cachedJson({ suppliers: result })
 }
-
