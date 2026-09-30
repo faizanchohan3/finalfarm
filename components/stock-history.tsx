@@ -36,6 +36,7 @@ export function StockHistory({ open, onClose, products, productId: initialProduc
   const [reload, setReload] = useState(0)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [productId, setProductId] = useState("")
+  const [categoryId, setCategoryId] = useState("")
   const [type, setType] = useState("ALL")
   const [from, setFrom] = useState("")
   const [to, setTo] = useState("")
@@ -44,7 +45,7 @@ export function StockHistory({ open, onClose, products, productId: initialProduc
   const [loading, setLoading] = useState(false)
   const [view, setView] = useState<"entries" | "summary">("entries")
 
-  useEffect(() => { if (open) { setProductId(initialProductId || ""); setType("ALL"); setView("entries") } }, [open, initialProductId])
+  useEffect(() => { if (open) { setProductId(initialProductId || ""); setCategoryId(""); setType("ALL"); setView("entries") } }, [open, initialProductId])
 
   useEffect(() => {
     if (!open) return
@@ -76,9 +77,37 @@ export function StockHistory({ open, onClose, products, productId: initialProduc
     }
   }
 
-  const shown = type === "ALL" ? entries : type === "IN" ? entries.filter((e) => e.qty > 0) : type === "OUT" ? entries.filter((e) => e.qty < 0) : entries.filter((e) => e.type === type)
+  // Category filter (done here: each product carries its category)
+  const categories = Object.values(
+    products.reduce<Record<string, { id: string; name: string }>>((acc, p) => {
+      if (p.categoryId) acc[p.categoryId] ??= { id: p.categoryId, name: p.category?.name || "Uncategorised" }
+      return acc
+    }, {})
+  ).sort((a, b) => a.name.localeCompare(b.name))
+  const category = categories.find((c) => c.id === categoryId)
+  const categoryOf = Object.fromEntries(products.map((p) => [p.id, p.categoryId]))
+  const productOptions = categoryId ? products.filter((p) => p.categoryId === categoryId) : products
+
+  function pickCategory(id: string) {
+    setCategoryId(id)
+    // Keep the chosen product only if it belongs to the new category
+    if (id && productId && categoryOf[productId] !== id) setProductId("")
+  }
+
+  const inCategory = categoryId ? entries.filter((e) => categoryOf[e.productId] === categoryId) : entries
+  const shown = type === "ALL" ? inCategory : type === "IN" ? inCategory.filter((e) => e.qty > 0) : type === "OUT" ? inCategory.filter((e) => e.qty < 0) : inCategory.filter((e) => e.type === type)
   const showBalance = !!productId && !from && !to
   const product = products.find((p) => p.id === productId)
+  const scopeName = product ? product.name : category ? category.name : ""
+
+  // Totals cards: from the API, or recounted here when a category narrows the list
+  const count = (list: Entry[]) => ({ qty: list.reduce((s, e) => s + Math.abs(e.qty), 0), amount: list.reduce((s, e) => s + e.amount, 0), count: list.length })
+  const cardTotals: Totals | null = !categoryId ? totals : {
+    in: count(inCategory.filter((e) => e.qty > 0)),
+    out: count(inCategory.filter((e) => e.qty < 0)),
+    purchases: count(inCategory.filter((e) => e.type === "PURCHASE")),
+    sales: count(inCategory.filter((e) => e.type === "SALE")),
+  }
 
   // Summary report: one row per product with stock in / out (qty and value) for the filtered entries
   type SummaryRow = { productId: string; name: string; code: string; unit: string; inQty: number; inAmt: number; outQty: number; outAmt: number; current: number; value: number }
@@ -110,7 +139,7 @@ ${billFontLink}
 <style>${billCSS} body { max-width: 1000px; }</style></head><body>
 <div dir="ltr">${buildPrintHeader(shop)}</div>
 <div class="meta">
-  <div>اسٹاک رپورٹ — <b style="font-family:inherit">${escapeHtml(product ? product.name : "تمام اشیاء")}</b>${range ? ` <span style="font-size:12px">(${range})</span>` : ""}</div>
+  <div>اسٹاک رپورٹ — <b style="font-family:inherit">${escapeHtml(scopeName || "تمام اشیاء")}</b>${range ? ` <span style="font-size:12px">(${range})</span>` : ""}</div>
   <div>تاریخ: <b>${day(new Date().toISOString())}</b></div>
 </div>
 <table>
@@ -149,7 +178,7 @@ ${billFontLink}
 <style>${billCSS} body { max-width: 1000px; }</style></head><body>
 <div dir="ltr">${buildPrintHeader(shop)}</div>
 <div class="meta">
-  <div>اسٹاک ریکارڈ — <b style="font-family:inherit">${escapeHtml(product ? product.name : "تمام اشیاء")}</b>${range ? ` <span style="font-size:12px">(${range})</span>` : ""}</div>
+  <div>اسٹاک ریکارڈ — <b style="font-family:inherit">${escapeHtml(scopeName || "تمام اشیاء")}</b>${range ? ` <span style="font-size:12px">(${range})</span>` : ""}</div>
   <div>تاریخ: <b>${day(new Date().toISOString())}</b></div>
 </div>
 <table>
@@ -177,16 +206,28 @@ ${billFontLink}
           <DialogTitle className="flex items-center gap-2"><History className="w-5 h-5 text-purple-600" /> Stock History</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
-          <div className="col-span-2">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
+          <div>
+            <Label>Category</Label>
+            <SearchableSelect
+              value={categoryId || "all"}
+              onValueChange={(v) => pickCategory(v === "all" ? "" : v)}
+              searchPlaceholder="Search category..."
+              options={[
+                { value: "all", label: "All categories" },
+                ...categories.map((c) => ({ value: c.id, label: c.name })),
+              ]}
+            />
+          </div>
+          <div className="col-span-2 md:col-span-2">
             <Label>Product</Label>
             <SearchableSelect
               value={productId || "all"}
               onValueChange={(v) => setProductId(v === "all" ? "" : v)}
               searchPlaceholder="Search product..."
               options={[
-                { value: "all", label: "All products" },
-                ...products.map((p) => ({ value: p.id, label: p.name, sub: `${p.currentStock} ${p.unit}${p.room?.name ? ` · ${p.room.name}` : ""}` })),
+                { value: "all", label: category ? `All in ${category.name}` : "All products" },
+                ...productOptions.map((p) => ({ value: p.id, label: p.name, sub: `${p.currentStock} ${p.unit}${p.room?.name ? ` · ${p.room.name}` : ""}` })),
               ]}
             />
           </div>
@@ -207,27 +248,27 @@ ${billFontLink}
           <div><Label>To</Label><Input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></div>
         </div>
 
-        {totals && (
+        {cardTotals && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="rounded-lg bg-green-50 border border-green-200 p-3">
               <p className="text-xs text-green-700">Stock in</p>
-              <p className="font-bold text-green-900 tabular-nums">{n(totals.in.qty)}</p>
-              <p className="text-xs text-gray-500">Rs {n(totals.in.amount)} · {totals.in.count} entries</p>
+              <p className="font-bold text-green-900 tabular-nums">{n(cardTotals.in.qty)}</p>
+              <p className="text-xs text-gray-500">Rs {n(cardTotals.in.amount)} · {cardTotals.in.count} entries</p>
             </div>
             <div className="rounded-lg bg-red-50 border border-red-200 p-3">
               <p className="text-xs text-red-700">Stock out</p>
-              <p className="font-bold text-red-900 tabular-nums">{n(totals.out.qty)}</p>
-              <p className="text-xs text-gray-500">Rs {n(totals.out.amount)} · {totals.out.count} entries</p>
+              <p className="font-bold text-red-900 tabular-nums">{n(cardTotals.out.qty)}</p>
+              <p className="text-xs text-gray-500">Rs {n(cardTotals.out.amount)} · {cardTotals.out.count} entries</p>
             </div>
             <div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
               <p className="text-xs text-blue-700">Purchases</p>
-              <p className="font-bold text-blue-900 tabular-nums">Rs {n(totals.purchases.amount)}</p>
-              <p className="text-xs text-gray-500">{n(totals.purchases.qty)} qty · {totals.purchases.count} entries</p>
+              <p className="font-bold text-blue-900 tabular-nums">Rs {n(cardTotals.purchases.amount)}</p>
+              <p className="text-xs text-gray-500">{n(cardTotals.purchases.qty)} qty · {cardTotals.purchases.count} entries</p>
             </div>
             <div className="rounded-lg bg-orange-50 border border-orange-200 p-3">
               <p className="text-xs text-orange-700">Sales</p>
-              <p className="font-bold text-orange-900 tabular-nums">Rs {n(totals.sales.amount)}</p>
-              <p className="text-xs text-gray-500">{n(totals.sales.qty)} qty · {totals.sales.count} entries</p>
+              <p className="font-bold text-orange-900 tabular-nums">Rs {n(cardTotals.sales.amount)}</p>
+              <p className="text-xs text-gray-500">{n(cardTotals.sales.qty)} qty · {cardTotals.sales.count} entries</p>
             </div>
           </div>
         )}
