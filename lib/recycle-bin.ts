@@ -7,11 +7,13 @@ export type DeletedType =
   | "BILL" | "COMMISSION" | "PURCHASE" | "LOT" | "PRODUCT"
   | "CUSTOMER" | "CUSTOMER_PERMANENT" | "FARMER" | "SUPPLIER"
   | "CUSTOMER_PAYMENT" | "FARMER_PAYMENT" | "SUPPLIER_PAYMENT"
+  | "STOCK_ADJUSTMENT" | "STOCK_OPENING"
 
 export const DELETED_TYPE_LABEL: Record<DeletedType, string> = {
   BILL: "Bill", COMMISSION: "Commission", PURCHASE: "Purchase", LOT: "Potato Store lot", PRODUCT: "Store product",
   CUSTOMER: "Trader", CUSTOMER_PERMANENT: "Trader (permanent)", FARMER: "Farmer", SUPPLIER: "Supplier",
   CUSTOMER_PAYMENT: "Trader payment", FARMER_PAYMENT: "Farmer payment", SUPPLIER_PAYMENT: "Supplier payment",
+  STOCK_ADJUSTMENT: "Store stock add / remove", STOCK_OPENING: "Store opening stock",
 }
 
 type Session = { user: { id?: string | null; name?: string | null; shopId?: string | null } }
@@ -154,6 +156,30 @@ export async function restoreDeleted(tx: any, rec: { type: string; recordId: str
       return
     }
 
+    case "STOCK_ADJUSTMENT": {
+      const a = { ...s.adjustment }
+      await ensureExists(tx.product, a.productId, "product")
+      await ensureMissing(tx.stockAdjustment, a.id)
+      await tx.stockAdjustment.create({ data: a })
+      // Re-apply the add / remove the delete reversed
+      const delta = a.type === "DECREASE" ? -a.quantity : a.quantity
+      await tx.product.update({ where: { id: a.productId }, data: { currentStock: { increment: delta } } })
+      if (a.warehouseId) {
+        const ws = await tx.warehouseStock.findFirst({ where: { warehouseId: a.warehouseId, productId: a.productId } })
+        if (ws) await tx.warehouseStock.update({ where: { id: ws.id }, data: { quantity: { increment: delta } } })
+      }
+      return
+    }
+
+    case "STOCK_OPENING": {
+      const m = { ...s.movement }
+      await ensureExists(tx.product, m.productId, "product")
+      await ensureMissing(tx.stockMovement, m.id)
+      await tx.stockMovement.create({ data: m })
+      await tx.product.update({ where: { id: m.productId }, data: { currentStock: { increment: m.quantity } } })
+      return
+    }
+
     default:
       throw new Error(`Records of type ${rec.type} can't be restored`)
   }
@@ -164,5 +190,5 @@ async function ensureMissing(model: any, id: string) {
 }
 
 async function ensureExists(model: any, id: string, what: string) {
-  if (!id || !(await model.findUnique({ where: { id } }))) throw new Error(`The ${what} for this payment no longer exists, so it can't be restored`)
+  if (!id || !(await model.findUnique({ where: { id } }))) throw new Error(`The ${what} for this record no longer exists, so it can't be restored`)
 }

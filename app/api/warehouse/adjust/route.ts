@@ -24,6 +24,8 @@ export async function POST(req: Request) {
 
   const body = await req.json()
   const adjustNo = `ADJ-${Date.now()}`
+  // Price per unit of this add (purchase price) or remove (sale price); optional
+  const rate = body.rate !== undefined && body.rate !== "" && body.rate !== null ? parseFloat(body.rate) : null
 
   const adjustment = await db.$transaction(async (tx) => {
     const adj = await tx.stockAdjustment.create({
@@ -33,6 +35,7 @@ export async function POST(req: Request) {
         productId: body.productId,
         type: body.type,
         quantity: body.quantity,
+        rate: rate != null && !isNaN(rate) ? rate : null,
         reason: body.reason || null,
         createdById: session.user!.id!,
       },

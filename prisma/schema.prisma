@@ -826,6 +826,7 @@ model StockAdjustment {
   productId   String
   type        String   // INCREASE, DECREASE, CORRECTION
   quantity    Float
+  rate        Float?   // price per unit when added (purchase) or removed (sale); null on older rows
   reason      String?
   createdById String
   createdAt   DateTime @default(now())

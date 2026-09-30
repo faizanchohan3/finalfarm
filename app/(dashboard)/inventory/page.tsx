@@ -41,6 +41,8 @@ export default function InventoryPage() {
   const [stockTarget, setStockTarget] = useState<any>(null)
   const [stockRoom, setStockRoom] = useState<{ name: string; items: any[] } | null>(null)
   const [stockQty, setStockQty] = useState("")
+  const [stockMode, setStockMode] = useState<"INCREASE" | "DECREASE">("INCREASE")
+  const [stockRate, setStockRate] = useState("")
   const [stockReason, setStockReason] = useState("")
   const [stockSaving, setStockSaving] = useState(false)
   // Stock history dialog: null = closed, "" = all products, otherwise one product id
@@ -104,13 +106,25 @@ export default function InventoryPage() {
     }
   }
 
+  // Default price: purchase price when adding, sale price when removing
+  const defaultRate = (p: any, mode: "INCREASE" | "DECREASE") => {
+    const v = mode === "INCREASE" ? p?.purchasePrice : p?.salePrice
+    return v ? String(v) : ""
+  }
+
   function openStock(p: any) {
     setStockRoom(null); setStockTarget(p); setStockQty(""); setStockReason("")
+    setStockMode("INCREASE"); setStockRate(defaultRate(p, "INCREASE"))
   }
 
   // Opened from a room heading: pick which product in that room to adjust
   function openRoomStock(g: { name: string; items: any[] }) {
     setStockRoom(g); setStockTarget(g.items[0]); setStockQty(""); setStockReason("")
+    setStockMode("INCREASE"); setStockRate(defaultRate(g.items[0], "INCREASE"))
+  }
+
+  function switchStockMode(mode: "INCREASE" | "DECREASE") {
+    setStockMode(mode); setStockRate(defaultRate(stockTarget, mode))
   }
 
   function closeStock() {
@@ -128,7 +142,7 @@ export default function InventoryPage() {
       const res = await fetch("/api/warehouse/adjust", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: stockTarget.id, type, quantity: qty, reason: stockReason.trim() || "Store quick adjust" }),
+        body: JSON.stringify({ productId: stockTarget.id, type, quantity: qty, rate: stockRate, reason: stockReason.trim() || "Store quick adjust" }),
       })
       if (!res.ok) return alert("Failed to update stock")
       // Show the new stock right away, then reload to stay in sync
@@ -622,6 +636,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
         products={products}
         productId={historyFor || ""}
         shop={shop}
+        onChanged={loadData}
       />
 
       {/* Quick stock add / remove */}
@@ -637,7 +652,10 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                   <Label>Product</Label>
                   <select
                     value={stockTarget.id}
-                    onChange={(e) => setStockTarget(stockRoom.items.find((p) => p.id === e.target.value) || stockTarget)}
+                    onChange={(e) => {
+                      const p = stockRoom.items.find((x) => x.id === e.target.value) || stockTarget
+                      setStockTarget(p); setStockRate(defaultRate(p, stockMode))
+                    }}
                     className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
                   >
                     {stockRoom.items.map((p) => (
@@ -651,27 +669,56 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                 <div className="flex justify-between gap-2"><span className="text-gray-500">Room</span><span>{stockTarget.room?.name || "Unassigned"}</span></div>
                 <div className="flex justify-between gap-2"><span className="text-gray-500">Current stock</span><span className="font-bold">{stockTarget.currentStock} {stockTarget.unit}</span></div>
               </div>
-              <div>
-                <Label>Quantity ({stockTarget.unit})</Label>
-                <Input type="number" autoFocus value={stockQty} onChange={(e) => setStockQty(e.target.value)} placeholder="0" />
-                {parseFloat(stockQty) > 0 && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    After add: <strong>{stockTarget.currentStock + parseFloat(stockQty)}</strong> · After remove: <strong>{stockTarget.currentStock - parseFloat(stockQty)}</strong>
-                  </p>
-                )}
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => switchStockMode("INCREASE")}
+                  className={`flex items-center justify-center gap-1 rounded-md border py-2 text-sm font-medium ${stockMode === "INCREASE" ? "bg-green-600 border-green-600 text-white" : "border-gray-300 text-gray-600"}`}>
+                  <Plus className="w-4 h-4" /> Add
+                </button>
+                <button type="button" onClick={() => switchStockMode("DECREASE")}
+                  className={`flex items-center justify-center gap-1 rounded-md border py-2 text-sm font-medium ${stockMode === "DECREASE" ? "bg-red-600 border-red-600 text-white" : "border-gray-300 text-gray-600"}`}>
+                  <Minus className="w-4 h-4" /> Remove
+                </button>
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Quantity ({stockTarget.unit})</Label>
+                  <Input type="number" autoFocus value={stockQty} onChange={(e) => setStockQty(e.target.value)} placeholder="0" />
+                </div>
+                <div>
+                  <Label>{stockMode === "INCREASE" ? "Purchase price" : "Sale price"} / {stockTarget.unit}</Label>
+                  <Input type="number" value={stockRate} onChange={(e) => setStockRate(e.target.value)} placeholder="0" />
+                </div>
+              </div>
+              {(() => {
+                const qty = parseFloat(stockQty) || 0
+                const total = qty * (parseFloat(stockRate) || 0)
+                const add = stockMode === "INCREASE"
+                return (
+                  <div className={`rounded-lg p-3 text-sm space-y-1 ${add ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
+                    <div className="flex justify-between gap-2">
+                      <span className="text-gray-600">{add ? "Total purchase value" : "Total sale value"}</span>
+                      <span className={`font-bold ${add ? "text-green-800" : "text-red-800"}`}>{formatCurrency(total)}</span>
+                    </div>
+                    {qty > 0 && (
+                      <div className="flex justify-between gap-2 text-xs text-gray-500">
+                        <span>Stock after {add ? "adding" : "removing"}</span>
+                        <span className="font-semibold text-gray-700">{stockTarget.currentStock + (add ? qty : -qty)} {stockTarget.unit}</span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
               <div>
                 <Label>Note (optional)</Label>
                 <Input value={stockReason} onChange={(e) => setStockReason(e.target.value)} placeholder="e.g. new arrival, damaged" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="gap-1 border-red-300 text-red-700 hover:bg-red-50" disabled={stockSaving} onClick={() => adjustStock("DECREASE")}>
-                  <Minus className="w-4 h-4" /> Remove
-                </Button>
-                <Button className="gap-1" disabled={stockSaving} onClick={() => adjustStock("INCREASE")}>
-                  <Plus className="w-4 h-4" /> Add
-                </Button>
-              </div>
+              <Button
+                className={`w-full gap-1 ${stockMode === "DECREASE" ? "bg-red-600 hover:bg-red-700" : ""}`}
+                disabled={stockSaving}
+                onClick={() => adjustStock(stockMode)}
+              >
+                {stockMode === "INCREASE" ? <><Plus className="w-4 h-4" /> Add to stock</> : <><Minus className="w-4 h-4" /> Remove from stock</>}
+              </Button>
             </div>
           )}
         </DialogContent>
