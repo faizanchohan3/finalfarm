@@ -10,7 +10,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const { id } = await params
 
-  const [supplier, purchases, supplierPayments] = await Promise.all([
+  const [supplier, purchases, supplierPayments, commissions] = await Promise.all([
     db.supplier.findUnique({ where: { id } }),
     db.purchase.findMany({
       where: { supplierId: id },
@@ -25,35 +25,41 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       where: { supplierId: id },
       orderBy: { createdAt: "asc" },
     }),
+    // Commissions where this supplier is the seller
+    db.commission.findMany({ where: { supplierId: id }, orderBy: { createdAt: "asc" } }),
   ])
 
   if (!supplier) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const totalBusiness = purchases.reduce((s, p) => s + p.totalAmount, 0)
+  const totalBusiness =
+    purchases.reduce((s, p) => s + p.totalAmount, 0) +
+    commissions.reduce((s, c) => s + c.sellerPayable, 0)
   const purchasePaid = purchases.reduce((s, p) => s + p.paidAmount, 0)
   const spTotal = supplierPayments.reduce((s, p) => p.direction === "PAY" ? s + p.amount : s - p.amount, 0)
   const totalPaid = purchasePaid + spTotal
   const totalBalance = totalBusiness - totalPaid
 
-  // Build ledger entries
+  // Build ledger entries — Credit the Giver, Debit the Receiver (same as the supplier ledger report)
   const ledgerEvents: { id?: string; date: Date; type: string; description: string; debit: number; credit: number }[] = []
 
+  // Supplier gives goods → Credit supplier
   for (const p of purchases) {
     ledgerEvents.push({
       date: p.createdAt,
       type: "PURCHASE",
       description: `Purchase — ${p.items.map((i) => i.product?.name || "Item").join(", ")}`,
-      debit: p.totalAmount,
-      credit: 0,
+      debit: 0,
+      credit: p.totalAmount,
     })
+    // We pay the supplier → Debit supplier
     if (p.payments.length > 0) {
       for (const payment of p.payments) {
         ledgerEvents.push({
           date: payment.createdAt,
           type: "PAYMENT",
           description: `Payment — ${payment.method}${payment.notes ? ` (${payment.notes})` : ""}`,
-          debit: 0,
-          credit: payment.amount,
+          debit: payment.amount,
+          credit: 0,
         })
       }
     } else if (p.paidAmount > 0) {
@@ -61,10 +67,22 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         date: p.createdAt,
         type: "PAYMENT",
         description: `Payment — CASH (at purchase)`,
-        debit: 0,
-        credit: p.paidAmount,
+        debit: p.paidAmount,
+        credit: 0,
       })
     }
+  }
+
+  // Commission: supplier sold goods through us → Credit supplier with the seller payable
+  for (const c of commissions) {
+    const parts = [c.commodity, c.bags ? `${c.bags} bags` : null, c.weight ? `${c.weight} kg` : null].filter(Boolean).join(", ")
+    ledgerEvents.push({
+      date: c.createdAt,
+      type: "COMMISSION",
+      description: `Commission #${c.id.slice(-6).toUpperCase()}${parts ? ` — ${parts}` : ""}`,
+      debit: 0,
+      credit: c.sellerPayable,
+    })
   }
 
   for (const sp of supplierPayments) {
@@ -82,9 +100,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   }
 
   ledgerEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  // running = credit − debit: positive (Cr) = we owe the supplier, negative (Dr) = supplier owes us / advance
   let running = 0
   const ledger = ledgerEvents.map((e) => {
-    running += e.debit - e.credit
+    running += e.credit - e.debit
     return { ...e, balance: running }
   })
 

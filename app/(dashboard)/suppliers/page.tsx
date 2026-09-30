@@ -308,8 +308,9 @@ export default function SuppliersPage() {
                           </span>
                         ) : "—"}
                       </td>
-                      <td className={`py-3 px-3 text-right font-semibold ${(s.ledgerBalance || 0) > 0 ? "text-purple-600" : (s.ledgerBalance || 0) < 0 ? "text-red-600" : "text-gray-600"}`}>
-                        {formatCurrency(s.ledgerBalance || 0)}
+                      <td className={`py-3 px-3 text-right font-semibold ${(s.ledgerBalance || 0) > 0 ? "text-red-600" : (s.ledgerBalance || 0) < 0 ? "text-purple-600" : "text-gray-600"}`}>
+                        {formatCurrency(Math.abs(s.ledgerBalance || 0))}
+                        {(s.ledgerBalance || 0) !== 0 && <span className="text-xs ml-1 font-normal">{s.ledgerBalance > 0 ? "Cr" : "Dr"}</span>}
                       </td>
                       <td className="py-3 px-3">
                         <span className={`text-xs px-2 py-0.5 rounded-full ${s.isActive ? "bg-green-100 text-purple-700" : "bg-blue-100 text-gray-500"}`}>
@@ -528,7 +529,7 @@ export default function SuppliersPage() {
                                 <td className="py-2 px-3 text-right text-purple-700">{entry.credit > 0 ? formatCurrency(entry.credit) : "—"}</td>
                                 <td className={`py-2 px-3 text-right font-semibold ${entry.balance > 0 ? "text-red-600" : "text-purple-700"}`}>
                                   {formatCurrency(Math.abs(entry.balance))}
-                                  {entry.balance !== 0 && <span className="text-xs ml-1 font-normal">{entry.balance > 0 ? "Dr" : "Cr"}</span>}
+                                  {entry.balance !== 0 && <span className="text-xs ml-1 font-normal">{entry.balance > 0 ? "Cr" : "Dr"}</span>}
                                 </td>
                               </tr>
                             )
@@ -540,8 +541,8 @@ export default function SuppliersPage() {
                             <td className="py-2 px-3 text-right font-bold text-gray-900">{formatCurrency((detail.ledger || []).reduce((s: number, e: any) => s + e.debit, 0))}</td>
                             <td className="py-2 px-3 text-right font-bold text-purple-700">{formatCurrency((detail.ledger || []).reduce((s: number, e: any) => s + e.credit, 0))}</td>
                             <td className={`py-2 px-3 text-right font-bold ${detail.totalBalance > 0 ? "text-red-600" : "text-purple-700"}`}>
-                              {formatCurrency(detail.totalBalance)}
-                              <span className="text-xs ml-1 font-normal">{detail.totalBalance > 0 ? "Dr" : "Cr"}</span>
+                              {formatCurrency(Math.abs(detail.totalBalance))}
+                              <span className="text-xs ml-1 font-normal">{detail.totalBalance > 0 ? "Cr" : detail.totalBalance < 0 ? "Dr" : ""}</span>
                             </td>
                             <td></td>
                           </tr>
