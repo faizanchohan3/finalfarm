@@ -743,6 +743,9 @@ export default function FarmersPage() {
                         <tr>
                           <th className="text-left py-2 px-3 text-gray-500 font-medium text-xs">Date</th>
                           <th className="text-left py-2 px-3 text-gray-500 font-medium text-xs">Description</th>
+                          <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Bags</th>
+                          <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Weight (kg)</th>
+                          <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Rate</th>
                           <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Debit (Dr)</th>
                           <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Credit (Cr)</th>
                           <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Balance</th>
@@ -753,6 +756,9 @@ export default function FarmersPage() {
                           <tr key={i}>
                             <td className="py-2 px-3 text-gray-500 whitespace-nowrap text-xs">{formatDate(e.date)}</td>
                             <td className="py-2 px-3 text-gray-700 text-xs">{e.description}</td>
+                            <td className="py-2 px-3 text-right text-gray-700 whitespace-nowrap">{e.bags > 0 ? e.bags.toLocaleString() : "—"}</td>
+                            <td className="py-2 px-3 text-right text-gray-700 whitespace-nowrap">{e.weight > 0 ? `${e.weight.toLocaleString()} kg` : "—"}</td>
+                            <td className="py-2 px-3 text-right text-gray-700 whitespace-nowrap">{e.rate > 0 ? `${formatCurrency(e.rate)}/${e.rateUnit === "mound" ? "mound" : "kg"}` : "—"}</td>
                             <td className="py-2 px-3 text-right font-medium text-gray-900">{e.debit > 0 ? formatCurrency(e.debit) : "—"}</td>
                             <td className="py-2 px-3 text-right text-purple-700">{e.credit > 0 ? formatCurrency(e.credit) : "—"}</td>
                             <td className={`py-2 px-3 text-right font-semibold ${e.balance > 0 ? "text-red-600" : "text-purple-700"}`}>
@@ -761,6 +767,40 @@ export default function FarmersPage() {
                           </tr>
                         ))}
                       </tbody>
+                      {(() => {
+                        const rows: any[] = farmerDetail.ledger
+                        const bags = rows.reduce((s, e) => s + (e.bags || 0), 0)
+                        const weight = rows.reduce((s, e) => s + (e.weight || 0), 0)
+                        const debit = rows.reduce((s, e) => s + (e.debit || 0), 0)
+                        const credit = rows.reduce((s, e) => s + (e.credit || 0), 0)
+                        const balance = rows.length ? rows[rows.length - 1].balance : 0
+                        // Weighted average rate per kg (mound rates converted: 1 mound = 40 kg)
+                        const rated = rows.filter((e) => e.weight > 0 && e.rate > 0)
+                        const ratedKg = rated.reduce((s, e) => s + e.weight, 0)
+                        const avgPerKg = ratedKg ? rated.reduce((s, e) => s + e.weight * (e.rateUnit === "mound" ? e.rate / 40 : e.rate), 0) / ratedKg : 0
+                        return (
+                          <tfoot className="bg-gray-50 border-t-2 border-gray-300">
+                            <tr className="font-semibold">
+                              <td className="py-2 px-3 text-gray-900 text-xs" colSpan={2}>Total</td>
+                              <td className="py-2 px-3 text-right text-gray-900 whitespace-nowrap">{bags > 0 ? bags.toLocaleString() : "—"}</td>
+                              <td className="py-2 px-3 text-right text-gray-900 whitespace-nowrap">{weight > 0 ? `${weight.toLocaleString()} kg` : "—"}</td>
+                              <td className="py-2 px-3 text-right text-gray-900 whitespace-nowrap">
+                                {avgPerKg > 0 ? (
+                                  <>
+                                    <div>Avg {formatCurrency(avgPerKg)}/kg</div>
+                                    <div className="text-xs font-normal text-gray-500">{formatCurrency(avgPerKg * 40)}/mound</div>
+                                  </>
+                                ) : "—"}
+                              </td>
+                              <td className="py-2 px-3 text-right text-gray-900 whitespace-nowrap">{formatCurrency(debit)}</td>
+                              <td className="py-2 px-3 text-right text-purple-700 whitespace-nowrap">{formatCurrency(credit)}</td>
+                              <td className={`py-2 px-3 text-right whitespace-nowrap ${balance > 0 ? "text-red-600" : "text-purple-700"}`}>
+                                {formatCurrency(Math.abs(balance))} {balance > 0 ? "Dr" : balance < 0 ? "Cr" : ""}
+                              </td>
+                            </tr>
+                          </tfoot>
+                        )
+                      })()}
                     </table>
                   </div>
                 </div>

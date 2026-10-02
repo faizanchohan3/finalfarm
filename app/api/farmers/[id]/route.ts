@@ -54,6 +54,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       debit: purchase.totalAmount,
       credit: 0,
       ref: purchase.id,
+      bags: purchase.bags || 0,
+      weight: purchase.weight || 0,
+      rate: purchase.weight ? purchase.totalAmount / purchase.weight : 0,
+      rateUnit: "kg",
     })
     for (const payment of purchase.payments) {
       events.push({
@@ -138,6 +142,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       debit: comm.sellerPayable,
       credit: 0,
       ref: comm.id,
+      bags: comm.bags || 0,
+      weight: comm.weight || 0,
+      rate: comm.rate || 0,
+      rateUnit: comm.rateUnit || "kg",
     })
   }
 
