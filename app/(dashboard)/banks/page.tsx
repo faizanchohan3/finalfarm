@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Building2, Plus, PencilLine, Trash2, ArrowDownCircle, ArrowUpCircle, Check, BookOpen } from "lucide-react"
+import { Building2, Plus, PencilLine, Trash2, ArrowDownCircle, ArrowUpCircle, Check, BookOpen, Search } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils"
 
 const DEFAULT_FORM = { name: "", accountNumber: "" }
@@ -22,6 +22,7 @@ const ENTRY_LABELS: Record<string, string> = {
 export default function BanksPage() {
   const [banks, setBanks] = useState<any[]>([])
   const [firstLoad, setFirstLoad] = useState(true)
+  const [search, setSearch] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<any>(null)
   const [form, setForm] = useState(DEFAULT_FORM)
@@ -185,6 +186,12 @@ export default function BanksPage() {
     }
   }
 
+  const filteredBanks = banks.filter(
+    (b) =>
+      b.name.toLowerCase().includes(search.toLowerCase()) ||
+      (b.accountNumber || "").toLowerCase().includes(search.toLowerCase())
+  )
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -199,9 +206,16 @@ export default function BanksPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-blue-600" /> All Banks
-          </CardTitle>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-blue-600" /> All Banks
+            </CardTitle>
+            <div className="relative max-w-sm flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input placeholder="Search by bank name or account number..." value={search}
+                onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {firstLoad ? (
@@ -211,6 +225,11 @@ export default function BanksPage() {
               <Building2 className="w-10 h-10 mx-auto mb-3 opacity-30" />
               <p className="font-medium">No banks added yet</p>
               <p className="text-sm mt-1">Click "Add Bank" to add your first bank account</p>
+            </div>
+          ) : filteredBanks.length === 0 ? (
+            <div className="text-center py-16 text-gray-400">
+              <Building2 className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p className="font-medium">No banks match "{search}"</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -225,7 +244,7 @@ export default function BanksPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {banks.map((bank, i) => (
+                  {filteredBanks.map((bank, i) => (
                     <tr key={bank.id} className="border-b border-gray-50 hover:bg-blue-50">
                       <td className="py-3 px-4 text-gray-400 text-xs">{i + 1}</td>
                       <td className="py-3 px-4">
