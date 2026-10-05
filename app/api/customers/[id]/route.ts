@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
 import { recordCode } from "@/lib/record-code"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
+import { galaLedgerText } from "@/lib/gala"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -11,7 +12,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const { id } = await params
 
-  const [customer, sales, commissions, pesticideSales, customerPayments, traderPurchases, soldLots, bills] = await Promise.all([
+  const [customer, sales, commissions, pesticideSales, customerPayments, traderPurchases, soldLots, bills, galaEntries] = await Promise.all([
     db.customer.findUnique({ where: { id } }),
     db.sale.findMany({
       where: { customerId: id },
@@ -49,6 +50,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     }),
     // Bill Maker bills charged to this trader
     db.bill.findMany({ where: { customerId: id }, orderBy: { billDate: "asc" } }),
+    // Gala Mandi entries where this trader is the buyer (their Received payments are customer payments)
+    db.galaEntry.findMany({ where: { customerId: id }, orderBy: { entryDate: "asc" } }),
   ])
 
   if (!customer) return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -58,7 +61,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     commissions.reduce((s, c) => s + c.totalValue, 0) +
     pesticideSales.reduce((s, ps) => s + ps.totalAmount, 0) +
     soldLots.reduce((s, l) => s + (l.saleAmount || 0), 0) +
-    bills.reduce((s, b) => s + b.amount, 0)
+    bills.reduce((s, b) => s + b.amount, 0) +
+    galaEntries.reduce((s, g) => s + g.totalAmount, 0)
 
   // Initial paid at sale/commission creation + standalone CustomerPayment records
   const initialPaid =
@@ -78,7 +82,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const ledgerEvents: {
     id?: string
     date: Date
-    type: "SALE" | "COMMISSION" | "PESTICIDE" | "PAYMENT" | "TRADER_PURCHASE" | "LOT_SALE" | "BILL"
+    type: "SALE" | "COMMISSION" | "PESTICIDE" | "PAYMENT" | "TRADER_PURCHASE" | "LOT_SALE" | "BILL" | "GALA"
     description: string
     debit: number
     credit: number
@@ -103,6 +107,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         credit: lot.paidAmount,
       })
     }
+  }
+
+  // Gala Mandi: buyer owes the total (Debit); what is still unreceived is shown in the description
+  for (const g of galaEntries) {
+    ledgerEvents.push({
+      date: g.entryDate,
+      type: "GALA",
+      description: galaLedgerText(g, "buyer"),
+      debit: g.totalAmount,
+      credit: 0,
+    })
   }
 
   for (const bill of bills) {

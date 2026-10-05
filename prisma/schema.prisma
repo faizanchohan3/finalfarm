@@ -342,9 +342,12 @@ model CustomerPayment {
   direction  String        @default("RECEIVE")
   method     PaymentMethod @default(CASH)
   notes      String?
+  galaEntryId String?      // set when received against a Gala Mandi entry
   createdAt  DateTime      @default(now())
 
   customer   Customer      @relation(fields: [customerId], references: [id])
+
+  @@index([galaEntryId])
 }
 
 // ── SUPPLIERS ────────────────────────────────────────────────────────────────
@@ -375,9 +378,12 @@ model SupplierPayment {
   direction  String        @default("PAY")
   method     PaymentMethod @default(CASH)
   notes      String?
+  galaEntryId String?      // set when paid against a Gala Mandi entry
   createdAt  DateTime      @default(now())
 
   supplier   Supplier      @relation(fields: [supplierId], references: [id])
+
+  @@index([galaEntryId])
 }
 
 // ── SALES ────────────────────────────────────────────────────────────────────
@@ -727,11 +733,14 @@ model FarmerPayment {
   method     PaymentMethod @default(CASH)
   reference  String?
   notes      String?
+  galaEntryId String?      // set when paid against a Gala Mandi entry
   createdAt  DateTime      @default(now())
 
   farmer   Farmer          @relation(fields: [farmerId], references: [id])
   purchase FarmerPurchase? @relation(fields: [purchaseId], references: [id])
   bank     Bank?           @relation(fields: [bankId], references: [id])
+
+  @@index([galaEntryId])
 }
 
 // ── COMMISSION AGENT (AADAT) ─────────────────────────────────────────────────
@@ -1062,6 +1071,8 @@ model CommissionPayment {
 
 // One mandi deal: a buyer (trader) buys products from a seller (farmer / supplier / walk-in).
 // items: [{ product, qty, unit: KG | Bag | Tora, rate, amount }]. Buyer is charged the total; seller is owed it.
+// receivedAmount / paidAmount: taken from the buyer / paid to the seller with the Received / Paid buttons
+// (each one is also a trader / farmer / supplier payment carrying this entry's id).
 model GalaEntry {
   id           String   @id @default(cuid())
   shopId       String?
@@ -1076,6 +1087,8 @@ model GalaEntry {
   totalWeight  Float    @default(0)
   totalRate    Float    @default(0)
   totalAmount  Float    @default(0)
+  receivedAmount Float  @default(0)
+  paidAmount   Float    @default(0)
   notes        String?
   createdById  String?
   createdAt    DateTime @default(now())

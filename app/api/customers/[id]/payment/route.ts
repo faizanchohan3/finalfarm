@@ -3,6 +3,7 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
+import { syncGalaPayment } from "@/lib/gala"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -74,6 +75,8 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         snapshot: { payment },
       })
       await tx.customerPayment.delete({ where: { id: paymentId } })
+      // Received against a Gala Mandi entry → that entry has received less
+      await syncGalaPayment(tx, payment.galaEntryId, "receivedAmount", -payment.amount)
 
       // Reverse the balance update
       // RECEIVE was decrement → now increment to reverse

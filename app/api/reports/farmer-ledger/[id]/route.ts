@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { galaItemsText } from "@/lib/gala"
-import { recordCode } from "@/lib/record-code"
+import { galaLedgerText } from "@/lib/gala"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -169,11 +168,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   // Gala Mandi: farmer sold goods through the mandi → Credit farmer
   for (const g of galaEntries) {
-    const desc = galaItemsText(g.items)
     events.push({
       date: g.entryDate,
       type: "GALA",
-      description: `Gala Mandi #${g.entryNo} (${recordCode("gala", g.id)})${desc ? ` — ${desc}` : ""}`,
+      description: galaLedgerText(g, "seller"),
       debit: 0,
       credit: g.totalAmount,
     })

@@ -3,6 +3,7 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
+import { galaLedgerText } from "@/lib/gala"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -10,7 +11,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const { id } = await params
 
-  const [supplier, purchases, supplierPayments, commissions] = await Promise.all([
+  const [supplier, purchases, supplierPayments, commissions, galaEntries] = await Promise.all([
     db.supplier.findUnique({ where: { id } }),
     db.purchase.findMany({
       where: { supplierId: id },
@@ -27,13 +28,16 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     }),
     // Commissions where this supplier is the seller
     db.commission.findMany({ where: { supplierId: id }, orderBy: { createdAt: "asc" } }),
+    // Gala Mandi entries where this supplier is the seller (their Paid payments are supplier payments)
+    db.galaEntry.findMany({ where: { supplierId: id }, orderBy: { entryDate: "asc" } }),
   ])
 
   if (!supplier) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const totalBusiness =
     purchases.reduce((s, p) => s + p.totalAmount, 0) +
-    commissions.reduce((s, c) => s + c.sellerPayable, 0)
+    commissions.reduce((s, c) => s + c.sellerPayable, 0) +
+    galaEntries.reduce((s, g) => s + g.totalAmount, 0)
   const purchasePaid = purchases.reduce((s, p) => s + p.paidAmount, 0)
   const spTotal = supplierPayments.reduce((s, p) => p.direction === "PAY" ? s + p.amount : s - p.amount, 0)
   const totalPaid = purchasePaid + spTotal
@@ -82,6 +86,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       description: `Commission #${c.id.slice(-6).toUpperCase()}${parts ? ` — ${parts}` : ""}`,
       debit: 0,
       credit: c.sellerPayable,
+    })
+  }
+
+  // Gala Mandi: supplier sold through the mandi → Credit supplier with the total; unpaid part in the description
+  for (const g of galaEntries) {
+    ledgerEvents.push({
+      date: g.entryDate,
+      type: "GALA",
+      description: galaLedgerText(g, "seller"),
+      debit: 0,
+      credit: g.totalAmount,
     })
   }
 

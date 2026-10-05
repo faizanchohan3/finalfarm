@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { SearchableSelect } from "@/components/ui/searchable-select"
@@ -48,6 +48,14 @@ export default function GalaMandiPage() {
   const [rows, setRows] = useState<Row[]>([emptyRow()])
   const [notes, setNotes] = useState("")
   const [saving, setSaving] = useState(false)
+
+  // Received (from buyer) / Paid (to seller)
+  const [savedEntry, setSavedEntry] = useState<any>(null)          // "entry saved" prompt with Received / Paid buttons
+  const [payFor, setPayFor] = useState<{ entry: any; kind: "RECEIVE" | "PAY" } | null>(null)
+  const [payAmount, setPayAmount] = useState("")
+  const [payMethod, setPayMethod] = useState("CASH")
+  const [payNotes, setPayNotes] = useState("")
+  const [paying, setPaying] = useState(false)
 
   async function safeFetch(url: string, fallback: any) {
     try {
@@ -141,9 +149,41 @@ export default function GalaMandiPage() {
       const d = await res.json().catch(() => ({}))
       if (!res.ok) return alert(d?.error || "Failed to save entry")
       setShowForm(false)
+      // New entry: offer Received / Paid right away
+      if (!editingId && d?.entry) setSavedEntry(d.entry)
       loadData()
     } finally {
       setSaving(false)
+    }
+  }
+
+  const leftToReceive = (e: any) => Math.max(0, Math.round(((e.totalAmount || 0) - (e.receivedAmount || 0)) * 100) / 100)
+  const leftToPay = (e: any) => Math.max(0, Math.round(((e.totalAmount || 0) - (e.paidAmount || 0)) * 100) / 100)
+
+  function openPay(entry: any, kind: "RECEIVE" | "PAY") {
+    setSavedEntry(null)
+    setPayFor({ entry, kind })
+    setPayAmount(String(kind === "RECEIVE" ? leftToReceive(entry) : leftToPay(entry)))
+    setPayMethod("CASH"); setPayNotes("")
+  }
+
+  async function handlePay() {
+    if (!payFor) return
+    const amt = parseFloat(payAmount)
+    if (!(amt > 0)) return alert("Enter an amount greater than 0")
+    setPaying(true)
+    try {
+      const res = await fetch(`/api/gala/${payFor.entry.id}/payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: payFor.kind, amount: amt, method: payMethod, notes: payNotes }),
+      })
+      const d = await res.json().catch(() => ({}))
+      if (!res.ok) return alert(d?.error || "Failed to save payment")
+      setPayFor(null)
+      loadData()
+    } finally {
+      setPaying(false)
     }
   }
 
@@ -216,6 +256,8 @@ ${buildPrintHeader(shop)}
     itemsOf(e).some((i) => String(i.product || "").toLowerCase().includes(q)),
   )
   const grandTotal = filtered.reduce((s, e) => s + (e.totalAmount || 0), 0)
+  const totalUnreceived = filtered.reduce((s, e) => s + leftToReceive(e), 0)
+  const totalUnpaid = filtered.reduce((s, e) => s + leftToPay(e), 0)
 
   const buyerOptions = [
     { value: "walkin", label: "Walk-in (enter name)" },
@@ -239,7 +281,7 @@ ${buildPrintHeader(shop)}
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card><CardContent className="p-4">
           <p className="text-xs text-gray-500 uppercase font-medium">Entries</p>
           <p className="text-xl font-bold text-gray-900 mt-1">{filtered.length}</p>
@@ -248,9 +290,17 @@ ${buildPrintHeader(shop)}
           <p className="text-xs text-gray-500 uppercase font-medium">Total Weight</p>
           <p className="text-xl font-bold text-gray-900 mt-1 tabular-nums">{weightByUnit(filtered.flatMap(itemsOf))}</p>
         </CardContent></Card>
-        <Card className="col-span-2 md:col-span-1"><CardContent className="p-4">
+        <Card><CardContent className="p-4">
           <p className="text-xs text-gray-500 uppercase font-medium">Total Amount</p>
           <p className="text-xl font-bold text-purple-700 mt-1">{formatCurrency(grandTotal)}</p>
+        </CardContent></Card>
+        <Card><CardContent className="p-4">
+          <p className="text-xs text-gray-500 uppercase font-medium">Unreceived (buyers)</p>
+          <p className="text-xl font-bold text-blue-700 mt-1">{formatCurrency(totalUnreceived)}</p>
+        </CardContent></Card>
+        <Card><CardContent className="p-4">
+          <p className="text-xs text-gray-500 uppercase font-medium">Unpaid (sellers)</p>
+          <p className="text-xl font-bold text-orange-700 mt-1">{formatCurrency(totalUnpaid)}</p>
         </CardContent></Card>
       </div>
 
@@ -270,8 +320,8 @@ ${buildPrintHeader(shop)}
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-blue-300">
-                    {["#", "Date", "Seller", "Buyer", "Products", "Total Weight", "Total Amount", ""].map((h) => (
-                      <th key={h} className={`py-3 px-3 text-gray-500 font-medium ${h === "Total Amount" ? "text-right" : "text-left"}`}>{h}</th>
+                    {["#", "Date", "Seller", "Buyer", "Products", "Total Weight", "Total Amount", "Received (buyer)", "Paid (seller)", ""].map((h) => (
+                      <th key={h} className={`py-3 px-3 text-gray-500 font-medium ${["Total Amount", "Received (buyer)", "Paid (seller)"].includes(h) ? "text-right" : "text-left"}`}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -292,6 +342,24 @@ ${buildPrintHeader(shop)}
                       </td>
                       <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{weightByUnit(itemsOf(e))}</td>
                       <td className="py-3 px-3 text-right font-semibold text-gray-900 whitespace-nowrap">{formatCurrency(e.totalAmount)}</td>
+                      <td className="py-3 px-3 text-right whitespace-nowrap">
+                        <div className="font-medium text-gray-800 tabular-nums">{formatCurrency(e.receivedAmount || 0)}</div>
+                        {leftToReceive(e) > 0
+                          ? <div className="text-[11px] text-blue-700">Unreceived {formatCurrency(leftToReceive(e))}</div>
+                          : <div className="text-[11px] text-green-700">Fully received</div>}
+                        {leftToReceive(e) > 0 && (
+                          <button onClick={() => openPay(e, "RECEIVE")} className="mt-1 text-xs px-2 py-0.5 rounded bg-blue-600 text-white hover:bg-blue-700">Received</button>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 text-right whitespace-nowrap">
+                        <div className="font-medium text-gray-800 tabular-nums">{formatCurrency(e.paidAmount || 0)}</div>
+                        {leftToPay(e) > 0
+                          ? <div className="text-[11px] text-orange-700">Unpaid {formatCurrency(leftToPay(e))}</div>
+                          : <div className="text-[11px] text-green-700">Fully paid</div>}
+                        {leftToPay(e) > 0 && (
+                          <button onClick={() => openPay(e, "PAY")} className="mt-1 text-xs px-2 py-0.5 rounded bg-orange-600 text-white hover:bg-orange-700">Paid</button>
+                        )}
+                      </td>
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-1">
                           <button onClick={() => printEntry(e)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Print">
@@ -308,7 +376,7 @@ ${buildPrintHeader(shop)}
                     </tr>
                   ))}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={8} className="text-center py-12 text-gray-400">
+                    <tr><td colSpan={10} className="text-center py-12 text-gray-400">
                       <Scale className="w-8 h-8 mx-auto mb-2 opacity-30" />
                       {entries.length ? "No entries match your search" : "No entries yet — click New Entry"}
                     </td></tr>
@@ -320,6 +388,14 @@ ${buildPrintHeader(shop)}
                       <td colSpan={5} className="py-3 px-3 text-gray-800">Total ({filtered.length} entries)</td>
                       <td className="py-3 px-3 text-gray-900 whitespace-nowrap tabular-nums">{weightByUnit(filtered.flatMap(itemsOf))}</td>
                       <td className="py-3 px-3 text-right text-purple-800 whitespace-nowrap tabular-nums">{formatCurrency(grandTotal)}</td>
+                      <td className="py-3 px-3 text-right whitespace-nowrap tabular-nums">
+                        {formatCurrency(grandTotal - totalUnreceived)}
+                        <div className="text-[11px] font-normal text-blue-700">Unreceived {formatCurrency(totalUnreceived)}</div>
+                      </td>
+                      <td className="py-3 px-3 text-right whitespace-nowrap tabular-nums">
+                        {formatCurrency(grandTotal - totalUnpaid)}
+                        <div className="text-[11px] font-normal text-orange-700">Unpaid {formatCurrency(totalUnpaid)}</div>
+                      </td>
                       <td />
                     </tr>
                   </tfoot>
@@ -451,7 +527,8 @@ ${buildPrintHeader(shop)}
             </div>
 
             <p className="text-xs text-gray-500">
-              On save, the buyer is charged {formatCurrency(totalAmount)} and the seller is owed the same — both show in their ledgers.
+              On save, {formatCurrency(totalAmount)} goes to the buyer&apos;s ledger as unreceived and to the seller&apos;s ledger as unpaid.
+              Use the Received / Paid buttons after saving to record the money.
             </p>
 
             <div className="flex gap-3">
@@ -461,6 +538,78 @@ ${buildPrintHeader(shop)}
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* After saving a new entry: Received / Paid */}
+      <Dialog open={!!savedEntry} onOpenChange={(o) => { if (!o) setSavedEntry(null) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Entry #{savedEntry?.entryNo} saved</DialogTitle></DialogHeader>
+          {savedEntry && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-purple-50 p-3 text-sm space-y-1">
+                <div className="flex justify-between gap-2"><span className="text-gray-500">Total</span><span className="font-bold">{formatCurrency(savedEntry.totalAmount)}</span></div>
+                <div className="flex justify-between gap-2"><span className="text-gray-500">Buyer — {buyerName(savedEntry)}</span><span className="text-blue-700">Unreceived</span></div>
+                <div className="flex justify-between gap-2"><span className="text-gray-500">Seller — {sellerName(savedEntry)}</span><span className="text-orange-700">Unpaid</span></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => openPay(savedEntry, "RECEIVE")}>Received</Button>
+                <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => openPay(savedEntry, "PAY")}>Paid</Button>
+              </div>
+              <Button variant="outline" className="w-full" onClick={() => setSavedEntry(null)}>Later</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Received from buyer / Paid to seller */}
+      <Dialog open={!!payFor} onOpenChange={(o) => { if (!o) setPayFor(null) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{payFor?.kind === "RECEIVE" ? "Received from Buyer" : "Paid to Seller"}{payFor ? ` — #${payFor.entry.entryNo}` : ""}</DialogTitle>
+          </DialogHeader>
+          {payFor && (() => {
+            const receive = payFor.kind === "RECEIVE"
+            const party = receive ? buyerName(payFor.entry) : sellerName(payFor.entry)
+            const hasLedger = receive ? !!payFor.entry.customerId : !!(payFor.entry.farmerId || payFor.entry.supplierId)
+            const left = receive ? leftToReceive(payFor.entry) : leftToPay(payFor.entry)
+            return (
+              <div className="space-y-4">
+                <div className={`rounded-lg p-3 text-sm space-y-1 ${receive ? "bg-blue-50" : "bg-orange-50"}`}>
+                  <div className="flex justify-between gap-2"><span className="text-gray-500">{receive ? "Buyer" : "Seller"}</span><span className="font-medium">{party}</span></div>
+                  <div className="flex justify-between gap-2"><span className="text-gray-500">Total</span><span>{formatCurrency(payFor.entry.totalAmount)}</span></div>
+                  <div className="flex justify-between gap-2"><span className="text-gray-500">{receive ? "Unreceived" : "Unpaid"}</span><span className="font-bold">{formatCurrency(left)}</span></div>
+                </div>
+                <div>
+                  <Label>Amount</Label>
+                  <Input type="number" autoFocus value={payAmount} onChange={(e) => setPayAmount(e.target.value)} />
+                </div>
+                <div>
+                  <Label>Method</Label>
+                  <select value={payMethod} onChange={(e) => setPayMethod(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm">
+                    <option value="CASH">Cash</option>
+                    <option value="BANK_TRANSFER">Bank Transfer</option>
+                    <option value="CHEQUE">Cheque</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>Notes (optional)</Label>
+                  <Input value={payNotes} onChange={(e) => setPayNotes(e.target.value)} placeholder="Optional..." />
+                </div>
+                <p className="text-xs text-gray-500">
+                  {hasLedger
+                    ? `Goes to ${party}'s ledger as ${receive ? "received" : "paid"}.`
+                    : `${party} is walk-in (no ledger) — only this entry is updated.`}
+                </p>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex-1" onClick={() => setPayFor(null)} disabled={paying}>Cancel</Button>
+                  <Button className={`flex-1 ${receive ? "bg-blue-600 hover:bg-blue-700" : "bg-orange-600 hover:bg-orange-700"}`} onClick={handlePay} disabled={paying}>
+                    {paying ? "Saving..." : receive ? "Save Received" : "Save Paid"}
+                  </Button>
+                </div>
+              </div>
+            )
+          })()}
         </DialogContent>
       </Dialog>
     </div>

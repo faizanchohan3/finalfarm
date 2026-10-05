@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
+import { galaLedgerText } from "@/lib/gala"
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -24,7 +25,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   if (!farmer) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [sales, commissions, pesticideSales]: [any[], any[], any[]] = await Promise.all([
+  const [sales, commissions, pesticideSales, galaEntries]: [any[], any[], any[], any[]] = await Promise.all([
     (db.sale as any).findMany({
       where: { farmerId: id },
       orderBy: { createdAt: "asc" },
@@ -41,6 +42,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       orderBy: { createdAt: "asc" },
       include: { pesticide: { select: { name: true, unit: true } } },
     }),
+    // Gala Mandi entries where this farmer is the seller (their Paid payments are farmer payments)
+    db.galaEntry.findMany({ where: { farmerId: id }, orderBy: { entryDate: "asc" } }),
   ])
 
   const events: any[] = []
@@ -146,6 +149,18 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       weight: comm.weight || 0,
       rate: comm.rate || 0,
       rateUnit: comm.rateUnit || "kg",
+    })
+  }
+
+  // Gala Mandi: farmer sold through the mandi → mandi owes the total (this ledger: debit); unpaid part in the description
+  for (const g of galaEntries) {
+    events.push({
+      date: g.entryDate,
+      type: "GALA",
+      description: galaLedgerText(g, "seller"),
+      debit: g.totalAmount,
+      credit: 0,
+      ref: g.id,
     })
   }
 
