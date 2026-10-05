@@ -198,7 +198,7 @@ export default function BillMakerPage() {
   async function deleteBill(b: any) {
     if (!confirm(`${t("Delete bill")} #${b.billNo} (${b.name})?`)) return
     const res = await fetch(`/api/bills/${b.id}`, { method: "DELETE" })
-    if (!res.ok) return alert(t("Failed to delete bill"))
+    if (!res.ok) return res.status === 403 ? undefined : alert(t("Failed to delete bill")) // 403: admin-only message already shown
     const bills = await loadBills()
     if (editingId === b.id) resetForm(bills)
   }

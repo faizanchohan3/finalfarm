@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
+import { DeleteGuard } from "@/components/delete-guard"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 
@@ -27,6 +28,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-white">
+      <DeleteGuard />
       <div className="print:hidden">
         <Sidebar />
       </div>

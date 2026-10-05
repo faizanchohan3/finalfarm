@@ -164,6 +164,7 @@ export default function CustomersPage() {
     setDeleting(true)
     const res = await fetch(`/api/customers/${deleteTarget.id}?permanent=true`, { method: "DELETE" })
     setDeleting(false)
+    if (res.status === 403) { setDeleteTarget(null); return } // admin-only message already shown
     if (!res.ok) {
       const data = await res.json()
       alert(data.error || "Delete failed")

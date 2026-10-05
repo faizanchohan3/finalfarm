@@ -189,6 +189,7 @@ export default function SalesPage() {
     setDeleting(true)
     const res = await fetch(`/api/sales/${deleteTarget.id}`, { method: "DELETE" })
     setDeleting(false)
+    if (res.status === 403) { setDeleteTarget(null); return } // admin-only message already shown
     if (!res.ok) { alert("Failed to delete sale"); return }
     setDeleteTarget(null)
     loadData()

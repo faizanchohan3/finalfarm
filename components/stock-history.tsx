@@ -69,7 +69,7 @@ export function StockHistory({ open, onClose, products, productId: initialProduc
     try {
       const res = await fetch(`/api/inventory/history?type=${e.type}&id=${encodeURIComponent(e.id)}`, { method: "DELETE" })
       const d = await res.json().catch(() => ({}))
-      if (!res.ok) return alert(d.error || "Failed to delete")
+      if (!res.ok) return res.status === 403 ? undefined : alert(d.error || "Failed to delete")
       setReload((r) => r + 1)
       onChanged?.()
     } finally {

@@ -63,6 +63,7 @@ export default function CommissionPage() {
     setDeleting(true)
     const res = await fetch(`/api/commissions/${deleteTarget.id}`, { method: "DELETE" })
     setDeleting(false)
+    if (res.status === 403) { setDeleteTarget(null); return } // admin-only message already shown
     if (!res.ok) { alert("Failed to delete commission"); return }
     setDeleteTarget(null)
     loadData()

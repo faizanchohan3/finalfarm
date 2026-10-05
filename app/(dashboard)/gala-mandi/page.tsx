@@ -152,7 +152,7 @@ export default function GalaMandiPage() {
     const res = await fetch(`/api/gala/${e.id}`, { method: "DELETE" })
     if (!res.ok) {
       const d = await res.json().catch(() => ({}))
-      return alert(d?.error || "Failed to delete entry")
+      return res.status === 403 ? undefined : alert(d?.error || "Failed to delete entry")
     }
     loadData()
   }

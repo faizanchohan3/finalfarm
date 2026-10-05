@@ -71,6 +71,7 @@ export function getRoleColor(role: string): string {
     MANAGER: "bg-gray-100 text-gray-700",
     CASHIER: "bg-amber-50 text-amber-700",
     AUDITOR: "bg-gray-100 text-gray-700",
+    ACCOUNTANT: "bg-emerald-50 text-emerald-700",
   }
   return colors[role] || "bg-gray-100 text-gray-800"
 }

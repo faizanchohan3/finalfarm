@@ -72,6 +72,7 @@ export default function FinancePage() {
     setDeleting(true)
     try {
       const res = await fetch(`/api/finance/${deleteTarget.id}`, { method: "DELETE" })
+      if (res.status === 403) { setShowDeleteConfirm(false); setDeleteTarget(null); return } // admin-only message already shown
       if (!res.ok) throw new Error("Delete failed")
       setShowDeleteConfirm(false)
       setDeleteTarget(null)

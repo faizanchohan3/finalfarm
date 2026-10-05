@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
+import { ADMIN_ONLY_DELETE, canDelete } from "@/lib/permissions"
 
 export const proxy = auth((req) => {
   const isLoggedIn = !!req.auth
@@ -11,6 +12,11 @@ export const proxy = auth((req) => {
   // Only redirect page routes to login â€” never redirect API routes
   if (!isLoggedIn && !isLoginPage && !pathname.startsWith("/api/")) {
     return NextResponse.redirect(new URL("/login", req.nextUrl))
+  }
+
+  // Only admins may delete anything — every delete in the app is an HTTP DELETE to /api/
+  if (isLoggedIn && req.method === "DELETE" && pathname.startsWith("/api/") && !canDelete(role)) {
+    return NextResponse.json({ error: ADMIN_ONLY_DELETE }, { status: 403 })
   }
 
   if (isLoggedIn && isLoginPage) {

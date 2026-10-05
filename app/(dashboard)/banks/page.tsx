@@ -109,9 +109,11 @@ export default function BanksPage() {
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Remove bank "${name}"? Existing transactions linked to this bank will not be affected.`)) return
-    // Optimistic remove
+    // Optimistic remove — put it back if the delete is refused
+    const before = banks
     setBanks((prev) => prev.filter((b) => b.id !== id))
-    await fetch(`/api/banks/${id}`, { method: "DELETE" })
+    const res = await fetch(`/api/banks/${id}`, { method: "DELETE" })
+    if (!res.ok) setBanks(before)
   }
 
   async function openLedger(bank: any) {

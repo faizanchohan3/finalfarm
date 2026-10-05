@@ -68,6 +68,7 @@ export default function PurchasesPage() {
     setDeleting(true)
     const res = await fetch(`/api/purchases/${deleteTarget.id}`, { method: "DELETE" })
     setDeleting(false)
+    if (res.status === 403) { setDeleteTarget(null); return } // admin-only message already shown
     if (!res.ok) { alert("Failed to delete purchase"); return }
     setDeleteTarget(null)
     loadData()
