@@ -1,15 +1,31 @@
 // Gala Mandi: a buyer (trader) buys goods from a seller (farmer / supplier) through the mandi.
 // The buyer owes the total amount and the seller is owed it — same as a commission entry with no commission.
 
-export const GALA_UNITS = ["KG", "Bag", "Tora", "Mound"] as const
-
-// Row amount = weight × rate. For Mound the rate is per kg and 1 mound = 40 kg.
+// Like Bill Maker: weight is in KG and the rate is per KG or per Mound (40 kg).
+export const RATE_PER = ["KG", "Mound"] as const
+export type RatePer = (typeof RATE_PER)[number]
 export const MOUND_KG = 40
-export function galaRowAmount(qty: number, unit: string, rate: number) {
-  return unit === "Mound" ? qty * MOUND_KG * rate : qty * rate
+
+// Row amount: per KG = kg × rate; per Mound = kg ÷ 40 × rate
+export function galaRowAmount(kg: number, ratePer: string, rate: number) {
+  return ratePer === "Mound" ? (kg / MOUND_KG) * rate : kg * rate
 }
 
-export type GalaItem = { product: string; qty: number; unit: string; rate: number; amount: number }
+// qty is in `unit` (always KG for new rows; older entries may have Bag / Tora / Mound)
+export type GalaItem = { product: string; qty: number; unit: string; ratePer?: RatePer; rate: number; amount: number }
+
+// What an item's rate is per — older rows had no ratePer: their rate was per their unit (per kg for Mound)
+export function itemRatePer(i: { unit?: string; ratePer?: string }) {
+  return i.ratePer || (i.unit === "Mound" ? "KG" : i.unit || "KG")
+}
+
+// An item as a form row in KG. Old Mound rows (mounds × 40 × rate per kg) convert exactly to KG;
+// old Bag / Tora rows keep their numbers so the amount doesn't change.
+export function itemToKgRow(i: GalaItem) {
+  if (i.ratePer) return { qty: i.qty, ratePer: i.ratePer, rate: i.rate }
+  if (i.unit === "Mound") return { qty: i.qty * MOUND_KG, ratePer: "KG" as RatePer, rate: i.rate }
+  return { qty: i.qty, ratePer: "KG" as RatePer, rate: i.rate }
+}
 
 // Post (sign = 1) or take back (sign = -1) an entry's effect on the buyer's and seller's balances.
 export async function applyGala(

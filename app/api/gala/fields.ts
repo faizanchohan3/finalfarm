@@ -1,4 +1,4 @@
-import { GALA_UNITS, galaRowAmount, type GalaItem } from "@/lib/gala"
+import { RATE_PER, galaRowAmount, type GalaItem, type RatePer } from "@/lib/gala"
 
 const round = (v: number) => Math.round(v * 100) / 100
 
@@ -8,13 +8,15 @@ export function galaFields(body: any) {
     .map((r: any) => {
       const qty = parseFloat(r.qty) || 0
       const rate = parseFloat(r.rate) || 0
-      const unit = GALA_UNITS.includes(r.unit) ? r.unit : "KG"
+      // Weight is in KG; the rate is per KG or per Mound (40 kg)
+      const ratePer: RatePer = RATE_PER.includes(r.ratePer) ? r.ratePer : "KG"
       return {
         product: String(r.product || "").trim(),
         qty,
-        unit,
+        unit: "KG",
+        ratePer,
         rate,
-        amount: round(galaRowAmount(qty, unit, rate)),
+        amount: round(galaRowAmount(qty, ratePer, rate)),
       }
     })
     .filter((r: GalaItem) => r.product || r.qty || r.rate)

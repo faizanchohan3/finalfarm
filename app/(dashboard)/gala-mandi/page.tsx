@@ -11,12 +11,12 @@ import { SearchableSelect } from "@/components/ui/searchable-select"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { buildPrintHeader, escapeHtml, reportCSS } from "@/lib/print-utils"
 import { recordCode } from "@/lib/record-code"
-import { GALA_UNITS, galaRowAmount } from "@/lib/gala"
+import { RATE_PER, galaRowAmount, itemRatePer, itemToKgRow } from "@/lib/gala"
 import { Plus, Search, Scale, Printer, Edit, Trash2, X } from "lucide-react"
 
-const UNITS = GALA_UNITS
-type Row = { product: string; qty: string; unit: string; rate: string }
-const emptyRow = (): Row => ({ product: "", qty: "", unit: "KG", rate: "" })
+// Weight is always KG (like Bill Maker); the rate is per KG or per Mound (40 kg)
+type Row = { product: string; qty: string; ratePer: string; rate: string }
+const emptyRow = (): Row => ({ product: "", qty: "", ratePer: "KG", rate: "" })
 const today = () => new Date().toISOString().slice(0, 10)
 const n = (v: number) => (v || 0).toLocaleString("en-PK", { maximumFractionDigits: 2 })
 
@@ -83,7 +83,7 @@ export default function GalaMandiPage() {
   const parsed = rows.map((r) => {
     const qty = parseFloat(r.qty) || 0
     const rate = parseFloat(r.rate) || 0
-    return { ...r, qtyN: qty, rateN: rate, amount: galaRowAmount(qty, r.unit, rate) }
+    return { ...r, qtyN: qty, rateN: rate, amount: galaRowAmount(qty, r.ratePer, rate) }
   })
   const totalWeight = parsed.reduce((s, r) => s + r.qtyN, 0)
   const totalRate = parsed.reduce((s, r) => s + r.rateN, 0)
@@ -109,7 +109,7 @@ export default function GalaMandiPage() {
     setSellerId(e.farmerId ? `farmer_${e.farmerId}` : e.supplierId ? `supplier_${e.supplierId}` : e.walkInSeller ? "walkin" : "")
     setWalkInSeller(e.walkInSeller || "")
     const items = Array.isArray(e.items) ? e.items : []
-    setRows(items.length ? items.map((i: any) => ({ product: i.product || "", qty: String(i.qty ?? ""), unit: i.unit || "KG", rate: String(i.rate ?? "") })) : [emptyRow()])
+    setRows(items.length ? items.map((i: any) => { const k = itemToKgRow(i); return { product: i.product || "", qty: String(k.qty ?? ""), ratePer: k.ratePer, rate: String(k.rate ?? "") } }) : [emptyRow()])
     setNotes(e.notes || "")
     setShowForm(true)
   }
@@ -166,13 +166,14 @@ export default function GalaMandiPage() {
     const items = itemsOf(e)
     const rowsHtml = items.map((i, idx) => `<tr>
       <td>${idx + 1}</td><td>${x(i.product)}</td>
-      <td style="text-align:right">${n(i.qty)}</td><td>${x(i.unit)}</td>
-      <td style="text-align:right">${n(i.rate)}${i.unit === "Mound" ? " /kg" : ""}</td><td style="text-align:right">${n(i.amount)}</td>
+      <td style="text-align:right">${n(i.qty)}${i.unit && i.unit !== "KG" ? ` ${x(i.unit)}` : ""}</td><td>Per ${x(itemRatePer(i))}</td>
+      <td style="text-align:right">${n(i.rate)}</td><td style="text-align:right">${n(i.amount)}</td>
     </tr>`).join("")
-    // Total weight goes under Weight, its unit under Unit; mixed units are listed together under Weight
-    const units = Array.from(new Set(items.map((i) => i.unit)))
-    const weightCells = units.length === 1
-      ? `<td style="text-align:right"><strong>${n(items.reduce((s, i) => s + (i.qty || 0), 0))}</strong></td><td><strong>${x(units[0])}</strong></td>`
+    // Total weight under Weight (KG); older entries with other units list them together
+    const allKg = items.every((i) => !i.unit || i.unit === "KG")
+    const totalKg = items.reduce((s, i) => s + (i.qty || 0), 0)
+    const weightCells = allKg
+      ? `<td style="text-align:right"><strong>${n(totalKg)} KG</strong></td><td>${n(totalKg / 40)} mound</td>`
       : `<td style="text-align:right"><strong>${x(weightByUnit(items))}</strong></td><td></td>`
     const w = window.open("", "_blank")
     if (!w) return
@@ -189,7 +190,7 @@ ${buildPrintHeader(shop)}
     <div style="border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px"><div style="font-size:9px;color:#9ca3af;text-transform:uppercase;font-weight:700">Buyer</div><div style="font-size:14px;font-weight:800">${x(buyerName(e))}</div></div>
   </div>
   <table>
-    <thead><tr><th>#</th><th>Product</th><th style="text-align:right">Weight</th><th>Unit</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead>
+    <thead><tr><th>#</th><th>Product</th><th style="text-align:right">Weight (KG)</th><th>Rate per</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead>
     <tbody>${rowsHtml}</tbody>
     <tfoot><tr>
       <td colspan="2"><strong>Total</strong></td>
@@ -286,7 +287,7 @@ ${buildPrintHeader(shop)}
                       <td className="py-3 px-3 font-medium text-gray-800">{buyerName(e)}</td>
                       <td className="py-3 px-3 text-xs text-gray-600">
                         {itemsOf(e).map((i, idx) => (
-                          <div key={idx}>{i.product} — {n(i.qty)} {i.unit} × {n(i.rate)}</div>
+                          <div key={idx}>{i.product} — {n(i.qty)} {i.unit} × {n(i.rate)}{itemRatePer(i) !== i.unit ? ` /${itemRatePer(i)}` : ""}</div>
                         ))}
                       </td>
                       <td className="py-3 px-3 text-gray-700 whitespace-nowrap">{weightByUnit(itemsOf(e))}</td>
@@ -385,8 +386,8 @@ ${buildPrintHeader(shop)}
                     <tr className="text-xs text-gray-600">
                       <th className="text-left py-2 px-2 font-semibold w-8">#</th>
                       <th className="text-left py-2 px-2 font-semibold">Product</th>
-                      <th className="text-left py-2 px-2 font-semibold w-28">Weight</th>
-                      <th className="text-left py-2 px-2 font-semibold w-24">Unit</th>
+                      <th className="text-left py-2 px-2 font-semibold w-28">Weight (KG)</th>
+                      <th className="text-left py-2 px-2 font-semibold w-32">Rate per</th>
                       <th className="text-left py-2 px-2 font-semibold w-28">Rate</th>
                       <th className="text-right py-2 px-2 font-semibold w-32">Amount</th>
                       <th className="w-8" />
@@ -403,16 +404,17 @@ ${buildPrintHeader(shop)}
                           <Input type="number" value={r.qty} onChange={(e) => updateRow(i, "qty", e.target.value)} placeholder="0" className="h-8" />
                         </td>
                         <td className="py-1.5 px-2">
-                          <select value={r.unit} onChange={(e) => updateRow(i, "unit", e.target.value)}
+                          <select value={r.ratePer} onChange={(e) => updateRow(i, "ratePer", e.target.value)}
                             className="flex h-8 w-full rounded-md border border-input bg-background px-2 text-sm shadow-sm">
-                            {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+                            {RATE_PER.map((u) => <option key={u} value={u}>{u === "Mound" ? "Per Mound (40 kg)" : "Per KG"}</option>)}
                           </select>
                         </td>
                         <td className="py-1.5 px-2">
                           <Input type="number" value={r.rate} onChange={(e) => updateRow(i, "rate", e.target.value)} placeholder="0" className="h-8" />
+                          {r.ratePer === "Mound" && r.rateN > 0 && <div className="text-[10px] text-gray-400 mt-0.5">= Rs {n(r.rateN / 40)} / kg</div>}
                         </td>
                         <td className="py-1.5 px-2 text-right font-medium text-gray-800 tabular-nums whitespace-nowrap">{formatCurrency(r.amount)}
-                          {r.unit === "Mound" && r.qtyN > 0 && <div className="text-[10px] font-normal text-gray-400">{n(r.qtyN)} × 40 kg × {n(r.rateN)}/kg</div>}
+                          {r.ratePer === "Mound" && r.qtyN > 0 && <div className="text-[10px] font-normal text-gray-400">{n(r.qtyN / 40)} mound × {n(r.rateN)}</div>}
                         </td>
                         <td className="py-1.5 px-1">
                           <button onClick={() => setRows((prev) => prev.filter((_, idx) => idx !== i))} disabled={rows.length === 1}
@@ -426,9 +428,8 @@ ${buildPrintHeader(shop)}
                   <tfoot className="bg-purple-50 border-t-2 border-purple-200 font-semibold">
                     <tr>
                       <td colSpan={2} className="py-2.5 px-2 text-gray-800">Total</td>
-                      <td colSpan={2} className="py-2.5 px-2 text-gray-800 tabular-nums" title={`${n(totalWeight)} in all units`}>
-                        {weightByUnit(parsed.map((r) => ({ qty: r.qtyN, unit: r.unit })))}
-                      </td>
+                      <td className="py-2.5 px-2 text-gray-800 tabular-nums whitespace-nowrap">{n(totalWeight)} KG</td>
+                      <td className="py-2.5 px-2 text-xs font-normal text-gray-500 whitespace-nowrap">{n(totalWeight / 40)} mound</td>
                       <td className="py-2.5 px-2 text-gray-800 tabular-nums">{n(totalRate)}</td>
                       <td className="py-2.5 px-2 text-right text-purple-800 tabular-nums whitespace-nowrap">{formatCurrency(totalAmount)}</td>
                       <td />
