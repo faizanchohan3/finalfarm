@@ -24,6 +24,7 @@ export async function GET(req: Request) {
         supplier: { select: { id: true, name: true } },
         createdBy: { select: { name: true } },
         payments: { orderBy: { createdAt: "desc" } },
+        lot: { select: { lotNo: true } },
       },
     }),
     db.commission.count({ where: shopFilter }),

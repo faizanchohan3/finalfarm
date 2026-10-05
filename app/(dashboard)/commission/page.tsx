@@ -10,7 +10,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Textarea } from "@/components/ui/textarea"
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
 import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print-utils"
-import { Plus, Search, Percent, CreditCard, Printer, Trash2, X } from "lucide-react"
+import { Plus, Search, Percent, CreditCard, Printer, Trash2, X, Edit } from "lucide-react"
 import { useLang } from "@/lib/i18n"
 import { recordCode } from "@/lib/record-code"
 
@@ -29,6 +29,7 @@ export default function CommissionPage() {
 
   // New commission modal state
   const [showNew, setShowNew] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null) // set when the modal is editing an existing commission
   const [customerId, setCustomerId] = useState("")        // "" = none selected, "walkin" = walk-in
   const [walkInCustomer, setWalkInCustomer] = useState("")
   const [partyId, setPartyId] = useState("")              // "" = none, "walkin" = walk-in, "farmer_X" or supplier id
@@ -117,7 +118,7 @@ export default function CommissionPage() {
     const r = parseFloat(rate)
     const base = rateUnit === "mound" ? netWeight / 40 : netWeight
     if (base > 0 && r > 0) setTotalValue((base * r).toFixed(2))
-    else setTotalValue("")
+    else if (!editingId) setTotalValue("") // when editing, keep the loaded goods value
   }, [netWeight, rate, rateUnit])
 
   const total = parseFloat(totalValue || "0")  // goods value
@@ -131,7 +132,24 @@ export default function CommissionPage() {
   const sellerPayable = netAmount
   const balance = buyerOwes - parseFloat(paidAmount || "0")
 
+  function openEditForm(c: any) {
+    setEditingId(c.id)
+    setCustomerId(c.customerId || (c.walkInCustomer ? "walkin" : "")); setWalkInCustomer(c.walkInCustomer || "")
+    setPartyId(c.farmerId ? `farmer_${c.farmerId}` : c.supplierId || (c.walkInSeller ? "walkin" : "")); setWalkInSeller(c.walkInSeller || "")
+    setCommodity(c.commodity || ""); setVehicleNo(c.vehicleNo || "")
+    setBags(c.bags != null ? String(c.bags) : ""); setBagType(c.bagType || "bag")
+    const s = (v: number | null | undefined) => (v ? String(v) : "")
+    setWeightRows([c.grossWeight ? { gross: s(c.grossWeight), tare: s(c.tareWeight), bardana: s(c.bardanaWeight) } : { gross: s(c.weight), tare: "", bardana: "" }])
+    setRate(s(c.rate)); setRateUnit(c.rateUnit === "mound" ? "mound" : "kg")
+    // Goods value isn't stored â€” work it back out from the saved totals
+    setTotalValue(String(parseFloat(breakdown(c).goods.toFixed(2))))
+    setCommissionRate(String(c.commissionRate ?? 0)); setLabourAmount(String(c.labourAmount || 0)); setLabourMode(c.labourMode === "DEDUCT" ? "DEDUCT" : "ADD")
+    setPaidAmount(String(c.paidAmount || 0)); setNotes(c.notes || "")
+    setShowNew(true)
+  }
+
   function resetNewForm() {
+    setEditingId(null)
     setCustomerId(""); setWalkInCustomer("")
     setPartyId(""); setWalkInSeller("")
     setCommodity(""); setVehicleNo(""); setBags(""); setBagType("bag")
@@ -152,8 +170,8 @@ export default function CommissionPage() {
       const farmerId = isFarmer ? partyId.replace("farmer_", "") : null
       const supplierId = (!isFarmer && !isWalkInSeller && partyId) ? partyId : null
 
-      const res = await fetch("/api/commissions", {
-        method: "POST",
+      const res = await fetch(editingId ? `/api/commissions/${editingId}` : "/api/commissions", {
+        method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerId: hasCustomer ? customerId : null,
@@ -181,10 +199,11 @@ export default function CommissionPage() {
       })
       if (res.ok) {
         const d = await res.json().catch(() => ({}))
+        const wasEditing = !!editingId
         setShowNew(false)
         resetNewForm()
         loadData()
-        if (d?.commission?.id) alert(`Commission saved. ID: ${recordCode("commission", d.commission.id)}`)
+        if (d?.commission?.id) alert(`Commission ${wasEditing ? "updated" : "saved"}. ID: ${recordCode("commission", d.commission.id)}`)
       } else {
         const d = await res.json().catch(() => ({}))
         alert(d?.error || "Failed to save commission")
@@ -478,6 +497,11 @@ ${c.notes ? `<p style="font-size:12px;color:#555;margin:10px 24px 0"><strong>Ù†Ù
                           <button onClick={() => printForBuyer(c)} className="flex items-center gap-1 px-2 py-1 text-xs bg-green-50 text-purple-700 border border-green-200 rounded hover:bg-green-100 whitespace-nowrap">
                             <Printer className="w-3 h-3" /> Buyer
                           </button>
+                          {!c.lot && (
+                            <button onClick={() => openEditForm(c)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit Commission">
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           <button onClick={() => setDeleteTarget(c)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete Commission">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -505,7 +529,7 @@ ${c.notes ? `<p style="font-size:12px;color:#555;margin:10px 24px 0"><strong>Ù†Ù
                 <Percent className="w-5 h-5 text-brand-600" />
               </div>
               <div>
-                <h2 className="text-base font-semibold">{t("New Commission")}</h2>
+                <h2 className="text-base font-semibold">{editingId ? "Edit Commission" : t("New Commission")}</h2>
                 <p className="text-gray-500 text-xs">{t("Fill seller, buyer, and transaction details")}</p>
               </div>
             </div>
@@ -748,12 +772,13 @@ ${c.notes ? `<p style="font-size:12px;color:#555;margin:10px 24px 0"><strong>Ù†Ù
               <div className="bg-blue-50 rounded-xl p-4 space-y-3 border border-blue-300">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-semibold text-gray-600">Initial Payment (PKR)</Label>
+                  <Label className="text-xs font-semibold text-gray-600">{editingId ? "Already Paid (PKR)" : "Initial Payment (PKR)"}</Label>
                   <div className="relative mt-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-medium">PKR</span>
-                    <Input type="number" className="pl-9" value={paidAmount}
+                    <Input type="number" className="pl-9" value={paidAmount} readOnly={!!editingId}
                       onChange={(e) => setPaidAmount(e.target.value)} />
                   </div>
+                  {editingId && <p className="text-[11px] text-gray-400 mt-1">Payments stay as recorded â€” add more with the Pay button</p>}
                 </div>
                 <div className="flex flex-col justify-end">
                   <div className={`rounded-lg px-3 py-2.5 text-center ${balance > 0 ? "bg-red-50 border border-red-100" : "bg-green-50 border border-green-100"}`}>
@@ -776,7 +801,7 @@ ${c.notes ? `<p style="font-size:12px;color:#555;margin:10px 24px 0"><strong>Ù†Ù
             <div className="flex gap-3 pt-1">
               <Button variant="outline" onClick={() => setShowNew(false)} className="flex-1" disabled={saving}>Cancel</Button>
               <Button onClick={handleSave} disabled={saving} className="flex-1 bg-orange-600 hover:bg-orange-700 gap-2">
-                {saving ? "Saving..." : "Create Commission"}
+                {saving ? "Saving..." : editingId ? "Update Commission" : "Create Commission"}
               </Button>
             </div>
           </div>
