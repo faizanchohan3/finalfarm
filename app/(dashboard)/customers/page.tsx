@@ -265,39 +265,39 @@ export default function CustomersPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-5 flex items-center gap-3">
-            <div className="p-2 bg-blue-50 rounded-lg"><Users className="w-5 h-5 text-blue-600" /></div>
-            <div>
+          <CardContent className="p-5 flex items-center gap-3 min-w-0">
+            <div className="p-2 bg-blue-50 rounded-lg flex-shrink-0"><Users className="w-5 h-5 text-blue-600" /></div>
+            <div className="min-w-0">
               <p className="text-2xl font-bold text-gray-900">{customers.length}</p>
               <p className="text-sm text-gray-500">{t("Total Registered")}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-5 flex items-center gap-3">
-            <div className="p-2 bg-green-50 rounded-lg"><TrendingUp className="w-5 h-5 text-purple-600" /></div>
-            <div>
+          <CardContent className="p-5 flex items-center gap-3 min-w-0">
+            <div className="p-2 bg-green-50 rounded-lg flex-shrink-0"><TrendingUp className="w-5 h-5 text-purple-600" /></div>
+            <div className="min-w-0">
               <p className="text-2xl font-bold text-gray-900">{activeCustomers.length}</p>
               <p className="text-sm text-gray-500">{t("Active Traders")}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-5 flex items-center gap-3">
-            <div className="p-2 bg-emerald-50 rounded-lg"><ArrowDownCircle className="w-5 h-5 text-emerald-600" /></div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalReceived)}</p>
+          <CardContent className="p-5 flex items-center gap-3 min-w-0">
+            <div className="p-2 bg-emerald-50 rounded-lg flex-shrink-0"><ArrowDownCircle className="w-5 h-5 text-emerald-600" /></div>
+            <div className="min-w-0">
+              <p className="text-xl 2xl:text-2xl font-bold text-gray-900 tabular-nums break-words">{formatCurrency(totalReceived)}</p>
               <p className="text-sm text-gray-500">{t("Total Received")}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-5 flex items-center gap-3">
-            <div className="p-2 bg-orange-50 rounded-lg"><TrendingUp className="w-5 h-5 text-orange-600" /></div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalPaid)}</p>
+          <CardContent className="p-5 flex items-center gap-3 min-w-0">
+            <div className="p-2 bg-orange-50 rounded-lg flex-shrink-0"><TrendingUp className="w-5 h-5 text-orange-600" /></div>
+            <div className="min-w-0">
+              <p className="text-xl 2xl:text-2xl font-bold text-gray-900 tabular-nums break-words">{formatCurrency(totalPaid)}</p>
               <p className="text-sm text-gray-500">{t("Total Paid")}</p>
             </div>
           </CardContent>
