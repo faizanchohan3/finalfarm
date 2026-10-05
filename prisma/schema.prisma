@@ -130,6 +130,7 @@ model Shop {
   lots                Lot[]
   markhas             Markha[]
   bills               Bill[]
+  galaEntries         GalaEntry[]
   rooms               Room[]
 }
 
@@ -327,6 +328,7 @@ model Customer {
   freightSlips      FreightSlip[]
   commissions       Commission[]
   bills             Bill[]
+  galaEntries       GalaEntry[]
   payments          CustomerPayment[]
   purchasesAsSeller Purchase[]      @relation("PurchaseSeller")
   lots              Lot[]
@@ -361,6 +363,7 @@ model Supplier {
   shop        Shop?             @relation(fields: [shopId], references: [id])
   purchases   Purchase[]
   commissions Commission[]
+  galaEntries GalaEntry[]
   payments    SupplierPayment[]
 }
 
@@ -675,6 +678,7 @@ model Farmer {
   sales            Sale[]
   productPurchases Purchase[]
   commissions      Commission[]
+  galaEntries      GalaEntry[]
   pesticideSales   PesticideSale[]
   lots             Lot[]
 }
@@ -1051,4 +1055,38 @@ model CommissionPayment {
   createdAt    DateTime      @default(now())
 
   commission Commission @relation(fields: [commissionId], references: [id])
+}
+
+// ── GALA MANDI ───────────────────────────────────────────────────────────────
+
+// One mandi deal: a buyer (trader) buys products from a seller (farmer / supplier / walk-in).
+// items: [{ product, qty, unit: KG | Bag | Tora, rate, amount }]. Buyer is charged the total; seller is owed it.
+model GalaEntry {
+  id           String   @id @default(cuid())
+  shopId       String?
+  entryNo      String
+  entryDate    DateTime
+  customerId   String?
+  walkInBuyer  String?
+  farmerId     String?
+  supplierId   String?
+  walkInSeller String?
+  items        Json
+  totalWeight  Float    @default(0)
+  totalRate    Float    @default(0)
+  totalAmount  Float    @default(0)
+  notes        String?
+  createdById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  shop     Shop?     @relation(fields: [shopId], references: [id])
+  customer Customer? @relation(fields: [customerId], references: [id])
+  farmer   Farmer?   @relation(fields: [farmerId], references: [id])
+  supplier Supplier? @relation(fields: [supplierId], references: [id])
+
+  @@index([shopId, entryDate])
+  @@index([customerId])
+  @@index([farmerId])
+  @@index([supplierId])
 }

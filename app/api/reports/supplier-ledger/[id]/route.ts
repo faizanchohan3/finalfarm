@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { galaItemsText } from "@/lib/gala"
+import { recordCode } from "@/lib/record-code"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -24,7 +26,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const supplier = await db.supplier.findUnique({ where: { id } })
   if (!supplier) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const [purchases, commissions, supplierPayments] = await Promise.all([
+  const [purchases, commissions, supplierPayments, galaEntries] = await Promise.all([
     db.purchase.findMany({
       where: { supplierId: id, ...dateWhere },
       orderBy: { createdAt: "asc" },
@@ -35,6 +37,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     }),
     db.commission.findMany({ where: { supplierId: id, ...dateWhere }, orderBy: { createdAt: "asc" } }),
     db.supplierPayment.findMany({ where: { supplierId: id, ...dateWhere }, orderBy: { createdAt: "asc" } }),
+    db.galaEntry.findMany({ where: { supplierId: id, ...(dateWhere.createdAt ? { entryDate: dateWhere.createdAt } : {}) }, orderBy: { entryDate: "asc" } }),
   ])
 
   const events: any[] = []
@@ -80,6 +83,18 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       description: `Commission #${comm.id.slice(-6).toUpperCase()}${parts ? ` — ${parts}` : ""}`,
       debit: 0,
       credit: comm.sellerPayable,
+    })
+  }
+
+  // Gala Mandi: supplier sold goods through the mandi → Credit supplier
+  for (const g of galaEntries) {
+    const desc = galaItemsText(g.items)
+    events.push({
+      date: g.entryDate,
+      type: "GALA",
+      description: `Gala Mandi #${g.entryNo} (${recordCode("gala", g.id)})${desc ? ` — ${desc}` : ""}`,
+      debit: 0,
+      credit: g.totalAmount,
     })
   }
 

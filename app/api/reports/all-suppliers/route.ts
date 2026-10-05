@@ -32,7 +32,8 @@ export async function GET(req: Request) {
   const supplierIds = suppliers.map((s) => s.id)
   if (supplierIds.length === 0) return NextResponse.json({ suppliers: [] })
 
-  const [purchaseTotals, commissionTotals, paymentTotals] = await Promise.all([
+  const galaDateWhere = dateWhere.createdAt ? { entryDate: dateWhere.createdAt } : {}
+  const [purchaseTotals, commissionTotals, paymentTotals, galaTotals] = await Promise.all([
     db.purchase.groupBy({
       by: ["supplierId"],
       _sum: { totalAmount: true },
@@ -48,7 +49,9 @@ export async function GET(req: Request) {
       _sum: { amount: true },
       where: { supplierId: { in: supplierIds }, direction: "PAY", ...dateWhere },
     }),
+    db.galaEntry.groupBy({ by: ["supplierId"], _sum: { totalAmount: true }, where: { supplierId: { in: supplierIds }, ...galaDateWhere } }),
   ])
+  const galaMap = Object.fromEntries(galaTotals.map((r) => [r.supplierId!, r._sum.totalAmount || 0]))
 
   const ptMap = Object.fromEntries(purchaseTotals.map((r) => [r.supplierId!, r._sum.totalAmount || 0]))
   const cmMap = Object.fromEntries(commissionTotals.map((r) => [r.supplierId!, r._sum.sellerPayable || 0]))
@@ -56,7 +59,7 @@ export async function GET(req: Request) {
 
   const result = suppliers.map((s) => ({
     ...s,
-    totalDebit: (ptMap[s.id] || 0) + (cmMap[s.id] || 0),
+    totalDebit: (ptMap[s.id] || 0) + (cmMap[s.id] || 0) + (galaMap[s.id] || 0),
     totalCredit: pymtMap[s.id] || 0,
   }))
 

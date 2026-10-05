@@ -3,17 +3,19 @@
 // Restore is the exact reverse of what the delete did (re-create rows with the same ids
 // and re-apply the balance / stock / account changes the delete reversed).
 
+import { applyGala } from "@/lib/gala"
+
 export type DeletedType =
   | "BILL" | "COMMISSION" | "PURCHASE" | "LOT" | "PRODUCT"
   | "CUSTOMER" | "CUSTOMER_PERMANENT" | "FARMER" | "SUPPLIER"
   | "CUSTOMER_PAYMENT" | "FARMER_PAYMENT" | "SUPPLIER_PAYMENT"
-  | "STOCK_ADJUSTMENT" | "STOCK_OPENING"
+  | "STOCK_ADJUSTMENT" | "STOCK_OPENING" | "GALA"
 
 export const DELETED_TYPE_LABEL: Record<DeletedType, string> = {
   BILL: "Bill", COMMISSION: "Commission", PURCHASE: "Purchase", LOT: "Potato Store lot", PRODUCT: "Store product",
   CUSTOMER: "Trader", CUSTOMER_PERMANENT: "Trader (permanent)", FARMER: "Farmer", SUPPLIER: "Supplier",
   CUSTOMER_PAYMENT: "Trader payment", FARMER_PAYMENT: "Farmer payment", SUPPLIER_PAYMENT: "Supplier payment",
-  STOCK_ADJUSTMENT: "Store stock add / remove", STOCK_OPENING: "Store opening stock",
+  STOCK_ADJUSTMENT: "Store stock add / remove", STOCK_OPENING: "Store opening stock", GALA: "Gala Mandi entry",
 }
 
 type Session = { user: { id?: string | null; name?: string | null; shopId?: string | null } }
@@ -177,6 +179,18 @@ export async function restoreDeleted(tx: any, rec: { type: string; recordId: str
       await ensureMissing(tx.stockMovement, m.id)
       await tx.stockMovement.create({ data: m })
       await tx.product.update({ where: { id: m.productId }, data: { currentStock: { increment: m.quantity } } })
+      return
+    }
+
+    case "GALA": {
+      const g = { ...s.entry }
+      // A party deleted since then can't be charged — keep the entry without them
+      if (g.customerId && !(await tx.customer.findUnique({ where: { id: g.customerId } }))) g.customerId = null
+      if (g.farmerId && !(await tx.farmer.findUnique({ where: { id: g.farmerId } }))) g.farmerId = null
+      if (g.supplierId && !(await tx.supplier.findUnique({ where: { id: g.supplierId } }))) g.supplierId = null
+      await ensureMissing(tx.galaEntry, g.id)
+      await tx.galaEntry.create({ data: g })
+      await applyGala(tx, g, 1)
       return
     }
 

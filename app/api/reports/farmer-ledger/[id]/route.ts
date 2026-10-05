@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { galaItemsText } from "@/lib/gala"
+import { recordCode } from "@/lib/record-code"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -25,7 +27,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const farmer = await db.farmer.findUnique({ where: { id } })
   if (!farmer) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const [farmerPurchases, productPurchases, payments, farmerSales, commissions, pesticideSales] = await Promise.all([
+  const [farmerPurchases, productPurchases, payments, farmerSales, commissions, pesticideSales, galaEntries] = await Promise.all([
     db.farmerPurchase.findMany({
       where: { farmerId: id, ...dateWhere },
       orderBy: { createdAt: "asc" },
@@ -50,6 +52,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       where: { farmerId: id, ...dateWhere },
       orderBy: { createdAt: "asc" },
       include: { pesticide: { select: { name: true, unit: true } } },
+    }),
+    // Gala Mandi entries where this farmer is the seller (dated by entry date)
+    db.galaEntry.findMany({
+      where: { farmerId: id, ...(dateWhere.createdAt ? { entryDate: dateWhere.createdAt } : {}) },
+      orderBy: { entryDate: "asc" },
     }),
   ])
 
@@ -157,6 +164,18 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       description: `Commission #${comm.id.slice(-6).toUpperCase()}${parts ? ` — ${parts}` : ""}`,
       debit: 0,
       credit: comm.sellerPayable,
+    })
+  }
+
+  // Gala Mandi: farmer sold goods through the mandi → Credit farmer
+  for (const g of galaEntries) {
+    const desc = galaItemsText(g.items)
+    events.push({
+      date: g.entryDate,
+      type: "GALA",
+      description: `Gala Mandi #${g.entryNo} (${recordCode("gala", g.id)})${desc ? ` — ${desc}` : ""}`,
+      debit: 0,
+      credit: g.totalAmount,
     })
   }
 

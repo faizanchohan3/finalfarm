@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { recordCode } from "@/lib/record-code"
+import { galaItemsText } from "@/lib/gala"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -29,7 +30,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   // Bills are dated by their bill date, not when they were saved
   const billDateWhere: any = dateWhere.createdAt ? { billDate: dateWhere.createdAt } : {}
 
-  const [sales, pesticideSales, customerCommissions, customerPayments, traderPurchases, bills, soldLots] = await Promise.all([
+  const [sales, pesticideSales, customerCommissions, customerPayments, traderPurchases, bills, soldLots, galaEntries] = await Promise.all([
     db.sale.findMany({
       where: { customerId: id, ...dateWhere },
       orderBy: { createdAt: "asc" },
@@ -66,6 +67,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       where: { buyerId: id, commissionId: null, status: { in: ["SOLD", "DISPATCHED"] }, ...(dateWhere.createdAt ? { soldAt: dateWhere.createdAt } : {}) },
       orderBy: { soldAt: "asc" },
       include: { category: { select: { name: true } } },
+    }),
+    // Gala Mandi entries where this trader is the buyer (dated by entry date)
+    db.galaEntry.findMany({
+      where: { customerId: id, ...(dateWhere.createdAt ? { entryDate: dateWhere.createdAt } : {}) },
+      orderBy: { entryDate: "asc" },
     }),
   ])
 
@@ -194,6 +200,18 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       type: "BILL",
       description: `Bill #${bill.billNo} (${recordCode("bill", bill.id)})${desc ? ` — ${desc}` : ""}`,
       debit: bill.amount,
+      credit: 0,
+    })
+  }
+
+  // Gala Mandi: trader bought goods → Debit trader
+  for (const g of galaEntries) {
+    const desc = galaItemsText(g.items)
+    events.push({
+      date: g.entryDate,
+      type: "GALA",
+      description: `Gala Mandi #${g.entryNo} (${recordCode("gala", g.id)})${desc ? ` — ${desc}` : ""}`,
+      debit: g.totalAmount,
       credit: 0,
     })
   }

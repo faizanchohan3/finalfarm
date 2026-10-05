@@ -17,7 +17,7 @@ export async function GET() {
   const farmerIds = farmers.map((f) => f.id)
   if (farmerIds.length === 0) return NextResponse.json({ farmers: [] })
 
-  const [farmerPurchaseTotals, productPurchaseTotals, commissionTotals, paymentTotals] = await Promise.all([
+  const [farmerPurchaseTotals, productPurchaseTotals, commissionTotals, paymentTotals, galaTotals] = await Promise.all([
     db.farmerPurchase.groupBy({
       by: ["farmerId"],
       _sum: { totalAmount: true },
@@ -38,7 +38,9 @@ export async function GET() {
       _sum: { amount: true },
       where: { farmerId: { in: farmerIds } },
     }),
+    db.galaEntry.groupBy({ by: ["farmerId"], _sum: { totalAmount: true }, where: { farmerId: { in: farmerIds } } }),
   ])
+  const galaMap = Object.fromEntries(galaTotals.map((r) => [r.farmerId!, r._sum.totalAmount || 0]))
 
   const fpMap = Object.fromEntries(farmerPurchaseTotals.map((r) => [r.farmerId, r._sum.totalAmount || 0]))
   const ppMap = Object.fromEntries(productPurchaseTotals.map((r) => [r.farmerId!, r._sum.totalAmount || 0]))
@@ -47,7 +49,7 @@ export async function GET() {
 
   const result = farmers.map((f) => ({
     ...f,
-    totalDebit: (fpMap[f.id] || 0) + (ppMap[f.id] || 0) + (cmMap[f.id] || 0),
+    totalDebit: (fpMap[f.id] || 0) + (ppMap[f.id] || 0) + (cmMap[f.id] || 0) + (galaMap[f.id] || 0),
     totalCredit: pymtMap[f.id] || 0,
   }))
 
