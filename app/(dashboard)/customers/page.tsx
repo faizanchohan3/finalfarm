@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useLang } from "@/lib/i18n"
+import { VoiceInputButton } from "@/components/voice-input-button"
 
 type Tab = "sales" | "ledger"
 type StatusTab = "active" | "inactive"
@@ -473,8 +474,11 @@ export default function CustomersPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <Label>Full Name *</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="e.g. Muhammad Tariq" autoFocus />
+                <div className="flex gap-2">
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    placeholder="e.g. Muhammad Tariq" dir="auto" autoFocus />
+                  <VoiceInputButton onResult={(text) => setForm((f) => ({ ...f, name: text }))} />
+                </div>
               </div>
               <div>
                 <Label>Phone Number</Label>

@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
+import { VoiceInputButton } from "@/components/voice-input-button"
 import {
   Plus, Search, Edit, Phone, MapPin, ArrowUpCircle,
   Eye, Truck, X, TrendingDown, Printer, Check, BookOpen, ShoppingBag, Upload, Trash2,
@@ -354,7 +355,10 @@ export default function SuppliersPage() {
           <div className="space-y-4 max-h-[70vh] overflow-y-auto">
             <div>
               <Label>Business Name *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Punjab Agri Traders" />
+              <div className="flex gap-2">
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Punjab Agri Traders" dir="auto" />
+                <VoiceInputButton onResult={(text) => setForm((f) => ({ ...f, name: text }))} />
+              </div>
             </div>
             <div>
               <Label>Picture (Optional)</Label>
