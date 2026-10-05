@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print-utils"
 import { recordCode } from "@/lib/record-code"
-import { Plus, Minus, Search, Package, AlertTriangle, Edit, Trash2, Tag, ChevronDown, ChevronUp, X, Printer, PlusCircle, History } from "lucide-react"
+import { Plus, Minus, Search, Package, AlertTriangle, Edit, Trash2, Tag, ChevronDown, ChevronUp, ChevronRight, X, Printer, PlusCircle, History } from "lucide-react"
 import { StockHistory } from "@/components/stock-history"
 
 export default function InventoryPage() {
@@ -47,6 +47,9 @@ export default function InventoryPage() {
   const [stockSaving, setStockSaving] = useState(false)
   // Stock history dialog: null = closed, "" = all products, otherwise one product id
   const [historyFor, setHistoryFor] = useState<string | null>(null)
+  // Products whose ledger is expanded inline under their row; bumped after stock changes to refetch
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [ledgerVersion, setLedgerVersion] = useState(0)
 
   async function loadData() {
     try {
@@ -59,6 +62,7 @@ export default function InventoryPage() {
         fetch("/api/settings").then((r) => r.json()),
       ])
       setProducts(pr.products || [])
+      setLedgerVersion((v) => v + 1)
       setCategories(cr.categories || [])
       setRooms(rr.rooms || [])
       setShop(shr.shop || null)
@@ -153,6 +157,15 @@ export default function InventoryPage() {
     } finally {
       setStockSaving(false)
     }
+  }
+
+  function toggleLedger(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
   }
 
   async function handleDelete(id: string) {
@@ -564,6 +577,9 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                               <span>
                                 {g.name} <span className="text-purple-500 font-normal">({g.items.length})</span>
                                 <span className="ml-3 text-xs font-normal text-purple-700">Qty: {qtyByUnit(g.items)}</span>
+                                <span className="ml-3 text-xs font-normal text-purple-700">
+                                  Purchase amount: <span className="font-semibold">{formatCurrency(g.items.reduce((s, p) => s + (p.purchaseAmount || 0), 0))}</span>
+                                </span>
                               </span>
                               <button
                                 onClick={() => openRoomStock(g)}
@@ -575,8 +591,20 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                           </td>
                         </tr>
                         {g.items.map((p) => (
-                          <tr key={p.id} className="border-b border-gray-50 hover:bg-blue-50">
-                            <td className="py-3 px-3 font-medium text-gray-800">{p.name}<div className="font-mono text-[11px] text-purple-700 font-normal">{recordCode("product", p.id)}</div></td>
+                          <Fragment key={p.id}>
+                          <tr className={`border-b border-gray-50 hover:bg-blue-50 ${expanded.has(p.id) ? "bg-blue-50/60" : ""}`}>
+                            <td className="py-3 px-3 font-medium text-gray-800">
+                              <div className="flex items-start gap-1.5">
+                                <button
+                                  onClick={() => toggleLedger(p.id)}
+                                  className="mt-0.5 p-0.5 rounded text-gray-400 hover:text-purple-700 hover:bg-purple-100"
+                                  title={expanded.has(p.id) ? "Hide ledger" : "Show ledger"}
+                                >
+                                  {expanded.has(p.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                </button>
+                                <div>{p.name}<div className="font-mono text-[11px] text-purple-700 font-normal">{recordCode("product", p.id)}</div></div>
+                              </div>
+                            </td>
                             <td className="py-3 px-3 text-gray-600">{p.category?.name}</td>
                             <td className="py-3 px-3">
                               <div className="flex items-center gap-1.5">
@@ -610,6 +638,14 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                               </div>
                             </td>
                           </tr>
+                          {expanded.has(p.id) && (
+                            <tr className="border-b border-purple-100">
+                              <td colSpan={8} className="p-0">
+                                <ProductLedger product={p} version={ledgerVersion} onFullHistory={() => setHistoryFor(p.id)} />
+                              </td>
+                            </tr>
+                          )}
+                          </Fragment>
                         ))}
                         <tr className="border-b border-gray-100 bg-gray-50/60">
                           <td colSpan={7} className="py-2 px-3 text-right text-xs font-medium text-gray-500">
@@ -904,3 +940,91 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
   )
 }
 
+
+const LEDGER_TYPE: Record<string, { label: string; color: string }> = {
+  OPENING: { label: "Opening", color: "bg-gray-100 text-gray-700" },
+  PURCHASE: { label: "Purchase", color: "bg-blue-100 text-blue-700" },
+  SALE: { label: "Sale", color: "bg-orange-100 text-orange-700" },
+  ADD: { label: "Added", color: "bg-green-100 text-green-700" },
+  REMOVE: { label: "Removed", color: "bg-red-100 text-red-700" },
+}
+
+// One product's stock ledger, shown under its row: every add / remove with price, amount and stock after it.
+function ProductLedger({ product, version, onFullHistory }: { product: any; version: number; onFullHistory: () => void }) {
+  const [entries, setEntries] = useState<any[] | null>(null)
+
+  useEffect(() => {
+    fetch(`/api/inventory/history?productId=${product.id}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setEntries(d.entries || []))
+      .catch(() => setEntries([]))
+  }, [product.id, version])
+
+  if (entries === null) return <div className="px-6 py-4 text-xs text-gray-400">Loading ledger...</div>
+
+  // API returns newest first; a ledger reads oldest first
+  const rows = [...entries].reverse()
+  const qty = (v: number) => v.toLocaleString("en-PK", { maximumFractionDigits: 2 })
+  const totalIn = rows.filter((e) => e.qty > 0)
+  const totalOut = rows.filter((e) => e.qty < 0)
+
+  return (
+    <div className="bg-purple-50/40 px-4 py-3 sm:pl-10">
+      <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+        <p className="text-xs font-semibold text-purple-800">
+          Ledger — {product.name} <span className="font-normal text-gray-500">({rows.length} entries)</span>
+        </p>
+        <button onClick={onFullHistory} className="inline-flex items-center gap-1 text-xs text-purple-700 hover:text-purple-900 font-medium">
+          <History className="w-3.5 h-3.5" /> Full history / print
+        </button>
+      </div>
+      {rows.length === 0 ? (
+        <p className="text-xs text-gray-400 py-2">No stock entries yet</p>
+      ) : (
+        <div className="overflow-x-auto max-h-80 overflow-y-auto rounded-md border border-purple-100 bg-white">
+          <table className="w-full text-xs">
+            <thead className="bg-purple-50 sticky top-0">
+              <tr className="text-gray-500">
+                <th className="text-left py-2 px-3 font-medium">Date</th>
+                <th className="text-left py-2 px-3 font-medium">Type</th>
+                <th className="text-left py-2 px-3 font-medium">Detail</th>
+                <th className="text-right py-2 px-3 font-medium">In</th>
+                <th className="text-right py-2 px-3 font-medium">Out</th>
+                <th className="text-right py-2 px-3 font-medium">Price / {product.unit}</th>
+                <th className="text-right py-2 px-3 font-medium">Amount</th>
+                <th className="text-right py-2 px-3 font-medium">Stock</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {rows.map((e) => {
+                const t = LEDGER_TYPE[e.type] || { label: e.type, color: "bg-gray-100 text-gray-700" }
+                return (
+                  <tr key={`${e.type}-${e.id}`}>
+                    <td className="py-1.5 px-3 text-gray-600 whitespace-nowrap">{formatDate(e.date)}</td>
+                    <td className="py-1.5 px-3"><span className={`px-1.5 py-0.5 rounded font-semibold ${t.color}`}>{t.label}</span></td>
+                    <td className="py-1.5 px-3 text-gray-600">{[e.ref, e.party, e.note].filter(Boolean).join(" · ")}</td>
+                    <td className="py-1.5 px-3 text-right text-green-700">{e.qty > 0 ? qty(e.qty) : "—"}</td>
+                    <td className="py-1.5 px-3 text-right text-red-600">{e.qty < 0 ? qty(-e.qty) : "—"}</td>
+                    <td className="py-1.5 px-3 text-right text-gray-700">{e.rate ? formatCurrency(e.rate) : "—"}</td>
+                    <td className="py-1.5 px-3 text-right font-medium text-gray-800">{e.amount ? formatCurrency(e.amount) : "—"}</td>
+                    <td className="py-1.5 px-3 text-right font-semibold text-gray-900">{e.balance != null ? `${qty(e.balance)} ${product.unit}` : ""}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+            <tfoot className="bg-purple-50 font-semibold">
+              <tr>
+                <td colSpan={3} className="py-2 px-3 text-gray-700">Total</td>
+                <td className="py-2 px-3 text-right text-green-700">{qty(totalIn.reduce((s, e) => s + e.qty, 0))}</td>
+                <td className="py-2 px-3 text-right text-red-600">{qty(totalOut.reduce((s, e) => s - e.qty, 0))}</td>
+                <td />
+                <td className="py-2 px-3 text-right text-gray-800" title="Value of stock added">{formatCurrency(totalIn.reduce((s, e) => s + e.amount, 0))}</td>
+                <td className="py-2 px-3 text-right text-gray-900">{qty(product.currentStock)} {product.unit}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}

@@ -15,7 +15,22 @@ export async function GET() {
     orderBy: { name: "asc" },
   })
 
-  return cachedJson({ products })
+  // Total purchase amount per product — every stock-in entry from the stock ledger:
+  // opening stock, purchases and manual adds (at the price entered, else the purchase price)
+  const ids = products.map((p) => p.id)
+  const price = Object.fromEntries(products.map((p) => [p.id, p.purchasePrice || 0]))
+  const [openings, purchaseTotals, adds] = await Promise.all([
+    db.stockMovement.findMany({ where: { productId: { in: ids }, reference: "Opening Stock" }, select: { productId: true, quantity: true } }),
+    db.purchaseItem.groupBy({ by: ["productId"], _sum: { total: true }, where: { productId: { in: ids }, purchase: { status: { not: "CANCELLED" } } } }),
+    db.stockAdjustment.findMany({ where: { productId: { in: ids }, type: { not: "DECREASE" } }, select: { productId: true, quantity: true, rate: true } }),
+  ])
+  const purchaseAmount: Record<string, number> = {}
+  const addTo = (id: string, v: number) => { purchaseAmount[id] = (purchaseAmount[id] || 0) + v }
+  for (const m of openings) addTo(m.productId, m.quantity * price[m.productId])
+  for (const r of purchaseTotals) addTo(r.productId, r._sum.total || 0)
+  for (const a of adds) addTo(a.productId, a.quantity * (a.rate ?? price[a.productId]))
+
+  return cachedJson({ products: products.map((p) => ({ ...p, purchaseAmount: purchaseAmount[p.id] || 0 })) })
 }
 
 export async function POST(req: Request) {
