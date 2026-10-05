@@ -37,7 +37,7 @@ export async function POST(req: Request) {
       phone: body.phone || null,
       address: body.address || null,
       cnic: body.cnic || null,
-      commissionRate: body.commissionRate || 2.5,
+      commissionRate: body.commissionRate === undefined || body.commissionRate === "" ? 2.5 : parseFloat(body.commissionRate) || 0,
     },
   })
   return NextResponse.json({ agent })

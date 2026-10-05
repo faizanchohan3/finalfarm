@@ -74,7 +74,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Total value must be greater than 0" }, { status: 400 })
   }
 
-  const commRate = commissionRate !== undefined && commissionRate !== "" ? parseFloat(commissionRate) : 2.5
+  // Blank = no commission, same as the form preview shows
+  const commRate = commissionRate !== undefined && commissionRate !== "" ? parseFloat(commissionRate) || 0 : 0
   const goods = parseFloat(totalValue) // goods value = net kg × rate/kg (or mound × rate/mound)
   const commAmount = parseFloat(((goods * commRate) / 100).toFixed(2))
   const labourAmt = parseFloat(labourAmount || "0")
@@ -151,26 +152,28 @@ export async function POST(req: Request) {
     }
 
     // Record the commission in finance/transactions.
-    // RECEIVE → income (CREDIT); PAY → expense (DEBIT).
+    // RECEIVE → income (CREDIT); PAY → expense (DEBIT). Nothing to post when commission is 0.
     const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
-    const commissionAccount = await tx.account.findFirst({
-      where: { ...shopFilter, type: isPay ? "EXPENSE" : "INCOME", name: { contains: "Commission" }, isActive: true },
-      orderBy: { code: "asc" },
-    })
-    await tx.transaction.create({
-      data: {
-        shopId: session.user.shopId || null,
-        type: isPay ? "DEBIT" : "CREDIT",
-        amount: commEarned,
-        description: `Commission ${isPay ? "paid" : "earned"} — ${commodity || "goods"}${sellerName ? ` from ${sellerName}` : ""} to ${buyerName}`,
-        reference: c.id,
-        category: isPay ? "Commission Paid" : "Commission Income",
-        accountId: commissionAccount?.id || null,
-        createdById: session.user.id,
-      },
-    })
-    if (commissionAccount) {
-      await tx.account.update({ where: { id: commissionAccount.id }, data: { balance: { increment: commEarned } } })
+    if (commEarned > 0) {
+      const commissionAccount = await tx.account.findFirst({
+        where: { ...shopFilter, type: isPay ? "EXPENSE" : "INCOME", name: { contains: "Commission" }, isActive: true },
+        orderBy: { code: "asc" },
+      })
+      await tx.transaction.create({
+        data: {
+          shopId: session.user.shopId || null,
+          type: isPay ? "DEBIT" : "CREDIT",
+          amount: commEarned,
+          description: `Commission ${isPay ? "paid" : "earned"} — ${commodity || "goods"}${sellerName ? ` from ${sellerName}` : ""} to ${buyerName}`,
+          reference: c.id,
+          category: isPay ? "Commission Paid" : "Commission Income",
+          accountId: commissionAccount?.id || null,
+          createdById: session.user.id,
+        },
+      })
+      if (commissionAccount) {
+        await tx.account.update({ where: { id: commissionAccount.id }, data: { balance: { increment: commEarned } } })
+      }
     }
 
     // Post labour as expense to Labour account

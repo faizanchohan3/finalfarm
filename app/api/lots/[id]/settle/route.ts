@@ -30,7 +30,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   const body = await req.json().catch(() => ({}))
-  const commRate = body.commissionRate !== undefined && body.commissionRate !== "" ? parseFloat(body.commissionRate) : 2.5
+  // Blank = no commission, same as the settle preview shows
+  const commRate = body.commissionRate !== undefined && body.commissionRate !== "" ? parseFloat(body.commissionRate) || 0 : 0
   const total = lot.saleAmount
   const commAmount = parseFloat(((total * commRate) / 100).toFixed(2))
   const labourAmt = parseFloat(body.labourAmount || "0")
@@ -77,25 +78,27 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       await tx.farmer.update({ where: { id: lot.farmerId }, data: { balance: { increment: sellerPayable } } })
     }
 
-    // Commission income
-    const commissionAccount = await tx.account.findFirst({
-      where: { ...shopFilter, type: "INCOME", name: { contains: "Commission" }, isActive: true },
-      orderBy: { code: "asc" },
-    })
-    await tx.transaction.create({
-      data: {
-        shopId,
-        type: "CREDIT",
-        amount: commAmount,
-        description: `Commission — ${lot.category?.name || "goods"} (${lot.lotNo})`,
-        reference: c.id,
-        category: "Commission Income",
-        accountId: commissionAccount?.id || null,
-        createdById: session.user.id,
-      },
-    })
-    if (commissionAccount) {
-      await tx.account.update({ where: { id: commissionAccount.id }, data: { balance: { increment: commAmount } } })
+    // Commission income (nothing to post when commission is 0)
+    if (commAmount > 0) {
+      const commissionAccount = await tx.account.findFirst({
+        where: { ...shopFilter, type: "INCOME", name: { contains: "Commission" }, isActive: true },
+        orderBy: { code: "asc" },
+      })
+      await tx.transaction.create({
+        data: {
+          shopId,
+          type: "CREDIT",
+          amount: commAmount,
+          description: `Commission — ${lot.category?.name || "goods"} (${lot.lotNo})`,
+          reference: c.id,
+          category: "Commission Income",
+          accountId: commissionAccount?.id || null,
+          createdById: session.user.id,
+        },
+      })
+      if (commissionAccount) {
+        await tx.account.update({ where: { id: commissionAccount.id }, data: { balance: { increment: commAmount } } })
+      }
     }
 
     // Labour expense

@@ -47,7 +47,7 @@ export default function AgentsPage() {
     const method = editing ? "PUT" : "POST"
     await fetch(url, {
       method, headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, commissionRate: parseFloat(form.commissionRate) || 2.5 }),
+      body: JSON.stringify({ ...form, commissionRate: form.commissionRate === "" ? 2.5 : parseFloat(form.commissionRate) || 0 }),
     })
     setShowModal(false); loadData()
   }
