@@ -168,6 +168,11 @@ export default function GalaMandiPage() {
       <td style="text-align:right">${n(i.qty)}</td><td>${x(i.unit)}</td>
       <td style="text-align:right">${n(i.rate)}</td><td style="text-align:right">${n(i.amount)}</td>
     </tr>`).join("")
+    // Total weight goes under Weight, its unit under Unit; mixed units are listed together under Weight
+    const units = Array.from(new Set(items.map((i) => i.unit)))
+    const weightCells = units.length === 1
+      ? `<td style="text-align:right"><strong>${n(items.reduce((s, i) => s + (i.qty || 0), 0))}</strong></td><td><strong>${x(units[0])}</strong></td>`
+      : `<td style="text-align:right"><strong>${x(weightByUnit(items))}</strong></td><td></td>`
     const w = window.open("", "_blank")
     if (!w) return
     w.document.write(`<html><head><title>Gala Mandi #${x(e.entryNo)}</title>
@@ -187,13 +192,13 @@ ${buildPrintHeader(shop)}
     <tbody>${rowsHtml}</tbody>
     <tfoot><tr>
       <td colspan="2"><strong>Total</strong></td>
-      <td style="text-align:right" colspan="2"><strong>${x(weightByUnit(items))}</strong></td>
+      ${weightCells}
       <td style="text-align:right"><strong>${n(e.totalRate)}</strong></td>
       <td style="text-align:right"><strong>PKR ${n(e.totalAmount)}</strong></td>
     </tr></tfoot>
   </table>
   ${e.notes ? `<p style="font-size:11px;color:#4b5563;margin-top:10px">Notes: ${x(e.notes)}</p>` : ""}
-  <div class="sig-row"><span>Signature: ____________</span><span>${x(shop?.name || "")}</span></div>
+  <div style="margin-top:36px;display:flex;justify-content:space-between;font-size:11px;color:#6b7280;padding-top:10px;border-top:1px dashed #e5e7eb"><span>Signature: ____________</span><span>${x(shop?.name || "")}</span></div>
 </div>
 <script>window.onload=()=>{window.print()}<\/script>
 </body></html>`)
@@ -307,6 +312,16 @@ ${buildPrintHeader(shop)}
                     </td></tr>
                   )}
                 </tbody>
+                {filtered.length > 0 && (
+                  <tfoot className="bg-purple-50 border-t-2 border-purple-200 font-semibold">
+                    <tr>
+                      <td colSpan={5} className="py-3 px-3 text-gray-800">Total ({filtered.length} entries)</td>
+                      <td className="py-3 px-3 text-gray-900 whitespace-nowrap tabular-nums">{weightByUnit(filtered.flatMap(itemsOf))}</td>
+                      <td className="py-3 px-3 text-right text-purple-800 whitespace-nowrap tabular-nums">{formatCurrency(grandTotal)}</td>
+                      <td />
+                    </tr>
+                  </tfoot>
+                )}
               </table>
             </div>
           )}
