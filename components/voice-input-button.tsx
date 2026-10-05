@@ -59,6 +59,11 @@ export function VoiceInputButton({ onResult, lang = "ur-PK", className }: {
         setStatus(`Heard: ${text}`)
       }
     }
+    // Show each stage so a silent failure says where it stopped (mic → sound → speech → words)
+    const stage = (s: string) => setStatus((cur) => (cur.startsWith("Heard") ? cur : s))
+    rec.onaudiostart = () => stage("Listening… microphone is on — speak the name in Urdu")
+    rec.onsoundstart = () => stage("Listening… sound detected")
+    rec.onspeechstart = () => stage("Listening… speech detected, converting…")
     rec.onerror = (e: any) => {
       const msg: Record<string, string> = {
         "not-allowed": "Microphone is blocked. Click the lock/mic icon in the address bar, allow the microphone, then try again.",
@@ -72,14 +77,20 @@ export function VoiceInputButton({ onResult, lang = "ur-PK", className }: {
     }
     rec.onend = () => {
       setListening(false)
-      setStatus((s) => (s.startsWith("Listening") ? (heardRef.current ? "" : "No speech heard — click the mic and try again.") : s))
+      setStatus((s) => {
+        if (!s.startsWith("Listening") || heardRef.current) return s.startsWith("Listening") ? "" : s
+        if (s.includes("speech detected")) return "Speech was heard but the browser returned no words. Use Google Chrome — other browsers often don't support voice typing."
+        if (s.includes("sound detected")) return "Sound was heard but no speech. Speak a little louder and closer to the microphone."
+        if (s.includes("microphone is on")) return "The microphone is on but heard nothing. Check the right microphone is selected in Windows / browser settings."
+        return "The browser never started the microphone. Use Google Chrome and allow the microphone for this site."
+      })
     }
 
     recRef.current = rec
     try {
       rec.start()
       setListening(true)
-      setStatus("Listening… speak the name in Urdu")
+      setStatus("Listening… starting microphone")
     } catch (err: any) {
       setStatus(`Couldn't start voice input: ${err?.message || err}`)
     }
