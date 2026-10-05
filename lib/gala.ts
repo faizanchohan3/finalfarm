@@ -1,7 +1,13 @@
 // Gala Mandi: a buyer (trader) buys goods from a seller (farmer / supplier) through the mandi.
 // The buyer owes the total amount and the seller is owed it — same as a commission entry with no commission.
 
-export const GALA_UNITS = ["KG", "Bag", "Tora"] as const
+export const GALA_UNITS = ["KG", "Bag", "Tora", "Mound"] as const
+
+// Row amount = weight × rate. For Mound the rate is per kg and 1 mound = 40 kg.
+export const MOUND_KG = 40
+export function galaRowAmount(qty: number, unit: string, rate: number) {
+  return unit === "Mound" ? qty * MOUND_KG * rate : qty * rate
+}
 
 export type GalaItem = { product: string; qty: number; unit: string; rate: number; amount: number }
 

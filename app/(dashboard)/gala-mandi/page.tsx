@@ -11,9 +11,10 @@ import { SearchableSelect } from "@/components/ui/searchable-select"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { buildPrintHeader, escapeHtml, reportCSS } from "@/lib/print-utils"
 import { recordCode } from "@/lib/record-code"
+import { GALA_UNITS, galaRowAmount } from "@/lib/gala"
 import { Plus, Search, Scale, Printer, Edit, Trash2, X } from "lucide-react"
 
-const UNITS = ["KG", "Bag", "Tora"]
+const UNITS = GALA_UNITS
 type Row = { product: string; qty: string; unit: string; rate: string }
 const emptyRow = (): Row => ({ product: "", qty: "", unit: "KG", rate: "" })
 const today = () => new Date().toISOString().slice(0, 10)
@@ -82,7 +83,7 @@ export default function GalaMandiPage() {
   const parsed = rows.map((r) => {
     const qty = parseFloat(r.qty) || 0
     const rate = parseFloat(r.rate) || 0
-    return { ...r, qtyN: qty, rateN: rate, amount: qty * rate }
+    return { ...r, qtyN: qty, rateN: rate, amount: galaRowAmount(qty, r.unit, rate) }
   })
   const totalWeight = parsed.reduce((s, r) => s + r.qtyN, 0)
   const totalRate = parsed.reduce((s, r) => s + r.rateN, 0)
@@ -166,7 +167,7 @@ export default function GalaMandiPage() {
     const rowsHtml = items.map((i, idx) => `<tr>
       <td>${idx + 1}</td><td>${x(i.product)}</td>
       <td style="text-align:right">${n(i.qty)}</td><td>${x(i.unit)}</td>
-      <td style="text-align:right">${n(i.rate)}</td><td style="text-align:right">${n(i.amount)}</td>
+      <td style="text-align:right">${n(i.rate)}${i.unit === "Mound" ? " /kg" : ""}</td><td style="text-align:right">${n(i.amount)}</td>
     </tr>`).join("")
     // Total weight goes under Weight, its unit under Unit; mixed units are listed together under Weight
     const units = Array.from(new Set(items.map((i) => i.unit)))
@@ -410,7 +411,9 @@ ${buildPrintHeader(shop)}
                         <td className="py-1.5 px-2">
                           <Input type="number" value={r.rate} onChange={(e) => updateRow(i, "rate", e.target.value)} placeholder="0" className="h-8" />
                         </td>
-                        <td className="py-1.5 px-2 text-right font-medium text-gray-800 tabular-nums whitespace-nowrap">{formatCurrency(r.amount)}</td>
+                        <td className="py-1.5 px-2 text-right font-medium text-gray-800 tabular-nums whitespace-nowrap">{formatCurrency(r.amount)}
+                          {r.unit === "Mound" && r.qtyN > 0 && <div className="text-[10px] font-normal text-gray-400">{n(r.qtyN)} × 40 kg × {n(r.rateN)}/kg</div>}
+                        </td>
                         <td className="py-1.5 px-1">
                           <button onClick={() => setRows((prev) => prev.filter((_, idx) => idx !== i))} disabled={rows.length === 1}
                             className="p-1 text-gray-400 hover:text-red-600 disabled:opacity-30" title="Remove row">
