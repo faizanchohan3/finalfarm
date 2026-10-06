@@ -17,6 +17,7 @@ import {
 import Link from "next/link"
 import { useLang } from "@/lib/i18n"
 import { VoiceInputButton } from "@/components/voice-input-button"
+import { VoiceSearch } from "@/components/voice-search"
 
 type Tab = "sales" | "ledger"
 type StatusTab = "active" | "inactive"
@@ -318,15 +319,7 @@ export default function CustomersPage() {
       {/* Table */}
       <Card>
         <CardHeader>
-          <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder={t("Search name, phone, reference...")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+          <VoiceSearch value={search} onChange={setSearch} placeholder={t("Search name, phone, reference...")} />
         </CardHeader>
         <CardContent className="p-0">
           {loading && !customers.length ? (

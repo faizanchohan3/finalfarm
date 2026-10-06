@@ -33,6 +33,7 @@ export default function GalaMandiPage() {
   const [farmers, setFarmers] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
   const [products, setProducts] = useState<any[]>([])
+  const [banks, setBanks] = useState<any[]>([])
   const [shop, setShop] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
@@ -55,6 +56,7 @@ export default function GalaMandiPage() {
   const [payAmount, setPayAmount] = useState("")
   const [payMethod, setPayMethod] = useState("CASH")
   const [payNotes, setPayNotes] = useState("")
+  const [payBankId, setPayBankId] = useState("")
   const [paying, setPaying] = useState(false)
 
   async function safeFetch(url: string, fallback: any) {
@@ -68,13 +70,14 @@ export default function GalaMandiPage() {
 
   async function loadData() {
     setLoading(true)
-    const [g, cu, fa, su, pr, sh] = await Promise.all([
+    const [g, cu, fa, su, pr, sh, bk] = await Promise.all([
       safeFetch("/api/gala", { entries: [] }),
       safeFetch("/api/customers", { customers: [] }),
       safeFetch("/api/farmers", { farmers: [] }),
       safeFetch("/api/suppliers", { suppliers: [] }),
       safeFetch("/api/inventory", { products: [] }),
       safeFetch("/api/settings", { shop: null }),
+      safeFetch("/api/banks", { banks: [] }),
     ])
     setEntries(g.entries || [])
     setCustomers(cu.customers || [])
@@ -82,6 +85,7 @@ export default function GalaMandiPage() {
     setSuppliers(su.suppliers || [])
     setProducts(pr.products || [])
     setShop(sh.shop || null)
+    setBanks(bk.banks || [])
     setLoading(false)
   }
 
@@ -164,19 +168,20 @@ export default function GalaMandiPage() {
     setSavedEntry(null)
     setPayFor({ entry, kind })
     setPayAmount(String(kind === "RECEIVE" ? leftToReceive(entry) : leftToPay(entry)))
-    setPayMethod("CASH"); setPayNotes("")
+    setPayMethod("CASH"); setPayNotes(""); setPayBankId("")
   }
 
   async function handlePay() {
     if (!payFor) return
     const amt = parseFloat(payAmount)
     if (!(amt > 0)) return alert("Enter an amount greater than 0")
+    if (payMethod === "BANK_TRANSFER" && !payBankId) return alert("Select the bank account")
     setPaying(true)
     try {
       const res = await fetch(`/api/gala/${payFor.entry.id}/payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: payFor.kind, amount: amt, method: payMethod, notes: payNotes }),
+        body: JSON.stringify({ kind: payFor.kind, amount: amt, method: payMethod, notes: payNotes, bankId: payMethod === "BANK_TRANSFER" ? payBankId : null }),
       })
       const d = await res.json().catch(() => ({}))
       if (!res.ok) return alert(d?.error || "Failed to save payment")
@@ -592,6 +597,24 @@ ${buildPrintHeader(shop)}
                     <option value="CHEQUE">Cheque</option>
                   </select>
                 </div>
+                {payMethod === "BANK_TRANSFER" && (
+                  <div>
+                    <Label>{receive ? "Received into bank account *" : "Paid from bank account *"}</Label>
+                    {banks.length === 0 ? (
+                      <p className="text-xs text-red-600 mt-1">No bank accounts yet — add one on the Banks page first.</p>
+                    ) : (
+                      <div className="mt-1 space-y-1.5 max-h-48 overflow-y-auto">
+                        {banks.map((b: any) => (
+                          <button key={b.id} type="button" onClick={() => setPayBankId(b.id)}
+                            className={`w-full text-left rounded-md border px-3 py-2 text-sm ${payBankId === b.id ? (receive ? "border-blue-600 bg-blue-50" : "border-orange-600 bg-orange-50") : "border-gray-200 hover:bg-gray-50"}`}>
+                            <span className="font-medium text-gray-800">{b.name}</span>
+                            {b.accountNumber && <span className="block text-xs text-gray-500">{b.accountNumber}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div>
                   <Label>Notes (optional)</Label>
                   <Input value={payNotes} onChange={(e) => setPayNotes(e.target.value)} placeholder="Optional..." />
@@ -600,6 +623,11 @@ ${buildPrintHeader(shop)}
                   {hasLedger
                     ? `Goes to ${party}'s ledger as ${receive ? "received" : "paid"}.`
                     : `${party} is walk-in (no ledger) — only this entry is updated.`}
+                  {payMethod === "BANK_TRANSFER" && payBankId && (() => {
+                    const b = banks.find((x: any) => x.id === payBankId)
+                    const amt = parseFloat(payAmount) || 0
+                    return b ? ` ${formatCurrency(amt)} ${receive ? "goes into" : "comes out of"} ${b.name}.` : ""
+                  })()}
                 </p>
                 <div className="flex gap-3">
                   <Button variant="outline" className="flex-1" onClick={() => setPayFor(null)} disabled={paying}>Cancel</Button>

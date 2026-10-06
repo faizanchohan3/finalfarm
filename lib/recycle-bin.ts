@@ -129,6 +129,7 @@ export async function restoreDeleted(tx: any, rec: { type: string; recordId: str
       await ensureMissing(tx.customerPayment, p.id)
       await tx.customerPayment.create({ data: p })
       await syncGalaPayment(tx, p.galaEntryId, "receivedAmount", p.direction === "PAY" ? 0 : p.amount)
+      await restoreBankTxns(tx, s.bankTransactions)
       // Same effect as recording it: PAY → they owe more, RECEIVE → they owe less
       await tx.customer.update({ where: { id: p.customerId }, data: { balance: p.direction === "PAY" ? { increment: p.amount } : { decrement: p.amount } } })
       return
@@ -140,6 +141,7 @@ export async function restoreDeleted(tx: any, rec: { type: string; recordId: str
       await ensureMissing(tx.farmerPayment, p.id)
       await tx.farmerPayment.create({ data: p })
       await syncGalaPayment(tx, p.galaEntryId, "paidAmount", p.amount > 0 ? p.amount : 0)
+      await restoreBankTxns(tx, s.bankTransactions)
       // amount < 0 = RECEIVE (balance went up), amount > 0 = PAY (balance went down)
       const amt = Math.abs(p.amount)
       await tx.farmer.update({ where: { id: p.farmerId }, data: { balance: p.amount < 0 ? { increment: amt } : { decrement: amt } } })
@@ -156,6 +158,7 @@ export async function restoreDeleted(tx: any, rec: { type: string; recordId: str
       await ensureMissing(tx.supplierPayment, p.id)
       await tx.supplierPayment.create({ data: p })
       await syncGalaPayment(tx, p.galaEntryId, "paidAmount", p.direction === "PAY" ? p.amount : 0)
+      await restoreBankTxns(tx, s.bankTransactions)
       // PAY → balance down, RECEIVE → balance up
       await tx.supplier.update({ where: { id: p.supplierId }, data: { balance: p.direction === "PAY" ? { decrement: p.amount } : { increment: p.amount } } })
       return
@@ -204,6 +207,7 @@ export async function restoreDeleted(tx: any, rec: { type: string; recordId: str
       if (pays.farmerPayments.length) await tx.farmerPayment.createMany({ data: pays.farmerPayments })
       if (pays.supplierPayments.length) await tx.supplierPayment.createMany({ data: pays.supplierPayments })
       await applyGalaPayments(tx, pays, 1)
+      await restoreBankTxns(tx, s.bankTransactions)
       return
     }
 
@@ -218,4 +222,11 @@ async function ensureMissing(model: any, id: string) {
 
 async function ensureExists(model: any, id: string, what: string) {
   if (!id || !(await model.findUnique({ where: { id } }))) throw new Error(`The ${what} for this record no longer exists, so it can't be restored`)
+}
+
+// Bank-transfer transactions archived with a Gala Mandi entry or payment (skips any already back)
+async function restoreBankTxns(tx: any, txns: any[] | undefined) {
+  for (const t of txns || []) {
+    if (!(await tx.transaction.findUnique({ where: { id: t.id } }))) await tx.transaction.create({ data: t })
+  }
 }

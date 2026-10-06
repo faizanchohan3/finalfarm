@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Plus, Search, Tractor, Edit, Trash2, ChevronDown, ChevronRight, BookOpen, Banknote, Printer, Check, Upload, Eye, ExternalLink, ShoppingBag } from "lucide-react"
+import { VoiceSearch } from "@/components/voice-search"
+import { VoiceInputButton } from "@/components/voice-input-button"
 
 export default function FarmersPage() {
   const router = useRouter()
@@ -236,11 +238,7 @@ export default function FarmersPage() {
       </div>
 
       {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <Input placeholder="Search name, village, phone..." value={search}
-          onChange={(e) => setSearch(e.target.value)} className="pl-9" />
-      </div>
+      <VoiceSearch value={search} onChange={setSearch} placeholder="Search name, village, phone..." />
 
       {/* Table */}
       <Card>
@@ -417,7 +415,10 @@ export default function FarmersPage() {
           </DialogHeader>
           <div className="space-y-3 max-h-[70vh] overflow-y-auto">
             <div><Label>Full Name *</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Farmer name" autoFocus /></div>
+              <div className="flex gap-2">
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Farmer name" dir="auto" autoFocus />
+                <VoiceInputButton onResult={(text) => setForm((f: any) => ({ ...f, name: text }))} />
+              </div></div>
             <div>
               <Label>Profile Picture (Optional)</Label>
               {photoPreview && (

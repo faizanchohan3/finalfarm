@@ -54,6 +54,20 @@ export async function applyGalaPayments(
   for (const sp of p.supplierPayments || []) await tx.supplier.update({ where: { id: sp.supplierId }, data: { balance: { increment: -sign * sp.amount } } })
 }
 
+// Bank transfers on Received / Paid are bank transactions with this category; their reference is the
+// party payment's id, or galaWalkInRef(entryId) when the buyer / seller is walk-in (no payment row).
+export const GALA_BANK_CATEGORY = "Gala Mandi"
+export const galaWalkInRef = (entryId: string) => `gala:${entryId}`
+
+// Delete the bank transactions behind these payments (or walk-in refs) and return them for the archive.
+export async function takeGalaBankTxns(tx: any, references: string[]) {
+  if (!references.length) return []
+  const where = { category: GALA_BANK_CATEGORY, reference: { in: references } }
+  const txns = await tx.transaction.findMany({ where })
+  if (txns.length) await tx.transaction.deleteMany({ where })
+  return txns
+}
+
 // A Received / Paid payment was deleted (delta < 0) or restored (delta > 0) from a ledger page:
 // keep its Gala Mandi entry's received / paid amount in step. No-op for other payments.
 export async function syncGalaPayment(tx: any, galaEntryId: string | null | undefined, field: "receivedAmount" | "paidAmount", delta: number) {

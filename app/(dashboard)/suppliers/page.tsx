@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
 import { VoiceInputButton } from "@/components/voice-input-button"
+import { VoiceSearch } from "@/components/voice-search"
 import {
   Plus, Search, Edit, Phone, MapPin, ArrowUpCircle,
   Eye, Truck, X, TrendingDown, Printer, Check, BookOpen, ShoppingBag, Upload, Trash2,
@@ -262,15 +263,7 @@ export default function SuppliersPage() {
       {/* Table */}
       <Card>
         <CardHeader>
-          <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Search by name or phone..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+          <VoiceSearch value={search} onChange={setSearch} placeholder="Search by name or phone..." />
         </CardHeader>
         <CardContent>
           {loading && !suppliers.length ? (

@@ -8,11 +8,13 @@ import { cn } from "@/lib/utils"
 // (Chrome / Edge; needs microphone permission and an internet connection). Default language: Urdu.
 // The field fills live while speaking; the last words heard are kept even if the browser
 // stops without a "final" result (which happens with Urdu).
-export function VoiceInputButton({ onResult, lang = "ur-PK", className }: {
+export function VoiceInputButton({ onResult, lang = "ur-PK", className, what = "the name" }: {
   onResult: (text: string) => void
   lang?: string
   className?: string
+  what?: string   // what to speak, for the hints ("the name", "to search")
 }) {
+  const langName = lang.startsWith("ur") ? "Urdu" : "English"
   const [listening, setListening] = useState(false)
   const [status, setStatus] = useState("")
   const recRef = useRef<any>(null)
@@ -61,7 +63,7 @@ export function VoiceInputButton({ onResult, lang = "ur-PK", className }: {
     }
     // Show each stage so a silent failure says where it stopped (mic → sound → speech → words)
     const stage = (s: string) => setStatus((cur) => (cur.startsWith("Heard") ? cur : s))
-    rec.onaudiostart = () => stage("Listening… microphone is on — speak the name in Urdu")
+    rec.onaudiostart = () => stage(`Listening… microphone is on — speak ${what} in ${langName}`)
     rec.onsoundstart = () => stage("Listening… sound detected")
     rec.onspeechstart = () => stage("Listening… speech detected, converting…")
     rec.onerror = (e: any) => {
@@ -71,7 +73,7 @@ export function VoiceInputButton({ onResult, lang = "ur-PK", className }: {
         "no-speech": "No speech heard. Check your microphone is selected and speak right after clicking.",
         "audio-capture": "No microphone found. Plug in or select a microphone and try again.",
         "network": "Voice input needs an internet connection (the browser sends the audio to its speech service).",
-        "language-not-supported": "Urdu voice input isn't available in this browser — try Google Chrome.",
+        "language-not-supported": `${langName} voice input isn't available in this browser — try Google Chrome.`,
       }
       if (e.error !== "aborted") setStatus(msg[e.error] || `Voice input failed: ${e.error}`)
     }
@@ -101,7 +103,7 @@ export function VoiceInputButton({ onResult, lang = "ur-PK", className }: {
       <button
         type="button"
         onClick={toggle}
-        title={listening ? "Listening… click to stop" : "Speak the name in Urdu"}
+        title={listening ? "Listening… click to stop" : `Speak ${what} in ${langName}`}
         className={cn(
           "inline-flex items-center justify-center h-9 w-9 rounded-md border transition-colors",
           listening ? "bg-red-600 border-red-600 text-white animate-pulse" : "border-gray-300 text-gray-600 hover:bg-purple-50 hover:text-purple-700",

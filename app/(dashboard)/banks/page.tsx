@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label"
 import { Building2, Plus, PencilLine, Trash2, ArrowDownCircle, ArrowUpCircle, Check, BookOpen, Search } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { VoiceSearch } from "@/components/voice-search"
 
 const DEFAULT_FORM = { name: "", accountNumber: "" }
 const todayStr = () => new Date().toISOString().slice(0, 10)
@@ -212,11 +213,7 @@ export default function BanksPage() {
             <CardTitle className="text-base flex items-center gap-2">
               <Building2 className="w-4 h-4 text-blue-600" /> All Banks
             </CardTitle>
-            <div className="relative max-w-sm flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input placeholder="Search by bank name or account number..." value={search}
-                onChange={(e) => setSearch(e.target.value)} className="pl-9" />
-            </div>
+            <VoiceSearch value={search} onChange={setSearch} placeholder="Search by bank name or account number..." className="flex-1" />
           </div>
         </CardHeader>
         <CardContent>

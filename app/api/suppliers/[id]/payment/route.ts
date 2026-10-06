@@ -3,7 +3,7 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
-import { syncGalaPayment } from "@/lib/gala"
+import { syncGalaPayment, takeGalaBankTxns } from "@/lib/gala"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -62,6 +62,8 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
     await db.$transaction(async (tx) => {
       const supplier = await tx.supplier.findUnique({ where: { id }, select: { name: true } })
+      // A Gala Mandi bank transfer behind this payment goes with it (and comes back on restore)
+      const bankTransactions = payment.galaEntryId ? await takeGalaBankTxns(tx, [payment.id]) : []
       await archiveDeleted(tx, session, {
         type: "SUPPLIER_PAYMENT", recordId: paymentId, code: `PY-${paymentId.slice(-6).toUpperCase()}`,
         title: `${payment.direction === "PAY" ? "Paid to" : "Received from"} ${supplier?.name || "supplier"}`, amount: payment.amount,
@@ -70,7 +72,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
           ["Type", payment.direction === "PAY" ? "Paid to supplier" : "Received from supplier"],
           ["Amount", pkr(payment.amount)], ["Method", (payment as any).method || "—"], ["Notes", (payment as any).notes || "—"],
         ],
-        snapshot: { payment },
+        snapshot: { payment, bankTransactions },
       })
       await tx.supplierPayment.delete({ where: { id: paymentId } })
       // Paid against a Gala Mandi entry → that entry has paid less

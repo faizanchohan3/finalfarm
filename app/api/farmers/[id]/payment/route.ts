@@ -3,7 +3,7 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
-import { syncGalaPayment } from "@/lib/gala"
+import { syncGalaPayment, takeGalaBankTxns } from "@/lib/gala"
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -26,6 +26,8 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       // Keep a copy (and the linked purchase as it was) for the Deleted Records page
       const farmer = await tx.farmer.findUnique({ where: { id }, select: { name: true } })
       const purchaseBefore = payment.purchaseId && !isReceive ? await tx.farmerPurchase.findUnique({ where: { id: payment.purchaseId } }) : null
+      // A Gala Mandi bank transfer behind this payment goes with it (and comes back on restore)
+      const bankTransactions = payment.galaEntryId ? await takeGalaBankTxns(tx, [payment.id]) : []
       await archiveDeleted(tx, session, {
         type: "FARMER_PAYMENT", recordId: paymentId, code: `PY-${paymentId.slice(-6).toUpperCase()}`,
         title: `${isReceive ? "Received from" : "Paid to"} ${farmer?.name || "farmer"}`, amount: displayAmt,
@@ -33,7 +35,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
           ["Farmer", farmer?.name || "—"], ["Date", day(payment.createdAt)],
           ["Type", isReceive ? "Received from farmer" : "Paid to farmer"], ["Amount", pkr(displayAmt)],
         ],
-        snapshot: { payment, purchaseBefore },
+        snapshot: { payment, purchaseBefore, bankTransactions },
       })
       await tx.farmerPayment.delete({ where: { id: paymentId } })
       // Paid against a Gala Mandi entry → that entry has paid less

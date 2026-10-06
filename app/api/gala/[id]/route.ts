@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
-import { applyGala, applyGalaPayments, galaItemsText } from "@/lib/gala"
+import { applyGala, applyGalaPayments, galaItemsText, galaWalkInRef, takeGalaBankTxns } from "@/lib/gala"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 import { recordCode } from "@/lib/record-code"
 import { checkParties, galaFields } from "../fields"
@@ -71,6 +71,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       tx.farmerPayment.findMany({ where: { galaEntryId: id } }),
       tx.supplierPayment.findMany({ where: { galaEntryId: id } }),
     ])
+    // Bank-transfer entries behind those payments (and walk-in ones), removed with the entry
+    const bankTransactions = await takeGalaBankTxns(tx, [
+      ...customerPayments.map((p) => p.id), ...farmerPayments.map((p) => p.id), ...supplierPayments.map((p) => p.id), galaWalkInRef(id),
+    ])
     await archiveDeleted(tx, session, {
       type: "GALA", recordId: id, code: recordCode("gala", id), title: `Gala Mandi #${e.entryNo} — ${buyer}`, amount: e.totalAmount,
       summary: [
@@ -78,7 +82,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         ["Products", galaItemsText(e.items) || "—"], ["Total amount", pkr(e.totalAmount)],
         ["Received from buyer", pkr(e.receivedAmount)], ["Paid to seller", pkr(e.paidAmount)],
       ],
-      snapshot: { entry: row, customerPayments, farmerPayments, supplierPayments },
+      snapshot: { entry: row, customerPayments, farmerPayments, supplierPayments, bankTransactions },
     })
     await applyGalaPayments(tx, { customerPayments, farmerPayments, supplierPayments }, -1)
     await tx.customerPayment.deleteMany({ where: { galaEntryId: id } })
