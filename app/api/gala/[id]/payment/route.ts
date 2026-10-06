@@ -6,6 +6,60 @@ import { GALA_BANK_CATEGORY, galaWalkInRef } from "@/lib/gala"
 
 const round = (v: number) => Math.round(v * 100) / 100
 
+// Payment ledger of one entry: every Received (from the buyer) and Paid (to the seller), oldest first,
+// with the bank for bank transfers. Walk-in parties have no payment rows — only the entry's totals.
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { id } = await params
+  const e = await db.galaEntry.findUnique({ where: { id } })
+  if (!e || (session.user.shopId && e.shopId !== session.user.shopId)) return NextResponse.json({ error: "Entry not found" }, { status: 404 })
+
+  const [customerPayments, farmerPayments, supplierPayments] = await Promise.all([
+    db.customerPayment.findMany({ where: { galaEntryId: id }, orderBy: { createdAt: "asc" } }),
+    db.farmerPayment.findMany({ where: { galaEntryId: id }, orderBy: { createdAt: "asc" } }),
+    db.supplierPayment.findMany({ where: { galaEntryId: id }, orderBy: { createdAt: "asc" } }),
+  ])
+  // Bank accounts used, from the linked bank transactions (reference = payment id, or the walk-in ref)
+  const refs = [...customerPayments, ...farmerPayments, ...supplierPayments].map((p) => p.id)
+  const bankTxns = await db.transaction.findMany({
+    where: { category: GALA_BANK_CATEGORY, reference: { in: [...refs, galaWalkInRef(id)] } },
+    include: { bank: { select: { name: true, accountNumber: true } } },
+    orderBy: { createdAt: "asc" },
+  })
+  const bankFor = (ref: string) => {
+    const t = bankTxns.find((x) => x.reference === ref)
+    return t?.bank ? `${t.bank.name}${t.bank.accountNumber ? ` (${t.bank.accountNumber})` : ""}` : null
+  }
+  // Notes are saved as "Gala Mandi #12 — HBL — note"; keep only the typed note
+  const noteOf = (notes: string | null, bank: string | null) => {
+    let s = (notes || "").replace(/^Gala Mandi #\S+\s*(—\s*)?/, "")
+    const bankName = bank?.replace(/ \(.*\)$/, "")
+    if (bankName && s.startsWith(bankName)) s = s.slice(bankName.length).replace(/^\s*—\s*/, "")
+    return s.trim()
+  }
+  const row = (p: { id: string; createdAt: Date; amount: number; method: string; notes: string | null }) => {
+    const bank = bankFor(p.id)
+    return { id: p.id, date: p.createdAt, amount: Math.abs(p.amount), method: p.method, bank, notes: noteOf(p.notes, bank) }
+  }
+  // Walk-in bank transfers have no payment row: show them from the bank transaction
+  const walkIn = bankTxns.filter((t) => t.reference === galaWalkInRef(id)).map((t) => ({
+    id: t.id, date: t.createdAt, amount: t.amount, method: "BANK_TRANSFER",
+    bank: t.bank ? `${t.bank.name}${t.bank.accountNumber ? ` (${t.bank.accountNumber})` : ""}` : null, notes: "", kind: t.type === "CREDIT" ? "RECEIVE" : "PAY",
+  }))
+
+  const received = [...customerPayments.filter((p) => p.direction === "RECEIVE").map(row), ...walkIn.filter((w) => w.kind === "RECEIVE")]
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const paid = [
+    ...farmerPayments.filter((p) => p.amount > 0).map(row),
+    ...supplierPayments.filter((p) => p.direction === "PAY").map(row),
+    ...walkIn.filter((w) => w.kind === "PAY"),
+  ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+  return NextResponse.json({ received, paid })
+}
+
 // Received / Paid against a Gala Mandi entry.
 // RECEIVE: money from the buyer → trader payment (RECEIVE), buyer owes less.
 // PAY: money to the seller → farmer / supplier payment (PAY), we owe the seller less.

@@ -12,7 +12,7 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import { buildPrintHeader, escapeHtml, reportCSS } from "@/lib/print-utils"
 import { recordCode } from "@/lib/record-code"
 import { RATE_PER, galaRowAmount, itemRatePer, itemToKgRow } from "@/lib/gala"
-import { Plus, Search, Scale, Printer, Edit, Trash2, X } from "lucide-react"
+import { Plus, Search, Scale, Printer, Edit, Trash2, X, Eye } from "lucide-react"
 
 // Weight is always KG (like Bill Maker); the rate is per KG or per Mound (40 kg)
 type Row = { product: string; qty: string; ratePer: string; rate: string }
@@ -58,6 +58,11 @@ export default function GalaMandiPage() {
   const [payNotes, setPayNotes] = useState("")
   const [payBankId, setPayBankId] = useState("")
   const [paying, setPaying] = useState(false)
+
+  // Eye icon: payment ledger of one entry (Received from buyer / Paid to seller)
+  const [ledgerFor, setLedgerFor] = useState<any>(null)
+  const [ledger, setLedger] = useState<{ received: any[]; paid: any[] } | null>(null)
+  const [ledgerLoading, setLedgerLoading] = useState(false)
 
   async function safeFetch(url: string, fallback: any) {
     try {
@@ -205,6 +210,62 @@ export default function GalaMandiPage() {
   const buyerName = (e: any) => e.customer?.name || e.walkInBuyer || "—"
   const sellerName = (e: any) => e.farmer?.name || e.supplier?.name || e.walkInSeller || "—"
   const itemsOf = (e: any): any[] => (Array.isArray(e.items) ? e.items : [])
+
+  async function openLedger(e: any) {
+    setLedgerFor(e); setLedger(null); setLedgerLoading(true)
+    try {
+      const r = await fetch(`/api/gala/${e.id}/payment`, { cache: "no-store" })
+      const d = await r.json().catch(() => ({}))
+      setLedger(r.ok ? { received: d.received || [], paid: d.paid || [] } : { received: [], paid: [] })
+    } finally {
+      setLedgerLoading(false)
+    }
+  }
+
+  const methodLabel = (m: string) => (m === "BANK_TRANSFER" ? "Bank transfer" : m === "CHEQUE" ? "Cheque" : "Cash")
+
+  // One side of the payment ledger: each payment and what is still left after it
+  function ledgerSide(total: number, list: any[]) {
+    let left = total
+    return list.map((p) => { left = Math.round((left - p.amount) * 100) / 100; return { ...p, left } })
+  }
+
+  function printLedger() {
+    if (!ledgerFor || !ledger) return
+    const e = ledgerFor
+    const x = (v: unknown) => escapeHtml(v ?? "—")
+    const side = (title: string, party: string, list: any[], doneLabel: string, leftLabel: string) => {
+      const rows = ledgerSide(e.totalAmount, list)
+      return `<h3 style="font-size:13px;margin:16px 0 6px">${title} — ${x(party)}</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Method</th><th>Bank</th><th>Notes</th><th style="text-align:right">Amount</th><th style="text-align:right">${leftLabel}</th></tr></thead>
+    <tbody>
+      <tr><td>${formatDate(e.entryDate)}</td><td colspan="3"><em>Entry total</em></td><td></td><td style="text-align:right">${n(e.totalAmount)}</td></tr>
+      ${rows.map((p) => `<tr><td>${formatDate(p.date)}</td><td>${methodLabel(p.method)}</td><td>${x(p.bank)}</td><td>${x(p.notes || "")}</td><td style="text-align:right">${n(p.amount)}</td><td style="text-align:right">${n(Math.max(p.left, 0))}</td></tr>`).join("")
+        || `<tr><td colspan="6" style="text-align:center">No payments yet</td></tr>`}
+    </tbody>
+    <tfoot><tr><td colspan="4"><strong>${doneLabel}</strong></td><td style="text-align:right"><strong>${n(list.reduce((s, p) => s + p.amount, 0))}</strong></td><td style="text-align:right"><strong>${n(Math.max(e.totalAmount - list.reduce((s, p) => s + p.amount, 0), 0))}</strong></td></tr></tfoot>
+  </table>`
+    }
+    const w = window.open("", "_blank")
+    if (!w) return
+    w.document.write(`<html><head><title>Gala Mandi #${x(e.entryNo)} — Payments</title>
+<style>${reportCSS} body { max-width: 800px; margin: 0 auto; }</style></head><body>
+${buildPrintHeader(shop)}
+<div class="doc-header">
+  <div><div class="doc-title">Gala Mandi #${x(e.entryNo)} — Payment Ledger</div><div class="doc-sub">${recordCode("gala", e)} · ${x(galaItemsLabel(e))}</div></div>
+  <div class="doc-meta"><div>Date: ${formatDate(e.entryDate)}</div><div>Total: PKR ${n(e.totalAmount)}</div></div>
+</div>
+<div class="body-pad">
+  ${side("Received from Buyer", buyerName(e), ledger.received, "Total received", "Unreceived")}
+  ${side("Paid to Seller", sellerName(e), ledger.paid, "Total paid", "Unpaid")}
+</div>
+<script>window.onload=()=>{window.print()}<\/script>
+</body></html>`)
+    w.document.close()
+  }
+
+  const galaItemsLabel = (e: any) => itemsOf(e).map((i) => `${i.product} ${n(i.qty)} ${i.unit}`).join(", ")
 
   function printEntry(e: any) {
     const x = (v: unknown) => escapeHtml(v ?? "—")
@@ -367,6 +428,9 @@ ${buildPrintHeader(shop)}
                       </td>
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-1">
+                          <button onClick={() => openLedger(e)} className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded" title="Payment ledger">
+                            <Eye className="w-4 h-4" />
+                          </button>
                           <button onClick={() => printEntry(e)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Print">
                             <Printer className="w-4 h-4" />
                           </button>
@@ -543,6 +607,115 @@ ${buildPrintHeader(shop)}
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Eye icon: payment ledger of one entry */}
+      <Dialog open={!!ledgerFor} onOpenChange={(o) => { if (!o) setLedgerFor(null) }}>
+        <DialogContent className="w-[96vw] max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Gala Mandi #{ledgerFor?.entryNo} — Payment Ledger</DialogTitle>
+          </DialogHeader>
+          {ledgerFor && (
+            <div className="space-y-5">
+              <div className="rounded-lg bg-purple-50 p-3 text-sm grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div><p className="text-xs text-gray-500">ID</p><p className="font-mono text-purple-700">{recordCode("gala", ledgerFor)}</p></div>
+                <div><p className="text-xs text-gray-500">Date</p><p>{formatDate(ledgerFor.entryDate)}</p></div>
+                <div className="col-span-2"><p className="text-xs text-gray-500">Products</p><p dir="auto">{galaItemsLabel(ledgerFor) || "—"}</p></div>
+                <div className="col-span-2 sm:col-span-4 flex justify-between border-t border-purple-200 pt-2">
+                  <span className="text-gray-600">Entry total</span><span className="font-bold">{formatCurrency(ledgerFor.totalAmount)}</span>
+                </div>
+              </div>
+
+              {ledgerLoading || !ledger ? (
+                <div className="text-center py-8 text-gray-400">Loading...</div>
+              ) : (
+                ([
+                  { key: "RECEIVE" as const, title: "Received from Buyer", party: buyerName(ledgerFor), hasLedger: !!ledgerFor.customerId, list: ledger.received, leftLabel: "Unreceived", color: "blue" },
+                  { key: "PAY" as const, title: "Paid to Seller", party: sellerName(ledgerFor), hasLedger: !!(ledgerFor.farmerId || ledgerFor.supplierId), list: ledger.paid, leftLabel: "Unpaid", color: "orange" },
+                ]).map((s) => {
+                  const rows = ledgerSide(ledgerFor.totalAmount, s.list)
+                  const done = s.list.reduce((t: number, p: any) => t + p.amount, 0)
+                  const left = Math.max(ledgerFor.totalAmount - done, 0)
+                  // Walk-in cash payments have no payment rows; the entry's own figure still counts them
+                  const entryDone = s.key === "RECEIVE" ? ledgerFor.receivedAmount || 0 : ledgerFor.paidAmount || 0
+                  const untracked = Math.round((entryDone - done) * 100) / 100
+                  return (
+                    <div key={s.key}>
+                      <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                        <h3 className="text-sm font-semibold text-gray-800">
+                          {s.title} — <span dir="auto">{s.party}</span>
+                          {!s.hasLedger && <span className="ml-2 text-xs font-normal text-gray-400">(walk-in)</span>}
+                        </h3>
+                        <span className={`text-xs font-medium ${left > 0 ? (s.color === "blue" ? "text-blue-700" : "text-orange-700") : "text-green-700"}`}>
+                          {left > 0 ? `${s.leftLabel} ${formatCurrency(Math.max(ledgerFor.totalAmount - entryDone, 0))}` : s.key === "RECEIVE" ? "Fully received" : "Fully paid"}
+                        </span>
+                      </div>
+                      <div className="overflow-x-auto rounded-lg border">
+                        <table className="w-full text-sm">
+                          <thead className="bg-gray-50">
+                            <tr className="text-xs text-gray-500">
+                              <th className="px-3 py-2 text-left font-medium">Date</th>
+                              <th className="px-3 py-2 text-left font-medium">Method</th>
+                              <th className="px-3 py-2 text-left font-medium">Bank</th>
+                              <th className="px-3 py-2 text-left font-medium">Notes</th>
+                              <th className="px-3 py-2 text-right font-medium">Amount</th>
+                              <th className="px-3 py-2 text-right font-medium">{s.leftLabel}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            <tr className="bg-gray-50/60">
+                              <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{formatDate(ledgerFor.entryDate)}</td>
+                              <td colSpan={3} className="px-3 py-2 italic text-gray-500">Entry total</td>
+                              <td className="px-3 py-2" />
+                              <td className="px-3 py-2 text-right font-semibold tabular-nums">{formatCurrency(ledgerFor.totalAmount)}</td>
+                            </tr>
+                            {rows.map((p: any) => (
+                              <tr key={p.id}>
+                                <td className="px-3 py-2 text-gray-600 whitespace-nowrap">{formatDate(p.date)}</td>
+                                <td className="px-3 py-2">{methodLabel(p.method)}</td>
+                                <td className="px-3 py-2 text-gray-600">{p.bank || "—"}</td>
+                                <td className="px-3 py-2 text-gray-600" dir="auto">{p.notes || "—"}</td>
+                                <td className="px-3 py-2 text-right tabular-nums font-medium">{formatCurrency(p.amount)}</td>
+                                <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(Math.max(p.left, 0))}</td>
+                              </tr>
+                            ))}
+                            {rows.length === 0 && untracked <= 0 && (
+                              <tr><td colSpan={6} className="px-3 py-4 text-center text-gray-400">No payments yet</td></tr>
+                            )}
+                            {untracked > 0 && (
+                              <tr><td colSpan={6} className="px-3 py-2 text-xs text-gray-500">
+                                {formatCurrency(untracked)} {s.key === "RECEIVE" ? "received" : "paid"} in cash from / to a walk-in (no separate record)
+                              </td></tr>
+                            )}
+                          </tbody>
+                          <tfoot className="bg-gray-50 font-semibold">
+                            <tr>
+                              <td colSpan={4} className="px-3 py-2">{s.key === "RECEIVE" ? "Total received" : "Total paid"}</td>
+                              <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(entryDone)}</td>
+                              <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(Math.max(ledgerFor.totalAmount - entryDone, 0))}</td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  )
+                })
+              )}
+
+              <div className="flex gap-3 justify-end flex-wrap">
+                {leftToReceive(ledgerFor) > 0 && (
+                  <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { const e = ledgerFor; setLedgerFor(null); openPay(e, "RECEIVE") }}>Received</Button>
+                )}
+                {leftToPay(ledgerFor) > 0 && (
+                  <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => { const e = ledgerFor; setLedgerFor(null); openPay(e, "PAY") }}>Paid</Button>
+                )}
+                <Button variant="outline" className="gap-1" onClick={printLedger} disabled={!ledger}>
+                  <Printer className="w-4 h-4" /> Print
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
