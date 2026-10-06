@@ -46,16 +46,15 @@ export function SearchableSelect({
 }: Props) {
   const [search, setSearch] = useState("")
 
-  // Filter options based on search
-  const filteredOptions = search
-    ? options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()))
-    : options
+  // Filter options based on search — matches the label or the small sub line (phone, account no, …)
+  const matches = (o: SelectOption) => {
+    const q = search.toLowerCase()
+    return o.label.toLowerCase().includes(q) || (o.sub || "").toLowerCase().includes(q)
+  }
+  const filteredOptions = search ? options.filter(matches) : options
 
   const filteredGroups = search
-    ? groups.map(g => ({
-        ...g,
-        options: g.options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()))
-      })).filter(g => g.options.length > 0)
+    ? groups.map(g => ({ ...g, options: g.options.filter(matches) })).filter(g => g.options.length > 0)
     : groups
 
   const selectedLabel = [...options, ...groups.flatMap(g => g.options)].find(o => o.value === value)?.label

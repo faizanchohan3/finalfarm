@@ -9,7 +9,7 @@ import {
 } from "recharts"
 import {
   BarChart3, TrendingUp, Users, ShoppingCart, ShoppingBag, DollarSign, BookOpen,
-  ArrowRight, Package, TrendingDown, AlertTriangle, Wallet, Tractor, Store, UserCheck,
+  ArrowRight, Package, TrendingDown, AlertTriangle, Wallet, Tractor, Store, UserCheck, FileText, Scale,
 } from "lucide-react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
@@ -98,6 +98,20 @@ const reportCards = [
     description: "Balance summary for all traders (buyers/sellers) — receivable, payable, and settled",
     icon: UserCheck,
     color: "from-indigo-600 to-indigo-700",
+  },
+  {
+    href: "/reports/bill-maker",
+    title: "Bill Maker Report",
+    description: "All bills with date, trader and search by bill no, ID or product",
+    icon: FileText,
+    color: "from-violet-600 to-violet-700",
+  },
+  {
+    href: "/reports/gala-mandi",
+    title: "Gala Mandi Report",
+    description: "All Gala Mandi entries with date, buyer, seller and search — received / paid totals",
+    icon: Scale,
+    color: "from-emerald-600 to-emerald-700",
   },
 ]
 

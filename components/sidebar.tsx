@@ -50,6 +50,8 @@ const allReportSubItems = [
   { href: "/reports/supplier-ledger", label: "Supplier Ledger", icon: ClipboardList, color: "text-indigo-600", bgColor: "bg-indigo-50" },
   { href: "/reports/all-traders", label: "All Traders", icon: Store, color: "text-amber-600", bgColor: "bg-amber-50" },
   { href: "/reports/bank-transactions", label: "Bank Transactions", icon: Banknote, color: "text-teal-600", bgColor: "bg-teal-50" },
+  { href: "/reports/bill-maker", label: "Bill Maker Report", icon: FileText, color: "text-violet-600", bgColor: "bg-violet-50" },
+  { href: "/reports/gala-mandi", label: "Gala Mandi Report", icon: Scale, color: "text-emerald-600", bgColor: "bg-emerald-50" },
   { href: "/markha-report", label: "Markha Report", icon: Tag, color: "text-purple-600", bgColor: "bg-purple-50" },
 ]
 
@@ -246,7 +248,7 @@ export function Sidebar() {
                   <div
                     className={cn(
                       "overflow-hidden transition-all duration-300 ease-in-out",
-                      reportsOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                      reportsOpen ? "max-h-[48rem] opacity-100" : "max-h-0 opacity-0"
                     )}
                   >
                     <div className="ml-4 rtl:ml-0 rtl:mr-4 mt-1 border-l rtl:border-l-0 rtl:border-r border-gray-200 pl-3 rtl:pl-0 rtl:pr-3 pb-1 space-y-0.5">

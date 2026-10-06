@@ -603,14 +603,15 @@ ${buildPrintHeader(shop)}
                     {banks.length === 0 ? (
                       <p className="text-xs text-red-600 mt-1">No bank accounts yet — add one on the Banks page first.</p>
                     ) : (
-                      <div className="mt-1 space-y-1.5 max-h-48 overflow-y-auto">
-                        {banks.map((b: any) => (
-                          <button key={b.id} type="button" onClick={() => setPayBankId(b.id)}
-                            className={`w-full text-left rounded-md border px-3 py-2 text-sm ${payBankId === b.id ? (receive ? "border-blue-600 bg-blue-50" : "border-orange-600 bg-orange-50") : "border-gray-200 hover:bg-gray-50"}`}>
-                            <span className="font-medium text-gray-800">{b.name}</span>
-                            {b.accountNumber && <span className="block text-xs text-gray-500">{b.accountNumber}</span>}
-                          </button>
-                        ))}
+                      <div className="mt-1">
+                        <SearchableSelect
+                          value={payBankId}
+                          onValueChange={setPayBankId}
+                          placeholder="Select bank..."
+                          searchPlaceholder="Search bank or account no..."
+                          emptyText="No banks"
+                          options={banks.map((b: any) => ({ value: b.id, label: b.name, sub: b.accountNumber || undefined }))}
+                        />
                       </div>
                     )}
                   </div>
