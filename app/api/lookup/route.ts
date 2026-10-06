@@ -11,12 +11,12 @@ const pkr = (v: number | null | undefined) => `PKR ${Number(v || 0).toLocaleStri
 const day = (v: Date | string | null | undefined) => (v ? new Date(v).toLocaleDateString("en-PK") : "—")
 const lotStatus = (s: string) => (s === "CANCELLED" ? "Cancelled" : ["SOLD", "DISPATCHED", "SETTLED"].includes(s) ? "Sold" : "Stored")
 
-// GET /api/lookup?code=SRM-12 | LOT-2026-00012 | old short IDs: CM-7K2Q9X | BL-… | ST-… | GM-… | 7K2Q9X (any type)
+// GET /api/lookup?code=SRM-12 | 12 (Gala Mandi entry / bill no) | LOT-2026-00012 | old short IDs: CM-7K2Q9X | BL-… | ST-… | GM-… | 7K2Q9X (any type)
 export async function GET(req: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const raw = (new URL(req.url).searchParams.get("code") || "").trim().toUpperCase().replace(/^#/, "")
+  const raw = normalizeCode(new URL(req.url).searchParams.get("code") || "")
   if (!raw) return NextResponse.json({ error: "Enter an ID" }, { status: 400 })
   const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
 
@@ -32,18 +32,22 @@ export async function GET(req: Request) {
     return NextResponse.json({ results })
   }
 
-  // Record ID "SRM-12" → the record with that code, whatever its type.
+  // Record ID "SRM-12" (also typed "SRM12") → the record with that code, whatever its type.
   // Old short IDs still work: "CM-XXXXXX" → only commissions; a bare "XXXXXX" → every type.
-  const byCode = /^[A-Z0-9]{1,8}-\d+$/.test(raw) ? { code: { equals: raw, mode: "insensitive" as const } } : null
+  // A plain number ("12" / "#12") → the Gala Mandi entry or Bill Maker bill with that number.
+  const codeMatch = raw.match(/^([A-Z0-9]{1,8})-(\d+)$/) || raw.match(/^([A-Z0-9]{0,7}[A-Z])(\d+)$/)
+  const byCode = codeMatch ? { code: { equals: `${codeMatch[1]}-${codeMatch[2]}`, mode: "insensitive" as const } } : null
   const m = raw.match(/^(CM|BL|ST|GM)-?([A-Z0-9]{6})$/) || raw.match(/^()([A-Z0-9]{6})$/)
-  if (!byCode && !m) return NextResponse.json({ results })
+  const number = /^\d+$/.test(raw) ? raw : null
+  if (!byCode && !m && !number) return NextResponse.json({ results })
   const prefix = m?.[1]
   const byId = m ? { id: { endsWith: m[2].toLowerCase() } } : null
   // Where clause for one record type, or null when this ID can't be one
-  const whereFor = (typePrefix: string) => {
+  const whereFor = (typePrefix: string, byNumber?: object) => {
     const conds: any[] = []
     if (byCode) conds.push(byCode)
     if (byId && (!prefix || prefix === typePrefix)) conds.push(byId)
+    if (number && byNumber) conds.push(byNumber)
     return conds.length ? { ...shopFilter, OR: conds } : null
   }
 
@@ -79,7 +83,7 @@ export async function GET(req: Request) {
     }
   }
 
-  const billWhere = whereFor(RECORD_PREFIX.bill)
+  const billWhere = whereFor(RECORD_PREFIX.bill, { billNo: number })
   if (billWhere) {
     const rows = await db.bill.findMany({ where: billWhere, take: 5 })
     for (const b of rows) {
@@ -104,7 +108,7 @@ export async function GET(req: Request) {
     }
   }
 
-  const galaWhere = whereFor(RECORD_PREFIX.gala)
+  const galaWhere = whereFor(RECORD_PREFIX.gala, { entryNo: number })
   if (galaWhere) {
     const rows = await db.galaEntry.findMany({
       where: galaWhere,
@@ -157,6 +161,17 @@ export async function GET(req: Request) {
   }
 
   return NextResponse.json({ results })
+}
+
+// What people type or paste: "srm - 12", "SRM–12" (phone dash), "#12", "SRM_12", Urdu digits "۱۲"
+function normalizeCode(v: string) {
+  return v
+    .replace(/[\u06F0-\u06F9]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[\u2010-\u2015\u2212_]/g, "-")
+    .replace(/\s+/g, "")
+    .toUpperCase()
+    .replace(/^#/, "")
 }
 
 function lotResult(l: any): Result {
