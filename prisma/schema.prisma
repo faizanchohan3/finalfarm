@@ -105,6 +105,10 @@ model Shop {
   modulePurchases  Boolean @default(true)
   moduleSales      Boolean @default(true)
 
+  // Record IDs (SRM-1, SRM-2 …): one running number per shop across commissions, bills, Gala Mandi and store products
+  recordPrefix String?
+  recordSeq    Int     @default(0)
+
   users               User[]
   customers           Customer[]
   suppliers           Supplier[]
@@ -141,6 +145,7 @@ model Shop {
 model Bill {
   id          String   @id @default(cuid())
   shopId      String?
+  code         String?  // record ID, e.g. SRM-12 (see lib/record-number.ts)
   billNo      String
   billDate    DateTime
   name        String
@@ -159,6 +164,8 @@ model Bill {
 
   @@index([shopId, createdAt])
   @@index([customerId])
+
+  @@unique([shopId, code])
 }
 
 // ── RECYCLE BIN ──────────────────────────────────────────────────────────────
@@ -271,6 +278,7 @@ model Room {
 model Product {
   id            String   @id @default(cuid())
   shopId        String?
+  code         String?  // record ID, e.g. SRM-12 (see lib/record-number.ts)
   name          String
   categoryId    String
   roomId        String?
@@ -293,6 +301,8 @@ model Product {
   warehouseStock      WarehouseStock[]
   stockTransfers      StockTransfer[]
   stockAdjustments    StockAdjustment[]
+
+  @@unique([shopId, code])
 }
 
 model StockMovement {
@@ -1017,6 +1027,7 @@ model WeighbridgeEntry {
 model Commission {
   id               String     @id @default(cuid())
   shopId           String?
+  code         String?  // record ID, e.g. SRM-12 (see lib/record-number.ts)
   farmerId         String?
   supplierId       String?
   customerId       String?
@@ -1054,6 +1065,8 @@ model Commission {
   createdBy  User                @relation(fields: [createdById], references: [id])
   payments   CommissionPayment[]
   lot        Lot?
+
+  @@unique([shopId, code])
 }
 
 model CommissionPayment {
@@ -1076,6 +1089,7 @@ model CommissionPayment {
 model GalaEntry {
   id           String   @id @default(cuid())
   shopId       String?
+  code         String?  // record ID, e.g. SRM-12 (see lib/record-number.ts)
   entryNo      String
   entryDate    DateTime
   customerId   String?
@@ -1103,4 +1117,6 @@ model GalaEntry {
   @@index([customerId])
   @@index([farmerId])
   @@index([supplierId])
+
+  @@unique([shopId, code])
 }

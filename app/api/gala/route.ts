@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { nextRecordCode } from "@/lib/record-number"
 import { createAuditLog } from "@/lib/audit"
 import { applyGala } from "@/lib/gala"
 import { checkParties, galaFields } from "./fields"
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
       const last = await tx.galaEntry.findFirst({ where: { shopId }, orderBy: { createdAt: "desc" }, select: { entryNo: true } })
       const entryNo = String((parseInt(last?.entryNo || "0") || 0) + 1)
       const created = await tx.galaEntry.create({
-        data: { ...fields, entryNo, shopId, createdById: session.user.id },
+        data: { ...fields, entryNo, shopId, code: await nextRecordCode(tx, shopId), createdById: session.user.id },
         include: partySelect,
       })
       await applyGala(tx, created, 1)

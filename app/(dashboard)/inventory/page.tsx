@@ -106,7 +106,7 @@ export default function InventoryPage() {
     if (res.ok) {
       const d = await res.json().catch(() => ({}))
       setShowModal(false); loadData()
-      if (!editing && d?.product?.id) alert(`Product added. ID: ${recordCode("product", d.product.id)}`)
+      if (!editing && d?.product?.id) alert(`Product added. ID: ${recordCode("product", d.product)}`)
     }
   }
 
@@ -226,7 +226,7 @@ export default function InventoryPage() {
         const isLow = p.currentStock <= p.minStock
         return `<tr${isLow ? ' style="background:#fef2f2"' : ""}>
         <td>${i + 1}</td>
-        <td>${recordCode("product", p.id)}</td>
+        <td>${recordCode("product", p)}</td>
         <td style="font-family:inherit">${e(p.name)}</td>
         <td style="font-family:inherit">${e(p.category?.name)}</td>
         <td${isLow ? ' style="color:#b91c1c;font-weight:700"' : ""}>${n(p.currentStock)} ${e(p.unit)}</td>
@@ -602,7 +602,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                                 >
                                   {expanded.has(p.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                                 </button>
-                                <div>{p.name}<div className="font-mono text-[11px] text-purple-700 font-normal">{recordCode("product", p.id)}</div></div>
+                                <div>{p.name}<div className="font-mono text-[11px] text-purple-700 font-normal">{recordCode("product", p)}</div></div>
                               </div>
                             </td>
                             <td className="py-3 px-3 text-gray-600">{p.category?.name}</td>

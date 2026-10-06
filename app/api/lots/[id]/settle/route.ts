@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { nextRecordCode } from "@/lib/record-number"
 
 // Settle a SOLD lot: create the commission (Aarthi) record, post the buyer
 // receivable, farmer payable, commission income and labour expense in one
@@ -46,6 +47,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const c = await tx.commission.create({
       data: {
         shopId,
+        code: await nextRecordCode(tx, shopId),
         customerId: lot.buyerId,
         farmerId: lot.farmerId,
         commodity: lot.category?.name || null,

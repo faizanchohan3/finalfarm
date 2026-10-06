@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Plus, Tag, ImageIcon, Trash2, Upload, Store, ToggleLeft, ToggleRight, Printer } from "lucide-react"
+import { Plus, Tag, ImageIcon, Trash2, Upload, Store, ToggleLeft, ToggleRight, Printer, Hash } from "lucide-react"
 
 export default function SettingsPage() {
   const [categories, setCategories] = useState<any[]>([])
@@ -22,6 +22,10 @@ export default function SettingsPage() {
   // Contact details printed in the header of every print
   const [contact, setContact] = useState({ address: "", phone: "", phone2: "" })
   const [savingContact, setSavingContact] = useState(false)
+  // Record IDs: SRM-1, SRM-2 … (one running number for commissions, bills, Gala Mandi and store products)
+  const [recordPrefix, setRecordPrefix] = useState("")
+  const [recordSeq, setRecordSeq] = useState(0)
+  const [savingPrefix, setSavingPrefix] = useState(false)
 
   // Module toggles
   const [modules, setModules] = useState({
@@ -59,6 +63,8 @@ export default function SettingsPage() {
       if (s.logo) setCurrentLogo(s.logo)
       if (s.name) setShopName(s.name)
       setContact({ address: s.address || "", phone: s.phone || "", phone2: s.phone2 || "" })
+      setRecordPrefix(s.recordPrefix || "")
+      setRecordSeq(s.recordSeq || 0)
       setModules({
         moduleGodown:     !!s.moduleGodown,
         moduleGate:       !!s.moduleGate,
@@ -120,6 +126,27 @@ export default function SettingsPage() {
       alert("Network error. Please try again.")
     } finally {
       setSavingName(false)
+    }
+  }
+
+  async function savePrefix() {
+    const prefix = recordPrefix.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8)
+    if (!prefix) return alert("Enter a prefix (letters or numbers), e.g. SRM")
+    setSavingPrefix(true)
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recordPrefix: prefix }),
+      })
+      const d = await res.json().catch(() => ({}))
+      if (!res.ok) return alert(d?.error || "Failed to save prefix")
+      setRecordPrefix(prefix)
+      alert(`Saved. New records will be numbered ${prefix}-${recordSeq + 1}, ${prefix}-${recordSeq + 2} …`)
+    } catch {
+      alert("Network error. Please try again.")
+    } finally {
+      setSavingPrefix(false)
     }
   }
 
@@ -323,6 +350,41 @@ export default function SettingsPage() {
           <Button className="bg-teal-700 hover:bg-teal-800" onClick={saveContact} disabled={savingContact}>
             {savingContact ? "Saving..." : "Save"}
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* Record ID prefix */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Hash className="w-4 h-4" /> Record ID Prefix
+          </CardTitle>
+          <p className="text-xs text-gray-500">
+            Commissions, Bill Maker bills, Gala Mandi entries and store products share one running number:
+            {" "}<span className="font-mono">{(recordPrefix || "SRM").toUpperCase()}-1, {(recordPrefix || "SRM").toUpperCase()}-2, {(recordPrefix || "SRM").toUpperCase()}-3 …</span>
+            {" "}Type an ID on the Dashboard to find any record.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-end gap-3 flex-wrap">
+            <div>
+              <Label className="mb-1 block">Prefix</Label>
+              <Input
+                value={recordPrefix}
+                onChange={(e) => setRecordPrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8))}
+                placeholder="e.g. SRM"
+                className="w-40 font-mono uppercase"
+              />
+            </div>
+            <Button className="bg-teal-700 hover:bg-teal-800" onClick={savePrefix} disabled={savingPrefix}>
+              {savingPrefix ? "Saving..." : "Save"}
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500">
+            {recordSeq > 0 ? `${recordSeq} records numbered so far · next: ` : "Next: "}
+            <span className="font-mono font-semibold text-gray-800">{(recordPrefix || "SRM").toUpperCase()}-{recordSeq + 1}</span>
+            {" "}— changing the prefix only affects new records; existing IDs stay the same.
+          </p>
         </CardContent>
       </Card>
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { nextRecordCode } from "@/lib/record-number"
 import { createAuditLog } from "@/lib/audit"
 import { cachedJson } from "@/lib/api-cache"
 
@@ -40,15 +41,20 @@ export async function POST(req: Request) {
   const body = await req.json()
   const { name, categoryId, roomId, unit, currentStock, minStock, purchasePrice, salePrice } = body
 
-  const product = await db.product.create({
-    data: { shopId: session.user.shopId || null, name, categoryId, roomId: roomId || null, unit, currentStock, minStock, purchasePrice, salePrice },
-  })
-
-  if (currentStock > 0) {
-    await db.stockMovement.create({
-      data: { productId: product.id, type: "IN", quantity: currentStock, reference: "Opening Stock" },
+  const product = await db.$transaction(async (tx) => {
+    const p = await tx.product.create({
+      data: {
+        shopId: session.user.shopId || null, code: await nextRecordCode(tx, session.user.shopId),
+        name, categoryId, roomId: roomId || null, unit, currentStock, minStock, purchasePrice, salePrice,
+      },
     })
-  }
+    if (currentStock > 0) {
+      await tx.stockMovement.create({
+        data: { productId: p.id, type: "IN", quantity: currentStock, reference: "Opening Stock" },
+      })
+    }
+    return p
+  })
 
   await createAuditLog({ userId: session.user.id, shopId: session.user.shopId, action: "CREATE", module: "INVENTORY", details: `Created product: ${name}` })
 

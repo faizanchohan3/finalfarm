@@ -219,7 +219,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     }
 
     await archiveDeleted(tx, session, {
-      type: "COMMISSION", recordId: id, code: recordCode("commission", id),
+      type: "COMMISSION", recordId: id, code: recordCode("commission", c),
       title: `${c.commodity || "Commission"} — ${c.walkInCustomer || "Trader"}`, amount: c.totalValue,
       summary: [
         ["Date", day(c.createdAt)], ["Commodity", c.commodity || "—"], ["Vehicle No", c.vehicleNo || "—"],

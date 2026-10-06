@@ -49,7 +49,7 @@ export default function BillMakerReportPage() {
     traderName(b).toLowerCase().includes(q) ||
     String(b.name || "").toLowerCase().includes(q) ||
     String(b.billNo || "").toLowerCase().includes(q) ||
-    recordCode("bill", b.id).toLowerCase().includes(q) ||
+    recordCode("bill", b).toLowerCase().includes(q) ||
     String(b.product || "").toLowerCase().includes(q),
   )
   const sum = (k: string) => shown.reduce((s, b) => s + (b[k] || 0), 0)
@@ -60,7 +60,7 @@ export default function BillMakerReportPage() {
   function print() {
     const x = (v: unknown) => escapeHtml(v ?? "—")
     const rows = shown.map((b, i) => `<tr>
-      <td>${i + 1}</td><td>${formatDate(b.billDate)}</td><td>${x(b.billNo)}<div style="font-size:9px;color:#7c3aed">${recordCode("bill", b.id)}</div></td>
+      <td>${i + 1}</td><td>${formatDate(b.billDate)}</td><td>${x(b.billNo)}<div style="font-size:9px;color:#7c3aed">${recordCode("bill", b)}</div></td>
       <td>${x(traderName(b))}</td><td>${x(b.product)}</td>
       <td style="text-align:right">${n(b.totalWeight)}</td><td style="text-align:right">${n(b.safiWeight)}</td>
       <td style="text-align:right">${n(b.amount)}</td>
@@ -123,7 +123,7 @@ ${buildPrintHeader(shop)}
             </div>
           </div>
           <div className="flex items-center gap-3 mt-3 flex-wrap">
-            <VoiceSearch value={search} onChange={setSearch} placeholder="Search name, bill no, ID (BL-…), product..." className="flex-1" />
+            <VoiceSearch value={search} onChange={setSearch} placeholder="Search name, bill no, ID, product..." className="flex-1" />
             {hasFilters && (
               <Button variant="ghost" size="sm" className="gap-1 text-gray-500" onClick={() => { setFrom(""); setTo(""); setCustomerId(""); setSearch("") }}>
                 <X className="w-4 h-4" /> Clear filters
@@ -179,7 +179,7 @@ ${buildPrintHeader(shop)}
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(b.billDate)}</td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-900">{b.billNo}</div>
-                      <div className="font-mono text-[11px] text-purple-700">{recordCode("bill", b.id)}</div>
+                      <div className="font-mono text-[11px] text-purple-700">{recordCode("bill", b)}</div>
                     </td>
                     <td className="px-4 py-3 font-medium text-gray-900" dir="auto">{traderName(b)}</td>
                     <td className="px-4 py-3 text-gray-600" dir="auto">{b.product || "—"}</td>

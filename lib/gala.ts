@@ -86,7 +86,7 @@ export function galaLedgerText(
   const status = left <= 0
     ? (side === "buyer" ? "Fully received" : "Fully paid")
     : `${side === "buyer" ? "Unreceived" : "Unpaid"} PKR ${left.toLocaleString("en-PK", { maximumFractionDigits: 2 })}`
-  return `Gala Mandi #${g.entryNo} (${recordCode("gala", g.id)})${items ? ` — ${items}` : ""} · ${status}`
+  return `Gala Mandi #${g.entryNo} (${recordCode("gala", g)})${items ? ` — ${items}` : ""} · ${status}`
 }
 
 // Short product list for ledgers, e.g. "Wheat 120 KG, Rice 40 Bag"

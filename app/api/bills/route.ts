@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { nextRecordCode } from "@/lib/record-number"
 import { applyToTrader, billFields, findTrader } from "./fields"
 
 export async function GET() {
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
       const trader = await findTrader(tx, fields.customerId, session.user.shopId)
       if (!trader) throw new Error("TRADER_NOT_FOUND")
       const created = await tx.bill.create({
-        data: { ...fields, name: trader.name, shopId: session.user.shopId ?? null, createdById: session.user.id },
+        data: { ...fields, name: trader.name, shopId: session.user.shopId ?? null, code: await nextRecordCode(tx, session.user.shopId), createdById: session.user.id },
       })
       await applyToTrader(tx, trader.id, created.amount)
       return created

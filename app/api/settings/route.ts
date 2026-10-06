@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { cachedJson } from "@/lib/api-cache"
+import { cleanRecordPrefix } from "@/lib/record-number"
 
 export async function GET() {
   const session = await auth()
@@ -17,6 +18,7 @@ export async function GET() {
         moduleFarmers: true, moduleCommission: true, modulePesticides: true,
         moduleLots: true, moduleAgents: true,
         moduleSuppliers: true, modulePurchases: true, moduleSales: true,
+        recordPrefix: true, recordSeq: true,
       },
     })
     return cachedJson({ shop }, 30, 120)
@@ -50,6 +52,12 @@ export async function PATCH(req: Request) {
     if ("moduleSuppliers" in body)  data.moduleSuppliers  = !!body.moduleSuppliers
     if ("modulePurchases" in body)  data.modulePurchases  = !!body.modulePurchases
     if ("moduleSales" in body)      data.moduleSales      = !!body.moduleSales
+    // Record ID prefix (SRM → SRM-1, SRM-2 …); applies to records created from now on
+    if ("recordPrefix" in body) {
+      const prefix = cleanRecordPrefix(body.recordPrefix)
+      if (!prefix) return NextResponse.json({ error: "Enter a prefix (letters or numbers)" }, { status: 400 })
+      data.recordPrefix = prefix
+    }
 
     const shop = await db.shop.update({ where: { id: session.user.shopId }, data })
     return NextResponse.json({ shop })

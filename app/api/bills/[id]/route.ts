@@ -52,7 +52,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const b = found.bill
   await db.$transaction(async (tx) => {
     await archiveDeleted(tx, session, {
-      type: "BILL", recordId: b.id, code: recordCode("bill", b.id), title: `Bill #${b.billNo} — ${b.name}`, amount: b.amount,
+      type: "BILL", recordId: b.id, code: recordCode("bill", b), title: `Bill #${b.billNo} — ${b.name}`, amount: b.amount,
       summary: [
         ["Bill No", b.billNo], ["Date", day(b.billDate)], ["Trader", b.name], ["Product", b.product || "—"],
         ["Total weight", `${b.totalWeight} KG`], ["Safi weight", `${b.safiWeight} KG`], ["Total amount", pkr(b.amount)],

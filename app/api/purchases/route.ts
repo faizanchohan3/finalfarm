@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { nextRecordCode } from "@/lib/record-number"
 import { createAuditLog } from "@/lib/audit"
 
 export async function GET(req: Request) {
@@ -77,7 +78,7 @@ export async function POST(req: Request) {
       let product = await tx.product.findFirst({ where: { shopId, name: i.customName } })
       if (!product) {
         product = await tx.product.create({
-          data: { shopId, name: i.customName, categoryId: category.id, purchasePrice: i.price, salePrice: i.price },
+          data: { shopId, code: await nextRecordCode(tx, shopId), name: i.customName, categoryId: category.id, purchasePrice: i.price, salePrice: i.price },
         })
       }
       return { ...i, productId: product.id }

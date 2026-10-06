@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
+import { assignMissingCodes } from "@/lib/record-number"
 
 // Ordered table configs. `shop` = stamp target shopId, `user` = fields pointing at a
 // User (remapped to the importing user), `fks` = cross-entity references remapped via
@@ -85,6 +86,8 @@ export async function POST(req: Request) {
         delete rec.id
 
         if (cfg.shop) rec.shopId = shopId
+        // Record IDs (SRM-12) belong to the source shop; imported records get this shop's numbers below
+        delete rec.code
         for (const uf of cfg.user || []) {
           if (rec[uf] != null) rec[uf] = userId
         }
@@ -120,6 +123,9 @@ export async function POST(req: Request) {
       { status: 500 }
     )
   }
+
+  // Number the imported commissions, bills, Gala Mandi entries and products in this shop's series
+  await assignMissingCodes(db, shopId).catch((err) => console.error("Numbering imported records failed:", err))
 
   const total = Object.values(counts).reduce((s, n) => s + n, 0)
   await createAuditLog({

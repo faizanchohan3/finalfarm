@@ -76,7 +76,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       ...customerPayments.map((p) => p.id), ...farmerPayments.map((p) => p.id), ...supplierPayments.map((p) => p.id), galaWalkInRef(id),
     ])
     await archiveDeleted(tx, session, {
-      type: "GALA", recordId: id, code: recordCode("gala", id), title: `Gala Mandi #${e.entryNo} — ${buyer}`, amount: e.totalAmount,
+      type: "GALA", recordId: id, code: recordCode("gala", e), title: `Gala Mandi #${e.entryNo} — ${buyer}`, amount: e.totalAmount,
       summary: [
         ["Entry No", e.entryNo], ["Date", day(e.entryDate)], ["Buyer", buyer], ["Seller", seller],
         ["Products", galaItemsText(e.items) || "—"], ["Total amount", pkr(e.totalAmount)],

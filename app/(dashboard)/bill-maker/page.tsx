@@ -59,6 +59,8 @@ export default function BillMakerPage() {
   const [savedBills, setSavedBills] = useState<any[]>([])
   const [billSearch, setBillSearch] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
+  // The bill being edited, for its record ID (SRM-12)
+  const editingBill = savedBills.find((b) => b.id === editingId)
   const [saving, setSaving] = useState(false)
 
   const [billNo, setBillNo] = useState("1")
@@ -170,7 +172,7 @@ export default function BillMakerPage() {
       setEditingId(d.bill.id)
       markBillNoUsed(billNo)
       loadBills()
-      alert(`${editingId ? t("Bill updated") : t("Bill saved")} — ID: ${recordCode("bill", d.bill.id)}`)
+      alert(`${editingId ? t("Bill updated") : t("Bill saved")} — ID: ${recordCode("bill", d.bill)}`)
     } finally {
       setSaving(false)
     }
@@ -223,7 +225,7 @@ ${billFontLink}
 <style>${billCSS}</style></head><body>
 <div dir="ltr">${buildPrintHeader(shop)}</div>
 <div class="meta">
-  <div>نمبر: <b>${escapeHtml(billNo)}</b>${editingId ? ` <span style="font-size:11px;color:#6b7280">(ID: <b>${recordCode("bill", editingId)}</b>)</span>` : ""}</div>
+  <div>نمبر: <b>${escapeHtml(billNo)}</b>${editingId ? ` <span style="font-size:11px;color:#6b7280">(ID: <b>${recordCode("bill", editingBill || editingId)}</b>)</span>` : ""}</div>
   <div>تاریخ: <b>${escapeHtml(fmtDate(billDate))}</b></div>
 </div>
 <div class="name">بل برائے: <strong>${BILL_FOR[billFor].ur}</strong><span style="margin-inline-start:28px">بنام: <strong>${escapeHtml(name.trim())}</strong></span>${product ? `<span style="margin-inline-start:28px">جنس: <strong>${escapeHtml(productUr)}</strong></span>` : ""}</div>
@@ -260,7 +262,7 @@ ${billFontLink}
             <FileText className="w-6 h-6 text-purple-600" /> {t("Bill Maker")}
           </h2>
           <p className="text-gray-500 text-sm">
-            {editingId ? <>{t("Editing saved bill")} #{billNo} · ID <span className="font-mono text-purple-700">{recordCode("bill", editingId)}</span></> : t("Make, save and print a weight bill.")}
+            {editingId ? <>{t("Editing saved bill")} #{billNo} · ID <span className="font-mono text-purple-700">{recordCode("bill", editingBill || editingId)}</span></> : t("Make, save and print a weight bill.")}
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -451,7 +453,7 @@ ${billFontLink}
               <tbody>
                 {filteredBills.map((b) => (
                   <tr key={b.id} className={`border-b border-gray-50 hover:bg-purple-50 ${editingId === b.id ? "bg-purple-50" : ""}`}>
-                    <td className="py-2 px-2 font-medium">#{b.billNo}<div className="font-mono text-[11px] text-purple-700 font-normal">{recordCode("bill", b.id)}</div></td>
+                    <td className="py-2 px-2 font-medium">#{b.billNo}<div className="font-mono text-[11px] text-purple-700 font-normal">{recordCode("bill", b)}</div></td>
                     <td className="py-2 px-2 text-gray-600 whitespace-nowrap">{fmtDate(b.billDate)}</td>
                     <td className="py-2 px-2">{b.name}</td>
                     <td className="py-2 px-2 text-gray-600">{b.product ? t(b.product) : "—"}</td>

@@ -226,7 +226,7 @@ export default function GalaMandiPage() {
 <style>${reportCSS} body { max-width: 800px; margin: 0 auto; }</style></head><body>
 ${buildPrintHeader(shop)}
 <div class="doc-header">
-  <div><div class="doc-title">Gala Mandi #${x(e.entryNo)}</div><div class="doc-sub">${recordCode("gala", e.id)}</div></div>
+  <div><div class="doc-title">Gala Mandi #${x(e.entryNo)}</div><div class="doc-sub">${recordCode("gala", e)}</div></div>
   <div class="doc-meta"><div>Date: ${formatDate(e.entryDate)}</div></div>
 </div>
 <div class="body-pad">
@@ -335,7 +335,7 @@ ${buildPrintHeader(shop)}
                     <tr key={e.id} className="border-b border-gray-50 hover:bg-blue-50 align-top">
                       <td className="py-3 px-3 text-gray-500">
                         {e.entryNo}
-                        <div className="font-mono text-[11px] text-purple-700">{recordCode("gala", e.id)}</div>
+                        <div className="font-mono text-[11px] text-purple-700">{recordCode("gala", e)}</div>
                       </td>
                       <td className="py-3 px-3 text-gray-600 whitespace-nowrap">{formatDate(e.entryDate)}</td>
                       <td className="py-3 px-3 font-medium text-gray-800">{sellerName(e)}</td>

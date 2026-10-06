@@ -36,7 +36,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     // Keep a copy for the Deleted Records page (the product is only hidden, so restore just shows it again)
     const { category, room, ...row } = p
     await archiveDeleted(tx, session, {
-      type: "PRODUCT", recordId: id, code: recordCode("product", id), title: p.name,
+      type: "PRODUCT", recordId: id, code: recordCode("product", p), title: p.name,
       amount: p.currentStock * p.purchasePrice,
       summary: [
         ["Product", p.name], ["Category", category?.name || "—"], ["Room", room?.name || "Unassigned"],

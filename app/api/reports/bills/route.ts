@@ -27,7 +27,7 @@ export async function GET(req: Request) {
     orderBy: [{ billDate: "desc" }, { createdAt: "desc" }],
     take: 5000,
     select: {
-      id: true, billNo: true, billDate: true, name: true, product: true, customerId: true,
+      id: true, code: true, billNo: true, billDate: true, name: true, product: true, customerId: true,
       totalWeight: true, safiWeight: true, amount: true,
       customer: { select: { name: true, phone: true } },
     },

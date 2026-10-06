@@ -125,7 +125,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     ledgerEvents.push({
       date: bill.billDate,
       type: "BILL",
-      description: `Bill #${bill.billNo} (${recordCode("bill", bill.id)})${desc ? ` — ${desc}` : ""}`,
+      description: `Bill #${bill.billNo} (${recordCode("bill", bill)})${desc ? ` — ${desc}` : ""}`,
       debit: bill.amount,
       credit: 0,
     })

@@ -62,7 +62,7 @@ export default function GalaMandiReportPage() {
     buyerName(e).toLowerCase().includes(q) ||
     sellerName(e).toLowerCase().includes(q) ||
     String(e.entryNo).toLowerCase() === q.replace(/^#/, "") ||
-    recordCode("gala", e.id).toLowerCase().includes(q) ||
+    recordCode("gala", e).toLowerCase().includes(q) ||
     galaItemsText(e.items).toLowerCase().includes(q),
   )
   const sum = (f: (e: any) => number) => shown.reduce((s, e) => s + (f(e) || 0), 0)
@@ -87,7 +87,7 @@ export default function GalaMandiReportPage() {
   function print() {
     const x = (v: unknown) => escapeHtml(v ?? "—")
     const rows = shown.map((e, i) => `<tr>
-      <td>${i + 1}</td><td>${formatDate(e.entryDate)}</td><td>#${x(e.entryNo)}<div style="font-size:9px;color:#7c3aed">${recordCode("gala", e.id)}</div></td>
+      <td>${i + 1}</td><td>${formatDate(e.entryDate)}</td><td>#${x(e.entryNo)}<div style="font-size:9px;color:#7c3aed">${recordCode("gala", e)}</div></td>
       <td>${x(sellerName(e))}</td><td>${x(buyerName(e))}</td><td>${x(galaItemsText(e.items))}</td>
       <td style="text-align:right">${n(e.totalWeight)}</td><td style="text-align:right">${n(e.totalAmount)}</td>
       <td style="text-align:right">${n(e.receivedAmount)}</td><td style="text-align:right">${n(e.paidAmount)}</td>
@@ -162,7 +162,7 @@ ${buildPrintHeader(shop)}
             </div>
           </div>
           <div className="flex items-center gap-3 mt-3 flex-wrap">
-            <VoiceSearch value={search} onChange={setSearch} placeholder="Search name, entry no, ID (GM-…), product..." className="flex-1" />
+            <VoiceSearch value={search} onChange={setSearch} placeholder="Search name, entry no, ID, product..." className="flex-1" />
             {hasFilters && (
               <Button variant="ghost" size="sm" className="gap-1 text-gray-500" onClick={() => { setFrom(""); setTo(""); setCustomerId(""); setSeller(""); setSearch("") }}>
                 <X className="w-4 h-4" /> Clear filters
@@ -226,7 +226,7 @@ ${buildPrintHeader(shop)}
                     <td className="px-3 py-3 text-gray-600 whitespace-nowrap">{formatDate(e.entryDate)}</td>
                     <td className="px-3 py-3">
                       <div className="font-medium text-gray-900">#{e.entryNo}</div>
-                      <div className="font-mono text-[11px] text-purple-700">{recordCode("gala", e.id)}</div>
+                      <div className="font-mono text-[11px] text-purple-700">{recordCode("gala", e)}</div>
                     </td>
                     <td className="px-3 py-3 font-medium text-gray-900" dir="auto">{sellerName(e)}</td>
                     <td className="px-3 py-3 font-medium text-gray-900" dir="auto">{buyerName(e)}</td>

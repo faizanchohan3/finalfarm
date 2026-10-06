@@ -24,7 +24,7 @@ export async function GET(req: Request) {
 
   const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
   const productWhere = { ...shopFilter, ...(productId ? { id: productId } : {}) }
-  const productSelect = { select: { id: true, name: true, unit: true, purchasePrice: true, currentStock: true } }
+  const productSelect = { select: { id: true, code: true, name: true, unit: true, purchasePrice: true, currentStock: true } }
 
   const [openings, purchaseItems, saleItems, adjustments] = await Promise.all([
     db.stockMovement.findMany({
@@ -56,7 +56,7 @@ export async function GET(req: Request) {
     productId: string; productName: string; productCode: string; unit: string
     qty: number; rate: number; amount: number; ref: string; party: string; note: string; by: string
   }
-  const base = (p: any) => ({ productId: p.id, productName: p.name, productCode: recordCode("product", p.id), unit: p.unit })
+  const base = (p: any) => ({ productId: p.id, productName: p.name, productCode: recordCode("product", p), unit: p.unit })
   const entries: Entry[] = []
 
   for (const m of openings) {
@@ -158,7 +158,7 @@ export async function DELETE(req: Request) {
     const { product, ...row } = m
     await db.$transaction(async (tx) => {
       await archiveDeleted(tx, session, {
-        type: "STOCK_OPENING", recordId: id, code: recordCode("product", product.id),
+        type: "STOCK_OPENING", recordId: id, code: recordCode("product", product),
         title: `Opening stock ${m.quantity} ${product.unit} — ${product.name}`,
         amount: m.quantity * (product.purchasePrice || 0),
         summary: [["Product", product.name], ["Quantity", `${m.quantity} ${product.unit}`], ["Date", day(m.createdAt)]],

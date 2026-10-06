@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { nextRecordCode } from "@/lib/record-number"
 
 export async function GET(req: Request) {
   const session = await auth()
@@ -97,6 +98,7 @@ export async function POST(req: Request) {
     const c = await tx.commission.create({
       data: {
         shopId: session.user.shopId || null,
+        code: await nextRecordCode(tx, session.user.shopId),
         customerId: customerId || null,
         walkInCustomer: walkInCustomer || null,
         createdAt: commissionDate ? new Date(commissionDate) : new Date(),

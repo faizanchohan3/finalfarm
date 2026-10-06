@@ -204,7 +204,7 @@ export default function CommissionPage() {
         setShowNew(false)
         resetNewForm()
         loadData()
-        if (d?.commission?.id) alert(`Commission ${wasEditing ? "updated" : "saved"}. ID: ${recordCode("commission", d.commission.id)}`)
+        if (d?.commission?.id) alert(`Commission ${wasEditing ? "updated" : "saved"}. ID: ${recordCode("commission", d.commission)}`)
       } else {
         const d = await res.json().catch(() => ({}))
         alert(d?.error || "Failed to save commission")
@@ -306,7 +306,7 @@ ${body}
   function printCopy(c: any, side: "buyer" | "seller") {
     const b = breakdown(c)
     const sd = b[side]
-    const ref = recordCode("commission", c.id)
+    const ref = recordCode("commission", c)
     const bagUr = UR_BAG[c.bagType] || "بوری"
     const hasWeights = c.grossWeight || c.tareWeight || c.bardanaWeight
     const parties = side === "seller"
@@ -359,7 +359,7 @@ ${c.notes ? `<p style="font-size:12px;color:#555;margin:10px 24px 0"><strong>ن�
   function printAllCommissions(list: any[]) {
     const rows = list.map((c, i) => `<tr>
       <td>${i + 1}</td>
-      <td>${recordCode("commission", c.id)}</td>
+      <td>${recordCode("commission", c)}</td>
       <td style="font-family:inherit">${e(sellerName(c))}</td>
       <td style="font-family:inherit">${e(buyerName(c))}</td>
       <td style="font-family:inherit">${e([c.commodity, c.bags ? `${c.bags} ${UR_BAG[c.bagType] || "بوری"}` : null, c.weight ? `${n(c.weight)} kg` : null].filter(Boolean).join("، ") || "—")}</td>
@@ -456,7 +456,7 @@ ${c.notes ? `<p style="font-size:12px;color:#555;margin:10px 24px 0"><strong>ن�
                   {filtered.map((c, i) => (
                     <tr key={c.id} className="border-b border-gray-50 hover:bg-blue-50">
                       <td className="py-3 px-2 text-gray-400 text-xs">{i + 1}</td>
-                      <td className="py-3 px-2 font-mono text-xs text-purple-700 whitespace-nowrap">{recordCode("commission", c.id)}</td>
+                      <td className="py-3 px-2 font-mono text-xs text-purple-700 whitespace-nowrap">{recordCode("commission", c)}</td>
                       <td className="py-3 px-2 font-medium text-gray-800">
                         {c.farmer?.name || c.supplier?.name || c.walkInSeller || <span className="text-gray-400">—</span>}
                         {c.walkInSeller && <span className="ml-1 text-xs text-orange-500">(walk-in)</span>}
@@ -873,7 +873,7 @@ ${c.notes ? `<p style="font-size:12px;color:#555;margin:10px 24px 0"><strong>ن�
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-300 text-sm space-y-1.5">
               <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Reference</span>
-                <span className="font-semibold font-mono">{recordCode("commission", deleteTarget?.id)}</span>
+                <span className="font-semibold font-mono">{recordCode("commission", deleteTarget)}</span>
               </div>
               <div className="flex justify-between gap-2 flex-wrap">
                 <span className="text-gray-500">Commodity</span>

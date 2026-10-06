@@ -27,7 +27,7 @@ const UR_LABEL: Record<string, string> = {
 // Field shown in the purple total bar at the bottom, per record type
 const GRAND_FIELD: Record<string, string> = { Commission: "Total amount", Bill: "Total amount", Store: "Stock value", "Potato Store": "Sale amount" }
 
-// Dashboard box: type a record ID (CM-…, BL-…, ST-…, LOT-…) to see it in a modal and print it.
+// Dashboard box: type a record ID (SRM-12, LOT-…, or an old CM-… / BL-… / ST-… / GM-… one) to see it in a modal and print it.
 export function RecordLookup() {
   const { t } = useLang()
   const [code, setCode] = useState("")
@@ -95,7 +95,7 @@ ${billFontLink}
         <Input
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          placeholder="CM-7K2Q9X · BL-… · ST-… · LOT-2026-00012"
+          placeholder="SRM-12 · LOT-2026-00012"
           className="flex-1 min-w-[200px] font-mono uppercase"
         />
         <Button type="submit" size="sm" disabled={loading || !code.trim()}>{loading ? t("Searching...") : t("Find")}</Button>
