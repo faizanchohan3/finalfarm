@@ -614,7 +614,12 @@ ${buildPrintHeader(shop)}
       <Dialog open={!!ledgerFor} onOpenChange={(o) => { if (!o) setLedgerFor(null) }}>
         <DialogContent className="w-[96vw] max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Gala Mandi #{ledgerFor?.entryNo} — Payment Ledger</DialogTitle>
+            <div className="flex items-center justify-between gap-2 flex-wrap pr-8">
+              <DialogTitle>Gala Mandi #{ledgerFor?.entryNo} — Payment Ledger</DialogTitle>
+              <Button size="sm" variant="outline" className="gap-1" onClick={printLedger} disabled={ledgerLoading || !ledger}>
+                <Printer className="w-4 h-4" /> Print
+              </Button>
+            </div>
           </DialogHeader>
           {ledgerFor && (
             <div className="space-y-5">
