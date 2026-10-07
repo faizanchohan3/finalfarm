@@ -232,15 +232,16 @@ export default function InventoryPage() {
         <td${isLow ? ' style="color:#b91c1c;font-weight:700"' : ""}>${n(p.currentStock)} ${e(p.unit)}</td>
         <td>${n(p.purchasePrice)}</td>
         <td>${n(p.salePrice)}</td>
+        <td>${n(p.purchaseAmount || 0)}</td>
         <td>${n(p.currentStock * p.purchasePrice)}</td>
         <td style="font-family:inherit">${isLow ? "کم اسٹاک" : "دستیاب"}</td>
       </tr>`
       }).join("")
       return `<div class="section">${e(g.name)} <small>— <span class="num">${g.items.length}</span> اشیاء · مقدار: <span class="num">${e(qtyByUnit(g.items))}</span></small></div>
 <table>
-  <thead><tr><th>#</th><th>آئی ڈی</th><th>جنس</th><th>کیٹیگری</th><th>اسٹاک</th><th>خرید ریٹ</th><th>فروخت ریٹ</th><th>مالیت</th><th>حالت</th></tr></thead>
+  <thead><tr><th>#</th><th>آئی ڈی</th><th>جنس</th><th>کیٹیگری</th><th>اسٹاک</th><th>خرید ریٹ</th><th>فروخت ریٹ</th><th>کل خرید رقم</th><th>مالیت</th><th>حالت</th></tr></thead>
   <tbody>${rows}</tbody>
-  <tfoot><tr><td colspan="7" style="font-family:inherit">میزان</td><td>${n(groupValue)}</td><td></td></tr></tfoot>
+  <tfoot><tr><td colspan="7" style="font-family:inherit">میزان</td><td>${n(g.items.reduce((s, p) => s + (p.purchaseAmount || 0), 0))}</td><td>${n(groupValue)}</td><td></td></tr></tfoot>
 </table>`
     }).join("")
 
@@ -561,8 +562,8 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-blue-300">
-                    {["Product", "Category", "Stock", "Unit", "Purchase Price", "Sale Price", "Status", "Actions"].map((h) => (
-                      <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium">{h}</th>
+                    {["Product", "Category", "Stock", "Unit", "Purchase Price", "Sale Price", "Purchase Amount", "Status", "Actions"].map((h) => (
+                      <th key={h} className="text-left py-3 px-3 text-gray-500 font-medium" title={h === "Purchase Amount" ? "Total spent on this product: opening stock, purchases and stock added (at the price entered)" : undefined}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -572,7 +573,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                     return (
                       <Fragment key={g.name}>
                         <tr className="bg-purple-50 border-b border-purple-200">
-                          <td colSpan={8} className="py-2 px-3 font-semibold text-purple-800">
+                          <td colSpan={9} className="py-2 px-3 font-semibold text-purple-800">
                             <div className="flex items-center justify-between gap-2 flex-wrap">
                               <span>
                                 {g.name} <span className="text-purple-500 font-normal">({g.items.length})</span>
@@ -619,6 +620,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                             <td className="py-3 px-3 text-gray-500">{p.unit}</td>
                             <td className="py-3 px-3 text-gray-700">{formatCurrency(p.purchasePrice)}</td>
                             <td className="py-3 px-3 text-gray-700">{formatCurrency(p.salePrice)}</td>
+                            <td className="py-3 px-3 font-semibold text-gray-900 whitespace-nowrap">{formatCurrency(p.purchaseAmount || 0)}</td>
                             <td className="py-3 px-3">
                               <span className={`text-xs px-2 py-0.5 rounded-full ${p.currentStock <= p.minStock ? "bg-red-100 text-red-700" : "bg-green-100 text-purple-700"}`}>
                                 {p.currentStock <= p.minStock ? "Low Stock" : "In Stock"}
@@ -640,7 +642,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                           </tr>
                           {expanded.has(p.id) && (
                             <tr className="border-b border-purple-100">
-                              <td colSpan={8} className="p-0">
+                              <td colSpan={9} className="p-0">
                                 <ProductLedger product={p} version={ledgerVersion} onFullHistory={() => setHistoryFor(p.id)} />
                               </td>
                             </tr>
@@ -648,16 +650,17 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                           </Fragment>
                         ))}
                         <tr className="border-b border-gray-100 bg-gray-50/60">
-                          <td colSpan={7} className="py-2 px-3 text-right text-xs font-medium text-gray-500">
-                            {g.name} subtotal ({g.items.length} product{g.items.length > 1 ? "s" : ""})
+                          <td colSpan={6} className="py-2 px-3 text-right text-xs font-medium text-gray-500">
+ subtotal ({g.items.length} product{g.items.length > 1 ? "s" : ""})
                           </td>
-                          <td className="py-2 px-3 text-xs font-semibold text-gray-700">{formatCurrency(groupValue)}</td>
+                          <td className="py-2 px-3 text-xs font-semibold text-gray-900 whitespace-nowrap">{formatCurrency(g.items.reduce((s, p) => s + (p.purchaseAmount || 0), 0))}</td>
+                          <td colSpan={2} className="py-2 px-3 text-xs text-gray-600 whitespace-nowrap">Stock value: <span className="font-semibold text-gray-700">{formatCurrency(groupValue)}</span></td>
                         </tr>
                       </Fragment>
                     )
                   })}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={8} className="text-center py-8 text-gray-400">No products found</td></tr>
+                    <tr><td colSpan={9} className="text-center py-8 text-gray-400">No products found</td></tr>
                   )}
                 </tbody>
               </table>

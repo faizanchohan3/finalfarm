@@ -647,6 +647,7 @@ model Lot {
   netWeight     Float?
   grade         String?
   status        LotStatus  @default(ARRIVED)
+  soldBags      Int        @default(0) // bags taken by Potato Store sales (sell from total); left = bags − soldBags
   saleQty       Float?     // quantity sold, in saleUnit
   saleUnit      String?    // bag | kg | mound (40 kg) — what saleRate is per
   saleRate      Float?
@@ -667,6 +668,7 @@ model Lot {
   warehouse  Warehouse?  @relation(fields: [warehouseId], references: [id])
   buyer      Customer?   @relation(fields: [buyerId], references: [id])
   commission Commission? @relation(fields: [commissionId], references: [id])
+  saleItems  LotSaleItem[]
   createdBy  User        @relation(fields: [createdById], references: [id])
 }
 
@@ -1054,6 +1056,7 @@ model Commission {
   balance          Float      @default(0)
   status           SaleStatus @default(PENDING)
   notes            String?
+  lotSaleId        String?    // Potato Store sale that created it (one commission per farmer in the sale)
   createdById      String
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
@@ -1119,4 +1122,45 @@ model GalaEntry {
   @@index([supplierId])
 
   @@unique([shopId, code])
+}
+
+// ── POTATO STORE SALES (sell from total) ─────────────────────────────────────
+// One sale to a buyer taking bags from one or more lots of a product. Each farmer in the sale gets a
+// commission (buyer receivable, farmer payable) created at save, linked by Commission.lotSaleId.
+model LotSale {
+  id             String   @id @default(cuid())
+  shopId         String?
+  code           String?  // record ID, e.g. SRM-140
+  categoryId     String?
+  buyerId        String
+  saleDate       DateTime
+  totalBags      Int
+  weight         Float?   // KG, needed when the rate is per kg / mound
+  rateUnit       String   @default("bag") // bag | kg | mound (40 kg)
+  rate           Float
+  amount         Float
+  commissionRate Float    @default(0)
+  paidAmount     Float    @default(0)
+  paymentMethod  PaymentMethod @default(CASH)
+  notes          String?
+  createdById    String
+  createdAt      DateTime @default(now())
+
+  items LotSaleItem[]
+
+  @@unique([shopId, code])
+  @@index([shopId, saleDate])
+}
+
+model LotSaleItem {
+  id     String @id @default(cuid())
+  saleId String
+  lotId  String
+  bags   Int
+  amount Float
+
+  sale LotSale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  lot  Lot     @relation(fields: [lotId], references: [id])
+
+  @@index([lotId])
 }

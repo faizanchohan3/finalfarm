@@ -12,6 +12,7 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt, Printer, Tag, Search, X } from "lucide-react"
 import { useLang } from "@/lib/i18n"
 import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print-utils"
+import { LotStockSale } from "@/components/lot-stock-sale"
 
 // Lots are shown as just Stored or Sold. The database keeps its detailed statuses:
 // sold / dispatched / settled count as Sold, cancelled stays Cancelled, everything else is Stored.
@@ -456,6 +457,8 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">اس گو
           <Button className="gap-2" onClick={() => { setForm({ ...EMPTY }); setError(null); setShowCreate(true) }}>
             <Plus className="w-4 h-4" /> {t("New Lot")}
           </Button>
+          {/* Sell from stock: choose product, markha and bags from each lot */}
+          <LotStockSale buyers={buyers} shop={shop} onChanged={loadLots} />
         </div>
       </div>
 
@@ -596,6 +599,9 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">اس گو
                       {lot.netWeight != null && <span>{lot.netWeight} KG</span>}
                       {lot.bags ? (
                         <span>{lot.bags} {t(BAG_TYPE_LABEL[lot.bagType] || "bags")}</span>
+                      ) : null}
+                      {lot.soldBags > 0 && lot.bags ? (
+                        <span className="text-purple-700 font-medium">{lot.soldBags} sold · {Math.max(lot.bags - lot.soldBags, 0)} left</span>
                       ) : null}
                     </div>
                     {(lot.markha1 || lot.markha2) && (

@@ -22,6 +22,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 
   const body = await req.json()
+  if (existing.soldBags > 0 && (body.status === "SOLD" || body.status === "CANCELLED")) {
+    return NextResponse.json({ error: `${existing.soldBags} bags of this lot are already sold from the Potato Store total — sell the rest from there` }, { status: 400 })
+  }
   const data: any = {}
 
   if (body.status) data.status = body.status
@@ -95,6 +98,9 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!existing) return NextResponse.json({ error: "Lot not found" }, { status: 404 })
   if (session.user.shopId && existing.shopId !== session.user.shopId) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
+  if (existing.soldBags > 0) {
+    return NextResponse.json({ error: `${existing.soldBags} bags of this lot are sold from the Potato Store total — delete those sales first` }, { status: 400 })
   }
 
   await db.$transaction(async (tx) => {

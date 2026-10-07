@@ -16,6 +16,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (!old) return NextResponse.json({ error: "Commission not found" }, { status: 404 })
   if (session.user.shopId && old.shopId !== session.user.shopId) return NextResponse.json({ error: "Commission not found" }, { status: 404 })
   if (old.lot) return NextResponse.json({ error: `This commission was created by settling lot ${old.lot.lotNo} and can't be edited here` }, { status: 400 })
+  if (old.lotSaleId) return NextResponse.json({ error: "This commission was created by a Potato Store sale — change or delete the sale on the Potato Store page" }, { status: 400 })
 
   const body = await req.json()
   const {
@@ -156,6 +157,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     include: { payments: true },
   })
   if (!commission) return NextResponse.json({ error: "Commission not found" }, { status: 404 })
+  if (commission.lotSaleId) return NextResponse.json({ error: "This commission was created by a Potato Store sale — delete the sale on the Potato Store page" }, { status: 400 })
 
   const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
 
