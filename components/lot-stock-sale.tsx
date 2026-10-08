@@ -67,10 +67,29 @@ export function LotStockSale({ buyers, shop, onChanged }: { buyers: any[]; shop:
   }
   useEffect(() => { load() }, [])
 
-  async function openSell() {
-    await load()
+  // Just the stock and banks — the sell form doesn't need the (large) sales history
+  const [refreshing, setRefreshing] = useState(false)
+  async function loadStock() {
+    setRefreshing(true)
+    try {
+      const [st, bk] = await Promise.all([
+        fetch("/api/lots/stock", { cache: "no-store" }).then((r) => r.json()),
+        fetch("/api/banks").then((r) => r.json()).catch(() => ({})),
+      ])
+      setProducts(st.products || [])
+      if (bk.banks) setBanks(bk.banks)
+    } catch {
+      // keep the stock already shown; saving re-checks bags left on the server
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
+  // Open at once with the stock loaded with the page, then refresh it in the background
+  function openSell() {
     setShowSell(true); setMarkha(""); setBagsBy({}); setBuyerId(""); setSaleDate(today())
     setRateUnit("bag"); setRate(""); setWeight(""); setPaid(""); setMethod("CASH"); setBankId(""); setNotes("")
+    loadStock()
   }
   // Default to the first product in stock
   useEffect(() => {
@@ -272,15 +291,17 @@ ${billFontLink}
       <Button variant="outline" className="gap-2" onClick={() => setShowSales(true)}>
         <Receipt className="w-4 h-4" /> Sales{sales.length ? ` (${sales.length})` : ""}
       </Button>
-      <Button className="gap-2 bg-green-700 hover:bg-green-800" onClick={openSell} disabled={loading}>
+      <Button className="gap-2 bg-green-700 hover:bg-green-800" onClick={openSell}>
         <ShoppingCart className="w-4 h-4" /> Sell
       </Button>
 
       {/* Sale form */}
       <Dialog open={showSell} onOpenChange={setShowSell}>
         <DialogContent className="w-[96vw] max-w-4xl max-h-[92vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Sell from stock</DialogTitle></DialogHeader>
-          {products.length === 0 ? (
+          <DialogHeader><DialogTitle className="flex items-center gap-2">Sell from stock{refreshing && <span className="text-xs font-normal text-gray-400">updating stock…</span>}</DialogTitle></DialogHeader>
+          {products.length === 0 && (loading || refreshing) ? (
+            <p className="text-sm text-gray-400 py-6 text-center">Loading stock…</p>
+          ) : products.length === 0 ? (
             <p className="text-sm text-gray-500 py-6 text-center">No bags in stock to sell.</p>
           ) : sellFor && (
             <div className="space-y-4">
@@ -474,7 +495,7 @@ ${billFontLink}
 
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1" onClick={() => setShowSell(false)} disabled={saving}>Cancel</Button>
-                <Button className="flex-1 gap-1" onClick={save} disabled={saving || totalBags === 0}>
+                <Button className="flex-1 gap-1" onClick={save} disabled={saving || refreshing || totalBags === 0}>
                   <ShoppingCart className="w-4 h-4" /> {saving ? "Saving..." : `Sell ${n(totalBags)} bags`}
                 </Button>
               </div>
