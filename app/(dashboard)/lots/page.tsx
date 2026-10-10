@@ -23,7 +23,7 @@ const FILTER_LABELS: Record<string, string> = { ALL: "All", STORED: "Stored", SO
 
 // Markha 1 is a fixed list of potato grades — not shop-editable like Markha 2.
 // Always in Urdu (saved and shown the same in every language, on screen and in prints).
-const MARKHA1_OPTIONS = ["سفید بیگ", "سرخ بیگ", "سفید راشن", "سرخ راشن", "سفید گولی", "سرخ گولی"]
+const MARKHA1_OPTIONS = ["سفید بیج", "سرخ بیج", "سفید راشن", "سرخ راشن", "سفید گولی", "سرخ گولی"]
 
 const STATUS_COLORS: Record<string, string> = {
   ARRIVED: "bg-blue-100 text-blue-700",
