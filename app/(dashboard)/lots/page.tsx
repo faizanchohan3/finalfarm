@@ -22,7 +22,8 @@ const FILTERS = ["ALL", "STORED", "SOLD"] as const
 const FILTER_LABELS: Record<string, string> = { ALL: "All", STORED: "Stored", SOLD: "Sold" }
 
 // Markha 1 is a fixed list of potato grades — not shop-editable like Markha 2.
-const MARKHA1_OPTIONS = ["Safaid Beeg", "Surkh Beeg", "Safaid Rashan", "Surkh Rashan", "Safaid Goli", "Surkh Goli"]
+// Always in Urdu (saved and shown the same in every language, on screen and in prints).
+const MARKHA1_OPTIONS = ["سفید بیگ", "سرخ بیگ", "سفید راشن", "سرخ راشن", "سفید گولی", "سرخ گولی"]
 
 const STATUS_COLORS: Record<string, string> = {
   ARRIVED: "bg-blue-100 text-blue-700",
@@ -517,7 +518,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">اس گو
           >
             <option value="ALL">{t("All markhas")}</option>
             <optgroup label={t("Markha 1")}>
-              {MARKHA1_OPTIONS.map((name) => <option key={name} value={name}>{t(name)}</option>)}
+              {MARKHA1_OPTIONS.map((name) => <option key={name} value={name}>{name}</option>)}
             </optgroup>
             <optgroup label={t("Markha 2")}>
               {markhas.filter((m) => m.slot === 2).map((m) => <option key={m.id} value={m.name}>{m.name}</option>)}
@@ -746,7 +747,7 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">اس گو
                 <select value={form.markha1} onChange={(e) => set("markha1", e.target.value)}
                   className="mt-1 flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 shadow-xs focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-ring/20">
                   <option value="">— {t("None")} —</option>
-                  {MARKHA1_OPTIONS.map((name) => <option key={name} value={name}>{t(name)}</option>)}
+                  {MARKHA1_OPTIONS.map((name) => <option key={name} value={name}>{name}</option>)}
                 </select>
               </div>
               <div>
