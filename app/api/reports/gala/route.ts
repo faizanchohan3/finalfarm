@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { galaPartyInclude } from "@/lib/gala"
 
 // Gala Mandi report: entries by entry date, optionally for one buyer and / or one seller.
-// GET /api/reports/gala?from=YYYY-MM-DD&to=YYYY-MM-DD&buyer=supplier_<id>|customer_<id>&seller=customer_<id>|farmer_<id>|supplier_<id>
+// GET /api/reports/gala?from=YYYY-MM-DD&to=YYYY-MM-DD&customerId=&seller=farmer_<id>|supplier_<id>
 // (search by name / entry no / ID / product is done on the page)
 export async function GET(req: Request) {
   const session = await auth()
@@ -13,7 +12,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const from = searchParams.get("from")
   const to = searchParams.get("to")
-  const buyer = searchParams.get("buyer") || ""
+  const customerId = searchParams.get("customerId") || ""
   const seller = searchParams.get("seller") || ""
 
   const entryDate: any = {}
@@ -24,15 +23,17 @@ export async function GET(req: Request) {
     where: {
       ...(session.user.shopId ? { shopId: session.user.shopId } : {}),
       ...(from || to ? { entryDate } : {}),
-      ...(buyer.startsWith("customer_") ? { customerId: buyer.slice(9) } : {}),
-      ...(buyer.startsWith("supplier_") ? { buyerSupplierId: buyer.slice(9) } : {}),
-      ...(seller.startsWith("customer_") ? { sellerCustomerId: seller.slice(9) } : {}),
+      ...(customerId ? { customerId } : {}),
       ...(seller.startsWith("farmer_") ? { farmerId: seller.slice(7) } : {}),
       ...(seller.startsWith("supplier_") ? { supplierId: seller.slice(9) } : {}),
     },
     orderBy: [{ entryDate: "desc" }, { createdAt: "desc" }],
     take: 5000,
-    include: galaPartyInclude,
+    include: {
+      customer: { select: { name: true } },
+      farmer: { select: { name: true } },
+      supplier: { select: { name: true } },
+    },
   })
   return NextResponse.json({ entries })
 }
