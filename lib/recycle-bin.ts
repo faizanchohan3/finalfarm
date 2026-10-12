@@ -3,7 +3,7 @@
 // Restore is the exact reverse of what the delete did (re-create rows with the same ids
 // and re-apply the balance / stock / account changes the delete reversed).
 
-import { applyGala, applyGalaPayments, galaPaymentField, syncGalaPayment } from "@/lib/gala"
+import { applyGala, applyGalaPayments, syncGalaPayment } from "@/lib/gala"
 
 export type DeletedType =
   | "BILL" | "COMMISSION" | "PURCHASE" | "LOT" | "PRODUCT"
@@ -120,8 +120,6 @@ export async function restoreDeleted(tx: any, rec: { type: string; recordId: str
       if (l.pesticideSales?.length) await tx.pesticideSale.updateMany({ where: { id: { in: l.pesticideSales }, customerId: null }, data: { customerId: c.id } })
       if (l.purchases?.length) await tx.purchase.updateMany({ where: { id: { in: l.purchases }, sellerCustomerId: null }, data: { sellerCustomerId: c.id } })
       if (l.bills?.length) await tx.bill.updateMany({ where: { id: { in: l.bills }, customerId: null }, data: { customerId: c.id } })
-      if (l.galaBuys?.length) await tx.galaEntry.updateMany({ where: { id: { in: l.galaBuys }, customerId: null }, data: { customerId: c.id } })
-      if (l.galaSales?.length) await tx.galaEntry.updateMany({ where: { id: { in: l.galaSales }, sellerCustomerId: null }, data: { sellerCustomerId: c.id } })
       return
     }
 
@@ -130,7 +128,7 @@ export async function restoreDeleted(tx: any, rec: { type: string; recordId: str
       await ensureExists(tx.customer, p.customerId, "trader")
       await ensureMissing(tx.customerPayment, p.id)
       await tx.customerPayment.create({ data: p })
-      await syncGalaPayment(tx, p.galaEntryId, galaPaymentField(p.direction), p.amount)
+      await syncGalaPayment(tx, p.galaEntryId, "receivedAmount", p.direction === "PAY" ? 0 : p.amount)
       await restoreBankTxns(tx, s.bankTransactions)
       // Same effect as recording it: PAY → they owe more, RECEIVE → they owe less
       await tx.customer.update({ where: { id: p.customerId }, data: { balance: p.direction === "PAY" ? { increment: p.amount } : { decrement: p.amount } } })
@@ -159,7 +157,7 @@ export async function restoreDeleted(tx: any, rec: { type: string; recordId: str
       await ensureExists(tx.supplier, p.supplierId, "supplier")
       await ensureMissing(tx.supplierPayment, p.id)
       await tx.supplierPayment.create({ data: p })
-      await syncGalaPayment(tx, p.galaEntryId, galaPaymentField(p.direction), p.amount)
+      await syncGalaPayment(tx, p.galaEntryId, "paidAmount", p.direction === "PAY" ? p.amount : 0)
       await restoreBankTxns(tx, s.bankTransactions)
       // PAY → balance down, RECEIVE → balance up
       await tx.supplier.update({ where: { id: p.supplierId }, data: { balance: p.direction === "PAY" ? { decrement: p.amount } : { increment: p.amount } } })
@@ -196,16 +194,14 @@ export async function restoreDeleted(tx: any, rec: { type: string; recordId: str
       if (g.customerId && !(await tx.customer.findUnique({ where: { id: g.customerId } }))) g.customerId = null
       if (g.farmerId && !(await tx.farmer.findUnique({ where: { id: g.farmerId } }))) g.farmerId = null
       if (g.supplierId && !(await tx.supplier.findUnique({ where: { id: g.supplierId } }))) g.supplierId = null
-      if (g.sellerCustomerId && !(await tx.customer.findUnique({ where: { id: g.sellerCustomerId } }))) g.sellerCustomerId = null
-      if (g.buyerSupplierId && !(await tx.supplier.findUnique({ where: { id: g.buyerSupplierId } }))) g.buyerSupplierId = null
       await ensureMissing(tx.galaEntry, g.id)
       await tx.galaEntry.create({ data: g })
       await applyGala(tx, g, 1)
       // Its Received / Paid payments, for parties that still exist
       const pays = {
-        customerPayments: (s.customerPayments || []).filter((p: any) => p.customerId === (p.direction === "PAY" ? g.sellerCustomerId : g.customerId)),
+        customerPayments: (s.customerPayments || []).filter((p: any) => p.customerId === g.customerId),
         farmerPayments: (s.farmerPayments || []).filter((p: any) => p.farmerId === g.farmerId),
-        supplierPayments: (s.supplierPayments || []).filter((p: any) => p.supplierId === (p.direction === "RECEIVE" ? g.buyerSupplierId : g.supplierId)),
+        supplierPayments: (s.supplierPayments || []).filter((p: any) => p.supplierId === g.supplierId),
       }
       if (pays.customerPayments.length) await tx.customerPayment.createMany({ data: pays.customerPayments })
       if (pays.farmerPayments.length) await tx.farmerPayment.createMany({ data: pays.farmerPayments })

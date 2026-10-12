@@ -9,7 +9,7 @@ import { VoiceSearch } from "@/components/voice-search"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { buildPrintHeader, escapeHtml, reportCSS } from "@/lib/print-utils"
 import { recordCode } from "@/lib/record-code"
-import { galaBuyerName, galaItemsText, galaSellerName } from "@/lib/gala"
+import { galaItemsText } from "@/lib/gala"
 import { Printer, Scale, X } from "lucide-react"
 
 const n = (v: number) => (v || 0).toLocaleString("en-PK", { maximumFractionDigits: 2 })
@@ -23,8 +23,8 @@ export default function GalaMandiReportPage() {
   const [shop, setShop] = useState<any>(null)
   const [from, setFrom] = useState("")
   const [to, setTo] = useState("")
-  const [buyerFilter, setBuyerFilter] = useState("") // "supplier_<id>" | "customer_<id>"
-  const [seller, setSeller] = useState("")          // "customer_<id>" | "farmer_<id>" | "supplier_<id>"
+  const [customerId, setCustomerId] = useState("")
+  const [seller, setSeller] = useState("")          // "farmer_<id>" | "supplier_<id>"
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(true)
 
@@ -41,7 +41,7 @@ export default function GalaMandiReportPage() {
     const qs = new URLSearchParams()
     if (from) qs.set("from", from)
     if (to) qs.set("to", to)
-    if (buyerFilter) qs.set("buyer", buyerFilter)
+    if (customerId) qs.set("customerId", customerId)
     if (seller) qs.set("seller", seller)
     setLoading(true)
     fetch(`/api/reports/gala?${qs}`, { cache: "no-store" })
@@ -49,10 +49,10 @@ export default function GalaMandiReportPage() {
       .then((d) => setEntries(d.entries || []))
       .catch(() => setEntries([]))
       .finally(() => setLoading(false))
-  }, [from, to, buyerFilter, seller])
+  }, [from, to, customerId, seller])
 
-  const buyerName = galaBuyerName
-  const sellerName = galaSellerName
+  const buyerName = (e: any) => e.customer?.name || e.walkInBuyer || "—"
+  const sellerName = (e: any) => e.farmer?.name || e.supplier?.name || e.walkInSeller || "—"
   const unreceived = (e: any) => Math.max(0, (e.totalAmount || 0) - (e.receivedAmount || 0))
   const unpaid = (e: any) => Math.max(0, (e.totalAmount || 0) - (e.paidAmount || 0))
 
@@ -75,20 +75,14 @@ export default function GalaMandiReportPage() {
     unpaid: sum(unpaid),
   }
 
-  // New entries: suppliers buy from traders; older entries: traders bought from farmers / suppliers
-  const buyerOptions = [
-    ...suppliers.map((s: any) => ({ value: `supplier_${s.id}`, label: s.name, sub: "Supplier" })),
-    ...traders.map((t: any) => ({ value: `customer_${t.id}`, label: t.name, sub: `Trader${t.phone ? ` · ${t.phone}` : ""}` })),
-  ]
-  const buyer = buyerOptions.find((o) => o.value === buyerFilter)
+  const buyer = traders.find((t) => t.id === customerId)
   const sellerOptions = [
-    ...traders.map((t: any) => ({ value: `customer_${t.id}`, label: t.name, sub: `Trader${t.phone ? ` · ${t.phone}` : ""}` })),
     ...farmers.map((f: any) => ({ value: `farmer_${f.id}`, label: f.name, sub: `Farmer${f.village ? ` · ${f.village}` : ""}` })),
     ...suppliers.map((s: any) => ({ value: `supplier_${s.id}`, label: s.name, sub: "Supplier" })),
   ]
   const sellerLabel = sellerOptions.find((o) => o.value === seller)?.label
   const period = from || to ? `${from ? formatDate(from) : "Start"} — ${to ? formatDate(to) : "Today"}` : "All time"
-  const hasFilters = !!(from || to || buyerFilter || seller || search)
+  const hasFilters = !!(from || to || customerId || seller || search)
 
   function print() {
     const x = (v: unknown) => escapeHtml(v ?? "—")
@@ -98,7 +92,7 @@ export default function GalaMandiReportPage() {
       <td style="text-align:right">${n(e.totalWeight)}</td><td style="text-align:right">${n(e.totalAmount)}</td>
       <td style="text-align:right">${n(e.receivedAmount)}</td><td style="text-align:right">${n(e.paidAmount)}</td>
     </tr>`).join("")
-    const filters = [`Period: ${period}`, buyer && `Buyer: ${buyer.label}`, sellerLabel && `Seller: ${sellerLabel}`, search && `Search: "${search}"`]
+    const filters = [`Period: ${period}`, buyer && `Buyer: ${buyer.name}`, sellerLabel && `Seller: ${sellerLabel}`, search && `Search: "${search}"`]
       .filter(Boolean).map((f) => x(f)).join(" · ")
     const w = window.open("", "_blank")
     if (!w) return
@@ -149,16 +143,16 @@ ${buildPrintHeader(shop)}
               <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
             </div>
             <div className="col-span-2">
-              <label className="text-xs text-gray-500 font-medium">Buyer (Supplier)</label>
+              <label className="text-xs text-gray-500 font-medium">Buyer (Trader)</label>
               <SearchableSelect
-                value={buyerFilter || "all"}
-                onValueChange={(v) => setBuyerFilter(v === "all" ? "" : v)}
+                value={customerId || "all"}
+                onValueChange={(v) => setCustomerId(v === "all" ? "" : v)}
                 searchPlaceholder="Search buyer..."
-                options={[{ value: "all", label: "All buyers" }, ...buyerOptions]}
+                options={[{ value: "all", label: "All buyers" }, ...traders.map((t: any) => ({ value: t.id, label: t.name, sub: t.phone || undefined }))]}
               />
             </div>
             <div className="col-span-2">
-              <label className="text-xs text-gray-500 font-medium">Seller (Trader)</label>
+              <label className="text-xs text-gray-500 font-medium">Seller (Farmer / Supplier)</label>
               <SearchableSelect
                 value={seller || "all"}
                 onValueChange={(v) => setSeller(v === "all" ? "" : v)}
@@ -170,7 +164,7 @@ ${buildPrintHeader(shop)}
           <div className="flex items-center gap-3 mt-3 flex-wrap">
             <VoiceSearch value={search} onChange={setSearch} placeholder="Search name, entry no, ID, product..." className="flex-1" />
             {hasFilters && (
-              <Button variant="ghost" size="sm" className="gap-1 text-gray-500" onClick={() => { setFrom(""); setTo(""); setBuyerFilter(""); setSeller(""); setSearch("") }}>
+              <Button variant="ghost" size="sm" className="gap-1 text-gray-500" onClick={() => { setFrom(""); setTo(""); setCustomerId(""); setSeller(""); setSearch("") }}>
                 <X className="w-4 h-4" /> Clear filters
               </Button>
             )}
@@ -207,7 +201,7 @@ ${buildPrintHeader(shop)}
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Scale className="w-4 h-4" /> Gala Mandi Entries
-            <span className="text-gray-400 font-normal text-sm">({period}{buyer ? ` · ${buyer.label}` : ""}{sellerLabel ? ` · ${sellerLabel}` : ""})</span>
+            <span className="text-gray-400 font-normal text-sm">({period}{buyer ? ` · ${buyer.name}` : ""}{sellerLabel ? ` · ${sellerLabel}` : ""})</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
-import { applyGala, applyGalaPayments, galaBuyerName, galaItemsText, galaPartyInclude, galaSellerName, galaWalkInRef, takeGalaBankTxns } from "@/lib/gala"
+import { applyGala, applyGalaPayments, galaItemsText, galaWalkInRef, takeGalaBankTxns } from "@/lib/gala"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 import { recordCode } from "@/lib/record-code"
 import { checkParties, galaFields } from "../fields"
@@ -10,7 +10,7 @@ import { checkParties, galaFields } from "../fields"
 async function findOwn(id: string, shopId: string | null | undefined) {
   const entry = await db.galaEntry.findUnique({
     where: { id },
-    include: galaPartyInclude,
+    include: { customer: { select: { name: true } }, farmer: { select: { name: true } }, supplier: { select: { name: true } } },
   })
   if (!entry || (shopId && entry.shopId !== shopId)) return null
   return entry
@@ -30,8 +30,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
   // Money already received / paid sits in that buyer's / seller's ledger, so they can't change,
   // and the total can't go below it
-  const buyerChanged = fields.customerId !== old.customerId || fields.buyerSupplierId !== old.buyerSupplierId || fields.walkInBuyer !== old.walkInBuyer
-  const sellerChanged = fields.sellerCustomerId !== old.sellerCustomerId || fields.farmerId !== old.farmerId || fields.supplierId !== old.supplierId || fields.walkInSeller !== old.walkInSeller
+  const buyerChanged = fields.customerId !== old.customerId || (!fields.customerId && fields.walkInBuyer !== old.walkInBuyer)
+  const sellerChanged = fields.farmerId !== old.farmerId || fields.supplierId !== old.supplierId || (!fields.farmerId && !fields.supplierId && fields.walkInSeller !== old.walkInSeller)
   if (old.receivedAmount > 0 && buyerChanged) return NextResponse.json({ error: `PKR ${old.receivedAmount.toLocaleString()} is already received from this buyer — the buyer can't be changed` }, { status: 400 })
   if (old.paidAmount > 0 && sellerChanged) return NextResponse.json({ error: `PKR ${old.paidAmount.toLocaleString()} is already paid to this seller — the seller can't be changed` }, { status: 400 })
   const already = Math.max(old.receivedAmount, old.paidAmount)
@@ -61,9 +61,9 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const e = await findOwn(id, session.user.shopId)
   if (!e) return NextResponse.json({ error: "Entry not found" }, { status: 404 })
 
-  const { customer, buyerSupplier, farmer, supplier, sellerCustomer, ...row } = e
-  const buyer = galaBuyerName(e)
-  const seller = galaSellerName(e)
+  const { customer, farmer, supplier, ...row } = e
+  const buyer = customer?.name || e.walkInBuyer || "—"
+  const seller = farmer?.name || supplier?.name || e.walkInSeller || "—"
   await db.$transaction(async (tx) => {
     // Received / Paid payments made against this entry go with it (and come back on restore)
     const [customerPayments, farmerPayments, supplierPayments] = await Promise.all([

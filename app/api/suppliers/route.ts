@@ -12,7 +12,7 @@ export async function GET() {
   // Balance from the ledger: purchases + commissions (we owe) − payments to them + payments from them.
   // Same figure as the closing balance in /api/suppliers/[id]; positive (Cr) = we owe the supplier.
   const supplierIds = suppliers.map((s) => s.id)
-  const [purchaseTotals, commissionTotals, paidPayments, receivedPayments, galaTotals, galaBuyTotals] = await Promise.all([
+  const [purchaseTotals, commissionTotals, paidPayments, receivedPayments, galaTotals] = await Promise.all([
     db.purchase.groupBy({
       by: ["supplierId"],
       _sum: { totalAmount: true, paidAmount: true },
@@ -39,14 +39,7 @@ export async function GET() {
       _sum: { totalAmount: true },
       where: { supplierId: { in: supplierIds } },
     }),
-    // Gala Mandi entries where the supplier is the buyer (they owe us)
-    db.galaEntry.groupBy({
-      by: ["buyerSupplierId"],
-      _sum: { totalAmount: true },
-      where: { buyerSupplierId: { in: supplierIds } },
-    }),
   ])
-  const galaBuyMap = Object.fromEntries(galaBuyTotals.map((r) => [r.buyerSupplierId!, r._sum.totalAmount || 0]))
   const galaMap = Object.fromEntries(galaTotals.map((r) => [r.supplierId!, r._sum.totalAmount || 0]))
 
   const paidMap = Object.fromEntries(paidPayments.map((r) => [r.supplierId, r._sum.amount || 0]))
@@ -57,10 +50,9 @@ export async function GET() {
   const commMap = Object.fromEntries(commissionTotals.map((r) => [r.supplierId!, r._sum.sellerPayable || 0]))
 
   const suppliersWithBalance = suppliers.map((s) => {
-    // Credit the Giver (purchases, commissions, Gala Mandi sales, money received from them),
-    // Debit the Receiver (money paid to them, Gala Mandi buys)
+    // Credit the Giver (purchases, commissions, Gala Mandi, money received from them), Debit the Receiver (money paid to them)
     const totalCredit = (purchaseMap[s.id] || 0) + (commMap[s.id] || 0) + (galaMap[s.id] || 0) + (receivedMap[s.id] || 0)
-    const totalDebit = (purchasePaidMap[s.id] || 0) + (paidMap[s.id] || 0) + (galaBuyMap[s.id] || 0)
+    const totalDebit = (purchasePaidMap[s.id] || 0) + (paidMap[s.id] || 0)
     return { ...s, totalDebit, totalCredit, ledgerBalance: totalCredit - totalDebit }
   })
 
