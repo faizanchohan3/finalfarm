@@ -12,12 +12,14 @@ import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils"
 import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print-utils"
 import { Plus, Search, Percent, CreditCard, Printer, Trash2, X, Edit } from "lucide-react"
 import { useLang } from "@/lib/i18n"
+import { useCanEdit } from "@/lib/use-can-edit"
 import { recordCode } from "@/lib/record-code"
 
 const BAG_LABELS: Record<string, string> = { bori: "Bori", jali: "Jali", bag: "Bag" }
 const bagUnit = (c: any) => BAG_LABELS[c?.bagType] || "Bags"
 
 export default function CommissionPage() {
+  const canEdit = useCanEdit()
   const { t } = useLang()
   const [commissions, setCommissions] = useState<any[]>([])
   const [customers, setCustomers] = useState<any[]>([])
@@ -498,7 +500,7 @@ ${c.notes ? `<p style="font-size:12px;color:#555;margin:10px 24px 0"><strong>Ù†Ù
                           <button onClick={() => printForBuyer(c)} className="flex items-center gap-1 px-2 py-1 text-xs bg-green-50 text-purple-700 border border-green-200 rounded hover:bg-green-100 whitespace-nowrap">
                             <Printer className="w-3 h-3" /> Buyer
                           </button>
-                          {!c.lot && (
+                          {!c.lot && canEdit && (
                             <button onClick={() => openEditForm(c)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit Commission">
                               <Edit className="w-3.5 h-3.5" />
                             </button>

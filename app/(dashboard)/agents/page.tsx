@@ -9,8 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Plus, Search, UserCog, Edit, ChevronDown, ChevronRight, DollarSign } from "lucide-react"
+import { useCanEdit } from "@/lib/use-can-edit"
 
 export default function AgentsPage() {
+  const canEdit = useCanEdit()
   const [agents, setAgents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
@@ -179,8 +181,10 @@ export default function AgentsPage() {
                       </td>
                       <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center gap-1">
-                          <button onClick={() => { setEditing(a); setForm({ name: a.name, phone: a.phone || "", address: a.address || "", cnic: a.cnic || "", commissionRate: String(a.commissionRate) }); setShowModal(true) }}
-                            className="p-1 text-gray-400 hover:text-blue-600"><Edit className="w-4 h-4" /></button>
+                          {canEdit && (
+                            <button onClick={() => { setEditing(a); setForm({ name: a.name, phone: a.phone || "", address: a.address || "", cnic: a.cnic || "", commissionRate: String(a.commissionRate) }); setShowModal(true) }}
+                              className="p-1 text-gray-400 hover:text-blue-600"><Edit className="w-4 h-4" /></button>
+                          )}
                           <button onClick={() => setShowPayModal(a)}
                             className="p-1 text-gray-400 hover:text-purple-600" title="Add commission"><DollarSign className="w-4 h-4" /></button>
                         </div>

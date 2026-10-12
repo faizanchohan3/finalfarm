@@ -13,6 +13,7 @@ import { buildPrintHeader, escapeHtml, reportCSS } from "@/lib/print-utils"
 import { recordCode } from "@/lib/record-code"
 import { RATE_PER, galaRowAmount, itemRatePer, itemToKgRow } from "@/lib/gala"
 import { Plus, Search, Scale, Printer, Edit, Trash2, X, Eye } from "lucide-react"
+import { useCanEdit } from "@/lib/use-can-edit"
 
 // Weight is always KG (like Bill Maker); the rate is per KG or per Mound (40 kg)
 type Row = { product: string; qty: string; ratePer: string; rate: string }
@@ -28,6 +29,7 @@ function weightByUnit(rows: { qty: number; unit: string }[]) {
 }
 
 export default function GalaMandiPage() {
+  const canEdit = useCanEdit()
   const [entries, setEntries] = useState<any[]>([])
   const [customers, setCustomers] = useState<any[]>([])
   const [farmers, setFarmers] = useState<any[]>([])
@@ -434,9 +436,11 @@ ${buildPrintHeader(shop)}
                           <button onClick={() => printEntry(e)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Print">
                             <Printer className="w-4 h-4" />
                           </button>
-                          <button onClick={() => openEdit(e)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit">
-                            <Edit className="w-4 h-4" />
-                          </button>
+                          {canEdit && (
+                            <button onClick={() => openEdit(e)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit">
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          )}
                           <button onClick={() => handleDelete(e)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete">
                             <Trash2 className="w-4 h-4" />
                           </button>

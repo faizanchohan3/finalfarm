@@ -13,8 +13,10 @@ import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print
 import { recordCode } from "@/lib/record-code"
 import { Plus, Minus, Search, Package, AlertTriangle, Edit, Trash2, Tag, ChevronDown, ChevronUp, ChevronRight, X, Printer, PlusCircle, History } from "lucide-react"
 import { StockHistory } from "@/components/stock-history"
+import { useCanEdit } from "@/lib/use-can-edit"
 
 export default function InventoryPage() {
+  const canEdit = useCanEdit()
   const [products, setProducts] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [search, setSearch] = useState("")
@@ -631,9 +633,11 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">کوئی 
                                 <button onClick={() => setHistoryFor(p.id)} className="p-1 text-gray-400 hover:text-purple-600" title="Stock history">
                                   <History className="w-4 h-4" />
                                 </button>
-                                <button onClick={() => openEdit(p)} className="p-1 text-gray-400 hover:text-blue-600">
-                                  <Edit className="w-4 h-4" />
-                                </button>
+                                {canEdit && (
+                                  <button onClick={() => openEdit(p)} className="p-1 text-gray-400 hover:text-blue-600">
+                                    <Edit className="w-4 h-4" />
+                                  </button>
+                                )}
                                 <button onClick={() => handleDelete(p.id)} className="p-1 text-gray-400 hover:text-red-600">
                                   <Trash2 className="w-4 h-4" />
                                 </button>

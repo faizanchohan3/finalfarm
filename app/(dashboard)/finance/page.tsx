@@ -14,8 +14,10 @@ import {
   Plus, TrendingUp, TrendingDown, Wallet, ArrowUpCircle, ArrowDownCircle,
   Building2, Banknote, CreditCard, ChevronDown, Trash2,
 } from "lucide-react"
+import { useCanEdit } from "@/lib/use-can-edit"
 
 export default function FinancePage() {
+  const canEdit = useCanEdit()
   const [transactions, setTransactions] = useState<any[]>([])
   const [summary, setSummary] = useState({ income: 0, expense: 0, balance: 0 })
   const [banks, setBanks] = useState<any[]>([])
@@ -275,12 +277,14 @@ export default function FinancePage() {
                       <td className="py-3 px-3 text-gray-500">{formatDateTime(t.createdAt)}</td>
                       <td className="py-3 px-3">
                         <div className="flex gap-2 flex-wrap">
-                          <button
-                            onClick={() => openEdit(t)}
-                            className="text-blue-600 hover:text-blue-800 text-xs font-medium hover:underline"
-                          >
-                            Edit
-                          </button>
+                          {canEdit && (
+                            <button
+                              onClick={() => openEdit(t)}
+                              className="text-blue-600 hover:text-blue-800 text-xs font-medium hover:underline"
+                            >
+                              Edit
+                            </button>
+                          )}
                           <button
                             onClick={() => { setDeleteTarget({ id: t.id, description: t.description, amount: t.amount }); setShowDeleteConfirm(true); }}
                             className="text-red-600 hover:text-red-800 text-xs font-medium hover:underline"

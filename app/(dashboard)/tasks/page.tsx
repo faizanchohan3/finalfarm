@@ -10,11 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { formatDate, getStatusColor } from "@/lib/utils"
 import { Plus, CheckCircle, Clock, AlertCircle, Edit, Trash2, User } from "lucide-react"
+import { useCanEdit } from "@/lib/use-can-edit"
 
 const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "URGENT"]
 const STATUSES = ["PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"]
 
 export default function TasksPage() {
+  const canEdit = useCanEdit()
   const [tasks, setTasks] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
   const [filter, setFilter] = useState("ALL")
@@ -178,9 +180,11 @@ export default function TasksPage() {
                         <CheckCircle className="w-4 h-4" />
                       </button>
                     )}
-                    <button onClick={() => openEdit(task)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded">
-                      <Edit className="w-4 h-4" />
-                    </button>
+                    {canEdit && (
+                      <button onClick={() => openEdit(task)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded">
+                        <Edit className="w-4 h-4" />
+                      </button>
+                    )}
                     <button onClick={() => handleDelete(task.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded">
                       <Trash2 className="w-4 h-4" />
                     </button>

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Building2, Plus, PencilLine, Trash2, ArrowDownCircle, ArrowUpCircle, Check, BookOpen, Search } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { VoiceSearch } from "@/components/voice-search"
+import { useCanEdit } from "@/lib/use-can-edit"
 
 const DEFAULT_FORM = { name: "", accountNumber: "" }
 const todayStr = () => new Date().toISOString().slice(0, 10)
@@ -21,6 +22,7 @@ const ENTRY_LABELS: Record<string, string> = {
 }
 
 export default function BanksPage() {
+  const canEdit = useCanEdit()
   const [banks, setBanks] = useState<any[]>([])
   const [firstLoad, setFirstLoad] = useState(true)
   const [search, setSearch] = useState("")
@@ -276,13 +278,15 @@ export default function BanksPage() {
                           >
                             <ArrowDownCircle className="w-3.5 h-3.5" /> Record
                           </button>
-                          <button
-                            onClick={() => openEdit(bank)}
-                            disabled={bank.id.startsWith("temp-")}
-                            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors disabled:opacity-40"
-                          >
-                            <PencilLine className="w-3.5 h-3.5" /> Edit
-                          </button>
+                          {canEdit && (
+                            <button
+                              onClick={() => openEdit(bank)}
+                              disabled={bank.id.startsWith("temp-")}
+                              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors disabled:opacity-40"
+                            >
+                              <PencilLine className="w-3.5 h-3.5" /> Edit
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDelete(bank.id, bank.name)}
                             disabled={bank.id.startsWith("temp-")}

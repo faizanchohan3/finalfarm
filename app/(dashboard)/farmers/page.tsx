@@ -14,8 +14,10 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import { Plus, Search, Tractor, Edit, Trash2, ChevronDown, ChevronRight, BookOpen, Banknote, Printer, Check, Upload, Eye, ExternalLink, ShoppingBag } from "lucide-react"
 import { VoiceSearch } from "@/components/voice-search"
 import { VoiceInputButton } from "@/components/voice-input-button"
+import { useCanEdit } from "@/lib/use-can-edit"
 
 export default function FarmersPage() {
+  const canEdit = useCanEdit()
   const router = useRouter()
   const { data: session } = useSession()
   const [farmers, setFarmers] = useState<any[]>([])
@@ -305,9 +307,11 @@ export default function FarmersPage() {
                           >
                             <Banknote className="w-4 h-4" />
                           </button>
-                          <button onClick={() => openEdit(f)} className="p-1 text-gray-400 hover:text-blue-600">
-                            <Edit className="w-4 h-4" />
-                          </button>
+                          {canEdit && (
+                            <button onClick={() => openEdit(f)} className="p-1 text-gray-400 hover:text-blue-600">
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          )}
                           <button onClick={() => handleDelete(f.id, f.name)} className="p-1 text-gray-400 hover:text-red-600">
                             <Trash2 className="w-4 h-4" />
                           </button>

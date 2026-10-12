@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useLang } from "@/lib/i18n"
+import { useCanEdit } from "@/lib/use-can-edit"
 import { VoiceInputButton } from "@/components/voice-input-button"
 import { VoiceSearch } from "@/components/voice-search"
 
@@ -28,6 +29,7 @@ const DEFAULT_FORM = {
 }
 
 export default function CustomersPage() {
+  const canEdit = useCanEdit()
   const { t } = useLang()
   const [customers, setCustomers] = useState<any[]>([])
   const [search, setSearch] = useState("")
@@ -394,9 +396,11 @@ export default function CustomersPage() {
                           <button onClick={() => openPayment(c)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Record payment">
                             <ArrowDownCircle className="w-4 h-4" />
                           </button>
-                          <button onClick={() => openEdit(c)} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded" title="Edit">
-                            <Edit className="w-4 h-4" />
-                          </button>
+                          {canEdit && (
+                            <button onClick={() => openEdit(c)} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded" title="Edit">
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
                             onClick={() => handleToggleActive(c)}
                             className={`p-1.5 rounded text-xs font-medium px-2 ${c.isActive ? "text-red-500 hover:text-red-700 hover:bg-red-50" : "text-purple-600 hover:text-purple-800 hover:bg-green-50"}`}
@@ -644,9 +648,11 @@ export default function CustomersPage() {
                   onClick={() => { setShowDetailModal(false); setSelectedPayments(new Set()); openPayment(selected) }}>
                   <ArrowDownCircle className="w-4 h-4" /> {t("Record Payment")}
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => { setShowDetailModal(false); setSelectedPayments(new Set()); openEdit(selected) }}>
-                  <Edit className="w-4 h-4" /> Edit
-                </Button>
+                {canEdit && (
+                  <Button size="sm" variant="outline" onClick={() => { setShowDetailModal(false); setSelectedPayments(new Set()); openEdit(selected) }}>
+                    <Edit className="w-4 h-4" /> Edit
+                  </Button>
+                )}
               </div>
 
               {/* Tabs */}
