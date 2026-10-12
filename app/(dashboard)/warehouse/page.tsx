@@ -9,8 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency } from "@/lib/utils"
 import { Plus, Warehouse, ArrowLeftRight, Settings2, Package, AlertTriangle, Boxes } from "lucide-react"
+import { useCanEdit } from "@/lib/use-can-edit"
 
 export default function WarehousePage() {
+  const canEdit = useCanEdit()
   const [warehouses, setWarehouses] = useState<any[]>([])
   const [products, setProducts] = useState<any[]>([])
   const [transfers, setTransfers] = useState<any[]>([])
@@ -132,8 +134,10 @@ export default function WarehousePage() {
                     <Warehouse className="w-4 h-4 text-blue-600" /> {w.name}
                     {w.isPotato && <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">Potato</span>}
                   </CardTitle>
-                  <button onClick={() => { setWForm({ id: w.id, name: w.name, location: w.location || "", capacity: w.capacity ? String(w.capacity) : "", manager: w.manager || "", isPotato: !!w.isPotato }); setShowWarehouseModal(true) }}
-                    className="text-xs text-gray-400 hover:text-blue-600">Edit</button>
+                  {canEdit && (
+                    <button onClick={() => { setWForm({ id: w.id, name: w.name, location: w.location || "", capacity: w.capacity ? String(w.capacity) : "", manager: w.manager || "", isPotato: !!w.isPotato }); setShowWarehouseModal(true) }}
+                      className="text-xs text-gray-400 hover:text-blue-600">Edit</button>
+                  )}
                 </div>
                 <p className="text-xs text-gray-500">{w.location || "No location set"}</p>
               </CardHeader>

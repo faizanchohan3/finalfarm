@@ -16,8 +16,10 @@ import {
   Plus, Search, Edit, Phone, MapPin, ArrowUpCircle,
   Eye, Truck, X, TrendingDown, Printer, Check, BookOpen, ShoppingBag, Upload, Trash2,
 } from "lucide-react"
+import { useCanEdit } from "@/lib/use-can-edit"
 
 export default function SuppliersPage() {
+  const canEdit = useCanEdit()
   const router = useRouter()
   const { data: session } = useSession()
   const [suppliers, setSuppliers] = useState<any[]>([])
@@ -319,9 +321,11 @@ export default function SuppliersPage() {
                           <button onClick={() => openPayment(s)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Record payment">
                             <ArrowUpCircle className="w-4 h-4" />
                           </button>
-                          <button onClick={() => openEdit(s)} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded" title="Edit">
-                            <Edit className="w-4 h-4" />
-                          </button>
+                          {canEdit && (
+                            <button onClick={() => openEdit(s)} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded" title="Edit">
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          )}
                           <button onClick={() => handleDelete(s.id, s.name)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="Remove">
                             <X className="w-4 h-4" />
                           </button>
@@ -450,9 +454,11 @@ export default function SuppliersPage() {
                 >
                   <ArrowUpCircle className="w-4 h-4" /> Record Payment
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => { setShowDetailModal(false); setSelectedPayments(new Set()); openEdit(selected) }}>
-                  <Edit className="w-4 h-4" /> Edit
-                </Button>
+                {canEdit && (
+                  <Button size="sm" variant="outline" onClick={() => { setShowDetailModal(false); setSelectedPayments(new Set()); openEdit(selected) }}>
+                    <Edit className="w-4 h-4" /> Edit
+                  </Button>
+                )}
               </div>
 
               {/* Tabs */}

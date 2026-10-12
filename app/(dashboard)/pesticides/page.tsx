@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { formatCurrency, formatDateDMY } from "@/lib/utils"
 import { buildPrintHeader, reportCSS, receiptCSS } from "@/lib/print-utils"
 import { Plus, Search, AlertTriangle, ShoppingCart, Edit, Sprout, Trash2, Tag, Printer } from "lucide-react"
+import { useCanEdit } from "@/lib/use-can-edit"
 
 export default function PesticidesPage() {
+  const canEdit = useCanEdit()
   const [pesticides, setPesticides] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [sales, setSales] = useState<any[]>([])
@@ -418,9 +420,11 @@ ${buildPrintHeader(shop)}
                             <button onClick={() => printSinglePesticide(p)} className="p-1 text-gray-400 hover:text-purple-600" title="Print Stock Card">
                               <Printer className="w-4 h-4" />
                             </button>
-                            <button onClick={() => openEdit(p)} className="p-1 text-gray-400 hover:text-blue-600">
-                              <Edit className="w-4 h-4" />
-                            </button>
+                            {canEdit && (
+                              <button onClick={() => openEdit(p)} className="p-1 text-gray-400 hover:text-blue-600">
+                                <Edit className="w-4 h-4" />
+                              </button>
+                            )}
                             <button onClick={() => handleDelete(p.id)} className="p-1 text-gray-400 hover:text-red-600" title="Delete">
                               <Trash2 className="w-4 h-4" />
                             </button>

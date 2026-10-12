@@ -11,6 +11,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Plus, Boxes, User, Warehouse as WarehouseIcon, Settings2, XCircle, Truck, Receipt, Printer, Tag, Search, X } from "lucide-react"
 import { useLang } from "@/lib/i18n"
+import { useCanEdit } from "@/lib/use-can-edit"
 import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print-utils"
 import { LotStockSale } from "@/components/lot-stock-sale"
 
@@ -62,6 +63,7 @@ const BAG_TYPE_LABEL: Record<string, string> = { bori: "Bori", jali: "Jali", tor
 const NO_MARKHA = "__none__"
 
 export default function LotsPage() {
+  const canEdit = useCanEdit()
   const { t } = useLang()
   const [lots, setLots] = useState<any[]>([])
   const [shop, setShop] = useState<any>(null)
@@ -648,9 +650,11 @@ ${sections || '<p style="text-align:center;color:#9ca3af;padding:20px">اس گو
                       )}
                       {lot.status !== "CANCELLED" && lot.status !== "SETTLED" && (
                         <>
-                          <button onClick={() => openManage(lot)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500" title="Manage">
-                            <Settings2 className="w-4 h-4" />
-                          </button>
+                          {canEdit && (
+                            <button onClick={() => openManage(lot)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500" title="Manage">
+                              <Settings2 className="w-4 h-4" />
+                            </button>
+                          )}
                           <button onClick={() => cancelLot(lot)} className="p-1.5 rounded hover:bg-red-50 text-red-500" title="Cancel">
                             <XCircle className="w-4 h-4" />
                           </button>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { FileText, Plus, Trash2, Printer, RotateCcw, Save, FolderOpen, Search } from "lucide-react"
 import { useLang } from "@/lib/i18n"
+import { useCanEdit } from "@/lib/use-can-edit"
 import { recordCode } from "@/lib/record-code"
 import { billCSS, billFontLink, buildPrintHeader, escapeHtml } from "@/lib/print-utils"
 
@@ -54,6 +55,7 @@ function readStoredNext() {
 }
 
 export default function BillMakerPage() {
+  const canEdit = useCanEdit()
   const { t } = useLang()
   const [shop, setShop] = useState<any>(null)
   const [savedBills, setSavedBills] = useState<any[]>([])
@@ -420,9 +422,11 @@ ${billFontLink}
             </div>
           </div>
 
-          <Button className="w-full gap-2" onClick={saveBill} disabled={saving}>
-            <Save className="w-4 h-4" /> {saving ? t("Saving...") : editingId ? t("Update Bill") : t("Save Bill")}
-          </Button>
+          {(!editingId || canEdit) && (
+            <Button className="w-full gap-2" onClick={saveBill} disabled={saving}>
+              <Save className="w-4 h-4" /> {saving ? t("Saving...") : editingId ? t("Update Bill") : t("Save Bill")}
+            </Button>
+          )}
         </CardContent>
       </Card>
 

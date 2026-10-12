@@ -9,10 +9,12 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatDate, getRoleColor } from "@/lib/utils"
 import { Plus, Edit, UserX, Shield, User } from "lucide-react"
+import { useCanEdit } from "@/lib/use-can-edit"
 
 const ROLES = ["ADMIN", "ACCOUNTANT", "MANAGER", "CASHIER", "AUDITOR"]
 
 export default function UsersPage() {
+  const canEdit = useCanEdit()
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -136,9 +138,11 @@ export default function UsersPage() {
                       <td className="py-3 px-3 text-gray-500">{formatDate(u.createdAt)}</td>
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <button onClick={() => openEdit(u)} className="p-1 text-gray-400 hover:text-blue-600">
-                            <Edit className="w-4 h-4" />
-                          </button>
+                          {canEdit && (
+                            <button onClick={() => openEdit(u)} className="p-1 text-gray-400 hover:text-blue-600">
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          )}
                           <button onClick={() => toggleActive(u)} className="p-1 text-gray-400 hover:text-red-600" title={u.isActive ? "Deactivate" : "Activate"}>
                             <UserX className="w-4 h-4" />
                           </button>
