@@ -12,7 +12,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const { id } = await params
 
-  const [customer, sales, commissions, pesticideSales, customerPayments, traderPurchases, soldLots, bills, galaEntries] = await Promise.all([
+  const [customer, sales, commissions, pesticideSales, customerPayments, traderPurchases, soldLots, bills, galaEntries, galaSales] = await Promise.all([
     db.customer.findUnique({ where: { id } }),
     db.sale.findMany({
       where: { customerId: id },
@@ -52,6 +52,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     db.bill.findMany({ where: { customerId: id }, orderBy: { billDate: "asc" } }),
     // Gala Mandi entries where this trader is the buyer (their Received payments are customer payments)
     db.galaEntry.findMany({ where: { customerId: id }, orderBy: { entryDate: "asc" } }),
+    // Gala Mandi entries where this trader is the seller (their Paid payments are customer payments, PAY)
+    db.galaEntry.findMany({ where: { sellerCustomerId: id }, orderBy: { entryDate: "asc" } }),
   ])
 
   if (!customer) return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -75,8 +77,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const cpAdvances = customerPayments.reduce((s, p) => p.direction === "PAY" ? s + p.amount : s, 0)
   const totalPaid = initialPaid + cpReceived
 
-  // Balance = Business (sales + advances) - Paid (received)
-  const totalBalance = totalBusiness + cpAdvances - totalPaid
+  // Balance = Business (sales + advances) - Paid (received) - Gala Mandi sales by the trader (we owe them)
+  const totalBalance = totalBusiness + cpAdvances - totalPaid - galaSales.reduce((s, g) => s + g.totalAmount, 0)
 
   // Build ledger entries from all sources, sorted by date
   const ledgerEvents: {
@@ -117,6 +119,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       description: galaLedgerText(g, "buyer"),
       debit: g.totalAmount,
       credit: 0,
+    })
+  }
+
+  // Gala Mandi: trader sold goods through the mandi → we owe them the total (Credit); unpaid part in the description
+  for (const g of galaSales) {
+    ledgerEvents.push({
+      date: g.entryDate,
+      type: "GALA",
+      description: galaLedgerText(g, "seller"),
+      debit: 0,
+      credit: g.totalAmount,
     })
   }
 
@@ -310,13 +323,15 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     await db.$transaction(async (tx) => {
       // Keep the trader, their payments and what they were linked to, so a restore can put it all back
       const ids = (rows: { id: string }[]) => rows.map((r) => r.id)
-      const [payments, sales, commissions, pesticideSales, purchases, bills] = await Promise.all([
+      const [payments, sales, commissions, pesticideSales, purchases, bills, galaBuys, galaSales] = await Promise.all([
         tx.customerPayment.findMany({ where: { customerId: id } }),
         tx.sale.findMany({ where: { customerId: id }, select: { id: true } }),
         tx.commission.findMany({ where: { customerId: id }, select: { id: true } }),
         tx.pesticideSale.findMany({ where: { customerId: id }, select: { id: true } }),
         tx.purchase.findMany({ where: { sellerCustomerId: id }, select: { id: true } }),
         tx.bill.findMany({ where: { customerId: id }, select: { id: true } }),
+        tx.galaEntry.findMany({ where: { customerId: id }, select: { id: true } }),
+        tx.galaEntry.findMany({ where: { sellerCustomerId: id }, select: { id: true } }),
       ])
       await archiveDeleted(tx, session, {
         type: "CUSTOMER_PERMANENT", recordId: id, code: `TR-${id.slice(-6).toUpperCase()}`, title: customer.name,
@@ -324,7 +339,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         summary: [...traderSummary(customer), ["Payments removed", String(payments.length)]],
         snapshot: {
           customer, payments,
-          linked: { sales: ids(sales), commissions: ids(commissions), pesticideSales: ids(pesticideSales), purchases: ids(purchases), bills: ids(bills) },
+          linked: { sales: ids(sales), commissions: ids(commissions), pesticideSales: ids(pesticideSales), purchases: ids(purchases), bills: ids(bills), galaBuys: ids(galaBuys), galaSales: ids(galaSales) },
         },
       })
       await tx.sale.updateMany({ where: { customerId: id }, data: { customerId: null } })
@@ -332,6 +347,8 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       await tx.pesticideSale.updateMany({ where: { customerId: id }, data: { customerId: null } })
       await tx.purchase.updateMany({ where: { sellerCustomerId: id }, data: { sellerCustomerId: null } })
       await tx.bill.updateMany({ where: { customerId: id }, data: { customerId: null } })
+      await tx.galaEntry.updateMany({ where: { customerId: id }, data: { customerId: null } })
+      await tx.galaEntry.updateMany({ where: { sellerCustomerId: id }, data: { sellerCustomerId: null } })
       await tx.customerPayment.deleteMany({ where: { customerId: id } })
       await tx.customer.delete({ where: { id } })
     })

@@ -11,7 +11,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const { id } = await params
 
-  const [supplier, purchases, supplierPayments, commissions, galaEntries] = await Promise.all([
+  const [supplier, purchases, supplierPayments, commissions, galaEntries, galaBuys] = await Promise.all([
     db.supplier.findUnique({ where: { id } }),
     db.purchase.findMany({
       where: { supplierId: id },
@@ -30,6 +30,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     db.commission.findMany({ where: { supplierId: id }, orderBy: { createdAt: "asc" } }),
     // Gala Mandi entries where this supplier is the seller (their Paid payments are supplier payments)
     db.galaEntry.findMany({ where: { supplierId: id }, orderBy: { entryDate: "asc" } }),
+    // Gala Mandi entries where this supplier is the buyer (their Received payments are supplier payments, RECEIVE)
+    db.galaEntry.findMany({ where: { buyerSupplierId: id }, orderBy: { entryDate: "asc" } }),
   ])
 
   if (!supplier) return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -41,7 +43,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const purchasePaid = purchases.reduce((s, p) => s + p.paidAmount, 0)
   const spTotal = supplierPayments.reduce((s, p) => p.direction === "PAY" ? s + p.amount : s - p.amount, 0)
   const totalPaid = purchasePaid + spTotal
-  const totalBalance = totalBusiness - totalPaid
+  // Gala Mandi buys: the supplier owes us, so we owe them less
+  const totalBalance = totalBusiness - totalPaid - galaBuys.reduce((s, g) => s + g.totalAmount, 0)
 
   // Build ledger entries — Credit the Giver, Debit the Receiver (same as the supplier ledger report)
   const ledgerEvents: { id?: string; date: Date; type: string; description: string; debit: number; credit: number }[] = []
@@ -97,6 +100,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       description: galaLedgerText(g, "seller"),
       debit: 0,
       credit: g.totalAmount,
+    })
+  }
+
+  // Gala Mandi: supplier bought goods through the mandi → Debit supplier with the total; unreceived part in the description
+  for (const g of galaBuys) {
+    ledgerEvents.push({
+      date: g.entryDate,
+      type: "GALA",
+      description: galaLedgerText(g, "buyer"),
+      debit: g.totalAmount,
+      credit: 0,
     })
   }
 

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
-import { GALA_BANK_CATEGORY, galaWalkInRef } from "@/lib/gala"
+import { GALA_BANK_CATEGORY, galaBuyerName, galaPartyInclude, galaSellerName, galaWalkInRef } from "@/lib/gala"
 
 const round = (v: number) => Math.round(v * 100) / 100
 
@@ -49,11 +49,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     bank: t.bank ? `${t.bank.name}${t.bank.accountNumber ? ` (${t.bank.accountNumber})` : ""}` : null, notes: "", kind: t.type === "CREDIT" ? "RECEIVE" : "PAY",
   }))
 
-  const received = [...customerPayments.filter((p) => p.direction === "RECEIVE").map(row), ...walkIn.filter((w) => w.kind === "RECEIVE")]
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const received = [
+    ...customerPayments.filter((p) => p.direction === "RECEIVE").map(row),
+    ...supplierPayments.filter((p) => p.direction === "RECEIVE").map(row),
+    ...walkIn.filter((w) => w.kind === "RECEIVE"),
+  ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   const paid = [
     ...farmerPayments.filter((p) => p.amount > 0).map(row),
     ...supplierPayments.filter((p) => p.direction === "PAY").map(row),
+    ...customerPayments.filter((p) => p.direction === "PAY").map(row),
     ...walkIn.filter((w) => w.kind === "PAY"),
   ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
@@ -61,8 +65,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 // Received / Paid against a Gala Mandi entry.
-// RECEIVE: money from the buyer → trader payment (RECEIVE), buyer owes less.
-// PAY: money to the seller → farmer / supplier payment (PAY), we owe the seller less.
+// RECEIVE: money from the buyer → supplier / trader payment (RECEIVE), buyer owes less.
+// PAY: money to the seller → trader / farmer / supplier payment (PAY), we owe the seller less.
 // Walk-in parties have no ledger, so only the entry's received / paid amount changes.
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -93,10 +97,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   const note = `Gala Mandi #${e.entryNo}${bank ? ` — ${bank.name}` : ""}${notes?.trim() ? ` — ${notes.trim()}` : ""}`
-  const party = await db.galaEntry.findUnique({
-    where: { id },
-    select: { walkInBuyer: true, walkInSeller: true, customer: { select: { name: true } }, farmer: { select: { name: true } }, supplier: { select: { name: true } } },
-  })
+  const party = await db.galaEntry.findUnique({ where: { id }, include: galaPartyInclude })
   await db.$transaction(async (tx) => {
     let paymentId: string | null = null
     if (kind === "RECEIVE") {
@@ -104,10 +105,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         const p = await tx.customerPayment.create({ data: { customerId: e.customerId, amount: amt, direction: "RECEIVE", method: payMethod, notes: note, galaEntryId: id } })
         paymentId = p.id
         await tx.customer.update({ where: { id: e.customerId }, data: { balance: { decrement: amt } } })
+      } else if (e.buyerSupplierId) {
+        // Supplier as buyer: RECEIVE raises the supplier balance back toward 0 (they owe us less)
+        const p = await tx.supplierPayment.create({ data: { supplierId: e.buyerSupplierId, amount: amt, direction: "RECEIVE", method: payMethod, notes: note, galaEntryId: id } })
+        paymentId = p.id
+        await tx.supplier.update({ where: { id: e.buyerSupplierId }, data: { balance: { increment: amt } } })
       }
       await tx.galaEntry.update({ where: { id }, data: { receivedAmount: { increment: amt } } })
     } else {
-      if (e.farmerId) {
+      if (e.sellerCustomerId) {
+        // Trader as seller: PAY raises the trader balance back toward 0 (we owe them less)
+        const p = await tx.customerPayment.create({ data: { customerId: e.sellerCustomerId, amount: amt, direction: "PAY", method: payMethod, notes: note, galaEntryId: id } })
+        paymentId = p.id
+        await tx.customer.update({ where: { id: e.sellerCustomerId }, data: { balance: { increment: amt } } })
+      } else if (e.farmerId) {
         // Farmer payments: positive amount = PAY (mandi pays farmer). No bankId here — the bank side is the transaction below.
         const p = await tx.farmerPayment.create({ data: { farmerId: e.farmerId, amount: amt, method: payMethod, notes: note, galaEntryId: id } })
         paymentId = p.id
@@ -123,9 +134,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // Bank account entry: money in for Received, money out for Paid. Linked by reference to the
     // party payment (or to the entry for walk-ins), so deleting either removes it too.
     if (bank) {
-      const name = kind === "RECEIVE"
-        ? party?.customer?.name || party?.walkInBuyer || "buyer"
-        : party?.farmer?.name || party?.supplier?.name || party?.walkInSeller || "seller"
+      const name = (kind === "RECEIVE" ? galaBuyerName(party) : galaSellerName(party)).replace(/^—$/, kind === "RECEIVE" ? "buyer" : "seller")
       await tx.transaction.create({
         data: {
           shopId: e.shopId,
