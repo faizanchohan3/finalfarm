@@ -11,7 +11,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { buildPrintHeader, escapeHtml, reportCSS } from "@/lib/print-utils"
 import { recordCode } from "@/lib/record-code"
-import { RATE_PER, galaRowAmount, itemRatePer, itemToKgRow } from "@/lib/gala"
+import { RATE_PER, galaBuyerName, galaRowAmount, galaSellerName, itemRatePer, itemToKgRow } from "@/lib/gala"
 import { Plus, Search, Scale, Printer, Edit, Trash2, X, Eye } from "lucide-react"
 import { useCanEdit } from "@/lib/use-can-edit"
 
@@ -32,7 +32,6 @@ export default function GalaMandiPage() {
   const canEdit = useCanEdit()
   const [entries, setEntries] = useState<any[]>([])
   const [customers, setCustomers] = useState<any[]>([])
-  const [farmers, setFarmers] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
   const [products, setProducts] = useState<any[]>([])
   const [banks, setBanks] = useState<any[]>([])
@@ -44,13 +43,15 @@ export default function GalaMandiPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [entryDate, setEntryDate] = useState(today())
-  const [buyerId, setBuyerId] = useState("")      // customer id, or "walkin"
+  // Buyer is a supplier and seller is a trader; older entries keep their trader buyer / farmer or supplier seller
+  const [buyerId, setBuyerId] = useState("")      // "supplier_<id>", "walkin" (older: "customer_<id>")
   const [walkInBuyer, setWalkInBuyer] = useState("")
-  const [sellerId, setSellerId] = useState("")    // "farmer_<id>", "supplier_<id>" or "walkin"
+  const [sellerId, setSellerId] = useState("")    // "customer_<id>", "walkin" (older: "farmer_<id>", "supplier_<id>")
   const [walkInSeller, setWalkInSeller] = useState("")
   const [rows, setRows] = useState<Row[]>([emptyRow()])
   const [notes, setNotes] = useState("")
   const [saving, setSaving] = useState(false)
+  const [editingEntry, setEditingEntry] = useState<any>(null)
 
   // Received (from buyer) / Paid (to seller)
   const [savedEntry, setSavedEntry] = useState<any>(null)          // "entry saved" prompt with Received / Paid buttons
@@ -77,10 +78,9 @@ export default function GalaMandiPage() {
 
   async function loadData() {
     setLoading(true)
-    const [g, cu, fa, su, pr, sh, bk] = await Promise.all([
+    const [g, cu, su, pr, sh, bk] = await Promise.all([
       safeFetch("/api/gala", { entries: [] }),
       safeFetch("/api/customers", { customers: [] }),
-      safeFetch("/api/farmers", { farmers: [] }),
       safeFetch("/api/suppliers", { suppliers: [] }),
       safeFetch("/api/inventory", { products: [] }),
       safeFetch("/api/settings", { shop: null }),
@@ -88,7 +88,6 @@ export default function GalaMandiPage() {
     ])
     setEntries(g.entries || [])
     setCustomers(cu.customers || [])
-    setFarmers(fa.farmers || [])
     setSuppliers(su.suppliers || [])
     setProducts(pr.products || [])
     setShop(sh.shop || null)
@@ -113,7 +112,7 @@ export default function GalaMandiPage() {
   }
 
   function openNew() {
-    setEditingId(null)
+    setEditingId(null); setEditingEntry(null)
     setEntryDate(today())
     setBuyerId(""); setWalkInBuyer("")
     setSellerId(""); setWalkInSeller("")
@@ -122,10 +121,11 @@ export default function GalaMandiPage() {
   }
 
   function openEdit(e: any) {
-    setEditingId(e.id)
+    setEditingId(e.id); setEditingEntry(e)
     setEntryDate(new Date(e.entryDate).toISOString().slice(0, 10))
-    setBuyerId(e.customerId || (e.walkInBuyer ? "walkin" : "")); setWalkInBuyer(e.walkInBuyer || "")
-    setSellerId(e.farmerId ? `farmer_${e.farmerId}` : e.supplierId ? `supplier_${e.supplierId}` : e.walkInSeller ? "walkin" : "")
+    setBuyerId(e.buyerSupplierId ? `supplier_${e.buyerSupplierId}` : e.customerId ? `customer_${e.customerId}` : e.walkInBuyer ? "walkin" : "")
+    setWalkInBuyer(e.walkInBuyer || "")
+    setSellerId(e.sellerCustomerId ? `customer_${e.sellerCustomerId}` : e.farmerId ? `farmer_${e.farmerId}` : e.supplierId ? `supplier_${e.supplierId}` : e.walkInSeller ? "walkin" : "")
     setWalkInSeller(e.walkInSeller || "")
     const items = Array.isArray(e.items) ? e.items : []
     setRows(items.length ? items.map((i: any) => { const k = itemToKgRow(i); return { product: i.product || "", qty: String(k.qty ?? ""), ratePer: k.ratePer, rate: String(k.rate ?? "") } }) : [emptyRow()])
@@ -148,8 +148,10 @@ export default function GalaMandiPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           entryDate,
-          customerId: buyerId !== "walkin" ? buyerId : null,
+          buyerSupplierId: buyerId.startsWith("supplier_") ? buyerId.slice(9) : null,
+          customerId: buyerId.startsWith("customer_") ? buyerId.slice(9) : null,
           walkInBuyer: buyerId === "walkin" ? walkInBuyer.trim() : null,
+          sellerCustomerId: sellerId.startsWith("customer_") ? sellerId.slice(9) : null,
           farmerId: sellerId.startsWith("farmer_") ? sellerId.slice(7) : null,
           supplierId: sellerId.startsWith("supplier_") ? sellerId.slice(9) : null,
           walkInSeller: sellerId === "walkin" ? walkInSeller.trim() : null,
@@ -209,8 +211,8 @@ export default function GalaMandiPage() {
     loadData()
   }
 
-  const buyerName = (e: any) => e.customer?.name || e.walkInBuyer || "—"
-  const sellerName = (e: any) => e.farmer?.name || e.supplier?.name || e.walkInSeller || "—"
+  const buyerName = galaBuyerName
+  const sellerName = galaSellerName
   const itemsOf = (e: any): any[] => (Array.isArray(e.items) ? e.items : [])
 
   async function openLedger(e: any) {
@@ -327,14 +329,22 @@ ${buildPrintHeader(shop)}
   const totalUnreceived = filtered.reduce((s, e) => s + leftToReceive(e), 0)
   const totalUnpaid = filtered.reduce((s, e) => s + leftToPay(e), 0)
 
-  const buyerOptions = [
-    { value: "walkin", label: "Walk-in (enter name)" },
-    ...customers.map((c: any) => ({ value: c.id, label: c.name, sub: c.phone || undefined })),
-  ]
+  // Buyers are suppliers, sellers are traders. An older entry being edited keeps its trader buyer /
+  // farmer or supplier seller as an extra option so it still shows.
+  const old = editingEntry
+  const buyerGroups = [
+    { label: "Walk-in", options: [{ value: "walkin", label: "Walk-in (enter name)" }] },
+    { label: "Suppliers", options: suppliers.map((s: any) => ({ value: `supplier_${s.id}`, label: s.name, sub: s.phone || undefined })) },
+    { label: "Current buyer", options: old?.customerId ? [{ value: `customer_${old.customerId}`, label: old.customer?.name || "Trader", sub: "Trader" }] : [] },
+  ].filter((g) => g.options.length > 0)
   const sellerGroups = [
     { label: "Walk-in", options: [{ value: "walkin", label: "Walk-in (enter name)" }] },
-    { label: "Farmers", options: farmers.map((f: any) => ({ value: `farmer_${f.id}`, label: f.name, sub: f.village || f.phone || undefined })) },
-    { label: "Suppliers", options: suppliers.map((s: any) => ({ value: `supplier_${s.id}`, label: s.name, sub: s.phone || undefined })) },
+    { label: "Traders", options: customers.map((c: any) => ({ value: `customer_${c.id}`, label: c.name, sub: c.phone || undefined })) },
+    {
+      label: "Current seller",
+      options: old?.farmerId ? [{ value: `farmer_${old.farmerId}`, label: old.farmer?.name || "Farmer", sub: "Farmer" }]
+        : old?.supplierId ? [{ value: `supplier_${old.supplierId}`, label: old.supplier?.name || "Supplier", sub: "Supplier" }] : [],
+    },
   ].filter((g) => g.options.length > 0)
 
   return (
@@ -501,7 +511,7 @@ ${buildPrintHeader(shop)}
             {/* Parties */}
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-300 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <Label className="text-xs font-semibold text-gray-600">Seller (Farmer / Supplier) *</Label>
+                <Label className="text-xs font-semibold text-gray-600">Seller (Trader) *</Label>
                 <div className="mt-1">
                   <SearchableSelect value={sellerId} onValueChange={(v) => { setSellerId(v); if (v !== "walkin") setWalkInSeller("") }}
                     placeholder="Select seller..." groups={sellerGroups} searchPlaceholder="Search sellers..." emptyText="No sellers" />
@@ -511,10 +521,10 @@ ${buildPrintHeader(shop)}
                 )}
               </div>
               <div>
-                <Label className="text-xs font-semibold text-gray-600">Buyer (Trader) *</Label>
+                <Label className="text-xs font-semibold text-gray-600">Buyer (Supplier) *</Label>
                 <div className="mt-1">
                   <SearchableSelect value={buyerId} onValueChange={(v) => { setBuyerId(v); if (v !== "walkin") setWalkInBuyer("") }}
-                    placeholder="Select buyer..." options={buyerOptions} searchPlaceholder="Search buyers..." emptyText="No buyers" />
+                    placeholder="Select buyer..." groups={buyerGroups} searchPlaceholder="Search buyers..." emptyText="No buyers" />
                 </div>
                 {buyerId === "walkin" && (
                   <Input className="mt-2" placeholder="Enter buyer name..." value={walkInBuyer} onChange={(e) => setWalkInBuyer(e.target.value)} />
