@@ -1,6 +1,6 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
-import { ADMIN_ONLY_DELETE, canDelete } from "@/lib/permissions"
+import { ADMIN_ONLY_DELETE, NO_EDIT_MESSAGE, canDelete, isBlockedEdit } from "@/lib/permissions"
 
 export const proxy = auth((req) => {
   const isLoggedIn = !!req.auth
@@ -17,6 +17,11 @@ export const proxy = auth((req) => {
   // Only admins may delete anything — every delete in the app is an HTTP DELETE to /api/
   if (isLoggedIn && req.method === "DELETE" && pathname.startsWith("/api/") && !canDelete(role)) {
     return NextResponse.json({ error: ADMIN_ONLY_DELETE }, { status: 403 })
+  }
+
+  // Accountants may add entries but not edit them
+  if (isLoggedIn && isBlockedEdit(role, req.method, pathname)) {
+    return NextResponse.json({ error: NO_EDIT_MESSAGE }, { status: 403 })
   }
 
   if (isLoggedIn && isLoginPage) {
