@@ -25,7 +25,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const supplier = await db.supplier.findUnique({ where: { id } })
   if (!supplier) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-  const [purchases, commissions, supplierPayments, galaEntries] = await Promise.all([
+  const [purchases, commissions, supplierPayments, galaEntries, galaBuys] = await Promise.all([
     db.purchase.findMany({
       where: { supplierId: id, ...dateWhere },
       orderBy: { createdAt: "asc" },
@@ -37,6 +37,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     db.commission.findMany({ where: { supplierId: id, ...dateWhere }, orderBy: { createdAt: "asc" } }),
     db.supplierPayment.findMany({ where: { supplierId: id, ...dateWhere }, orderBy: { createdAt: "asc" } }),
     db.galaEntry.findMany({ where: { supplierId: id, ...(dateWhere.createdAt ? { entryDate: dateWhere.createdAt } : {}) }, orderBy: { entryDate: "asc" } }),
+    db.galaEntry.findMany({ where: { buyerSupplierId: id, ...(dateWhere.createdAt ? { entryDate: dateWhere.createdAt } : {}) }, orderBy: { entryDate: "asc" } }),
   ])
 
   const events: any[] = []
@@ -93,6 +94,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       description: galaLedgerText(g, "seller"),
       debit: 0,
       credit: g.totalAmount,
+    })
+  }
+
+  // Gala Mandi: supplier bought goods through the mandi → Debit supplier
+  for (const g of galaBuys) {
+    events.push({
+      date: g.entryDate,
+      type: "GALA",
+      description: galaLedgerText(g, "buyer"),
+      debit: g.totalAmount,
+      credit: 0,
     })
   }
 

@@ -30,7 +30,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   // Bills are dated by their bill date, not when they were saved
   const billDateWhere: any = dateWhere.createdAt ? { billDate: dateWhere.createdAt } : {}
 
-  const [sales, pesticideSales, customerCommissions, customerPayments, traderPurchases, bills, soldLots, galaEntries] = await Promise.all([
+  const [sales, pesticideSales, customerCommissions, customerPayments, traderPurchases, bills, soldLots, galaEntries, galaSales] = await Promise.all([
     db.sale.findMany({
       where: { customerId: id, ...dateWhere },
       orderBy: { createdAt: "asc" },
@@ -71,6 +71,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     // Gala Mandi entries where this trader is the buyer (dated by entry date)
     db.galaEntry.findMany({
       where: { customerId: id, ...(dateWhere.createdAt ? { entryDate: dateWhere.createdAt } : {}) },
+      orderBy: { entryDate: "asc" },
+    }),
+    // Gala Mandi entries where this trader is the seller
+    db.galaEntry.findMany({
+      where: { sellerCustomerId: id, ...(dateWhere.createdAt ? { entryDate: dateWhere.createdAt } : {}) },
       orderBy: { entryDate: "asc" },
     }),
   ])
@@ -212,6 +217,17 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       description: galaLedgerText(g, "buyer"),
       debit: g.totalAmount,
       credit: 0,
+    })
+  }
+
+  // Gala Mandi: trader sold goods through the mandi → Credit trader
+  for (const g of galaSales) {
+    events.push({
+      date: g.entryDate,
+      type: "GALA",
+      description: galaLedgerText(g, "seller"),
+      debit: 0,
+      credit: g.totalAmount,
     })
   }
 

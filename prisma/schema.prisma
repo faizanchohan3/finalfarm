@@ -339,7 +339,8 @@ model Customer {
   freightSlips      FreightSlip[]
   commissions       Commission[]
   bills             Bill[]
-  galaEntries       GalaEntry[]
+  galaEntries       GalaEntry[]     @relation("GalaBuyerCustomer")
+  galaSales         GalaEntry[]     @relation("GalaSellerCustomer")
   payments          CustomerPayment[]
   purchasesAsSeller Purchase[]      @relation("PurchaseSeller")
   lots              Lot[]
@@ -377,7 +378,8 @@ model Supplier {
   shop        Shop?             @relation(fields: [shopId], references: [id])
   purchases   Purchase[]
   commissions Commission[]
-  galaEntries GalaEntry[]
+  galaEntries GalaEntry[]       @relation("GalaSellerSupplier")
+  galaBuys    GalaEntry[]       @relation("GalaBuyerSupplier")
   payments    SupplierPayment[]
 }
 
@@ -1099,6 +1101,8 @@ model GalaEntry {
   walkInBuyer  String?
   farmerId     String?
   supplierId   String?
+  sellerCustomerId String? // trader as the seller
+  buyerSupplierId  String? // supplier as the buyer
   walkInSeller String?
   items        Json
   totalWeight  Float    @default(0)
@@ -1112,14 +1116,18 @@ model GalaEntry {
   updatedAt    DateTime @updatedAt
 
   shop     Shop?     @relation(fields: [shopId], references: [id])
-  customer Customer? @relation(fields: [customerId], references: [id])
-  farmer   Farmer?   @relation(fields: [farmerId], references: [id])
-  supplier Supplier? @relation(fields: [supplierId], references: [id])
+  customer       Customer? @relation("GalaBuyerCustomer", fields: [customerId], references: [id])
+  farmer         Farmer?   @relation(fields: [farmerId], references: [id])
+  supplier       Supplier? @relation("GalaSellerSupplier", fields: [supplierId], references: [id])
+  sellerCustomer Customer? @relation("GalaSellerCustomer", fields: [sellerCustomerId], references: [id])
+  buyerSupplier  Supplier? @relation("GalaBuyerSupplier", fields: [buyerSupplierId], references: [id])
 
   @@index([shopId, entryDate])
   @@index([customerId])
   @@index([farmerId])
   @@index([supplierId])
+  @@index([sellerCustomerId])
+  @@index([buyerSupplierId])
 
   @@unique([shopId, code])
 }

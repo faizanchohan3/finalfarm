@@ -3,14 +3,10 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { nextRecordCode } from "@/lib/record-number"
 import { createAuditLog } from "@/lib/audit"
-import { applyGala } from "@/lib/gala"
+import { applyGala, galaPartyInclude } from "@/lib/gala"
 import { checkParties, galaFields } from "./fields"
 
-const partySelect = {
-  customer: { select: { id: true, name: true, phone: true } },
-  farmer: { select: { id: true, name: true, phone: true } },
-  supplier: { select: { id: true, name: true, phone: true } },
-}
+const partySelect = galaPartyInclude
 
 export async function GET() {
   const session = await auth()

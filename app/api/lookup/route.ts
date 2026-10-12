@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { RECORD_PREFIX, recordCode } from "@/lib/record-code"
-import { galaItemsText } from "@/lib/gala"
+import { galaBuyerName, galaItemsText, galaPartyInclude, galaSellerName } from "@/lib/gala"
 
 type Result = { type: string; code: string; title: string; href: string; fields: [string, string][] }
 
@@ -112,18 +112,18 @@ export async function GET(req: Request) {
   if (galaWhere) {
     const rows = await db.galaEntry.findMany({
       where: galaWhere,
-      include: { customer: true, farmer: true, supplier: true },
+      include: galaPartyInclude,
       take: 5,
     })
     for (const g of rows) {
       results.push({
         type: "Gala Mandi", code: recordCode("gala", g), href: "/gala-mandi",
-        title: `Gala Mandi #${g.entryNo} — ${g.customer?.name || g.walkInBuyer || "Buyer"}`,
+        title: `Gala Mandi #${g.entryNo} — ${galaBuyerName(g).replace(/^—$/, "Buyer")}`,
         fields: [
           ["Entry No", g.entryNo],
           ["Date", day(g.entryDate)],
-          ["Seller", g.farmer?.name || g.supplier?.name || g.walkInSeller || "—"],
-          ["Buyer", g.customer?.name || g.walkInBuyer || "—"],
+          ["Seller", galaSellerName(g)],
+          ["Buyer", galaBuyerName(g)],
           ["Products", galaItemsText(g.items) || "—"],
           ["Total weight", num(g.totalWeight, " KG")],
           ["Total amount", pkr(g.totalAmount)],
