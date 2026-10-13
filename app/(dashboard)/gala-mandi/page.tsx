@@ -15,9 +15,9 @@ import { RATE_PER, galaBuyerName, galaRowAmount, galaSellerName, itemRatePer, it
 import { Plus, Search, Scale, Printer, Edit, Trash2, X, Eye } from "lucide-react"
 import { useCanEdit } from "@/lib/use-can-edit"
 
-// Weight is always KG (like Bill Maker); the rate is per KG or per Mound (40 kg)
+// Weight is always KG (like Bill Maker); the rate is per Mound (40 kg, the default) or per KG
 type Row = { product: string; qty: string; ratePer: string; rate: string }
-const emptyRow = (): Row => ({ product: "", qty: "", ratePer: "KG", rate: "" })
+const emptyRow = (): Row => ({ product: "", qty: "", ratePer: "Mound", rate: "" })
 const today = () => new Date().toISOString().slice(0, 10)
 const n = (v: number) => (v || 0).toLocaleString("en-PK", { maximumFractionDigits: 2 })
 
