@@ -6,6 +6,8 @@ import Link from "next/link"
 import { ShopDataActions } from "@/components/shop-data-actions"
 import { RecordLookup } from "@/components/record-lookup"
 import { getT } from "@/lib/i18n-server"
+import { cookies } from "next/headers"
+import { DASHBOARD_VIEW_COOKIE, showSampleData } from "@/lib/dashboard-view"
 
 function initials(name?: string | null) {
   if (!name) return "—"
@@ -74,8 +76,8 @@ function delta(curr: number, prev: number) {
   return ((curr - prev) / prev) * 100
 }
 
-// Sample dataset shown by default so the dashboard looks populated.
-// Owners flip to their real figures with the header toggle (?data=real).
+// Sample dataset shown by default so the dashboard looks populated (see lib/dashboard-view.ts).
+// Owners flip to their real figures with the header toggle, which is remembered.
 const DEMO = {
   today: 45200, todayDelta: 12.5,
   month: 842000, monthDelta: 8.3,
@@ -135,10 +137,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const isCashier = session?.user?.role === "CASHIER"
   const d = await getDashboardData(shopId)
 
-  // Sample data is shown by default; ?data=real reveals this shop's real figures.
+  // Real or sample figures: ?data=, else the saved header choice, else the account default
   const sp = await searchParams
-  const showReal = sp?.data === "real"
-  const demo = !showReal
+  const saved = (await cookies()).get(DASHBOARD_VIEW_COOKIE)?.value
+  const demo = showSampleData({ param: sp?.data, saved, email: session?.user?.email })
   const { t } = await getT()
 
   const daysVM = demo ? DEMO.days : d.days
@@ -185,7 +187,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           <ShopDataActions />
           {demo ? (
             <Link
-              href="/dashboard?data=real"
+              href="/api/dashboard-view?mode=real"
+              prefetch={false}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-lg px-3 py-1.5 transition-colors"
             >
               <Database className="w-3.5 h-3.5" />
@@ -193,7 +196,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </Link>
           ) : (
             <Link
-              href="/dashboard"
+              href="/api/dashboard-view?mode=sample"
+              prefetch={false}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg px-3 py-1.5 transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5" />
