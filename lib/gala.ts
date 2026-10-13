@@ -5,7 +5,7 @@
 import { recordCode } from "@/lib/record-code"
 
 // Like Bill Maker: weight is in KG and the rate is per KG or per Mound (40 kg).
-export const RATE_PER = ["KG", "Mound"] as const
+export const RATE_PER = ["Mound", "KG"] as const
 export type RatePer = (typeof RATE_PER)[number]
 export const MOUND_KG = 40
 
