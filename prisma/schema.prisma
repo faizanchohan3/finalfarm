@@ -137,6 +137,7 @@ model Shop {
   bills               Bill[]
   galaEntries         GalaEntry[]
   rooms               Room[]
+  leads               Lead[]
 }
 
 // ── BILL MAKER ───────────────────────────────────────────────────────────────
@@ -248,6 +249,8 @@ model User {
   gateEntries      GateEntry[]
   commissions      Commission[]
   lots             Lot[]
+  assignedLeads    Lead[]           @relation("LeadAssignedTo")
+  leadActivities   LeadActivity[]
 }
 
 // ── INVENTORY ────────────────────────────────────────────────────────────────
@@ -1171,4 +1174,56 @@ model LotSaleItem {
   lot  Lot     @relation(fields: [lotId], references: [id])
 
   @@index([lotId])
+}
+
+// ── LEADS (lead generation) ─────────────────────────────────────────────────
+// Prospective traders / farmers / suppliers, from walk-ins, calls, WhatsApp or the public enquiry form.
+
+model Lead {
+  id              String    @id @default(cuid())
+  shopId          String?
+  name            String
+  phone           String?
+  email           String?
+  city            String?
+  address         String?
+  type            String    @default("TRADER")   // TRADER | FARMER | SUPPLIER
+  source          String    @default("WALK_IN")  // WALK_IN | PHONE | WHATSAPP | FACEBOOK | REFERRAL | ENQUIRY_FORM | MANDI | RE_ENGAGE | OTHER
+  status          String    @default("NEW")      // NEW | CONTACTED | INTERESTED | NEGOTIATION | WON | LOST
+  interest        String?                         // crop / product they asked about
+  quantity        String?                         // free text, e.g. "500 bags"
+  estimatedValue  Float     @default(0)
+  score           Int       @default(0)           // 0–100, worked out from the lead's details and activity
+  notes           String?
+  referredBy      String?
+  lostReason      String?
+  nextFollowUp    DateTime?
+  lastContactedAt DateTime?
+  assignedToId    String?
+  convertedType   String?                         // CUSTOMER | FARMER | SUPPLIER once won
+  convertedId     String?
+  convertedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  shop       Shop?          @relation(fields: [shopId], references: [id])
+  assignedTo User?          @relation("LeadAssignedTo", fields: [assignedToId], references: [id])
+  activities LeadActivity[]
+
+  @@index([shopId, status])
+  @@index([shopId, nextFollowUp])
+}
+
+model LeadActivity {
+  id        String   @id @default(cuid())
+  leadId    String
+  userId    String?
+  kind      String   @default("NOTE")  // NOTE | CALL | WHATSAPP | SMS | VISIT | STATUS
+  notes     String?
+  createdAt DateTime @default(now())
+
+  lead Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([leadId])
 }

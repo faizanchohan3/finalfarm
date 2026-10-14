@@ -6,11 +6,13 @@ export const proxy = auth((req) => {
   const isLoggedIn = !!req.auth
   const pathname = req.nextUrl.pathname
   const isLoginPage = pathname === "/login"
+  // Public lead-capture form shared with prospects (no login)
+  const isPublicPage = pathname.startsWith("/enquiry/")
   const role = req.auth?.user?.role
   const isSuperAdmin = role === "SUPER_ADMIN"
 
   // Only redirect page routes to login â€” never redirect API routes
-  if (!isLoggedIn && !isLoginPage && !pathname.startsWith("/api/")) {
+  if (!isLoggedIn && !isLoginPage && !isPublicPage && !pathname.startsWith("/api/")) {
     return NextResponse.redirect(new URL("/login", req.nextUrl))
   }
 
@@ -32,7 +34,7 @@ export const proxy = auth((req) => {
 
   // Super admin can ONLY access /shops and /profile â€” but never redirect API routes
   const superAdminAllowed = pathname.startsWith("/shops") || pathname.startsWith("/profile")
-  if (isLoggedIn && isSuperAdmin && !superAdminAllowed && !pathname.startsWith("/api/")) {
+  if (isLoggedIn && isSuperAdmin && !superAdminAllowed && !isPublicPage && !pathname.startsWith("/api/")) {
     return NextResponse.redirect(new URL("/shops", req.nextUrl))
   }
 
