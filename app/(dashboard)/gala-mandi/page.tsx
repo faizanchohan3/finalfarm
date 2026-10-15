@@ -359,27 +359,19 @@ ${buildPrintHeader(shop)}
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-gray-500 uppercase font-medium">Entries</p>
-          <p className="text-xl font-bold text-gray-900 mt-1">{filtered.length}</p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-gray-500 uppercase font-medium">Total Weight</p>
-          <p className="text-xl font-bold text-gray-900 mt-1 tabular-nums">{weightByUnit(filtered.flatMap(itemsOf))}</p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-gray-500 uppercase font-medium">Total Amount</p>
-          <p className="text-xl font-bold text-purple-700 mt-1">{formatCurrency(grandTotal)}</p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-gray-500 uppercase font-medium">Unreceived (buyers)</p>
-          <p className="text-xl font-bold text-blue-700 mt-1">{formatCurrency(totalUnreceived)}</p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-gray-500 uppercase font-medium">Unpaid (sellers)</p>
-          <p className="text-xl font-bold text-orange-700 mt-1">{formatCurrency(totalUnpaid)}</p>
-        </CardContent></Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-4">
+        {[
+          { label: "Entries", value: String(filtered.length), color: "text-gray-900" },
+          { label: "Total Weight", value: weightByUnit(filtered.flatMap(itemsOf)), color: "text-gray-900" },
+          { label: "Total Amount", value: formatCurrency(grandTotal), color: "text-purple-700" },
+          { label: "Unreceived (buyers)", value: formatCurrency(totalUnreceived), color: "text-blue-700" },
+          { label: "Unpaid (sellers)", value: formatCurrency(totalUnpaid), color: "text-orange-700" },
+        ].map((c) => (
+          <Card key={c.label} className="min-w-0"><CardContent className="p-4">
+            <p className="text-xs text-gray-500 uppercase font-medium truncate">{c.label}</p>
+            <p className={`text-lg sm:text-xl font-bold mt-1 tabular-nums leading-tight break-words ${c.color}`}>{c.value}</p>
+          </CardContent></Card>
+        ))}
       </div>
 
       <Card>

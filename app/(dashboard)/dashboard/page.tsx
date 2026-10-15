@@ -1,7 +1,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { formatCurrency } from "@/lib/utils"
-import { ShoppingCart, TrendingUp, Users, Wheat, ArrowUpRight, ArrowDownRight, Clock, CheckSquare, Sparkles, Database } from "lucide-react"
+import { ShoppingCart, TrendingUp, Users, Wheat, ArrowUpRight, ArrowDownRight, Clock, CheckSquare, Sparkles, Database, Scale, Boxes, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { ShopDataActions } from "@/components/shop-data-actions"
 import { RecordLookup } from "@/components/record-lookup"
@@ -32,6 +32,7 @@ async function getDashboardData(shopId: string | null) {
     todayAgg, yesterdayAgg, monthAgg, lastMonthAgg,
     totalCustomers, totalFarmers,
     last7, salesAgg, recentSales, taskList,
+    galaAgg, galaCount, lotStockAgg, lotsInStore, lotSaleAgg, shop,
   ] = await Promise.all([
     db.sale.aggregate({ where: { ...shopFilter, ...active, createdAt: { gte: startOfDay } }, _sum: { totalAmount: true } }),
     db.sale.aggregate({ where: { ...shopFilter, ...active, createdAt: { gte: startYesterday, lt: startOfDay } }, _sum: { totalAmount: true } }),
@@ -43,6 +44,12 @@ async function getDashboardData(shopId: string | null) {
     db.sale.aggregate({ where: { ...shopFilter, ...active }, _sum: { totalAmount: true, paidAmount: true } }),
     db.sale.findMany({ take: 6, where: shopFilter, orderBy: { createdAt: "desc" }, include: { customer: { select: { name: true } } } }),
     db.task.findMany({ where: { ...shopFilter, status: { in: ["PENDING", "IN_PROGRESS"] } }, take: 5, orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }], include: { assignedTo: { select: { name: true } } } }),
+    db.galaEntry.aggregate({ where: shopFilter, _sum: { totalAmount: true, receivedAmount: true, paidAmount: true, totalWeight: true } }),
+    db.galaEntry.count({ where: shopFilter }),
+    db.lot.aggregate({ where: { ...shopFilter, status: { in: ["ARRIVED", "STORED"] } }, _sum: { bags: true, soldBags: true } }),
+    db.lot.count({ where: { ...shopFilter, status: { in: ["ARRIVED", "STORED"] } } }),
+    db.lotSale.aggregate({ where: shopFilter, _sum: { amount: true, paidAmount: true } }),
+    shopId ? db.shop.findUnique({ where: { id: shopId }, select: { moduleLots: true } }) : null,
   ])
 
   const days: { label: string; total: number }[] = []
@@ -68,6 +75,20 @@ async function getDashboardData(shopId: string | null) {
     totalSales: salesAgg._sum.totalAmount || 0,
     collected: salesAgg._sum.paidAmount || 0,
     recentSales, taskList,
+    gala: {
+      entries: galaCount,
+      weight: galaAgg._sum.totalWeight || 0,
+      amount: galaAgg._sum.totalAmount || 0,
+      unreceived: Math.max(0, (galaAgg._sum.totalAmount || 0) - (galaAgg._sum.receivedAmount || 0)),
+      unpaid: Math.max(0, (galaAgg._sum.totalAmount || 0) - (galaAgg._sum.paidAmount || 0)),
+    },
+    potato: {
+      enabled: shop?.moduleLots !== false,
+      lots: lotsInStore,
+      bagsLeft: Math.max(0, (lotStockAgg._sum.bags || 0) - (lotStockAgg._sum.soldBags || 0)),
+      sales: lotSaleAgg._sum.amount || 0,
+      received: lotSaleAgg._sum.paidAmount || 0,
+    },
   }
 }
 
@@ -102,6 +123,8 @@ const DEMO = {
     { name: "Punjab Grains", status: "PAID", date: "11 Sep", amount: 41000 },
     { name: "Walk-in customer", status: "PAID", date: "11 Sep", amount: 7600 },
   ],
+  gala: { entries: 64, weight: 1366247, amount: 158905649.44, unreceived: 24310500, unpaid: 18975200 },
+  potato: { enabled: true, lots: 37, bagsLeft: 4820, sales: 6235000, received: 5410000 },
 }
 
 const CARD = "rounded-2xl bg-white border border-gray-200 p-5"
@@ -156,6 +179,33 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const totalSales = demo ? DEMO.total : d.totalSales
   const collectionRate = totalSales > 0 ? (collected / totalSales) * 100 : 0
   const outstanding = totalSales - collected
+
+  const gala = demo ? DEMO.gala : d.gala
+  const potato = demo ? DEMO.potato : d.potato
+  const kg = (n: number) => `${Math.round(n).toLocaleString("en-PK")} KG`
+
+  const sections = [
+    {
+      title: t("Gala Mandi"), href: "/gala-mandi", icon: Scale, tint: "bg-emerald-50 text-emerald-600", show: true,
+      items: [
+        { label: t("Entries"), value: gala.entries.toLocaleString("en-PK"), color: "text-gray-900" },
+        { label: t("Total Weight"), value: kg(gala.weight), color: "text-gray-900" },
+        { label: t("Total Amount"), value: formatCurrency(gala.amount), color: "text-purple-700" },
+        { label: t("Unreceived (buyers)"), value: formatCurrency(gala.unreceived), color: "text-blue-700" },
+        { label: t("Unpaid (sellers)"), value: formatCurrency(gala.unpaid), color: "text-orange-700" },
+      ],
+    },
+    {
+      title: t("Potato Store"), href: "/lots", icon: Boxes, tint: "bg-amber-50 text-amber-600", show: potato.enabled,
+      items: [
+        { label: t("Lots in store"), value: potato.lots.toLocaleString("en-PK"), color: "text-gray-900" },
+        { label: t("Bags in stock"), value: potato.bagsLeft.toLocaleString("en-PK"), color: "text-gray-900" },
+        { label: t("Total Sales"), value: formatCurrency(potato.sales), color: "text-purple-700" },
+        { label: t("Received"), value: formatCurrency(potato.received), color: "text-brand-700" },
+        { label: t("Outstanding"), value: formatCurrency(Math.max(0, potato.sales - potato.received)), color: "text-orange-700" },
+      ],
+    },
+  ].filter((s) => s.show)
 
   const tasksVM = demo ? DEMO.tasks : d.taskList.map((t) => ({ title: t.title, who: t.assignedTo?.name || "Unassigned", priority: t.priority, due: t.dueDate ? shortDate(t.dueDate) : "—" }))
   const salesVM = demo ? DEMO.sales : d.recentSales.map((s: any) => ({ name: s.customer?.name || "Walk-in customer", status: s.status, date: shortDate(s.createdAt), amount: s.totalAmount }))
@@ -254,6 +304,38 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
       {!isCashier && (
         <>
+          {/* Gala Mandi + Potato Store */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {sections.map((sec, i) => (
+              <Link
+                key={sec.href}
+                href={sec.href}
+                className={`${CARD} group block min-w-0 hover:border-gray-300 hover:shadow-sm transition-all duration-200 animate-fade-up`}
+                style={{ animationDelay: `${220 + i * 50}ms` }}
+              >
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 min-w-0">
+                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${sec.tint}`}>
+                      <sec.icon className="w-4 h-4" />
+                    </span>
+                    <span className="truncate">{sec.title}</span>
+                  </h2>
+                  <span className="text-xs font-medium text-brand-700 group-hover:text-brand-800 flex items-center gap-0.5 flex-shrink-0">
+                    {t("Open")} <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3">
+                  {sec.items.map((it, j) => (
+                    <div key={it.label} className={`min-w-0 rounded-xl bg-gray-50 px-3 py-2.5 ${j === 0 ? "min-[420px]:col-span-2" : ""}`}>
+                      <p className="text-[11px] text-gray-500 font-medium uppercase truncate">{it.label}</p>
+                      <p className={`text-base sm:text-lg font-semibold tabular-nums leading-tight break-words mt-0.5 ${it.color}`}>{it.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </Link>
+            ))}
+          </div>
+
           {/* Sales chart + collection gauge */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className={`${CARD} lg:col-span-2 animate-fade-up`} style={{ animationDelay: "260ms" }}>
