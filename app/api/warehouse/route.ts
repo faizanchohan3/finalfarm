@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { createAuditLog } from "@/lib/audit"
+import { ADMIN_ONLY_DELETE, canDelete } from "@/lib/permissions"
 
 export async function GET() {
   const session = await auth()
@@ -84,3 +86,41 @@ export async function PUT(req: Request) {
   return NextResponse.json({ warehouse })
 }
 
+
+// Admin only (also enforced for every DELETE by proxy.ts). Godowns are hidden, not erased, so old
+// transfers, adjustments and lots keep their godown name. Refused while anything is still stored in it.
+export async function DELETE(req: Request) {
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!canDelete(session.user.role)) return NextResponse.json({ error: ADMIN_ONLY_DELETE }, { status: 403 })
+
+  const { id } = await req.json().catch(() => ({}))
+  if (!id) return NextResponse.json({ error: "Godown id is required" }, { status: 400 })
+
+  const warehouse = await db.warehouse.findFirst({
+    where: { id, isActive: true, ...(session.user.shopId ? { shopId: session.user.shopId } : {}) },
+    select: { id: true, name: true },
+  })
+  if (!warehouse) return NextResponse.json({ error: "Godown not found" }, { status: 404 })
+
+  const [lotsStored, stockLeft, pendingTransfers] = await Promise.all([
+    db.lot.count({ where: { warehouseId: id, status: { notIn: ["SOLD", "DISPATCHED", "SETTLED", "CANCELLED"] } } }),
+    db.warehouseStock.count({ where: { warehouseId: id, quantity: { gt: 0 } } }),
+    db.stockTransfer.count({ where: { status: "PENDING", OR: [{ fromWarehouseId: id }, { toWarehouseId: id }] } }),
+  ])
+  if (lotsStored || stockLeft || pendingTransfers) {
+    const parts = [
+      lotsStored && `${lotsStored} lot(s) stored`,
+      stockLeft && `${stockLeft} item(s) in stock`,
+      pendingTransfers && `${pendingTransfers} pending transfer(s)`,
+    ].filter(Boolean).join(", ")
+    return NextResponse.json({ error: `Cannot delete "${warehouse.name}": it still has ${parts}. Move or clear them first.` }, { status: 400 })
+  }
+
+  await db.warehouse.update({ where: { id }, data: { isActive: false } })
+  await createAuditLog({
+    userId: session.user.id, shopId: session.user.shopId, action: "DELETE", module: "WAREHOUSE",
+    details: `Deleted godown: ${warehouse.name}`,
+  })
+  return NextResponse.json({ success: true })
+}

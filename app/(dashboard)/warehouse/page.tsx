@@ -8,11 +8,15 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency } from "@/lib/utils"
-import { Plus, Warehouse, ArrowLeftRight, Settings2, Package, AlertTriangle, Boxes } from "lucide-react"
+import { Plus, Warehouse, ArrowLeftRight, Settings2, Package, AlertTriangle, Boxes, Trash2 } from "lucide-react"
 import { useCanEdit } from "@/lib/use-can-edit"
+import { useSession } from "next-auth/react"
+import { canDelete } from "@/lib/permissions"
 
 export default function WarehousePage() {
   const canEdit = useCanEdit()
+  const { data: session } = useSession()
+  const isAdmin = canDelete(session?.user?.role)
   const [warehouses, setWarehouses] = useState<any[]>([])
   const [products, setProducts] = useState<any[]>([])
   const [transfers, setTransfers] = useState<any[]>([])
@@ -55,6 +59,20 @@ export default function WarehousePage() {
       return alert(d?.error || "Failed to save godown. Please try again.")
     }
     setShowWarehouseModal(false); loadData()
+  }
+
+  async function handleDeleteWarehouse(w: any) {
+    if (!confirm(`Delete godown "${w.name}"? This cannot be undone from this page.`)) return
+    const res = await fetch("/api/warehouse", {
+      method: "DELETE", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: w.id }),
+    }).catch(() => null)
+    if (!res?.ok) {
+      const d = await res?.json().catch(() => ({}))
+      if (!d?.adminOnly) alert(d?.error || "Failed to delete godown. Please try again.")
+      return
+    }
+    loadData()
   }
 
   async function handleTransfer() {
@@ -134,10 +152,18 @@ export default function WarehousePage() {
                     <Warehouse className="w-4 h-4 text-blue-600" /> {w.name}
                     {w.isPotato && <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">Potato</span>}
                   </CardTitle>
-                  {canEdit && (
-                    <button onClick={() => { setWForm({ id: w.id, name: w.name, location: w.location || "", capacity: w.capacity ? String(w.capacity) : "", manager: w.manager || "", isPotato: !!w.isPotato }); setShowWarehouseModal(true) }}
-                      className="text-xs text-gray-400 hover:text-blue-600">Edit</button>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {canEdit && (
+                      <button onClick={() => { setWForm({ id: w.id, name: w.name, location: w.location || "", capacity: w.capacity ? String(w.capacity) : "", manager: w.manager || "", isPotato: !!w.isPotato }); setShowWarehouseModal(true) }}
+                        className="text-xs text-gray-400 hover:text-blue-600">Edit</button>
+                    )}
+                    {isAdmin && (
+                      <button onClick={() => handleDeleteWarehouse(w)}
+                        className="text-xs text-gray-400 hover:text-red-600 inline-flex items-center gap-1">
+                        <Trash2 className="w-3 h-3" /> Delete
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <p className="text-xs text-gray-500">{w.location || "No location set"}</p>
               </CardHeader>
