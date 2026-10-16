@@ -120,12 +120,8 @@ export const UR: Record<string, string> = {
   "Recent Sales": "حالیہ فروخت",
   "No pending tasks.": "کوئی زیر التواء کام نہیں۔",
   "No sales recorded yet.": "ابھی تک کوئی فروخت درج نہیں۔",
-  "Show Original Shop Data": "اصل دکان کا ڈیٹا دکھائیں",
-  "Show Sample Data": "نمونہ ڈیٹا دکھائیں",
   "Platform overview across all shops.": "تمام دکانوں کا مجموعی جائزہ۔",
   "Sales dashboard — process and track transactions.": "فروخت ڈیش بورڈ — لین دین کریں اور ٹریک کریں۔",
-  "Showing sample data — click \"Show Original Shop Data\" to see your real figures.":
-    "نمونہ ڈیٹا دکھایا جا رہا ہے — اپنے اصل اعداد دیکھنے کے لیے \"اصل دکان کا ڈیٹا دکھائیں\" پر کلک کریں۔",
 
   // ── Customers / Traders ───────────────────────────────────────────────
   "Add Traders": "تاجر شامل کریں",

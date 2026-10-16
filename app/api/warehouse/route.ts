@@ -6,8 +6,9 @@ export async function GET() {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
+  const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
   const warehouses = await db.warehouse.findMany({
-    where: { isActive: true },
+    where: { ...shopFilter, isActive: true },
     orderBy: { name: "asc" },
     include: {
       stock: {
@@ -15,7 +16,7 @@ export async function GET() {
       },
       // Lots currently stored in this godown (not yet sold/dispatched/settled/cancelled)
       lots: {
-        where: { status: { notIn: ["SOLD", "DISPATCHED", "SETTLED", "CANCELLED"] } },
+        where: { ...shopFilter, status: { notIn: ["SOLD", "DISPATCHED", "SETTLED", "CANCELLED"] } },
         orderBy: { createdAt: "desc" },
         include: {
           category: { select: { name: true } },
@@ -65,6 +66,11 @@ export async function PUT(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
+  const owned = await db.warehouse.findFirst({
+    where: { id: body.id, ...(session.user.shopId ? { shopId: session.user.shopId } : {}) },
+    select: { id: true },
+  })
+  if (!owned) return NextResponse.json({ error: "Godown not found" }, { status: 404 })
   const warehouse = await db.warehouse.update({
     where: { id: body.id },
     data: {

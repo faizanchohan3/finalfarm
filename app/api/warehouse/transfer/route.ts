@@ -6,7 +6,9 @@ export async function GET() {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
+  const shopId = session.user.shopId
   const transfers = await db.stockTransfer.findMany({
+    where: shopId ? { fromWarehouse: { shopId } } : undefined,
     orderBy: { createdAt: "desc" },
     include: {
       fromWarehouse: { select: { name: true } },
@@ -25,6 +27,16 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
+    if (session.user.shopId) {
+      const shopId = session.user.shopId
+      const [count, product] = await Promise.all([
+        db.warehouse.count({ where: { id: { in: [body.fromWarehouseId, body.toWarehouseId] }, shopId } }),
+        db.product.findFirst({ where: { id: body.productId, shopId }, select: { id: true } }),
+      ])
+      if (count < (body.fromWarehouseId === body.toWarehouseId ? 1 : 2) || !product) {
+        return NextResponse.json({ error: "Godown or product not found" }, { status: 404 })
+      }
+    }
     const transferNo = `TRF-${Date.now()}`
 
     // Create as PENDING — stock is NOT moved until approved
@@ -63,7 +75,9 @@ export async function PATCH(req: Request) {
     const { transferId } = await req.json()
     if (!transferId) return NextResponse.json({ error: "transferId required" }, { status: 400 })
 
-    const existing = await db.stockTransfer.findUnique({ where: { id: transferId } })
+    const existing = await db.stockTransfer.findFirst({
+      where: { id: transferId, ...(session.user.shopId ? { fromWarehouse: { shopId: session.user.shopId } } : {}) },
+    })
     if (!existing) return NextResponse.json({ error: "Transfer not found" }, { status: 404 })
     if (existing.status !== "PENDING") return NextResponse.json({ error: "Transfer is already approved" }, { status: 400 })
 

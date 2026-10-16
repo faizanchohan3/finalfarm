@@ -1,13 +1,11 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { formatCurrency } from "@/lib/utils"
-import { ShoppingCart, TrendingUp, Users, Wheat, ArrowUpRight, ArrowDownRight, Clock, CheckSquare, Sparkles, Database, Scale, Boxes, ChevronRight } from "lucide-react"
+import { ShoppingCart, TrendingUp, Users, Wheat, ArrowUpRight, ArrowDownRight, Clock, CheckSquare, Scale, Boxes, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { ShopDataActions } from "@/components/shop-data-actions"
 import { RecordLookup } from "@/components/record-lookup"
 import { getT } from "@/lib/i18n-server"
-import { cookies } from "next/headers"
-import { DASHBOARD_VIEW_COOKIE, showSampleData } from "@/lib/dashboard-view"
 
 function initials(name?: string | null) {
   if (!name) return "—"
@@ -97,36 +95,6 @@ function delta(curr: number, prev: number) {
   return ((curr - prev) / prev) * 100
 }
 
-// Sample dataset shown by default so the dashboard looks populated (see lib/dashboard-view.ts).
-// Owners flip to their real figures with the header toggle, which is remembered.
-const DEMO = {
-  today: 45200, todayDelta: 12.5,
-  month: 842000, monthDelta: 8.3,
-  traders: 128, farmers: 84,
-  days: [
-    { label: "Mon", total: 32000 }, { label: "Tue", total: 41000 }, { label: "Wed", total: 38500 },
-    { label: "Thu", total: 52000 }, { label: "Fri", total: 47000 }, { label: "Sat", total: 61000 }, { label: "Sun", total: 45200 },
-  ],
-  collected: 681000, total: 842000,
-  tasks: [
-    { title: "Weigh incoming wheat lot", who: "Weighing Operator", priority: "HIGH", due: "Today" },
-    { title: "Settle payment to farmer Bashir", who: "Cashier", priority: "URGENT", due: "Today" },
-    { title: "Verify godown stock count", who: "Godown Manager", priority: "MEDIUM", due: "Tomorrow" },
-    { title: "Follow up trader Khan balance", who: "Manager", priority: "MEDIUM", due: "14 Sep" },
-    { title: "Update today's market rates", who: "Admin", priority: "LOW", due: "15 Sep" },
-  ],
-  sales: [
-    { name: "Trader Khan", status: "PAID", date: "Today", amount: 52250 },
-    { name: "Al-Karam Traders", status: "PARTIAL", date: "Today", amount: 18400 },
-    { name: "Sindh Flour Mills", status: "PAID", date: "Yesterday", amount: 96300 },
-    { name: "Rehman & Sons", status: "PENDING", date: "Yesterday", amount: 12750 },
-    { name: "Punjab Grains", status: "PAID", date: "11 Sep", amount: 41000 },
-    { name: "Walk-in customer", status: "PAID", date: "11 Sep", amount: 7600 },
-  ],
-  gala: { entries: 64, weight: 1366247, amount: 158905649.44, unreceived: 24310500, unpaid: 18975200 },
-  potato: { enabled: true, lots: 37, bagsLeft: 4820, sales: 6235000, received: 5410000 },
-}
-
 const CARD = "rounded-2xl bg-white border border-gray-200 p-5"
 const STATUS_STYLE: Record<string, string> = {
   PAID: "bg-brand-50 text-brand-700",
@@ -153,35 +121,31 @@ function Spark({ series }: { series: number[] }) {
   )
 }
 
-export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ data?: string }> }) {
+export default async function DashboardPage() {
   const session = await auth()
   const shopId = session?.user?.shopId ?? null
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN"
   const isCashier = session?.user?.role === "CASHIER"
   const d = await getDashboardData(shopId)
 
-  // Real or sample figures: ?data=, else the saved header choice, else the account default
-  const sp = await searchParams
-  const saved = (await cookies()).get(DASHBOARD_VIEW_COOKIE)?.value
-  const demo = showSampleData({ param: sp?.data, saved, email: session?.user?.email })
   const { t } = await getT()
 
-  const daysVM = demo ? DEMO.days : d.days
+  const daysVM = d.days
   const series = daysVM.map((x) => x.total)
   const maxDay = Math.max(...series, 1)
-  const today = demo ? DEMO.today : d.today
-  const month = demo ? DEMO.month : d.month
-  const traders = demo ? DEMO.traders : d.totalCustomers
-  const farmers = demo ? DEMO.farmers : d.totalFarmers
-  const todayDelta = demo ? DEMO.todayDelta : delta(d.today, d.yesterday)
-  const monthDelta = demo ? DEMO.monthDelta : delta(d.month, d.lastMonth)
-  const collected = demo ? DEMO.collected : d.collected
-  const totalSales = demo ? DEMO.total : d.totalSales
+  const today = d.today
+  const month = d.month
+  const traders = d.totalCustomers
+  const farmers = d.totalFarmers
+  const todayDelta = delta(d.today, d.yesterday)
+  const monthDelta = delta(d.month, d.lastMonth)
+  const collected = d.collected
+  const totalSales = d.totalSales
   const collectionRate = totalSales > 0 ? (collected / totalSales) * 100 : 0
   const outstanding = totalSales - collected
 
-  const gala = demo ? DEMO.gala : d.gala
-  const potato = demo ? DEMO.potato : d.potato
+  const gala = d.gala
+  const potato = d.potato
   const kg = (n: number) => `${Math.round(n).toLocaleString("en-PK")} KG`
 
   const sections = [
@@ -207,8 +171,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     },
   ].filter((s) => s.show)
 
-  const tasksVM = demo ? DEMO.tasks : d.taskList.map((t) => ({ title: t.title, who: t.assignedTo?.name || "Unassigned", priority: t.priority, due: t.dueDate ? shortDate(t.dueDate) : "—" }))
-  const salesVM = demo ? DEMO.sales : d.recentSales.map((s: any) => ({ name: s.customer?.name || "Walk-in customer", status: s.status, date: shortDate(s.createdAt), amount: s.totalAmount }))
+  const tasksVM = d.taskList.map((t) => ({ title: t.title, who: t.assignedTo?.name || "Unassigned", priority: t.priority, due: t.dueDate ? shortDate(t.dueDate) : "—" }))
+  const salesVM = d.recentSales.map((s: any) => ({ name: s.customer?.name || "Walk-in customer", status: s.status, date: shortDate(s.createdAt), amount: s.totalAmount }))
 
   const stats = [
     { title: t("Today's Sales"), value: formatCurrency(today), icon: ShoppingCart, href: "/sales", d: todayDelta, spark: true },
@@ -235,33 +199,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <ShopDataActions />
-          {demo ? (
-            <Link
-              href="/api/dashboard-view?mode=real"
-              prefetch={false}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-lg px-3 py-1.5 transition-colors"
-            >
-              <Database className="w-3.5 h-3.5" />
-              {t("Show Original Shop Data")}
-            </Link>
-          ) : (
-            <Link
-              href="/api/dashboard-view?mode=sample"
-              prefetch={false}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg px-3 py-1.5 transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              {t("Show Sample Data")}
-            </Link>
-          )}
         </div>
       </div>
-      {demo && (
-        <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3.5 py-2.5 text-xs text-amber-800 animate-fade-up">
-          <Sparkles className="w-3.5 h-3.5 flex-shrink-0" />
-          {t("Showing sample data — click \"Show Original Shop Data\" to see your real figures.")}
-        </div>
-      )}
 
       {!isSuperAdmin && <RecordLookup />}
 

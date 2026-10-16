@@ -9,8 +9,9 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const warehouseId = searchParams.get("warehouseId")
 
+  const shopFilter = session.user.shopId ? { warehouse: { shopId: session.user.shopId } } : {}
   const stock = await db.warehouseStock.findMany({
-    where: warehouseId ? { warehouseId } : undefined,
+    where: { ...shopFilter, ...(warehouseId ? { warehouseId } : {}) },
     include: {
       product: { select: { name: true, unit: true, purchasePrice: true } },
       warehouse: { select: { name: true } },
@@ -26,6 +27,10 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
+  if (session.user.shopId) {
+    const owned = await db.warehouse.findFirst({ where: { id: body.warehouseId, shopId: session.user.shopId }, select: { id: true } })
+    if (!owned) return NextResponse.json({ error: "Godown not found" }, { status: 404 })
+  }
   const stock = await db.warehouseStock.create({
     data: {
       warehouseId: body.warehouseId,

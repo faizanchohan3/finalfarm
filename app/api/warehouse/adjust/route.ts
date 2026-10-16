@@ -6,7 +6,10 @@ export async function GET() {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
+  const shopId = session.user.shopId
   const adjustments = await db.stockAdjustment.findMany({
+    // Rows belong to the shop through their product (godown is optional on an adjustment)
+    where: shopId ? { product: { shopId } } : undefined,
     orderBy: { createdAt: "desc" },
     include: {
       product: { select: { name: true, unit: true } },
@@ -23,6 +26,15 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
+  if (session.user.shopId) {
+    const shopId = session.user.shopId
+    const product = await db.product.findFirst({ where: { id: body.productId, shopId }, select: { id: true } })
+    if (!product) return NextResponse.json({ error: "Product not found" }, { status: 404 })
+    if (body.warehouseId) {
+      const owned = await db.warehouse.findFirst({ where: { id: body.warehouseId, shopId }, select: { id: true } })
+      if (!owned) return NextResponse.json({ error: "Godown not found" }, { status: 404 })
+    }
+  }
   const adjustNo = `ADJ-${Date.now()}`
   // Price per unit of this add (purchase price) or remove (sale price); optional
   const rate = body.rate !== undefined && body.rate !== "" && body.rate !== null ? parseFloat(body.rate) : null
