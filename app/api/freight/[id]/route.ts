@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -8,6 +9,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
   try {
     const { id } = await params
+    if (!(await ownsRecord("freightSlip", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
     const body = await req.json()
 
     const slip = await db.freightSlip.update({

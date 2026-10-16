@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 import { galaLedgerText } from "@/lib/gala"
 
@@ -8,6 +9,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await params
+  if (!(await ownsRecord("farmer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const farmer = await db.farmer.findUnique({
     where: { id },
@@ -179,6 +181,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await params
+  if (!(await ownsRecord("farmer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const body = await req.json()
   const { amount, method, notes, purchaseId, paymentType = "PAY" } = body
 
@@ -235,6 +238,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await params
+  if (!(await ownsRecord("farmer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const body = await req.json()
 
   const farmer = await db.farmer.update({
@@ -255,6 +259,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await params
+  if (!(await ownsRecord("farmer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const farmer = await db.farmer.findUnique({ where: { id } })
   if (!farmer) return NextResponse.json({ error: "Not found" }, { status: 404 })

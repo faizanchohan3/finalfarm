@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -8,6 +9,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("transaction", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const { description, amount, category, reference } = await req.json()
 
   try {
@@ -44,6 +46,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("transaction", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   try {
     const transaction = await db.transaction.findUnique({ where: { id } })

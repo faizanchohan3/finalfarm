@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { shopOrCreatorWhere } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 
 export async function GET(req: Request) {
@@ -15,6 +16,7 @@ export async function GET(req: Request) {
   const tasks = await db.task.findMany({
     take: limit,
     where: {
+      ...shopOrCreatorWhere(session),
       ...(statusFilter ? { status: { in: statusFilter as any[] } } : {}),
       ...(myTasks ? { assignedToId: session.user.id } : {}),
     },
@@ -37,6 +39,7 @@ export async function POST(req: Request) {
 
   const task = await db.task.create({
     data: {
+      shopId: session.user.shopId || null,
       title,
       description,
       assignedToId: assignedToId || null,
@@ -50,7 +53,7 @@ export async function POST(req: Request) {
     },
   })
 
-  await createAuditLog({ userId: session.user.id, action: "CREATE", module: "TASKS", details: `Created task: ${title}` })
+  await createAuditLog({ userId: session.user.id, shopId: session.user.shopId, action: "CREATE", module: "TASKS", details: `Created task: ${title}` })
 
   return NextResponse.json({ task }, { status: 201 })
 }

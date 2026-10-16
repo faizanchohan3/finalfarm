@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import { nextRecordCode } from "@/lib/record-number"
 
 // Settle a SOLD lot: create the commission (Aarthi) record, post the buyer
@@ -12,6 +13,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("lot", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const lot = await db.lot.findUnique({
     where: { id },
     include: { category: { select: { name: true } } },

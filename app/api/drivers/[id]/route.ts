@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -8,6 +9,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   try {
     const { id } = await params
+    if (!(await ownsRecord("driver", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
     const [driver, slips, payments] = await Promise.all([
       db.driver.findUnique({ where: { id } }),
       db.freightSlip.findMany({
@@ -68,6 +70,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
   try {
     const { id } = await params
+    if (!(await ownsRecord("driver", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
     const { name, phone, cnic, address, license, isActive } = await req.json()
     const driver = await db.driver.update({
       where: { id },

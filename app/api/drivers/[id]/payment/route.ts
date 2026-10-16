@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -8,6 +9,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   try {
     const { id } = await params
+    if (!(await ownsRecord("driver", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
     const { amount, method, notes, bankId } = await req.json()
     if (!amount || amount <= 0) return NextResponse.json({ error: "Invalid amount" }, { status: 400 })
 

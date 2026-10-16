@@ -21,7 +21,10 @@ export async function GET(req: Request) {
   })
   const shopBankIds = shopBanks.map((b) => b.id)
 
-  const bankFilter = bankId ? { bankId } : { bankId: { in: shopBankIds } }
+  // A shop user can only pick one of their own banks
+  const bankFilter = bankId
+    ? (session.user.shopId ? { bankId: { in: shopBankIds.filter((b) => b === bankId) } } : { bankId })
+    : { bankId: { in: shopBankIds } }
 
   const dateFilter: any = {}
   if (from) dateFilter.gte = new Date(from)

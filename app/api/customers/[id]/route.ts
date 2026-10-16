@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 import { recordCode } from "@/lib/record-code"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
@@ -11,6 +12,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("customer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const [customer, sales, commissions, pesticideSales, customerPayments, traderPurchases, soldLots, bills, galaEntries, galaSales] = await Promise.all([
     db.customer.findUnique({ where: { id } }),
@@ -273,6 +275,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("customer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const { name, phone, address, image, referenceName, referencePhone, creditLimit } = await req.json()
 
   const customer = await db.customer.update({
@@ -289,6 +292,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("customer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const { isActive } = await req.json()
   const customer = await db.customer.update({ where: { id }, data: { isActive } })
   await createAuditLog({
@@ -305,6 +309,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("customer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const { searchParams } = new URL(req.url)
   const permanent = searchParams.get("permanent") === "true"
 

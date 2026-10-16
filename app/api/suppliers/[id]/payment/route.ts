@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 import { galaPaymentField, syncGalaPayment, takeGalaBankTxns } from "@/lib/gala"
@@ -10,6 +11,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("supplier", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const { amount, method, notes, bankId, direction } = await req.json()
 
   if (!amount || parseFloat(amount) <= 0)
@@ -52,12 +54,13 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("supplier", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const { paymentId } = await req.json()
 
   if (!paymentId) return NextResponse.json({ error: "Payment ID required" }, { status: 400 })
 
   try {
-    const payment = await db.supplierPayment.findUnique({ where: { id: paymentId } })
+    const payment = await db.supplierPayment.findFirst({ where: { id: paymentId, supplierId: id } })
     if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 })
 
     await db.$transaction(async (tx) => {

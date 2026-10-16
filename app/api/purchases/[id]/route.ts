@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 
@@ -9,6 +10,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("purchase", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const purchase = await db.purchase.findUnique({
     where: { id },

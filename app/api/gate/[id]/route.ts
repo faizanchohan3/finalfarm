@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await params
+  if (!(await ownsRecord("gateEntry", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const body = await req.json()
 
   if (body.action === "exit") {

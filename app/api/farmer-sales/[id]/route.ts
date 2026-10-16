@@ -6,6 +6,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await params
+  if (session.user.shopId && !(await db.farmerPurchase.findFirst({ where: { id, farmer: { shopId: session.user.shopId } }, select: { id: true } }))) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
 
   const purchase = await db.farmerPurchase.findUnique({
     where: { id },
@@ -25,6 +28,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await params
+  if (session.user.shopId && !(await db.farmerPurchase.findFirst({ where: { id, farmer: { shopId: session.user.shopId } }, select: { id: true } }))) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
 
   const body = await req.json()
   const payAmount = parseFloat(body.amount)

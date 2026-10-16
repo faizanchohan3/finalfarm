@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import { recordCode } from "@/lib/record-code"
 import { galaLedgerText } from "@/lib/gala"
 
@@ -9,6 +10,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("customer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const { searchParams } = new URL(req.url)
   const from = searchParams.get("from")
   const to = searchParams.get("to")

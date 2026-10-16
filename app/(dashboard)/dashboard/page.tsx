@@ -41,7 +41,7 @@ async function getDashboardData(shopId: string | null) {
     db.sale.findMany({ where: { ...shopFilter, ...active, createdAt: { gte: sevenDaysAgo } }, select: { createdAt: true, totalAmount: true } }),
     db.sale.aggregate({ where: { ...shopFilter, ...active }, _sum: { totalAmount: true, paidAmount: true } }),
     db.sale.findMany({ take: 6, where: shopFilter, orderBy: { createdAt: "desc" }, include: { customer: { select: { name: true } } } }),
-    db.task.findMany({ where: { ...shopFilter, status: { in: ["PENDING", "IN_PROGRESS"] } }, take: 5, orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }], include: { assignedTo: { select: { name: true } } } }),
+    db.task.findMany({ where: { ...(shopId ? { OR: [{ shopId }, { shopId: null, createdBy: { shopId } }] } : {}), status: { in: ["PENDING", "IN_PROGRESS"] } }, take: 5, orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }], include: { assignedTo: { select: { name: true } } } }),
     db.galaEntry.aggregate({ where: shopFilter, _sum: { totalAmount: true, receivedAmount: true, paidAmount: true, totalWeight: true } }),
     db.galaEntry.count({ where: shopFilter }),
     db.lot.aggregate({ where: { ...shopFilter, status: { in: ["ARRIVED", "STORED"] } }, _sum: { bags: true, soldBags: true } }),

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 import { syncGalaPayment, takeGalaBankTxns } from "@/lib/gala"
@@ -10,12 +11,13 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("farmer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const { paymentId } = await req.json()
 
   if (!paymentId) return NextResponse.json({ error: "Payment ID required" }, { status: 400 })
 
   try {
-    const payment = await db.farmerPayment.findUnique({ where: { id: paymentId } })
+    const payment = await db.farmerPayment.findFirst({ where: { id: paymentId, farmerId: id } })
     if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 })
 
     // Payment.amount is stored as: negative for RECEIVE, positive for PAY

@@ -14,16 +14,22 @@ export async function GET(req: Request) {
   const limit = parseInt(searchParams.get("limit") || "50")
   const module = searchParams.get("module")
   const skip = (page - 1) * limit
+  // Older log rows have no shopId, so also match on the shop of the user who made them
+  const shopId = session.user.shopId
+  const where: any = {
+    ...(module ? { module } : {}),
+    ...(shopId ? { OR: [{ shopId }, { shopId: null, user: { shopId } }] } : {}),
+  }
 
   const [logs, total] = await Promise.all([
     db.auditLog.findMany({
       skip,
       take: limit,
-      where: module ? { module } : {},
+      where,
       orderBy: { createdAt: "desc" },
       include: { user: { select: { name: true, email: true } } },
     }),
-    db.auditLog.count(module ? { where: { module } } : undefined),
+    db.auditLog.count({ where }),
   ])
 
   return NextResponse.json({ logs, total, page, limit })

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 import { recordCode } from "@/lib/record-code"
@@ -12,6 +13,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("commission", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const old = await db.commission.findUnique({ where: { id }, include: { lot: { select: { lotNo: true } } } })
   if (!old) return NextResponse.json({ error: "Commission not found" }, { status: 404 })
   if (session.user.shopId && old.shopId !== session.user.shopId) return NextResponse.json({ error: "Commission not found" }, { status: 404 })
@@ -151,6 +153,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("commission", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const commission = await db.commission.findUnique({
     where: { id },

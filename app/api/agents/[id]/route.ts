@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("commissionAgent", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const agent = await db.commissionAgent.findUnique({
     where: { id },
     include: {
@@ -28,6 +30,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("commissionAgent", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const body = await req.json()
   const agent = await db.commissionAgent.update({
     where: { id },
@@ -42,6 +45,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("commissionAgent", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   await db.commissionAgent.delete({ where: { id } })
   return NextResponse.json({ success: true })
 }

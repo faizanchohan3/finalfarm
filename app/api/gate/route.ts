@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { shopOrCreatorWhere } from "@/lib/shop-scope"
 
 export async function GET(req: Request) {
   const session = await auth()
@@ -22,7 +23,7 @@ export async function GET(req: Request) {
   }
 
   const entries = await db.gateEntry.findMany({
-    where: { ...(status ? { status } : {}), ...dateWhere },
+    where: { ...shopOrCreatorWhere(session), ...(status ? { status } : {}), ...dateWhere },
     orderBy: { entryTime: "desc" },
     include: {
       vehicle: { select: { vehicleNo: true, vehicleType: true } },
@@ -47,6 +48,7 @@ export async function POST(req: Request) {
   const entry = await db.gateEntry.create({
     data: {
       entryNo,
+      shopId: session.user.shopId || null,
       type: body.type || "IN",
       vehicleId: body.vehicleId || null,
       vehicleNo: body.vehicleNo || null,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 import { galaLedgerText } from "@/lib/gala"
@@ -10,6 +11,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("supplier", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const [supplier, purchases, supplierPayments, commissions, galaEntries, galaBuys] = await Promise.all([
     db.supplier.findUnique({ where: { id } }),
@@ -145,6 +147,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("supplier", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const { name, phone, address } = await req.json()
 
   const supplier = await db.supplier.update({ where: { id }, data: { name, phone, address } })
@@ -158,6 +161,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("supplier", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const supplier = await db.supplier.findUnique({ where: { id } })
   if (!supplier) return NextResponse.json({ error: "Not found" }, { status: 404 })
   await db.$transaction(async (tx) => {

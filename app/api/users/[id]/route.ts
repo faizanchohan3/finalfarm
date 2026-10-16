@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import bcrypt from "bcryptjs"
 import { createAuditLog } from "@/lib/audit"
 
@@ -12,6 +13,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   }
 
   const { id } = await params
+  if (!(await ownsRecord("user", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const { name, role, isActive, password } = await req.json()
 
   const data: any = { name, role, isActive }
@@ -36,6 +38,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   }
 
   const { id } = await params
+  if (!(await ownsRecord("user", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   if (id === session.user.id) return NextResponse.json({ error: "Cannot delete yourself" }, { status: 400 })
 
   await db.user.update({ where: { id }, data: { isActive: false } })

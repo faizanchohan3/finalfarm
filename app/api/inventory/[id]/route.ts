@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, pkr } from "@/lib/recycle-bin"
 import { recordCode } from "@/lib/record-code"
@@ -10,6 +11,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("product", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const body = await req.json()
   const { name, categoryId, roomId, unit, minStock, purchasePrice, salePrice } = body
 
@@ -28,6 +30,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
+  if (!(await ownsRecord("product", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
   const p = await db.product.findUnique({ where: { id }, include: { category: true, room: true } })
   if (!p) return NextResponse.json({ error: "Product not found" }, { status: 404 })
