@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { ownsRecord } from "@/lib/shop-scope"
+import { ownsRecord, refsOutsideShop } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 import { galaPaymentField, syncGalaPayment, takeGalaBankTxns } from "@/lib/gala"
@@ -13,6 +13,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params
   if (!(await ownsRecord("supplier", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const { amount, method, notes, bankId, direction } = await req.json()
+  { const bad = await refsOutsideShop(session, { bankId }); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
 
   if (!amount || parseFloat(amount) <= 0)
     return NextResponse.json({ error: "Invalid amount" }, { status: 400 })

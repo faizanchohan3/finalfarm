@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { ownsRecord } from "@/lib/shop-scope"
+import { ownsRecord, refsOutsideShop } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -11,6 +11,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const { id } = await params
   if (!(await ownsRecord("task", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   const { title, description, assignedToId, priority, dueDate, status } = body
 
   const data: any = { title, description, assignedToId: assignedToId || null, priority, status }

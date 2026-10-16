@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { refsOutsideShop } from "@/lib/shop-scope"
 
 export async function GET(req: Request) {
   const session = await auth()
@@ -33,6 +34,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
+    { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
     const { farmerId, commodity, bags, weight, totalAmount, paidAmount, paymentMethod, notes } = body
 
     if (!farmerId) return NextResponse.json({ error: "Farmer is required" }, { status: 400 })

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { ownsRecord } from "@/lib/shop-scope"
+import { ownsRecord, refsOutsideShop } from "@/lib/shop-scope"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -11,6 +11,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const { id } = await params
     if (!(await ownsRecord("driver", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
     const { amount, method, notes, bankId } = await req.json()
+    { const bad = await refsOutsideShop(session, { bankId }); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
     if (!amount || amount <= 0) return NextResponse.json({ error: "Invalid amount" }, { status: 400 })
 
     await db.$transaction(async (tx) => {

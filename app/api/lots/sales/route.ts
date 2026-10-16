@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { refsOutsideShop } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 import { nextRecordCode } from "@/lib/record-number"
 import { LOT_SALE_BANK_CATEGORY, LOT_SALE_UNITS, lotSaleAmount, splitByBags } from "@/lib/lot-sale"
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
   const shopFilter = shopId ? { shopId } : {}
 
   const body = await req.json().catch(() => ({}))
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   const items = (Array.isArray(body.items) ? body.items : [])
     .map((i: any) => ({ lotId: String(i.lotId || ""), bags: Math.floor(Number(i.bags) || 0) }))
     .filter((i: { lotId: string; bags: number }) => i.lotId && i.bags > 0)

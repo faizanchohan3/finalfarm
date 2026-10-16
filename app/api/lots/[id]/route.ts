@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { refsOutsideShop } from "@/lib/shop-scope"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 
 const lotInclude = {
@@ -22,6 +23,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   if (existing.soldBags > 0 && (body.status === "SOLD" || body.status === "CANCELLED")) {
     return NextResponse.json({ error: `${existing.soldBags} bags of this lot are already sold from the Potato Store total — sell the rest from there` }, { status: 400 })
   }

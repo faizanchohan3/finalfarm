@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { refsOutsideShop } from "@/lib/shop-scope"
 import { nextRecordCode } from "@/lib/record-number"
 import { createAuditLog } from "@/lib/audit"
 import { cachedJson } from "@/lib/api-cache"
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   const { name, categoryId, roomId, unit, currentStock, minStock, purchasePrice, salePrice } = body
 
   const product = await db.$transaction(async (tx) => {

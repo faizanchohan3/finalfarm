@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { shopOrCreatorWhere } from "@/lib/shop-scope"
+import { shopOrCreatorWhere, refsOutsideShop } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 
 export async function GET(req: Request) {
@@ -35,6 +35,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   const { title, description, assignedToId, priority, dueDate } = body
 
   const task = await db.task.create({

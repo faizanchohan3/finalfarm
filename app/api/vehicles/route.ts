@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord } from "@/lib/shop-scope"
 
 export async function GET(req: Request) {
   const session = await auth()
@@ -49,6 +50,7 @@ export async function PUT(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
+  if (!(await ownsRecord("vehicle", body.id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const vehicle = await db.vehicle.update({
     where: { id: body.id },
     data: {
@@ -65,6 +67,7 @@ export async function DELETE(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
+  if (!(await ownsRecord("vehicle", body.id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   await db.vehicle.update({ where: { id: body.id }, data: { isActive: false } })
   return NextResponse.json({ ok: true })
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { shopOrCreatorWhere } from "@/lib/shop-scope"
+import { shopOrCreatorWhere, refsOutsideShop } from "@/lib/shop-scope"
 
 export async function GET(req: Request) {
   const session = await auth()
@@ -43,6 +43,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   const entryNo = `GT-${Date.now()}`
 
   const entry = await db.gateEntry.create({

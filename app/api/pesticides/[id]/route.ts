@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { ownsRecord } from "@/lib/shop-scope"
+import { ownsRecord, refsOutsideShop } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -11,6 +11,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const { id } = await params
   if (!(await ownsRecord("pesticide", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body, { categoryId: "pesticideCategory" }); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   const { name, categoryId, manufacturer, batchNumber, expiryDate, quantity, unit, purchasePrice, salePrice, incentive, minStock } = body
 
   const pesticide = await db.pesticide.update({

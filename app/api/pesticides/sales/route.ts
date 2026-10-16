@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { refsOutsideShop } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 
 export async function GET(req: Request) {
@@ -29,6 +30,7 @@ export async function POST(req: Request) {
 
   try {
     const { pesticideId, quantity, unitPrice, customerId, farmerId, customerName, paidAmount, incentive, notes, saleDate } = await req.json()
+    { const bad = await refsOutsideShop(session, { pesticideId, customerId, farmerId }); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
 
     if (!pesticideId) return NextResponse.json({ error: "Pesticide is required" }, { status: 400 })
     if (!quantity || quantity <= 0) return NextResponse.json({ error: "Invalid quantity" }, { status: 400 })

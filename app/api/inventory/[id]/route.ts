@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { ownsRecord } from "@/lib/shop-scope"
+import { ownsRecord, refsOutsideShop } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, pkr } from "@/lib/recycle-bin"
 import { recordCode } from "@/lib/record-code"
@@ -13,6 +13,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const { id } = await params
   if (!(await ownsRecord("product", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   const { name, categoryId, roomId, unit, minStock, purchasePrice, salePrice } = body
 
   const product = await db.product.update({

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { ownsRecord } from "@/lib/shop-scope"
+import { ownsRecord, refsOutsideShop } from "@/lib/shop-scope"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 import { galaLedgerText } from "@/lib/gala"
 
@@ -183,6 +183,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params
   if (!(await ownsRecord("farmer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   const { amount, method, notes, purchaseId, paymentType = "PAY" } = body
 
   const amt = parseFloat(amount)
@@ -240,6 +241,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const { id } = await params
   if (!(await ownsRecord("farmer", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
 
   const farmer = await db.farmer.update({
     where: { id },

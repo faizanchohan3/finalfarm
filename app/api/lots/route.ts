@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { refsOutsideShop } from "@/lib/shop-scope"
 
 const lotInclude = {
   farmer: { select: { id: true, name: true } },
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   const categoryName = typeof body.categoryName === "string" ? body.categoryName.trim() : ""
   if (!body.categoryId && !categoryName) {
     return NextResponse.json({ error: "Category is required." }, { status: 400 })

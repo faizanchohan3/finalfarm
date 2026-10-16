@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { ownsRecord, refsOutsideShop } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 
 export async function GET(req: Request) {
@@ -50,6 +51,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { amount, description, category, reference, accountId } = await req.json()
+  { const bad = await refsOutsideShop(session, { accountId }); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   if (!amount || amount <= 0) return NextResponse.json({ error: "Invalid amount" }, { status: 400 })
   if (!description?.trim()) return NextResponse.json({ error: "Description required" }, { status: 400 })
 
@@ -99,6 +101,7 @@ export async function DELETE(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await req.json()
+  if (!(await ownsRecord("transaction", id, session))) return NextResponse.json({ error: "Not found" }, { status: 404 })
   await db.transaction.delete({ where: { id } })
 
   await createAuditLog({

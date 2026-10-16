@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { ownsRecord } from "@/lib/shop-scope"
+import { ownsRecord, refsOutsideShop } from "@/lib/shop-scope"
 import { nextRecordCode } from "@/lib/record-number"
 
 // Settle a SOLD lot: create the commission (Aarthi) record, post the buyer
@@ -33,6 +33,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   const body = await req.json().catch(() => ({}))
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   // Blank = no commission, same as the settle preview shows
   const commRate = body.commissionRate !== undefined && body.commissionRate !== "" ? parseFloat(body.commissionRate) || 0 : 0
   const total = lot.saleAmount

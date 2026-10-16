@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { refsOutsideShop } from "@/lib/shop-scope"
 import { nextRecordCode } from "@/lib/record-number"
 import { createAuditLog } from "@/lib/audit"
 
@@ -40,6 +41,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   const { supplierId, farmerId, sellerCustomerId, walkinSeller, items, paidAmount, notes, purchaseDate, roomId, roomName } = body
 
   const totalAmount = items.reduce((s: number, i: any) => s + i.quantity * i.price, 0)

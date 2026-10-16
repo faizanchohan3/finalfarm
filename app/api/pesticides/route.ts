@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { refsOutsideShop } from "@/lib/shop-scope"
 import { createAuditLog } from "@/lib/audit"
 import { cachedJson } from "@/lib/api-cache"
 
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const body = await req.json()
+  { const bad = await refsOutsideShop(session, body, { categoryId: "pesticideCategory" }); if (bad) return NextResponse.json({ error: bad }, { status: 400 }) }
   const { name, categoryId, manufacturer, batchNumber, expiryDate, quantity, unit, purchasePrice, salePrice, incentive, minStock } = body
 
   const incentiveAmt = parseFloat(incentive || "0")
