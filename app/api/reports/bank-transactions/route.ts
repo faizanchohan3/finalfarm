@@ -120,6 +120,7 @@ export async function GET(req: Request) {
       party: t.createdBy?.name || "-",
       description: t.description,
       reference: t.reference || null,
+      category: t.category || null,
     })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 

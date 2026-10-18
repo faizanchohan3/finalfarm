@@ -20,6 +20,16 @@ const ENTRY_LABELS: Record<string, string> = {
   RECEIPT: "Receipt", PAYMENT: "Payment", FARMER_PAYMENT: "Farmer Pay",
   DRIVER_PAYMENT: "Driver Pay", INCOME: "Credit", EXPENSE: "Debit",
 }
+// Only Credit/Debit entries recorded on this page are edited here; the rest belong to their own module.
+const isBankTxn = (type: string) => type === "INCOME" || type === "EXPENSE"
+const EDIT_IN: Record<string, string> = {
+  RECEIPT: "Sales", PAYMENT: "Purchases", FARMER_PAYMENT: "Farmers", DRIVER_PAYMENT: "Transport",
+}
+// yyyy-mm-dd in local time, for <input type="date">
+const toDateInput = (d: string | Date) => {
+  const x = new Date(d)
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`
+}
 
 export default function BanksPage() {
   const canEdit = useCanEdit()
@@ -44,6 +54,11 @@ export default function BanksPage() {
   const [ledgerLoading, setLedgerLoading] = useState(false)
   const [ledgerFrom, setLedgerFrom] = useState("")
   const [ledgerTo, setLedgerTo] = useState("")
+
+  // Editing a ledger entry
+  const [editTxn, setEditTxn] = useState<any>(null)
+  const [editTxnForm, setEditTxnForm] = useState(DEFAULT_TXN)
+  const [editTxnSaving, setEditTxnSaving] = useState(false)
 
   async function loadData() {
     try {
@@ -156,6 +171,51 @@ export default function BanksPage() {
     }
     return { opening, rows, totalIn, totalOut, closing: rows.length ? balance : opening }
   })()
+
+  function openEditTxn(entry: any) {
+    setEditTxn(entry)
+    setEditTxnForm({
+      type: entry.type === "INCOME" ? "CREDIT" : "DEBIT",
+      amount: String(entry.amount),
+      description: entry.description || "",
+      reference: entry.reference || "",
+      date: toDateInput(entry.date),
+    })
+  }
+
+  async function handleUpdateTxn() {
+    const amt = parseFloat(editTxnForm.amount)
+    if (!amt || amt <= 0) return alert("Enter a valid amount")
+    if (!editTxnForm.description.trim()) return alert("Enter a description")
+    const typeChanged = (editTxn.type === "INCOME" ? "CREDIT" : "DEBIT") !== editTxnForm.type
+    // Keep the automatic Bank Deposit / Bank Withdrawal category in step with the type
+    const autoCategory = editTxn.category === "Bank Deposit" || editTxn.category === "Bank Withdrawal"
+    setEditTxnSaving(true)
+    const res = await fetch(`/api/finance/${editTxn.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: editTxnForm.type,
+        amount: amt,
+        description: editTxnForm.description.trim(),
+        reference: editTxnForm.reference.trim() || null,
+        ...(typeChanged && autoCategory ? { category: editTxnForm.type === "CREDIT" ? "Bank Deposit" : "Bank Withdrawal" } : {}),
+        // Only send the date when it changed, so the entry keeps its time and order within the day
+        ...(editTxnForm.date && editTxnForm.date !== toDateInput(editTxn.date) ? { transactionDate: editTxnForm.date } : {}),
+      }),
+    })
+    setEditTxnSaving(false)
+    if (res.ok) {
+      setEditTxn(null)
+      if (ledgerBank) {
+        const data = await fetch(`/api/reports/bank-transactions?bankId=${ledgerBank.id}`).then((r) => r.json()).catch(() => null)
+        if (data) setLedgerEntries(data.entries || [])
+      }
+    } else {
+      const data = await res.json().catch(() => ({}))
+      if (!data?.adminOnly) alert(data?.error || "Failed to update transaction. Please try again.")
+    }
+  }
 
   function openTxn(bank: any) {
     setTxnBank(bank)
@@ -399,13 +459,14 @@ export default function BanksPage() {
                     <th className="text-right py-2 px-3 text-gray-500 font-medium">In</th>
                     <th className="text-right py-2 px-3 text-gray-500 font-medium">Out</th>
                     <th className="text-right py-2 px-3 text-gray-500 font-medium">Balance</th>
+                    {canEdit && <th className="py-2 px-3"></th>}
                   </tr>
                 </thead>
                 <tbody>
                   {ledgerLoading ? (
-                    <tr><td colSpan={7} className="text-center py-8 text-gray-400">Loading...</td></tr>
+                    <tr><td colSpan={canEdit ? 8 : 7} className="text-center py-8 text-gray-400">Loading...</td></tr>
                   ) : ledger.rows.length === 0 ? (
-                    <tr><td colSpan={7} className="text-center py-8 text-gray-400">No transactions</td></tr>
+                    <tr><td colSpan={canEdit ? 8 : 7} className="text-center py-8 text-gray-400">No transactions</td></tr>
                   ) : ledger.rows.map((e) => (
                     <tr key={`${e.type}-${e.id}`} className="border-b border-gray-50">
                       <td className="py-2 px-3 text-gray-600 whitespace-nowrap">{formatDate(e.date)}</td>
@@ -415,10 +476,104 @@ export default function BanksPage() {
                       <td className="py-2 px-3 text-right text-emerald-700 whitespace-nowrap">{isInflow(e.type) ? formatCurrency(e.amount) : ""}</td>
                       <td className="py-2 px-3 text-right text-red-600 whitespace-nowrap">{isInflow(e.type) ? "" : formatCurrency(e.amount)}</td>
                       <td className={`py-2 px-3 text-right font-medium whitespace-nowrap ${e.balance < 0 ? "text-red-600" : "text-gray-900"}`}>{formatCurrency(e.balance)}</td>
+                      {canEdit && (
+                        <td className="py-2 px-3 text-right whitespace-nowrap">
+                          {isBankTxn(e.type) ? (
+                            <button
+                              onClick={() => openEditTxn(e)}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                            >
+                              <PencilLine className="w-3.5 h-3.5" /> Edit
+                            </button>
+                          ) : (
+                            <span className="text-xs text-gray-400" title={`This entry is edited from the ${EDIT_IN[e.type] || "related"} page`}>
+                              Edit in {EDIT_IN[e.type] || "module"}
+                            </span>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Ledger Entry Modal */}
+      <Dialog open={!!editTxn} onOpenChange={(open) => { if (!open) setEditTxn(null) }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
+              <PencilLine className="w-5 h-5 text-blue-600" /> Edit Bank Transaction
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setEditTxnForm({ ...editTxnForm, type: "CREDIT" })}
+                className={`py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                  editTxnForm.type === "CREDIT"
+                    ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                    : "border-gray-200 text-gray-500 hover:border-gray-300"
+                }`}
+              >
+                <ArrowDownCircle className="w-4 h-4" /> Credit (In)
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditTxnForm({ ...editTxnForm, type: "DEBIT" })}
+                className={`py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                  editTxnForm.type === "DEBIT"
+                    ? "border-red-600 bg-red-50 text-red-700"
+                    : "border-gray-200 text-gray-500 hover:border-gray-300"
+                }`}
+              >
+                <ArrowUpCircle className="w-4 h-4" /> Debit (Out)
+              </button>
+            </div>
+            <div>
+              <Label>Amount (PKR) *</Label>
+              <Input
+                type="number"
+                value={editTxnForm.amount}
+                onChange={(e) => setEditTxnForm({ ...editTxnForm, amount: e.target.value })}
+                autoFocus
+              />
+            </div>
+            <div>
+              <Label>Description *</Label>
+              <Input
+                value={editTxnForm.description}
+                onChange={(e) => setEditTxnForm({ ...editTxnForm, description: e.target.value })}
+                onKeyDown={(e) => e.key === "Enter" && handleUpdateTxn()}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Date</Label>
+                <Input
+                  type="date"
+                  value={editTxnForm.date}
+                  onChange={(e) => setEditTxnForm({ ...editTxnForm, date: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Reference (optional)</Label>
+                <Input
+                  placeholder="Cheque no., slip #"
+                  value={editTxnForm.reference}
+                  onChange={(e) => setEditTxnForm({ ...editTxnForm, reference: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 pt-1">
+              <Button variant="outline" onClick={() => setEditTxn(null)} className="flex-1">Cancel</Button>
+              <Button onClick={handleUpdateTxn} disabled={editTxnSaving} className="flex-1 bg-purple-700 hover:bg-purple-800">
+                {editTxnSaving ? "Saving..." : "Update Transaction"}
+              </Button>
             </div>
           </div>
         </DialogContent>

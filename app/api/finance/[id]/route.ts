@@ -8,11 +8,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
-  const { description, amount, category, reference } = await req.json()
+  const { description, amount, category, reference, type, transactionDate } = await req.json()
 
   try {
     const transaction = await db.transaction.findUnique({ where: { id } })
     if (!transaction) return NextResponse.json({ error: "Transaction not found" }, { status: 404 })
+    if (session.user.shopId && transaction.shopId !== session.user.shopId) {
+      return NextResponse.json({ error: "Transaction not found" }, { status: 404 })
+    }
+
+    // The Bank ledger may also change Credit/Debit and the date. Type stays fixed for entries
+    // posted to a chart account, since their account balance was moved by the original type.
+    const newType = (type === "CREDIT" || type === "DEBIT") && !transaction.accountId ? type : transaction.type
+    const newDate = transactionDate ? new Date(transactionDate) : null
 
     // Update the transaction
     await db.transaction.update({
@@ -22,6 +30,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         amount: amount !== undefined ? amount : transaction.amount,
         category: category !== undefined ? category : transaction.category,
         reference: reference !== undefined ? reference : transaction.reference,
+        type: newType,
+        ...(newDate && !isNaN(newDate.getTime()) ? { createdAt: newDate } : {}),
       },
     })
 
