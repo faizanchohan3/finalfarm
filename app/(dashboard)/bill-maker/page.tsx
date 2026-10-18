@@ -211,8 +211,8 @@ export default function BillMakerPage() {
     const filled = validate()
     if (!filled) return
 
-    const rowHtml = filled.map((r) => `
-      <tr><td>${escapeHtml(fmtDate(r.date))}</td><td>${fmt(num(r.weight))}</td></tr>`).join("")
+    const rowHtml = filled.map((r, i) => `
+      <tr><td>${i + 1}</td><td>${escapeHtml(fmtDate(r.date))}</td><td>${fmt(num(r.weight))}</td></tr>`).join("")
 
     const rateLine = rateUnit === "mound"
       ? `<div><span>ریٹ (فی من)</span><span class="num">${fmt(num(rate))}</span></div>
@@ -232,7 +232,7 @@ ${billFontLink}
 </div>
 <div class="name">بل برائے: <strong>${BILL_FOR[billFor].ur}</strong><span style="margin-inline-start:28px">بنام: <strong>${escapeHtml(name.trim())}</strong></span>${product ? `<span style="margin-inline-start:28px">جنس: <strong>${escapeHtml(productUr)}</strong></span>` : ""}</div>
 <table>
-  <thead><tr><th>تاریخ</th><th>وزن (کلو)</th></tr></thead>
+  <thead><tr><th>نمبر</th><th>تاریخ</th><th>وزن (کلو)</th></tr></thead>
   <tbody>${rowHtml}</tbody>
 </table>
 <div class="sum">
@@ -319,14 +319,16 @@ ${billFontLink}
               </Button>
             </div>
             <div className="hidden sm:grid grid-cols-12 gap-2 px-1 pb-1 text-xs text-gray-500">
+              <span className="col-span-1 text-center">#</span>
               <span className="col-span-5">{t("Date")}</span>
-              <span className="col-span-6">{t("Weight (KG)")}</span>
+              <span className="col-span-5">{t("Weight (KG)")}</span>
             </div>
             <div className="space-y-2">
               {rows.map((r, i) => (
                 <div key={i} className="grid grid-cols-12 gap-2 items-center">
-                  <Input className="col-span-6 sm:col-span-5" type="date" value={r.date} onChange={(e) => updateRow(i, e.target.value, "date")} />
-                  <Input className="col-span-5 sm:col-span-6" type="number" placeholder={t("Weight (KG)")} value={r.weight} onChange={(e) => updateRow(i, e.target.value, "weight")} />
+                  <span className="col-span-1 text-center text-sm font-semibold text-gray-500 tabular-nums">{i + 1}</span>
+                  <Input className="col-span-5" type="date" value={r.date} onChange={(e) => updateRow(i, e.target.value, "date")} />
+                  <Input className="col-span-5" type="number" placeholder={t("Weight (KG)")} value={r.weight} onChange={(e) => updateRow(i, e.target.value, "weight")} />
                   <button
                     type="button"
                     onClick={() => setRows((prev) => (prev.length > 1 ? prev.filter((_, idx) => idx !== i) : [emptyRow()]))}
