@@ -3,7 +3,7 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
 import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
-import { galaPaymentField, syncGalaPayment, takeGalaBankTxns } from "@/lib/gala"
+import { GALA_BANK_CATEGORY, galaPaymentField, syncGalaPayment, takeGalaBankTxns } from "@/lib/gala"
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -47,6 +47,56 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   })
 
   return NextResponse.json({ success: true, id: paymentId })
+}
+
+// Effect on the trader's balance: RECEIVE lowers it (they owe us less), PAY raises it (they owe us more)
+const balanceEffect = (direction: string, amount: number) => (direction === "PAY" ? amount : -amount)
+
+// Edit one payment: amount, type, method, notes and date. The stored balance moves by the difference;
+// a Gala Mandi payment also keeps its entry's received / paid amount and its bank transfer in step.
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { id } = await params
+  const { paymentId, amount, method, notes, direction, date } = await req.json()
+
+  if (!paymentId) return NextResponse.json({ error: "Payment ID required" }, { status: 400 })
+  const amt = parseFloat(amount)
+  if (!amt || amt <= 0) return NextResponse.json({ error: "Invalid amount" }, { status: 400 })
+
+  const payment = await db.customerPayment.findUnique({ where: { id: paymentId } })
+  if (!payment || payment.customerId !== id) return NextResponse.json({ error: "Payment not found" }, { status: 404 })
+
+  const dir = direction ? (direction === "PAY" ? "PAY" : "RECEIVE") : payment.direction
+  if (payment.galaEntryId && dir !== payment.direction)
+    return NextResponse.json({ error: "The type of a Gala Mandi payment can't be changed. Delete it and record it again." }, { status: 400 })
+
+  const createdAt = date ? new Date(date) : payment.createdAt
+  if (isNaN(createdAt.getTime())) return NextResponse.json({ error: "Invalid date" }, { status: 400 })
+
+  const delta = balanceEffect(dir, amt) - balanceEffect(payment.direction, payment.amount)
+
+  await db.$transaction(async (tx) => {
+    await tx.customerPayment.update({
+      where: { id: paymentId },
+      data: { amount: amt, direction: dir, method: method || payment.method, notes: notes?.trim() || null, createdAt },
+    })
+    if (delta) await tx.customer.update({ where: { id }, data: { balance: { increment: delta } } })
+    if (payment.galaEntryId) {
+      await syncGalaPayment(tx, payment.galaEntryId, galaPaymentField(dir), amt - payment.amount)
+      await tx.transaction.updateMany({ where: { category: GALA_BANK_CATEGORY, reference: paymentId }, data: { amount: amt } })
+    }
+  })
+
+  await createAuditLog({
+    userId: session.user.id,
+    action: "UPDATE",
+    module: "CUSTOMERS",
+    details: `Edited customer payment PKR ${payment.amount} → PKR ${amt} (${dir === "PAY" ? "Paid to" : "Received from"}) — ID: ${id}`,
+  })
+
+  return NextResponse.json({ success: true })
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {

@@ -17,6 +17,7 @@ import {
 import Link from "next/link"
 import { useLang } from "@/lib/i18n"
 import { useCanEdit } from "@/lib/use-can-edit"
+import { EditPaymentDialog } from "@/components/edit-payment-dialog"
 import { VoiceInputButton } from "@/components/voice-input-button"
 import { VoiceSearch } from "@/components/voice-search"
 
@@ -50,6 +51,7 @@ export default function CustomersPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; phone?: string } | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [selectedPayments, setSelectedPayments] = useState<Set<string>>(new Set())
+  const [editTxn, setEditTxn] = useState<any>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -698,6 +700,7 @@ export default function CustomersPage() {
                           <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Debit (Dr)</th>
                           <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Credit (Cr)</th>
                           <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Balance</th>
+                          <th className="py-2 px-3 w-10"></th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -735,6 +738,13 @@ export default function CustomersPage() {
                                 {formatCurrency(Math.abs(entry.balance))}
                                 {entry.balance !== 0 && <span className="text-xs ml-1 font-normal">{entry.balance > 0 ? "Dr" : "Cr"}</span>}
                               </td>
+                              <td className="py-2 px-3 text-center">
+                                {canEdit && entry.payment && (
+                                  <button onClick={() => setEditTxn(entry)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit transaction">
+                                    <Edit className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </td>
                             </tr>
                           )
                         })}
@@ -748,6 +758,7 @@ export default function CustomersPage() {
                             {formatCurrency(detail.totalBalance)}
                             <span className="text-xs ml-1 font-normal">{detail.totalBalance > 0 ? "Dr" : "Cr"}</span>
                           </td>
+                          <td></td>
                         </tr>
                       </tfoot>
                     </table>
@@ -1094,6 +1105,16 @@ export default function CustomersPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {selected && (
+        <EditPaymentDialog
+          entry={editTxn}
+          partyPath={`/api/customers/${selected.id}`}
+          directions={[{ value: "RECEIVE", label: "Received" }, { value: "PAY", label: "Paid to Customer" }]}
+          onClose={() => setEditTxn(null)}
+          onSaved={() => { setEditTxn(null); loadDetail(selected.id); loadData() }}
+        />
+      )}
     </div>
   )
 }

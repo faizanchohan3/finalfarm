@@ -88,6 +88,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     description: string
     debit: number
     credit: number
+    payment?: { amount: number; direction: string; method: string; notes: string | null; galaEntryId: string | null }
   }[] = []
 
   for (const lot of soldLots) {
@@ -254,6 +255,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       // RECEIVE = Credit (they paid us, reduces their balance)
       debit: isPay ? cp.amount : 0,
       credit: isPay ? 0 : cp.amount,
+      // The trader's own payment row — editable from the ledger
+      payment: { amount: cp.amount, direction: cp.direction, method: cp.method, notes: cp.notes, galaEntryId: cp.galaEntryId },
     })
   }
 
