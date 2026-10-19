@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { createAuditLog } from "@/lib/audit"
+
+// Direct credits/debits recorded from the Banks page. Only these are fully editable (type and amount);
+// every other bank entry mirrors a sale, purchase, payment or settlement, so only its date and
+// reference can change here without breaking the record it came from.
+const MANUAL_CATEGORIES = ["Bank Deposit", "Bank Withdrawal"]
+const isManual = (t: { category: string | null; accountId: string | null }) =>
+  !t.accountId && MANUAL_CATEGORIES.includes(t.category || "")
 
 export async function GET(req: Request) {
   const session = await auth()
@@ -84,6 +92,7 @@ export async function GET(req: Request) {
         ? `Receipt from ${p.sale?.customer?.name || "Customer"}`
         : `Payment to ${p.purchase?.supplier?.name || "Supplier"}`,
       reference: p.reference || null,
+      editable: "meta",
     })),
     ...farmerPayments.map((fp) => ({
       id: fp.id,
@@ -96,6 +105,7 @@ export async function GET(req: Request) {
       party: fp.farmer?.name || "Farmer",
       description: `Payment to farmer ${fp.farmer?.name || ""}`,
       reference: fp.reference || null,
+      editable: "meta",
     })),
     ...driverPayments.map((dp) => ({
       id: dp.id,
@@ -108,6 +118,7 @@ export async function GET(req: Request) {
       party: dp.driver?.name || "Driver",
       description: `Payment to driver ${dp.driver?.name || ""}`,
       reference: dp.reference || null,
+      editable: "meta",
     })),
     ...transactions.map((t) => ({
       id: t.id,
@@ -120,6 +131,7 @@ export async function GET(req: Request) {
       party: t.createdBy?.name || "-",
       description: t.description,
       reference: t.reference || null,
+      editable: isManual(t) ? "full" : "meta",
     })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
@@ -133,3 +145,81 @@ export async function GET(req: Request) {
   return NextResponse.json({ entries, totalIn, totalOut, count: entries.length, banks: shopBanks })
 }
 
+
+// Edit one entry shown in a bank ledger. `type` is the entry type from GET, which says which table it lives in.
+export async function PATCH(req: Request) {
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { id, type, txnType, amount, description, reference, date } = await req.json()
+  if (!id || !type) return NextResponse.json({ error: "Entry ID and type are required" }, { status: 400 })
+
+  const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
+  const shopBankIds = (await db.bank.findMany({ where: shopFilter, select: { id: true } })).map((b) => b.id)
+
+  const createdAt = date ? new Date(date) : undefined
+  if (createdAt && isNaN(createdAt.getTime())) return NextResponse.json({ error: "Invalid date" }, { status: 400 })
+  const meta = {
+    ...(reference !== undefined ? { reference: reference ? String(reference).trim() : null } : {}),
+    ...(createdAt ? { createdAt } : {}),
+  }
+
+  const notFound = NextResponse.json({ error: "Entry not found" }, { status: 404 })
+  const ownBank = (bankId: string | null) => !!bankId && shopBankIds.includes(bankId)
+
+  try {
+    if (type === "INCOME" || type === "EXPENSE") {
+      const t = await db.transaction.findUnique({ where: { id } })
+      if (!t || !ownBank(t.bankId)) return notFound
+
+      const data: any = { ...meta }
+      if (isManual(t)) {
+        if (amount !== undefined) {
+          const amt = parseFloat(amount)
+          if (!amt || amt <= 0) return NextResponse.json({ error: "Enter a valid amount" }, { status: 400 })
+          data.amount = amt
+        }
+        if (txnType === "CREDIT" || txnType === "DEBIT") {
+          data.type = txnType
+          data.category = txnType === "CREDIT" ? "Bank Deposit" : "Bank Withdrawal"
+        }
+        if (description !== undefined) {
+          if (!String(description).trim()) return NextResponse.json({ error: "Enter a description" }, { status: 400 })
+          data.description = String(description).trim()
+        }
+      } else if (amount !== undefined && parseFloat(amount) !== t.amount) {
+        return NextResponse.json({ error: "This entry comes from another record. Edit the amount there." }, { status: 400 })
+      }
+
+      const updated = await db.transaction.update({ where: { id }, data })
+      await createAuditLog({
+        userId: session.user.id, shopId: session.user.shopId, action: "UPDATE", module: "FINANCE",
+        details: `Edited bank ${updated.type === "CREDIT" ? "credit" : "debit"}: ${updated.description} - PKR ${t.amount} → PKR ${updated.amount}`,
+      })
+      return NextResponse.json({ success: true })
+    }
+
+    // Payments mirror a sale/purchase, farmer or driver balance: only date and reference are editable.
+    const model =
+      type === "RECEIPT" || type === "PAYMENT" ? db.payment
+      : type === "FARMER_PAYMENT" ? db.farmerPayment
+      : type === "DRIVER_PAYMENT" ? db.driverPayment
+      : null
+    if (!model) return NextResponse.json({ error: "Unknown entry type" }, { status: 400 })
+
+    const p = await (model as any).findUnique({ where: { id } })
+    if (!p || !ownBank(p.bankId)) return notFound
+    if (amount !== undefined && parseFloat(amount) !== p.amount)
+      return NextResponse.json({ error: "This entry comes from another record. Edit the amount there." }, { status: 400 })
+
+    await (model as any).update({ where: { id }, data: meta })
+    await createAuditLog({
+      userId: session.user.id, shopId: session.user.shopId, action: "UPDATE", module: "FINANCE",
+      details: `Edited bank entry (${type}) date/reference - PKR ${p.amount}`,
+    })
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Update bank entry error:", error)
+    return NextResponse.json({ error: "Failed to update entry" }, { status: 500 })
+  }
+}
