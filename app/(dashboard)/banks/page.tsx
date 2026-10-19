@@ -45,6 +45,11 @@ export default function BanksPage() {
   const [ledgerFrom, setLedgerFrom] = useState("")
   const [ledgerTo, setLedgerTo] = useState("")
 
+  // Editing a single ledger entry
+  const [editEntry, setEditEntry] = useState<any>(null)
+  const [entryForm, setEntryForm] = useState(DEFAULT_TXN)
+  const [entrySaving, setEntrySaving] = useState(false)
+
   async function loadData() {
     try {
       const data = await fetch("/api/banks").then((r) => r.json())
@@ -119,18 +124,63 @@ export default function BanksPage() {
     if (!res.ok) setBanks(before)
   }
 
-  async function openLedger(bank: any) {
-    setLedgerBank(bank)
-    setLedgerFrom(""); setLedgerTo("")
-    setLedgerEntries([])
+  async function loadLedger(bankId: string) {
     setLedgerLoading(true)
     try {
-      const data = await fetch(`/api/reports/bank-transactions?bankId=${bank.id}`).then((r) => r.json())
+      const data = await fetch(`/api/reports/bank-transactions?bankId=${bankId}`).then((r) => r.json())
       setLedgerEntries(data.entries || [])
     } catch {
       setLedgerEntries([])
     } finally {
       setLedgerLoading(false)
+    }
+  }
+
+  function openLedger(bank: any) {
+    setLedgerBank(bank)
+    setLedgerFrom(""); setLedgerTo("")
+    setLedgerEntries([])
+    loadLedger(bank.id)
+  }
+
+  function openEditEntry(entry: any) {
+    setEditEntry(entry)
+    setEntryForm({
+      type: entry.type === "INCOME" ? "CREDIT" : "DEBIT",
+      amount: String(entry.amount),
+      description: entry.description || "",
+      reference: entry.reference || "",
+      date: new Date(entry.date).toISOString().slice(0, 10),
+    })
+  }
+
+  async function handleSaveEntry() {
+    const full = editEntry.editable === "full"
+    const amt = parseFloat(entryForm.amount)
+    if (full && (!amt || amt <= 0)) return alert("Enter a valid amount")
+    if (full && !entryForm.description.trim()) return alert("Enter a description")
+    setEntrySaving(true)
+    const dateChanged = entryForm.date !== new Date(editEntry.date).toISOString().slice(0, 10)
+    const res = await fetch("/api/reports/bank-transactions", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: editEntry.id,
+        type: editEntry.type,
+        reference: entryForm.reference.trim() || null,
+        // Keep the original time of day unless the date itself was changed
+        date: dateChanged ? entryForm.date : undefined,
+        ...(full ? { txnType: entryForm.type, amount: amt, description: entryForm.description.trim() } : {}),
+      }),
+    })
+    setEntrySaving(false)
+    if (res.ok) {
+      setEditEntry(null)
+      // Refetch so the running balance and totals reflect the edit
+      if (ledgerBank) loadLedger(ledgerBank.id)
+    } else {
+      const data = await res.json().catch(() => ({}))
+      alert(data?.error || "Failed to update entry. Please try again.")
     }
   }
 
@@ -399,13 +449,14 @@ export default function BanksPage() {
                     <th className="text-right py-2 px-3 text-gray-500 font-medium">In</th>
                     <th className="text-right py-2 px-3 text-gray-500 font-medium">Out</th>
                     <th className="text-right py-2 px-3 text-gray-500 font-medium">Balance</th>
+                    {canEdit && <th className="py-2 px-3"></th>}
                   </tr>
                 </thead>
                 <tbody>
                   {ledgerLoading ? (
-                    <tr><td colSpan={7} className="text-center py-8 text-gray-400">Loading...</td></tr>
+                    <tr><td colSpan={canEdit ? 8 : 7} className="text-center py-8 text-gray-400">Loading...</td></tr>
                   ) : ledger.rows.length === 0 ? (
-                    <tr><td colSpan={7} className="text-center py-8 text-gray-400">No transactions</td></tr>
+                    <tr><td colSpan={canEdit ? 8 : 7} className="text-center py-8 text-gray-400">No transactions</td></tr>
                   ) : ledger.rows.map((e) => (
                     <tr key={`${e.type}-${e.id}`} className="border-b border-gray-50">
                       <td className="py-2 px-3 text-gray-600 whitespace-nowrap">{formatDate(e.date)}</td>
@@ -415,12 +466,116 @@ export default function BanksPage() {
                       <td className="py-2 px-3 text-right text-emerald-700 whitespace-nowrap">{isInflow(e.type) ? formatCurrency(e.amount) : ""}</td>
                       <td className="py-2 px-3 text-right text-red-600 whitespace-nowrap">{isInflow(e.type) ? "" : formatCurrency(e.amount)}</td>
                       <td className={`py-2 px-3 text-right font-medium whitespace-nowrap ${e.balance < 0 ? "text-red-600" : "text-gray-900"}`}>{formatCurrency(e.balance)}</td>
+                      {canEdit && (
+                        <td className="py-2 px-3 text-right">
+                          <button
+                            onClick={() => openEditEntry(e)}
+                            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                          >
+                            <PencilLine className="w-3.5 h-3.5" /> Edit
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Ledger Entry Modal */}
+      <Dialog open={!!editEntry} onOpenChange={(open) => { if (!open) setEditEntry(null) }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
+              <PencilLine className="w-5 h-5 text-blue-600" /> Edit Bank Entry
+            </DialogTitle>
+          </DialogHeader>
+          {editEntry && (
+            <div className="space-y-4">
+              {editEntry.editable === "full" ? (
+                <>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEntryForm({ ...entryForm, type: "CREDIT" })}
+                      className={`py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                        entryForm.type === "CREDIT"
+                          ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                          : "border-gray-200 text-gray-500 hover:border-gray-300"
+                      }`}
+                    >
+                      <ArrowDownCircle className="w-4 h-4" /> Credit (In)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEntryForm({ ...entryForm, type: "DEBIT" })}
+                      className={`py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                        entryForm.type === "DEBIT"
+                          ? "border-red-600 bg-red-50 text-red-700"
+                          : "border-gray-200 text-gray-500 hover:border-gray-300"
+                      }`}
+                    >
+                      <ArrowUpCircle className="w-4 h-4" /> Debit (Out)
+                    </button>
+                  </div>
+                  <div>
+                    <Label>Amount (PKR) *</Label>
+                    <Input
+                      type="number"
+                      value={entryForm.amount}
+                      onChange={(e) => setEntryForm({ ...entryForm, amount: e.target.value })}
+                      autoFocus
+                    />
+                  </div>
+                  <div>
+                    <Label>Description *</Label>
+                    <Input
+                      value={entryForm.description}
+                      onChange={(e) => setEntryForm({ ...entryForm, description: e.target.value })}
+                      onKeyDown={(e) => e.key === "Enter" && handleSaveEntry()}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-3 text-sm">
+                  <p className="font-semibold text-gray-900">
+                    {ENTRY_LABELS[editEntry.type] || editEntry.type} · {formatCurrency(editEntry.amount)}
+                  </p>
+                  <p className="text-gray-600">{editEntry.description}</p>
+                  <p className="text-xs text-gray-400 mt-2">
+                    This entry comes from another record, so its amount is changed there. You can fix the date and reference here.
+                  </p>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Date</Label>
+                  <Input
+                    type="date"
+                    value={entryForm.date}
+                    onChange={(e) => setEntryForm({ ...entryForm, date: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Reference (optional)</Label>
+                  <Input
+                    placeholder="Cheque no., slip #"
+                    value={entryForm.reference}
+                    onChange={(e) => setEntryForm({ ...entryForm, reference: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-1">
+                <Button variant="outline" onClick={() => setEditEntry(null)} className="flex-1">Cancel</Button>
+                <Button onClick={handleSaveEntry} disabled={entrySaving} className="flex-1 bg-purple-700 hover:bg-purple-800">
+                  {entrySaving ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
