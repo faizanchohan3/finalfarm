@@ -17,6 +17,7 @@ import {
   Eye, Truck, X, TrendingDown, Printer, Check, BookOpen, ShoppingBag, Upload, Trash2,
 } from "lucide-react"
 import { useCanEdit } from "@/lib/use-can-edit"
+import { EditPaymentDialog } from "@/components/edit-payment-dialog"
 
 export default function SuppliersPage() {
   const canEdit = useCanEdit()
@@ -46,6 +47,7 @@ export default function SuppliersPage() {
   const [saving, setSaving] = useState(false)
   const [lastPayment, setLastPayment] = useState<{ amount: number; method: string; notes: string; name: string; phone?: string; balance: number; direction?: string } | null>(null)
   const [selectedPayments, setSelectedPayments] = useState<Set<string>>(new Set())
+  const [editTxn, setEditTxn] = useState<any>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -503,6 +505,7 @@ export default function SuppliersPage() {
                             <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Debit (Dr)</th>
                             <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Credit (Cr)</th>
                             <th className="text-right py-2 px-3 text-gray-500 font-medium text-xs">Balance</th>
+                            <th className="py-2 px-3 w-10"></th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -533,6 +536,13 @@ export default function SuppliersPage() {
                                 <td className={`py-2 px-3 text-right font-semibold ${entry.balance > 0 ? "text-red-600" : "text-purple-700"}`}>
                                   {formatCurrency(Math.abs(entry.balance))}
                                   {entry.balance !== 0 && <span className="text-xs ml-1 font-normal">{entry.balance > 0 ? "Cr" : "Dr"}</span>}
+                                </td>
+                                <td className="py-2 px-3 text-center">
+                                  {canEdit && entry.payment && (
+                                    <button onClick={() => setEditTxn(entry)} className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit transaction">
+                                      <Edit className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
                                 </td>
                               </tr>
                             )
@@ -783,6 +793,16 @@ export default function SuppliersPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {selected && (
+        <EditPaymentDialog
+          entry={editTxn}
+          partyPath={`/api/suppliers/${selected.id}`}
+          directions={[{ value: "PAY", label: "Paid to Supplier" }, { value: "RECEIVE", label: "Received from Supplier" }]}
+          onClose={() => setEditTxn(null)}
+          onSaved={() => { setEditTxn(null); loadDetail(selected.id); loadData() }}
+        />
+      )}
     </div>
   )
 }

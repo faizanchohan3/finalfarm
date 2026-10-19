@@ -47,7 +47,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const totalBalance = totalBusiness - totalPaid - galaBuys.reduce((s, g) => s + g.totalAmount, 0)
 
   // Build ledger entries — Credit the Giver, Debit the Receiver (same as the supplier ledger report)
-  const ledgerEvents: { id?: string; date: Date; type: string; description: string; debit: number; credit: number }[] = []
+  const ledgerEvents: {
+    id?: string; date: Date; type: string; description: string; debit: number; credit: number
+    payment?: { amount: number; direction: string; method: string; notes: string | null; galaEntryId: string | null }
+  }[] = []
 
   // Supplier gives goods → Credit supplier
   for (const p of purchases) {
@@ -125,6 +128,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         : `Received from Supplier — ${sp.method}${sp.notes ? ` (${sp.notes})` : ""}`,
       debit: isPay ? sp.amount : 0,
       credit: isPay ? 0 : sp.amount,
+      // The supplier's own payment row — editable from the ledger
+      payment: { amount: sp.amount, direction: sp.direction, method: sp.method, notes: sp.notes, galaEntryId: sp.galaEntryId },
     })
   }
 
