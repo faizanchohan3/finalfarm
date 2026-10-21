@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatCurrency } from "@/lib/utils"
-import { Plus, Warehouse, ArrowLeftRight, Settings2, Package, AlertTriangle, Boxes } from "lucide-react"
+import { Plus, Warehouse, ArrowLeftRight, Settings2, Package, AlertTriangle, Boxes, Pencil, Trash2, Loader2 } from "lucide-react"
 import { useCanEdit } from "@/lib/use-can-edit"
 import { useSession } from "next-auth/react"
 import { canDelete } from "@/lib/permissions"
@@ -29,6 +29,9 @@ export default function WarehousePage() {
   const [wForm, setWForm] = useState({ id: "", name: "", location: "", capacity: "", manager: "", isPotato: false })
   const [tForm, setTForm] = useState({ fromWarehouseId: "", toWarehouseId: "", productId: "", quantity: "", notes: "" })
   const [aForm, setAForm] = useState({ warehouseId: "", productId: "", type: "INCREASE", quantity: "", reason: "" })
+  const [deleteTarget, setDeleteTarget] = useState<any>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState("")
 
   async function loadData() {
     setLoading(true)
@@ -61,17 +64,23 @@ export default function WarehousePage() {
     setShowWarehouseModal(false); loadData()
   }
 
-  async function handleDeleteWarehouse(w: any) {
-    if (!confirm(`Delete godown "${w.name}"? This cannot be undone.`)) return
+  function openDeleteDialog(w: any) {
+    setDeleteError(""); setDeleteTarget(w)
+  }
+
+  async function handleDeleteWarehouse() {
+    if (!deleteTarget) return
+    setDeleting(true); setDeleteError("")
     const res = await fetch("/api/warehouse", {
       method: "DELETE", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: w.id }),
+      body: JSON.stringify({ id: deleteTarget.id }),
     }).catch(() => null)
+    setDeleting(false)
     if (!res?.ok) {
       const d = await res?.json().catch(() => ({}))
-      return alert(d?.error || "Failed to delete godown. Please try again.")
+      return setDeleteError(d?.error || "Failed to delete godown. Please try again.")
     }
-    loadData()
+    setDeleteTarget(null); loadData()
   }
 
   async function handleTransfer() {
@@ -151,14 +160,20 @@ export default function WarehousePage() {
                     <Warehouse className="w-4 h-4 text-blue-600" /> {w.name}
                     {w.isPotato && <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">Potato</span>}
                   </CardTitle>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
                     {canEdit && (
                       <button onClick={() => { setWForm({ id: w.id, name: w.name, location: w.location || "", capacity: w.capacity ? String(w.capacity) : "", manager: w.manager || "", isPotato: !!w.isPotato }); setShowWarehouseModal(true) }}
-                        className="text-xs text-gray-400 hover:text-blue-600">Edit</button>
+                        title="Edit godown"
+                        className="inline-flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 hover:border-blue-200">
+                        <Pencil className="w-3.5 h-3.5" /> Edit
+                      </button>
                     )}
                     {isAdmin && (
-                      <button onClick={() => handleDeleteWarehouse(w)}
-                        className="text-xs text-gray-400 hover:text-red-600">Delete</button>
+                      <button onClick={() => openDeleteDialog(w)}
+                        title="Delete godown"
+                        className="inline-flex items-center gap-1 rounded-md border border-red-100 bg-red-50 px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 hover:border-red-200">
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                      </button>
                     )}
                   </div>
                 </div>
@@ -357,6 +372,60 @@ export default function WarehousePage() {
               <Button onClick={handleSaveWarehouse} className="flex-1 bg-blue-700 hover:bg-blue-800">Save</Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Godown Confirm */}
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open && !deleting) setDeleteTarget(null) }}>
+        <DialogContent className="max-w-sm">
+          {deleteTarget && (() => {
+            const stocked = (deleteTarget.stock || []).filter((s: any) => s.quantity > 0).length
+            const lots = deleteTarget.lotCount ?? 0
+            const blocked = lots > 0 || stocked > 0
+            return (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center text-center pt-2">
+                  <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-3">
+                    <Trash2 className="w-7 h-7 text-red-600" />
+                  </div>
+                  <DialogHeader><DialogTitle className="text-center">Delete Godown?</DialogTitle></DialogHeader>
+                  <p className="text-sm text-gray-500 mt-1">
+                    You are about to delete <span className="font-semibold text-gray-800">{deleteTarget.name}</span>.
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm space-y-1.5">
+                  <div className="flex justify-between gap-2"><span className="text-gray-500">Location</span><span className="font-medium text-gray-800 text-right">{deleteTarget.location || "—"}</span></div>
+                  <div className="flex justify-between gap-2"><span className="text-gray-500">Active lots</span><span className={`font-medium ${lots ? "text-red-600" : "text-gray-800"}`}>{lots}</span></div>
+                  <div className="flex justify-between gap-2"><span className="text-gray-500">Items in stock</span><span className={`font-medium ${stocked ? "text-red-600" : "text-gray-800"}`}>{stocked}</span></div>
+                </div>
+
+                {blocked ? (
+                  <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <p>This godown still holds lots or stock. Transfer or clear them first, then delete.</p>
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500 text-center">
+                    The godown will be removed from the list. Past lots, transfers and adjustments will keep their record.
+                  </p>
+                )}
+
+                {deleteError && (
+                  <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">{deleteError}</p>
+                )}
+
+                <div className="flex gap-3 pt-1">
+                  <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting} className="flex-1">Cancel</Button>
+                  <Button onClick={handleDeleteWarehouse} disabled={deleting || blocked}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white gap-2">
+                    {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    {deleting ? "Deleting..." : "Delete"}
+                  </Button>
+                </div>
+              </div>
+            )
+          })()}
         </DialogContent>
       </Dialog>
 
