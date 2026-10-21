@@ -78,3 +78,26 @@ export async function PUT(req: Request) {
   return NextResponse.json({ warehouse })
 }
 
+// Soft delete (isActive = false) so past lots, transfers and adjustments keep their godown.
+// Admin-only: proxy.ts refuses DELETE for other roles.
+export async function DELETE(req: Request) {
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { id } = await req.json()
+  if (!id) return NextResponse.json({ error: "Godown id is required" }, { status: 400 })
+
+  const [activeLots, stockedItems] = await Promise.all([
+    db.lot.count({ where: { warehouseId: id, status: { notIn: ["SOLD", "DISPATCHED", "SETTLED", "CANCELLED"] } } }),
+    db.warehouseStock.count({ where: { warehouseId: id, quantity: { gt: 0 } } }),
+  ])
+  if (activeLots || stockedItems) {
+    return NextResponse.json({
+      error: `This godown still holds ${activeLots} lot(s) and ${stockedItems} stocked item(s). Move or clear them before deleting.`,
+    }, { status: 400 })
+  }
+
+  await db.warehouse.update({ where: { id }, data: { isActive: false } })
+  return NextResponse.json({ ok: true })
+}
+
