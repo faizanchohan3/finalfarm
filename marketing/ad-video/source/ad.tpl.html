@@ -254,7 +254,7 @@ table.bill td{padding:10px 14px;border-bottom:1px solid #e2e8f0}
 
   <!-- S9: CTA -->
   <div id="s9" class="scene">
-    <div class="abs center" id="s9in" style="left:0;right:0;top:70px">
+    <div class="abs center" id="s9in" style="left:0;right:0;top:40px">
       <div class="logoBox center" id="logo2" style="width:190px;height:190px;border-radius:44px">
         <svg viewBox="0 0 32 32" width="146" height="146"><g id="wheel2"><circle cx="16" cy="17" r="9" fill="none" stroke="#fbbf24" stroke-width="2"/><circle cx="16" cy="17" r="6" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3 1.7"/><circle cx="16" cy="17" r="2.5" fill="#fbbf24"/></g><rect x="10" y="4" width="12" height="6" fill="#93c5fd" stroke="#1e40af" stroke-width="1.5"/><path d="M12 10 L14 15 M20 10 L18 15" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/><path d="M 13 22 Q 12 25 11 27" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" fill="none"/><line x1="8" y1="26" x2="10" y2="28" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/><line x1="24" y1="26" x2="22" y2="28" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
@@ -262,6 +262,7 @@ table.bill td{padding:10px 14px;border-bottom:1px solid #e2e8f0}
       <div class="ur h1" id="s9u" style="font-size:86px;margin-top:34px">اپنی پریشانی ختم کریں</div>
       <div class="sub" id="s9e" style="font-size:30px;margin-top:28px">End your accounting worries — today.</div>
       <div class="cta" id="cta" style="margin-top:44px">__I:phone__<span class="ur" style="font-size:46px;font-weight:700;line-height:1.7">ابھی رابطہ کریں</span><span style="font:700 32px Poppins">· Contact Now</span></div>
+      <div id="wa" style="margin-top:30px;display:inline-flex;align-items:center;gap:20px;padding:14px 40px 14px 18px;border-radius:999px;background:rgba(37,211,102,.14);border:2px solid rgba(37,211,102,.6);box-shadow:0 0 50px rgba(37,211,102,.25)"><div style="width:68px;height:68px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;color:#fff">__I:message-circle__</div><div style="font:600 24px Poppins;color:#86efac;letter-spacing:2px">WHATSAPP</div><div style="font:800 54px Poppins;letter-spacing:1px">0333-9777676</div></div>
     </div>
   </div>
 
@@ -415,10 +416,11 @@ window.seek=function(t){
     pop($('s8t'),t,47.4,.5,20);}
 
   // S9 52.0-60
-  const s9=vis(t,52.0,61,.45,.1);$('s9').style.opacity=s9*(1-k(t,59.2,60));
+  const s9=vis(t,52.0,61,.45,.1);$('s9').style.opacity=s9*(1-k(t,59.6,60));
   if(s9>0){ popS($('logo2'),t,52.1,.7);$('wheel2').setAttribute('transform',`rotate(${t*120} 16 17)`);
     pop($('s9in').children[1],t,52.75,.6,30);pop($('s9u'),t,53.85,.6,30);pop($('s9e'),t,54.6,.6,20);
     const c=$('cta');const p=k(t,56.15,56.7);c.style.opacity=eo(p);c.style.transform=`scale(${(t<56.15?0:eb(p))*(1+Math.max(0,Math.sin((t-56.7)*5))*.04*k(t,56.7,57))})`;
+    {const w=$('wa');const q=k(t,56.9,57.5);w.style.opacity=eo(q);w.style.transform=`translateY(${(1-eo(q))*40}px) scale(${.85+.15*eb(q)})`;w.querySelector('svg').style.cssText='width:40px;height:40px;stroke-width:2.4';}
     $('s9in').style.transform=`scale(${1+k(t,52,60)*.03})`;}
 };
 window.fontsReady=document.fonts.ready.then(()=>true);

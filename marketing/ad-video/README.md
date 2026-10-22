@@ -13,7 +13,7 @@
 | 36–42s | Balance sheet, P&L, automatic reports |
 | 42–47s | Urdu & English, mobile & computer |
 | 47–52s | Save time · Zero errors · Every rupee accounted |
-| 52–60s | Call to action: "اپنی پریشانی ختم کریں — ابھی رابطہ کریں" |
+| 52–60s | Call to action: "اپنی پریشانی ختم کریں — ابھی رابطہ کریں" + WhatsApp 0333-9777676 |
 
 ## Rebuilding (`source/`)
 1. `python3 build.py` – writes `ad.html` from `ad.tpl.html` (brand name is set in `build.py`).
