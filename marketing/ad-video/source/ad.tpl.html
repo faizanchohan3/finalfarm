@@ -1,0 +1,428 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Poppins:wght@400;500;600;700;800&display=block" rel="stylesheet">
+<style>
+:root{--navy:#081230;--blue:#1e40af;--sky:#93c5fd;--gold:#fbbf24;--gold2:#f59e0b;--red:#ef4444;--ink:#0f172a;--paper:#fbf6e9;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;font-family:Poppins,Inter,sans-serif;color:#fff;background:var(--navy)}
+.abs{position:absolute}
+.ur{font-family:"Noto Nastaliq Urdu",serif;direction:rtl;line-height:2.0}
+.layer{position:absolute;inset:0}
+.center{display:flex;align-items:center;justify-content:center;flex-direction:column}
+svg.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#bgP{background:radial-gradient(1200px 800px at 50% 40%,#3a1414 0%,#170a12 55%,#07060c 100%)}
+#bgS{background:radial-gradient(1400px 900px at 50% 35%,#1d3f9e 0%,#0c1d52 45%,#050b22 100%)}
+#glow{width:1400px;height:1400px;border-radius:50%;background:radial-gradient(circle,rgba(251,191,36,.18),rgba(251,191,36,0) 60%);left:260px;top:-160px}
+#vign{background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba(0,0,0,.55) 100%);pointer-events:none}
+#grid{background-image:linear-gradient(rgba(147,197,253,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(147,197,253,.06) 1px,transparent 1px);background-size:80px 80px}
+canvas{position:absolute;inset:0}
+.scene{position:absolute;inset:0;opacity:0}
+/* papers */
+.paper{position:absolute;width:300px;height:390px;background:var(--paper);border-radius:6px;box-shadow:0 30px 60px rgba(0,0,0,.55);padding:26px 22px;color:#334;overflow:hidden}
+.paper:before{content:"";position:absolute;left:46px;top:0;bottom:0;width:2px;background:rgba(239,68,68,.45)}
+.paper .ln{height:30px;border-bottom:1.5px solid rgba(59,130,246,.25);font:500 17px "JetBrains Mono",monospace;color:#1e3a8a;padding-left:34px;white-space:nowrap;opacity:.85}
+.paper .ln.x{color:#b91c1c;text-decoration:line-through}
+.h1{font-weight:700;text-align:center;text-shadow:0 6px 30px rgba(0,0,0,.6)}
+.sub{font-weight:500;letter-spacing:.5px;color:rgba(255,255,255,.75);text-align:center}
+.chip{position:absolute;display:flex;align-items:center;gap:22px;padding:18px 34px 18px 28px;border-radius:22px;background:rgba(30,10,14,.78);border:2px solid rgba(239,68,68,.55);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 40px rgba(239,68,68,.15)}
+.chip .t{font-size:44px}
+.chip .e{font:500 20px Poppins;color:rgba(255,255,255,.6);direction:ltr}
+.chip svg{width:46px;height:46px;color:#f87171;flex:none}
+.mis{position:absolute;left:660px;top:330px;width:600px;padding:30px 40px;border-radius:24px;background:rgba(10,6,10,.85);border:2px solid rgba(239,68,68,.6);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.mis .row{display:flex;justify-content:space-between;align-items:center;font:600 36px "JetBrains Mono",monospace;padding:8px 0}
+.mis .lab{font-size:34px;color:rgba(255,255,255,.75)}
+.badge svg{width:34px;height:34px;flex:none}.badge{white-space:nowrap;display:inline-flex;align-items:center;gap:12px;padding:10px 26px;border-radius:999px;font-weight:600}
+/* brand */
+.logoBox{width:300px;height:300px;border-radius:66px;background:linear-gradient(145deg,#2952d6,#1e40af 55%,#172f86);box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 0 2px rgba(255,255,255,.08) inset,0 0 120px rgba(251,191,36,.25)}
+.word{font-weight:800;letter-spacing:-2px}
+.word .g{background:linear-gradient(90deg,#fde68a,#fbbf24 50%,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* features */
+.card{position:absolute;width:400px;height:200px;border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border:1.5px solid rgba(255,255,255,.14);box-shadow:0 25px 60px rgba(0,0,0,.4);display:flex;align-items:center;gap:24px;padding:0 30px;backdrop-filter:blur(6px)}
+.card .ib{width:92px;height:92px;border-radius:24px;display:flex;align-items:center;justify-content:center;flex:none;background:rgba(251,191,36,.14);color:var(--gold)}
+.card .ib svg{width:50px;height:50px}
+.card .u{font-size:31px;line-height:1.9;white-space:nowrap}
+.card .en{font:500 19px Poppins;color:rgba(255,255,255,.65);margin-top:4px}
+/* laptop */
+.laptop{position:absolute}
+.screen{position:absolute;left:0;top:0;width:1100px;height:660px;border-radius:26px;background:#0b0f1c;padding:20px;box-shadow:0 50px 100px rgba(0,0,0,.6),0 0 0 2px #2a3350 inset}
+.app{width:100%;height:100%;border-radius:10px;background:#f1f5f9;overflow:hidden;position:relative;color:var(--ink)}
+.base{position:absolute;left:-90px;top:660px;width:1280px;height:34px;border-radius:0 0 30px 30px;background:linear-gradient(#cbd5e1,#8b97ad);box-shadow:0 30px 60px rgba(0,0,0,.5)}
+.base:before{content:"";position:absolute;left:560px;top:0;width:160px;height:12px;border-radius:0 0 12px 12px;background:#7c879b}
+.side{position:absolute;left:0;top:0;bottom:0;width:200px;background:#0f1f4d;padding:18px 14px;color:#cbd5e1}
+.side .it{height:34px;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;gap:10px;padding:0 10px;font:500 14px Poppins}
+.side .it.on{background:#1e40af;color:#fff}
+.side .it i{width:16px;height:16px;border-radius:4px;background:rgba(255,255,255,.25);display:block}
+.top{position:absolute;left:200px;right:0;top:0;height:56px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;padding:0 24px;font:600 18px Poppins;gap:12px}
+.main{position:absolute;left:200px;right:0;top:56px;bottom:0;padding:22px}
+table.bill{width:100%;border-collapse:collapse;font:500 16px Poppins;background:#fff;border-radius:10px;overflow:hidden}
+table.bill th{background:#1e40af;color:#fff;text-align:left;padding:10px 14px;font-weight:600}
+table.bill td{padding:10px 14px;border-bottom:1px solid #e2e8f0}
+.btn svg{width:22px;height:22px}.btn{white-space:nowrap;display:inline-flex;align-items:center;gap:10px;padding:12px 24px;border-radius:10px;background:#1e40af;color:#fff;font:600 17px Poppins}
+.receipt{position:absolute;width:330px;background:#fff;color:#111;border-radius:6px;padding:22px 24px;font:500 15px "JetBrains Mono",monospace;box-shadow:0 30px 70px rgba(0,0,0,.55)}
+.receipt .r{display:flex;justify-content:space-between;padding:3px 0}
+.kpi{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 2px 8px rgba(15,23,42,.06)}
+.kpi .l{font:500 13px Poppins;color:#64748b}
+.kpi .v{white-space:nowrap;font:700 21px Poppins;color:#0f172a;margin-top:4px}
+.phone{position:absolute;width:330px;height:660px;border-radius:52px;background:#0b0f1c;padding:14px;box-shadow:0 50px 100px rgba(0,0,0,.6),0 0 0 2px #2a3350 inset}
+.phone .app{border-radius:40px}
+.benefit{position:absolute;width:520px;height:420px;border-radius:34px;background:linear-gradient(170deg,rgba(255,255,255,.12),rgba(255,255,255,.03));border:1.5px solid rgba(255,255,255,.15);box-shadow:0 30px 70px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.benefit .ib{width:130px;height:130px;border-radius:40px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#fbbf24,#f59e0b);color:#0b1640;box-shadow:0 20px 50px rgba(251,191,36,.35)}
+.benefit .ib svg{width:70px;height:70px;stroke-width:2.2}
+.benefit .u{font-size:54px}
+.benefit .en{font:600 24px Poppins;color:rgba(255,255,255,.7);margin-top:6px}
+.cta{display:inline-flex;align-items:center;gap:22px;padding:22px 56px;border-radius:999px;background:linear-gradient(90deg,#fbbf24,#f59e0b);color:#0b1640;box-shadow:0 25px 60px rgba(251,191,36,.4)}
+.cta svg{width:48px;height:48px;stroke-width:2.4}
+#flash{background:linear-gradient(100deg,rgba(255,255,255,0) 30%,rgba(255,236,170,.95) 50%,rgba(255,255,255,0) 70%);opacity:0}
+#bars{pointer-events:none}
+#bars div{position:absolute;left:0;right:0;height:0;background:#000}
+#wm{left:56px;top:44px;display:flex;align-items:center;gap:14px;opacity:0}
+</style></head>
+<body><div id="stage">
+  <div id="bgP" class="layer"></div>
+  <div id="bgS" class="layer" style="opacity:0"></div>
+  <div id="grid" class="layer" style="opacity:0"></div>
+  <div id="glow" class="abs" style="opacity:0"></div>
+  <canvas id="cv" width="1920" height="1080"></canvas>
+
+  <!-- S1: registers mess -->
+  <div id="s1" class="scene">
+    <div id="papers" class="layer"></div>
+    <div id="s1t" class="abs" style="left:0;right:0;top:20px">
+      <div class="ur h1" id="s1a" style="font-size:92px">کیا آپ کا حساب کتاب</div>
+      <div class="ur h1" id="s1b" style="font-size:104px;color:#fca5a5;margin-top:-40px">الجھا ہوا ہے؟</div>
+      <div class="sub" id="s1c" style="font-size:30px;margin-top:-6px">Is your mill's accounting lost in registers?</div>
+    </div>
+  </div>
+
+  <!-- S2: problems -->
+  <div id="s2" class="scene">
+    <div class="chip" id="c1" style="left:150px;top:150px">__I:hand-coins__<div><div class="ur t">کسانوں کی ادائیگیاں</div><div class="e">Farmer payments</div></div></div>
+    <div class="chip" id="c2" style="left:1220px;top:150px">__I:landmark__<div><div class="ur t">آڑھت کا کمیشن</div><div class="e">Commission (Aadat)</div></div></div>
+    <div class="chip" id="c3" style="left:220px;top:780px">__I:package__<div><div class="ur t">اسٹاک کا حساب</div><div class="e">Stock tracking</div></div></div>
+    <div class="chip" id="c4" style="left:1300px;top:780px">__I:warehouse__<div><div class="ur t">گودام کا ریکارڈ</div><div class="e">Godown records</div></div></div>
+    <div class="mis" id="mis">
+      <div class="row"><span class="ur lab">رجسٹر کا ٹوٹل</span><span id="m1">Rs 12,45,000</span></div>
+      <div class="row"><span class="ur lab">کیش بک</span><span id="m2">Rs 11,98,500</span></div>
+      <div style="height:2px;background:rgba(255,255,255,.15);margin:10px 0"></div>
+      <div class="row" style="color:#f87171"><span class="ur lab" style="color:#fca5a5">فرق</span><span id="m3">Rs 46,500 ?</span></div>
+    </div>
+    <div class="abs" id="s2t" style="left:0;right:0;top:600px;text-align:center">
+      <div class="ur h1" style="font-size:84px">ہر روز ایک نئی پریشانی</div>
+    </div>
+  </div>
+
+  <!-- S3: brand reveal -->
+  <div id="s3" class="scene">
+    <div id="s3a" class="abs center" style="left:0;right:0;top:330px">
+      <div class="ur h1" style="font-size:96px">اب پریشان ہونے کی ضرورت نہیں</div>
+      <div class="sub" style="font-size:32px;margin-top:10px">No more worries.</div>
+    </div>
+    <div id="brand" class="abs center" style="left:0;right:0;top:120px">
+      <div class="logoBox center" id="logo">
+        <svg id="mill" viewBox="0 0 32 32" width="230" height="230">
+          <g id="wheel"><circle cx="16" cy="17" r="9" fill="none" stroke="#fbbf24" stroke-width="2"/>
+          <circle cx="16" cy="17" r="6" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3 1.7"/>
+          <circle cx="16" cy="17" r="2.5" fill="#fbbf24"/></g>
+          <rect x="10" y="4" width="12" height="6" fill="#93c5fd" stroke="#1e40af" stroke-width="1.5"/>
+          <path d="M12 10 L14 15 M20 10 L18 15" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M 13 22 Q 12 25 11 27" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <line x1="8" y1="26" x2="10" y2="28" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="24" y1="26" x2="22" y2="28" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="word" id="wordmark" style="font-size:150px;margin-top:30px;line-height:1">__BRAND_HTML__</div>
+      <div class="ur" id="tagU" style="font-size:62px;margin-top:6px;color:#fde68a">آپ کی مل اور منڈی کا مکمل سافٹ ویئر</div>
+      <div class="sub" id="tagE" style="font-size:30px;margin-top:10px;letter-spacing:6px;text-transform:uppercase">Complete Mill &amp; Mandi Management</div>
+    </div>
+  </div>
+
+  <!-- S4: features -->
+  <div id="s4" class="scene">
+    <div class="abs" id="s4t" style="left:0;right:0;top:70px;text-align:center">
+      <div class="ur h1" style="font-size:74px">سب کچھ، ایک ہی جگہ پر</div>
+      <div class="sub" style="font-size:26px;margin-top:14px;letter-spacing:4px">EVERYTHING IN ONE PLACE</div>
+    </div>
+    <div id="cards"></div>
+  </div>
+
+  <!-- S5: bill maker -->
+  <div id="s5" class="scene">
+    <div class="abs" id="s5t" style="right:90px;top:120px;width:560px;text-align:right">
+      <div class="ur h1" style="font-size:80px;text-align:right">ایک کلک میں بل</div>
+      <div class="sub" style="font-size:28px;text-align:right;margin-top:8px">Bills in one click — print instantly</div>
+      <div class="ur" id="s5l" style="font-size:44px;margin-top:40px;color:#fde68a;text-align:right">ہر تاجر کا لیجر، فوراً</div>
+      <div class="sub" id="s5le" style="font-size:24px;text-align:right;margin-top:-10px">Every trader's ledger, instantly</div>
+    </div>
+    <div class="laptop" id="lap1" style="left:110px;top:170px">
+      <div class="screen"><div class="app">
+        <div class="side"><div style="font:700 20px Poppins;color:#fff;margin:4px 6px 18px">__BRAND_TEXT__</div>
+          <div class="it"><i></i>Dashboard</div><div class="it on"><i></i>Bill Maker</div><div class="it"><i></i>Gala Mandi</div><div class="it"><i></i>Traders</div><div class="it"><i></i>Farmers</div><div class="it"><i></i>Roznamcha</div><div class="it"><i></i>Reports</div></div>
+        <div class="top">Bill Maker <span style="font:500 14px Poppins;color:#64748b">· New Bill #1048</span></div>
+        <div class="main">
+          <div style="display:flex;gap:14px;margin-bottom:16px;font:500 15px Poppins">
+            <div style="flex:1;background:#fff;border:1px solid #cbd5e1;border-radius:8px;padding:10px 12px"><span style="color:#64748b">Trader:</span> <b id="trader"></b></div>
+            <div style="width:220px;background:#fff;border:1px solid #cbd5e1;border-radius:8px;padding:10px 12px"><span style="color:#64748b">Date:</span> <b>22-10-2026</b></div>
+          </div>
+          <table class="bill"><thead><tr><th>Item</th><th>Bags</th><th>Weight (kg)</th><th>Rate / 40kg</th><th style="text-align:right">Amount</th></tr></thead>
+          <tbody id="rows"></tbody></table>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px">
+            <div class="btn" id="pbtn">__I:printer__ Print Bill</div>
+            <div style="font:700 30px Poppins">Total: <span id="tot" style="color:#1e40af">Rs 0</span></div>
+          </div>
+        </div>
+      </div></div>
+      <div class="base"></div>
+    </div>
+    <div class="receipt" id="rcpt" style="left:1180px;top:560px">
+      <div style="text-align:center;font:700 20px Poppins">__BRAND_TEXT__</div>
+      <div style="text-align:center;font-size:12px;color:#555;margin-bottom:10px">Bill #1048 · 22-10-2026</div>
+      <div class="r"><span>Wheat 52 bags</span><span>2,62,600</span></div>
+      <div class="r"><span>Rice 30 bags</span><span>1,92,000</span></div>
+      <div class="r"><span>Maize 24 bags</span><span>79,200</span></div>
+      <div style="border-top:1px dashed #999;margin:8px 0"></div>
+      <div class="r" style="font-weight:700"><span>TOTAL</span><span>5,33,800</span></div>
+      <div style="text-align:center;margin-top:10px;font-size:12px;color:#16a34a">✔ Saved to ledger</div>
+    </div>
+  </div>
+
+  <!-- S6: reports -->
+  <div id="s6" class="scene">
+    <div class="abs" id="s6t" style="left:90px;top:110px;width:600px">
+      <div class="ur h1" style="font-size:64px;text-align:left;direction:rtl;white-space:nowrap">بیلنس شیٹ</div><div class="ur h1" style="font-size:64px;text-align:left;direction:rtl;white-space:nowrap;margin-top:-30px;color:#fde68a">نفع و نقصان</div>
+      <div class="sub" style="font-size:28px;text-align:left;margin-top:-6px">Balance Sheet · P&amp;L · All Reports</div>
+      <div id="s6b" style="margin-top:46px;display:flex;flex-direction:column;gap:18px">
+        <div class="badge" style="background:rgba(34,197,94,.15);color:#86efac;border:1.5px solid rgba(34,197,94,.4);font-size:26px;width:max-content">__I:badge-check__ <span class="ur" style="font-size:34px;line-height:1.7">بالکل درست</span> · 100% Accurate</div>
+        <div class="badge" style="background:rgba(251,191,36,.12);color:#fde68a;border:1.5px solid rgba(251,191,36,.4);font-size:26px;width:max-content">__I:clock__ <span class="ur" style="font-size:34px;line-height:1.7">خودکار</span> · Automatic</div>
+      </div>
+    </div>
+    <div class="laptop" id="lap2" style="left:760px;top:190px;transform-origin:0 0">
+      <div class="screen" style="width:1060px;height:640px"><div class="app">
+        <div class="side" style="width:180px"><div style="font:700 19px Poppins;color:#fff;margin:4px 6px 18px">__BRAND_TEXT__</div>
+          <div class="it"><i></i>Dashboard</div><div class="it"><i></i>Sales</div><div class="it"><i></i>Purchases</div><div class="it on"><i></i>Reports</div><div class="it"><i></i>Banks</div><div class="it"><i></i>Godowns</div></div>
+        <div class="top" style="left:180px">Reports Overview</div>
+        <div class="main" style="left:180px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+            <div class="kpi"><div class="l">Total Sales</div><div class="v" id="k1">0</div></div>
+            <div class="kpi"><div class="l">Purchases</div><div class="v" id="k2">0</div></div>
+            <div class="kpi"><div class="l">Net Profit</div><div class="v" id="k3" style="color:#16a34a">0</div></div>
+            <div class="kpi"><div class="l">Receivable</div><div class="v" id="k4">0</div></div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:14px">
+            <div class="kpi" style="flex:1.5;height:350px;position:relative"><div class="l">Monthly Sales vs Purchases</div><svg id="chart" width="480" height="300" style="position:absolute;left:14px;bottom:10px"></svg></div>
+            <div class="kpi" style="flex:1;height:350px;position:relative"><div class="l">Profit &amp; Loss</div><svg id="donut" width="260" height="290" style="position:absolute;left:20px;bottom:6px"></svg></div>
+          </div>
+        </div>
+      </div></div>
+      <div class="base" style="width:1240px"></div>
+    </div>
+  </div>
+
+  <!-- S7: bilingual + devices -->
+  <div id="s7" class="scene">
+    <div class="abs" id="s7t" style="left:0;right:0;top:60px;text-align:center">
+      <div class="ur h1" style="font-size:72px">اردو اور انگلش — کہیں سے بھی</div>
+      <div class="sub" style="font-size:26px;margin-top:14px;letter-spacing:3px">URDU &amp; ENGLISH · MOBILE &amp; COMPUTER · ANYWHERE</div>
+    </div>
+    <div class="laptop" id="lap3" style="left:300px;top:330px">
+      <div class="screen" style="width:960px;height:560px"><div class="app" id="lapApp">
+        <div class="side" style="width:190px" id="lapSide"><div style="font:700 19px Poppins;color:#fff;margin:4px 6px 18px">__BRAND_TEXT__</div><div id="lapMenu"></div></div>
+        <div class="top" style="left:190px" id="lapTop"><span id="lapTitle">Dashboard</span><span style="margin-left:auto;display:flex;border:1px solid #cbd5e1;border-radius:999px;overflow:hidden;font:600 14px Poppins"><span id="tEn" style="padding:6px 14px">EN</span><span id="tUr" style="padding:6px 14px">اردو</span></span></div>
+        <div class="main" style="left:190px">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px" id="lapK"></div>
+          <div class="kpi" style="margin-top:12px;height:270px;position:relative"><svg id="chart2" width="680" height="240" style="position:absolute;left:14px;bottom:10px"></svg></div>
+        </div>
+      </div></div>
+      <div class="base" style="width:1140px"></div>
+    </div>
+    <div class="phone" id="ph" style="left:1330px;top:290px">
+      <div class="app" style="background:#f1f5f9">
+        <div style="background:#1e40af;color:#fff;padding:46px 22px 18px;font:700 20px Poppins">__BRAND_TEXT__<div class="ur" style="font-size:22px;font-weight:400;line-height:1.8;color:#bfdbfe">ڈیش بورڈ</div></div>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:10px" id="phList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S8: benefits -->
+  <div id="s8" class="scene">
+    <div class="benefit" id="b1" style="left:110px;top:330px"><div class="ib">__I:clock__</div><div class="ur u">وقت کی بچت</div><div class="en">Save Time</div></div>
+    <div class="benefit" id="b2" style="left:700px;top:330px"><div class="ib">__I:shield-check__</div><div class="ur u">غلطیوں کا خاتمہ</div><div class="en">Zero Errors</div></div>
+    <div class="benefit" id="b3" style="left:1290px;top:330px"><div class="ib">__I:calculator__</div><div class="ur u">ہر روپے کا حساب</div><div class="en">Every Rupee Accounted</div></div>
+    <div class="abs" id="s8t" style="left:0;right:0;top:110px;text-align:center"><div class="sub" style="font-size:30px;letter-spacing:8px;color:#fde68a">WHY CHOOSE __BRAND_UP__</div></div>
+  </div>
+
+  <!-- S9: CTA -->
+  <div id="s9" class="scene">
+    <div class="abs center" id="s9in" style="left:0;right:0;top:40px">
+      <div class="logoBox center" id="logo2" style="width:190px;height:190px;border-radius:44px">
+        <svg viewBox="0 0 32 32" width="146" height="146"><g id="wheel2"><circle cx="16" cy="17" r="9" fill="none" stroke="#fbbf24" stroke-width="2"/><circle cx="16" cy="17" r="6" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3 1.7"/><circle cx="16" cy="17" r="2.5" fill="#fbbf24"/></g><rect x="10" y="4" width="12" height="6" fill="#93c5fd" stroke="#1e40af" stroke-width="1.5"/><path d="M12 10 L14 15 M20 10 L18 15" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/><path d="M 13 22 Q 12 25 11 27" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" fill="none"/><line x1="8" y1="26" x2="10" y2="28" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/><line x1="24" y1="26" x2="22" y2="28" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="word" style="font-size:110px;margin-top:22px;line-height:1">__BRAND_HTML__</div>
+      <div class="ur h1" id="s9u" style="font-size:86px;margin-top:34px">اپنی پریشانی ختم کریں</div>
+      <div class="sub" id="s9e" style="font-size:30px;margin-top:28px">End your accounting worries — today.</div>
+      <div class="cta" id="cta" style="margin-top:44px">__I:phone__<span class="ur" style="font-size:46px;font-weight:700;line-height:1.7">ابھی رابطہ کریں</span><span style="font:700 32px Poppins">· Contact Now</span></div>
+      <div id="wa" style="margin-top:30px;display:inline-flex;align-items:center;gap:20px;padding:14px 40px 14px 18px;border-radius:999px;background:rgba(37,211,102,.14);border:2px solid rgba(37,211,102,.6);box-shadow:0 0 50px rgba(37,211,102,.25)"><div style="width:68px;height:68px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;color:#fff">__I:message-circle__</div><div style="font:600 24px Poppins;color:#86efac;letter-spacing:2px">WHATSAPP</div><div style="font:800 54px Poppins;letter-spacing:1px">0333-9777676</div></div>
+    </div>
+  </div>
+
+  <div id="flash" class="layer"></div>
+  <div id="wm" class="abs"><div class="logoBox" style="width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 32 32" width="40" height="40"><circle cx="16" cy="17" r="9" fill="none" stroke="#fbbf24" stroke-width="2"/><circle cx="16" cy="17" r="2.5" fill="#fbbf24"/><rect x="10" y="4" width="12" height="6" fill="#93c5fd"/></svg></div><div style="font:700 28px Poppins">__BRAND_HTML__</div></div>
+  <div id="vign" class="layer"></div>
+  <div id="bars" class="layer"><div id="barT" style="top:0"></div><div id="barB" style="bottom:0"></div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const k=(t,a,b)=>cl((t-a)/(b-a));
+const eo=x=>1-Math.pow(1-x,3);
+const eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const eb=x=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const lerp=(a,b,x)=>a+(b-a)*x;
+function vis(t,a,b,fi=.45,fo=.45){return Math.min(k(t,a,a+fi),1-k(t,b-fo,b))}
+function rnd(s){let x=Math.sin(s*999.7)*43758.5453;return x-Math.floor(x)}
+const fmt=n=>'Rs '+Math.round(n).toLocaleString('en-IN');
+function pop(el,t,a,d=.6,dy=40){const p=k(t,a,a+d);el.style.opacity=eo(p);el.style.transform=`translateY(${(1-eo(p))*dy}px)`;return p}
+function popS(el,t,a,d=.6){const p=k(t,a,a+d);el.style.opacity=cl(p*2);el.style.transform=`scale(${.6+.4*eb(p)})`;return p}
+
+/* ---- build papers ---- */
+const notes=[["Wheat 40 bag  52,000","Aslam  - 18,500","Rate ?? 3,250","Bardana 1,200","Total 71,700","Cash  50,000","Baqaya 21,7??"],["Godown #2 stock","Bags: 312 / 298 ?","Commission 2.5%","Labour 4,400","Transport 6,800","Mistake?? 1,300"],["Farmer: Rashid","Wheat 62 bags","Paid 1,20,000","Advance 15,000","Balance ????","Check again!"],["Roznamcha 21-10","Udhaar 34,000","Bank 2,50,000","Cash 98,750","Kharcha 7,250","Total ≠ match"],["Maize 24 bags","Rate 3,300","Weight 960 kg","Aadat 1,980","Net 77,220","Ledger page ?"],["Trader: Bilal","Old bal 64,000","New bill 1,92,000","Recv 1,00,000","Due 1,56,000","Recount!!"]];
+const P=$('papers');const papers=[];
+notes.forEach((n,i)=>{const d=document.createElement('div');d.className='paper';d.innerHTML=n.map((l,j)=>`<div class="ln ${(j%4==3)?'x':''}">${l}</div>`).join('');P.appendChild(d);
+papers.push({el:d,x:280+i*272+rnd(i)*50,y:700+rnd(i+7)*120,r:(rnd(i+3)-.5)*40,dl:.15+i*.22})});
+
+/* ---- feature cards ---- */
+const feats=[["shopping-cart","خریداری و فروخت","Purchases & Sales",22.89],["users","کسان و تاجر کھاتے","Farmer & Trader Ledgers",23.98],["notebook-pen","روزنامچہ","Daily Roznamcha",25.36],["landmark","بینک","Banks",26.00],["warehouse","گودام","Godowns",26.27],["scale","وے برج / گیٹ","Weighbridge & Gate",26.85],["hand-coins","آڑھت کمیشن","Commission (Aadat)",27.25],["file-text","بل میکر","Bill Maker",27.55]];
+const C=$('cards');const cards=[];
+feats.forEach((f,i)=>{const d=document.createElement('div');d.className='card';const col=i%4,row=Math.floor(i/4);
+d.style.left=(110+col*440)+'px';d.style.top=(330+row*250)+'px';
+d.innerHTML=`<div class="ib">${ICON(f[0])}</div><div><div class="ur u">${f[1]}</div><div class="en">${f[2]}</div></div>`;C.appendChild(d);cards.push([d,f[3]])});
+
+/* ---- bill rows ---- */
+const rowsD=[["Wheat (Gandum)",52,2080,5050,262600,31.3],["Rice (Basmati)",30,1500,5120,192000,31.75],["Maize (Makai)",24,960,3300,79200,32.2]];
+const RB=$('rows');const rowEls=rowsD.map(r=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${r[0]}</td><td>${r[1]}</td><td>${r[2].toLocaleString('en-IN')}</td><td>${r[3].toLocaleString('en-IN')}</td><td style="text-align:right;font-weight:600">${r[4].toLocaleString('en-IN')}</td>`;RB.appendChild(tr);return tr});
+const traderName="Bilal Traders, Okara";
+
+/* ---- charts ---- */
+const ch=$('chart');const months=8;const sv=[.42,.55,.5,.68,.62,.78,.86,.95],pv=[.35,.4,.44,.5,.47,.55,.6,.64];
+let chHTML='';for(let i=0;i<months;i++){const x=20+i*56;chHTML+=`<rect id="bs${i}" x="${x}" width="22" rx="4" fill="#1e40af"/><rect id="bp${i}" x="${x+24}" width="22" rx="4" fill="#fbbf24"/>`}
+for(let g=0;g<4;g++)chHTML=`<line x1="10" x2="470" y1="${40+g*62}" y2="${40+g*62}" stroke="#e2e8f0"/>`+chHTML;
+chHTML+=`<polyline id="trend" fill="none" stroke="#16a34a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points="${sv.map((v,i)=>`${31+i*56},${270-v*240-14}`).join(' ')}"/>`;
+ch.innerHTML=chHTML;const trend=$('trend');const tlen=trend.getTotalLength();trend.style.strokeDasharray=tlen;
+const dn=$('donut');const segs=[[.58,'#1e40af','Revenue'],[.27,'#fbbf24','Expenses'],[.15,'#16a34a','Profit']];
+let acc=0,dh='';segs.forEach((s,i)=>{dh+=`<circle id="dg${i}" cx="130" cy="120" r="88" fill="none" stroke="${s[1]}" stroke-width="34" transform="rotate(${-90+acc*360} 130 120)"/>`;acc+=s[0]});
+dh+=`<text x="130" y="116" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="30" fill="#0f172a" id="dnv">0%</text><text x="130" y="142" text-anchor="middle" font-family="Poppins" font-size="14" fill="#64748b">Profit margin</text>`;
+segs.forEach((s,i)=>{dh+=`<rect x="${14+i*86}" y="250" width="14" height="14" rx="3" fill="${s[1]}"/><text x="${32+i*86}" y="262" font-family="Poppins" font-size="13" fill="#334155">${s[2]}</text>`});
+dn.innerHTML=dh;const DC=2*Math.PI*88;
+
+/* ---- bilingual ---- */
+const menu=[["Dashboard","ڈیش بورڈ"],["Purchases","خریداری"],["Sales","فروخت"],["Farmers","کسان"],["Traders","تاجر"],["Roznamcha","روزنامچہ"],["Godowns","گودام"],["Reports","رپورٹس"]];
+const lk=[["Today's Sales","آج کی فروخت","Rs 3,48,000"],["Cash in Hand","نقد رقم","Rs 1,12,500"],["Stock (bags)","اسٹاک (بوریاں)","4,820"]];
+const ch2=$('chart2');let c2='';for(let i=0;i<14;i++){const h=60+Math.abs(Math.sin(i*1.3))*120+i*4;c2+=`<rect id="c2b${i}" x="${12+i*47}" width="30" rx="5" fill="${i%2?'#fbbf24':'#1e40af'}" data-h="${h}"/>`}ch2.innerHTML=c2;
+const phItems=[["آج کی فروخت","Rs 3,48,000","#1e40af"],["کسانوں کو ادائیگی","Rs 2,10,000","#16a34a"],["وصولی باقی","Rs 1,56,000","#f59e0b"],["گودام اسٹاک","4,820 بوریاں","#7c3aed"],["بینک بیلنس","Rs 8,75,400","#0891b2"]];
+$('phList').innerHTML=phItems.map(p=>`<div class="kpi ph" style="border-right:5px solid ${p[2]};text-align:right"><div class="ur" style="font-size:20px;color:#64748b;line-height:2">${p[0]}</div><div style="font:700 22px Poppins;color:#0f172a;margin-top:4px">${p[1]}</div></div>`).join('');
+const phEls=[...document.querySelectorAll('.ph')];
+function setLang(ur){$('lapMenu').innerHTML=menu.map((m,i)=>`<div class="it ${i==0?'on':''}" style="${ur?'direction:rtl;font-family:Noto Nastaliq Urdu;font-size:15px;line-height:2':''}"><i></i>${ur?m[1]:m[0]}</div>`).join('');
+$('lapTitle').innerHTML=ur?'<span class="ur" style="font-size:20px;line-height:1.8">ڈیش بورڈ</span>':'Dashboard';
+$('lapK').innerHTML=lk.map(x=>`<div class="kpi" style="${ur?'text-align:right':''}"><div class="l ${ur?'ur':''}" style="${ur?'font-size:17px;line-height:1.8':''}">${ur?x[1]:x[0]}</div><div class="v">${x[2]}</div></div>`).join('');
+$('tEn').style.cssText=`padding:6px 14px;${ur?'':'background:#1e40af;color:#fff'}`;$('tUr').style.cssText=`padding:6px 14px;${ur?'background:#1e40af;color:#fff':''}`;}
+let langState=null;
+
+/* ---- particles ---- */
+const cv=$('cv'),cx=cv.getContext('2d');const parts=[...Array(90)].map((_,i)=>({x:rnd(i)*1920,y:rnd(i+.5)*1080,s:1+rnd(i+.2)*3,v:10+rnd(i+.9)*30,a:.2+rnd(i+.3)*.6}));
+function drawParts(t,gold){cx.clearRect(0,0,1920,1080);parts.forEach((p,i)=>{const y=((p.y-p.v*t)%1080+1080)%1080;const x=p.x+Math.sin(t*.4+i)*30;cx.globalAlpha=p.a*(.5+.5*Math.sin(t*1.3+i));cx.fillStyle=gold?'#fcd34d':'#f87171';cx.beginPath();cx.arc(x,y,p.s,0,7);cx.fill()})}
+
+/* ================= TIMELINE ================= */
+window.seek=function(t){
+  // backgrounds
+  const sw=k(t,13.9,15.0);$('bgS').style.opacity=sw;$('grid').style.opacity=sw*.9;$('glow').style.opacity=sw*(.7+.3*Math.sin(t*.8));
+  $('glow').style.transform=`translate(${Math.sin(t*.25)*120}px,${Math.cos(t*.2)*60}px)`;
+  $('grid').style.transform=`translateY(${(t*12)%80}px)`;
+  drawParts(t,t>14.4);cv.style.opacity=t<14.4?.5:.9;
+  // letterbox intro / flash
+  const bar=60*(1-eio(k(t,0,1.2)));$('barT').style.height=$('barB').style.height=(t<1.2?bar+480*(1-eio(k(t,0,.9))):0)+'px';
+  const fl=k(t,13.7,14.6);$('flash').style.opacity=Math.sin(fl*Math.PI);$('flash').style.transform=`translateX(${lerp(-1400,1400,eio(fl))}px)`;
+  // watermark
+  const wm=vis(t,23.0,52.0,.6,.5);$('wm').style.opacity=wm;
+
+  // S1 0-6.2
+  const s1=vis(t,0,6.3,.3,.5);$('s1').style.opacity=s1;
+  if(s1>0){ $('s1').style.transform=`scale(${1+t*.012})`;
+    papers.forEach((p,i)=>{const q=k(t,p.dl,p.dl+1.1);const e=eo(q);const sh=t>3.6?Math.sin(t*40+i)*2.5*k(t,3.6,4.2):0;
+      p.el.style.opacity=cl(q*3);p.el.style.transform=`translate(${p.x-150+sh}px,${lerp(-700,p.y-195,e)}px) rotate(${lerp(p.r*3,p.r,e)+Math.sin(t*1.5+i)*2}deg)`;});
+    pop($('s1a'),t,1.0,.7);pop($('s1b'),t,3.75,.6,60);pop($('s1c'),t,4.3,.6,20);
+    const sh=t>3.85&&t<4.6?Math.sin(t*90)*6*(1-k(t,3.85,4.6)):0;$('s1b').style.transform+=` translateX(${sh}px)`;}
+
+  // S2 6.0-14.0
+  const s2=vis(t,5.9,14.0,.4,.35);$('s2').style.opacity=s2;
+  if(s2>0){ [[1,6.15],[2,7.24],[3,8.04],[4,8.6]].forEach(([i,a])=>{const el=$('c'+i);const p=popS(el,t,a,.55);
+      const wob=Math.sin(t*2+i)*8;el.style.transform+=` translateY(${wob}px) rotate(${Math.sin(t*1.7+i)*1.5}deg)`;});
+    const m=$('mis');const mp=k(t,8.9,9.5);m.style.opacity=eo(mp);
+    const shake=t>11.2&&t<12.9?Math.sin(t*70)*7*Math.sin(k(t,11.2,12.9)*Math.PI):0;
+    m.style.transform=`translate(${shake}px,${(1-eo(mp))*50-110}px) scale(${.9+.1*eo(mp)})`;
+    $('m3').style.opacity=k(t,11.3,11.6);$('m3').style.textShadow=`0 0 ${20+Math.sin(t*12)*12}px rgba(239,68,68,.8)`;
+    pop($('s2t'),t,9.95,.6,40);$('s2t').style.top='640px';
+    $('s2').style.filter=t>12.2&&t<14?`hue-rotate(${Math.sin(t*30)*10}deg)`:'none';}
+
+  // S3 14.2-22.6
+  const s3=vis(t,14.25,22.65,.3,.45);$('s3').style.opacity=s3;
+  if(s3>0){ const a=$('s3a');const ai=k(t,14.35,15.0),ao=k(t,16.4,16.95);a.style.opacity=eo(ai)*(1-ao);a.style.transform=`scale(${lerp(.85,1,eo(ai))+ao*.15}) translateY(${-ao*30}px)`;a.style.filter=`blur(${ao*10}px)`;
+    const b=$('brand');b.style.opacity=t>16.8?1:0;
+    const lp=k(t,16.9,17.8);$('logo').style.transform=`scale(${t<16.9?0:eb(lp)}) rotate(${(1-eo(lp))*-90}deg)`;
+    $('wheel').setAttribute('transform',`rotate(${t*120} 16 17)`);
+    const wp=k(t,17.7,18.4);$('wordmark').style.opacity=eo(wp);$('wordmark').style.letterSpacing=lerp(30,-2,eo(wp))+'px';$('wordmark').style.filter=`blur(${(1-eo(wp))*12}px)`;
+    pop($('tagU'),t,19.2,.6,30);pop($('tagE'),t,20.7,.6,20);
+    b.style.transform=`scale(${1+k(t,18,22.6)*.04})`;}
+
+  // S4 22.6-30.6
+  const s4=vis(t,22.6,30.7,.35,.45);$('s4').style.opacity=s4;
+  if(s4>0){ cards.forEach(([d,a],i)=>{const p=k(t,a-.1,a+.45);d.style.opacity=eo(p);d.style.transform=`translateY(${(1-eo(p))*60+Math.sin(t*1.2+i)*4}px) scale(${.92+.08*eo(p)})`;
+      const lit=k(t,28.1,28.6)*(1-k(t,29.6,30.3));d.style.borderColor=`rgba(251,191,36,${.14+lit*.6})`;d.style.boxShadow=`0 25px 60px rgba(0,0,0,.4),0 0 ${lit*40}px rgba(251,191,36,${lit*.35})`;});
+    const tt=$('s4t');const p=k(t,22.7,23.3);const big=k(t,28.05,28.6);tt.style.opacity=eo(p);tt.style.transform=`scale(${.9+.1*eo(p)+big*.12})`;tt.querySelector('.ur').style.color=big>0?`rgb(${lerp(255,253,big)},${lerp(255,230,big)},${lerp(255,138,big)})`:'#fff';}
+
+  // S5 30.7-35.9
+  const s5=vis(t,30.7,35.95,.35,.4);$('s5').style.opacity=s5;
+  if(s5>0){ const lp=k(t,30.7,31.4);$('lap1').style.transform=`translateY(${(1-eo(lp))*120}px) perspective(2000px) rotateY(${lerp(14,6,eo(lp))}deg)`;$('lap1').style.opacity=eo(lp);
+    const nm=Math.floor(traderName.length*k(t,31.1,31.7));$('trader').textContent=traderName.slice(0,nm)+(t<31.8&&Math.floor(t*4)%2?'|':'');
+    let tot=0;rowsD.forEach((r,i)=>{const p=k(t,r[5],r[5]+.35);rowEls[i].style.opacity=p;if(p>=1)tot+=r[4];else tot+=r[4]*p});$('tot').textContent=fmt(tot);
+    const pr=k(t,32.25,32.45)*(1-k(t,32.5,32.7));$('pbtn').style.transform=`scale(${1-pr*.1})`;$('pbtn').style.boxShadow=`0 0 0 ${pr*10}px rgba(30,64,175,.3)`;
+    const rp=k(t,32.5,33.3);const r=$('rcpt');r.style.opacity=cl(rp*3);r.style.transform=`translate(${(1-eo(rp))*-200}px,${(1-eo(rp))*-60}px) rotate(${lerp(-12,4,eo(rp))}deg)`;
+    pop($('s5t'),t,31.0,.6,30);pop($('s5l'),t,33.2,.5,20);pop($('s5le'),t,33.5,.5,15);}
+
+  // S6 35.95-42.2
+  const s6=vis(t,35.95,42.25,.35,.4);$('s6').style.opacity=s6;
+  if(s6>0){ const lp=k(t,36.0,36.7);$('lap2').style.transform=`translateX(${(1-eo(lp))*200}px) perspective(2000px) rotateY(${lerp(-16,-6,eo(lp))}deg)`;$('lap2').style.opacity=eo(lp);
+    const kv=[48750000,31200000,9860000,4320000];kv.forEach((v,i)=>{$('k'+(i+1)).textContent=fmt(v*eo(k(t,36.6+i*.15,38.2+i*.15))).replace('Rs ','Rs ')});
+    for(let i=0;i<months;i++){const p=eo(k(t,36.7+i*.1,37.5+i*.1));const hs=sv[i]*230*p,hp=pv[i]*230*p;const s=$('bs'+i),q=$('bp'+i);s.setAttribute('y',270-hs);s.setAttribute('height',hs);q.setAttribute('y',270-hp);q.setAttribute('height',hp)}
+    trend.style.strokeDashoffset=tlen*(1-eio(k(t,37.8,39.2)));
+    segs.forEach((s,i)=>{const p=eo(k(t,37.2+i*.25,38.1+i*.25));$('dg'+i).setAttribute('stroke-dasharray',`${DC*s[0]*p} ${DC}`)});
+    $('dnv').textContent=Math.round(20.2*eo(k(t,37.5,39)))+'%';
+    pop($('s6t'),t,36.2,.6,30);const bb=$('s6b').children;pop(bb[0],t,39.65,.5,20);pop(bb[1],t,40.45,.5,20);}
+
+  // S7 42.25-47.2
+  const s7=vis(t,42.25,47.25,.35,.4);$('s7').style.opacity=s7;
+  if(s7>0){ const ur=t>42.9&&!(t>43.35&&t<43.6)?(t>43.6||t<43.35):false; const L=t<42.9?false:(t<44.4?true:(t<45.3?false:true));
+    if(L!==langState){setLang(L);langState=L}
+    const lp=k(t,42.3,43.0);$('lap3').style.transform=`translateY(${(1-eo(lp))*100}px)`;$('lap3').style.opacity=eo(lp);
+    for(let i=0;i<14;i++){const b=$('c2b'+i);const h=+b.dataset.h*eo(k(t,42.6+i*.05,43.4+i*.05))*(0.85+.15*Math.sin(t*2+i));b.setAttribute('y',230-h);b.setAttribute('height',h)}
+    const pp=k(t,44.1,44.8);$('ph').style.transform=`translateY(${(1-eo(pp))*260}px) rotate(${lerp(8,3,eo(pp))}deg)`;$('ph').style.opacity=eo(pp);
+    phEls.forEach((e,i)=>pop(e,t,44.5+i*.12,.4,20));
+    pop($('s7t'),t,42.45,.6,30);}
+
+  // S8 47.25-52.0
+  const s8=vis(t,47.25,52.05,.35,.4);$('s8').style.opacity=s8;
+  if(s8>0){ [[1,47.5],[2,48.15],[3,49.45]].forEach(([i,a])=>{const el=$('b'+i);const p=k(t,a,a+.6);el.style.opacity=eo(p);el.style.transform=`translateY(${(1-eb(p))*120+Math.sin(t*1.4+i)*5}px)`;
+      el.querySelector('.ib').style.transform=`scale(${eb(k(t,a+.15,a+.7))}) rotate(${(1-eo(k(t,a+.15,a+.7)))*-30}deg)`});
+    pop($('s8t'),t,47.4,.5,20);}
+
+  // S9 52.0-60
+  const s9=vis(t,52.0,61,.45,.1);$('s9').style.opacity=s9*(1-k(t,59.6,60));
+  if(s9>0){ popS($('logo2'),t,52.1,.7);$('wheel2').setAttribute('transform',`rotate(${t*120} 16 17)`);
+    pop($('s9in').children[1],t,52.75,.6,30);pop($('s9u'),t,53.85,.6,30);pop($('s9e'),t,54.6,.6,20);
+    const c=$('cta');const p=k(t,56.15,56.7);c.style.opacity=eo(p);c.style.transform=`scale(${(t<56.15?0:eb(p))*(1+Math.max(0,Math.sin((t-56.7)*5))*.04*k(t,56.7,57))})`;
+    {const w=$('wa');const q=k(t,56.9,57.5);w.style.opacity=eo(q);w.style.transform=`translateY(${(1-eo(q))*40}px) scale(${.85+.15*eb(q)})`;w.querySelector('svg').style.cssText='width:40px;height:40px;stroke-width:2.4';}
+    $('s9in').style.transform=`scale(${1+k(t,52,60)*.03})`;}
+};
+window.fontsReady=document.fonts.ready.then(()=>true);
+</script>
+</body></html>

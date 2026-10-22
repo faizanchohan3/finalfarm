@@ -7,6 +7,7 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const adjustments = await db.stockAdjustment.findMany({
+    where: session.user.shopId ? { product: { shopId: session.user.shopId } } : undefined,
     orderBy: { createdAt: "desc" },
     include: {
       product: { select: { name: true, unit: true } },

@@ -10,7 +10,10 @@ export async function GET(req: Request) {
   const warehouseId = searchParams.get("warehouseId")
 
   const stock = await db.warehouseStock.findMany({
-    where: warehouseId ? { warehouseId } : undefined,
+    where: {
+      ...(warehouseId ? { warehouseId } : {}),
+      ...(session.user.shopId ? { warehouse: { shopId: session.user.shopId } } : {}),
+    },
     include: {
       product: { select: { name: true, unit: true, purchasePrice: true } },
       warehouse: { select: { name: true } },
