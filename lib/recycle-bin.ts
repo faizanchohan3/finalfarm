@@ -9,13 +9,14 @@ export type DeletedType =
   | "BILL" | "COMMISSION" | "PURCHASE" | "LOT" | "PRODUCT"
   | "CUSTOMER" | "CUSTOMER_PERMANENT" | "FARMER" | "SUPPLIER"
   | "CUSTOMER_PAYMENT" | "FARMER_PAYMENT" | "SUPPLIER_PAYMENT"
-  | "STOCK_ADJUSTMENT" | "STOCK_OPENING" | "GALA"
+  | "STOCK_ADJUSTMENT" | "STOCK_OPENING" | "GALA" | "BANK_TRANSACTION"
 
 export const DELETED_TYPE_LABEL: Record<DeletedType, string> = {
   BILL: "Bill", COMMISSION: "Commission", PURCHASE: "Purchase", LOT: "Potato Store lot", PRODUCT: "Store product",
   CUSTOMER: "Trader", CUSTOMER_PERMANENT: "Trader (permanent)", FARMER: "Farmer", SUPPLIER: "Supplier",
   CUSTOMER_PAYMENT: "Trader payment", FARMER_PAYMENT: "Farmer payment", SUPPLIER_PAYMENT: "Supplier payment",
   STOCK_ADJUSTMENT: "Store stock add / remove", STOCK_OPENING: "Store opening stock", GALA: "Gala Mandi entry",
+  BANK_TRANSACTION: "Bank credit / debit",
 }
 
 type Session = { user: { id?: string | null; name?: string | null; shopId?: string | null } }
@@ -212,6 +213,18 @@ export async function restoreDeleted(tx: any, rec: { type: string; recordId: str
       if (pays.supplierPayments.length) await tx.supplierPayment.createMany({ data: pays.supplierPayments })
       await applyGalaPayments(tx, pays, 1)
       await restoreBankTxns(tx, s.bankTransactions)
+      return
+    }
+
+    case "BANK_TRANSACTION": {
+      const t = { ...s.transaction }
+      await ensureExists(tx.bank, t.bankId, "bank")
+      if (t.createdById && !(await tx.user.findUnique({ where: { id: t.createdById } }))) {
+        throw new Error("The user who recorded this entry no longer exists, so it can't be restored")
+      }
+      await ensureMissing(tx.transaction, t.id)
+      // The bank balance is worked out from its entries, so putting the row back is the whole restore
+      await tx.transaction.create({ data: t })
       return
     }
 

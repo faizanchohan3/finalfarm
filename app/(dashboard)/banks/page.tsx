@@ -184,6 +184,30 @@ export default function BanksPage() {
     }
   }
 
+  async function handleDeleteEntry(entry: any) {
+    const label = ENTRY_LABELS[entry.type] || entry.type
+    if (!confirm(`Delete this ${label.toLowerCase()} of ${formatCurrency(entry.amount)}?\n\n${entry.description}\n\nIt will be moved to Deleted Records, where it can be restored.`)) return
+    // Farmer payments go through the farmer route so the farmer's balance is reversed too
+    const res = entry.type === "FARMER_PAYMENT"
+      ? await fetch(`/api/farmers/${entry.farmerId}/payment`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paymentId: entry.id }),
+        })
+      : await fetch("/api/reports/bank-transactions", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: entry.id }),
+        })
+    if (res.ok) {
+      // Refetch so the running balance and totals reflect the delete
+      if (ledgerBank) loadLedger(ledgerBank.id)
+    } else {
+      const data = await res.json().catch(() => ({}))
+      alert(data?.error || "Failed to delete entry. Please try again.")
+    }
+  }
+
   // Oldest first with running balance; entries before "from" roll into the opening balance.
   const ledger = (() => {
     const fromTs = ledgerFrom ? new Date(ledgerFrom).getTime() : -Infinity
@@ -468,12 +492,22 @@ export default function BanksPage() {
                       <td className={`py-2 px-3 text-right font-medium whitespace-nowrap ${e.balance < 0 ? "text-red-600" : "text-gray-900"}`}>{formatCurrency(e.balance)}</td>
                       {canEdit && (
                         <td className="py-2 px-3 text-right">
-                          <button
-                            onClick={() => openEditEntry(e)}
-                            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
-                          >
-                            <PencilLine className="w-3.5 h-3.5" /> Edit
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => openEditEntry(e)}
+                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                            >
+                              <PencilLine className="w-3.5 h-3.5" /> Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteEntry(e)}
+                              disabled={!e.deletable}
+                              title={e.deletable ? "Delete entry" : "This entry comes from a sale, purchase or payment. Delete it from there."}
+                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-red-50"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" /> Delete
+                            </button>
+                          </div>
                         </td>
                       )}
                     </tr>
