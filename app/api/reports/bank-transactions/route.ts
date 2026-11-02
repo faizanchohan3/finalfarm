@@ -2,10 +2,13 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { createAuditLog } from "@/lib/audit"
+import { archiveDeleted, day, pkr } from "@/lib/recycle-bin"
 
 // Direct credits/debits recorded from the Banks page. Only these are fully editable (type and amount);
 // every other bank entry mirrors a sale, purchase, payment or settlement, so only its date and
-// reference can change here without breaking the record it came from.
+// reference can change here without breaking the record it came from. Manual entries can also be
+// deleted here; farmer payments are deleted through the farmer payment route (which reverses the
+// farmer's balance); the rest have to be deleted from the record they came from.
 const MANUAL_CATEGORIES = ["Bank Deposit", "Bank Withdrawal"]
 const isManual = (t: { category: string | null; accountId: string | null }) =>
   !t.accountId && MANUAL_CATEGORIES.includes(t.category || "")
@@ -93,6 +96,7 @@ export async function GET(req: Request) {
         : `Payment to ${p.purchase?.supplier?.name || "Supplier"}`,
       reference: p.reference || null,
       editable: "meta",
+      deletable: false,
     })),
     ...farmerPayments.map((fp) => ({
       id: fp.id,
@@ -106,6 +110,8 @@ export async function GET(req: Request) {
       description: `Payment to farmer ${fp.farmer?.name || ""}`,
       reference: fp.reference || null,
       editable: "meta",
+      deletable: true,
+      farmerId: fp.farmerId,
     })),
     ...driverPayments.map((dp) => ({
       id: dp.id,
@@ -119,6 +125,7 @@ export async function GET(req: Request) {
       description: `Payment to driver ${dp.driver?.name || ""}`,
       reference: dp.reference || null,
       editable: "meta",
+      deletable: false,
     })),
     ...transactions.map((t) => ({
       id: t.id,
@@ -132,6 +139,7 @@ export async function GET(req: Request) {
       description: t.description,
       reference: t.reference || null,
       editable: isManual(t) ? "full" : "meta",
+      deletable: isManual(t),
     })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
@@ -221,5 +229,50 @@ export async function PATCH(req: Request) {
   } catch (error) {
     console.error("Update bank entry error:", error)
     return NextResponse.json({ error: "Failed to update entry" }, { status: 500 })
+  }
+}
+
+
+// Delete a direct credit/debit recorded from the Banks page. A copy goes to Deleted Records so it can be restored.
+export async function DELETE(req: Request) {
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { id } = await req.json().catch(() => ({}))
+  if (!id) return NextResponse.json({ error: "Entry ID is required" }, { status: 400 })
+
+  const shopFilter = session.user.shopId ? { shopId: session.user.shopId } : {}
+  const shopBankIds = (await db.bank.findMany({ where: shopFilter, select: { id: true } })).map((b) => b.id)
+
+  try {
+    const t = await db.transaction.findUnique({ where: { id }, include: { bank: { select: { name: true } } } })
+    if (!t || !t.bankId || !shopBankIds.includes(t.bankId)) return NextResponse.json({ error: "Entry not found" }, { status: 404 })
+    if (!isManual(t))
+      return NextResponse.json({ error: "This entry comes from another record. Delete it there." }, { status: 400 })
+
+    const { bank, ...transaction } = t
+    const isCredit = t.type === "CREDIT"
+    await db.$transaction(async (tx) => {
+      await archiveDeleted(tx, session, {
+        type: "BANK_TRANSACTION", recordId: t.id, code: `BT-${t.id.slice(-6).toUpperCase()}`,
+        title: `${isCredit ? "Credit to" : "Debit from"} ${bank?.name || "bank"}: ${t.description}`, amount: t.amount,
+        summary: [
+          ["Bank", bank?.name || "—"], ["Date", day(t.createdAt)],
+          ["Type", isCredit ? "Credit (money in)" : "Debit (money out)"], ["Amount", pkr(t.amount)],
+          ["Description", t.description], ["Reference", t.reference || "—"],
+        ],
+        snapshot: { transaction },
+      })
+      await tx.transaction.delete({ where: { id } })
+    })
+
+    await createAuditLog({
+      userId: session.user.id, shopId: session.user.shopId, action: "DELETE", module: "FINANCE",
+      details: `Deleted bank ${isCredit ? "credit" : "debit"}: ${t.description} - PKR ${t.amount}`,
+    })
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Delete bank entry error:", error)
+    return NextResponse.json({ error: "Failed to delete entry" }, { status: 500 })
   }
 }
